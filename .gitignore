@@ -54,6 +54,7 @@ out
 *.iws
 *.iml
 atlassian-ide-plugin.xml
+.vscode/
 
 # Eclipse specific files/directories
 .classpath
