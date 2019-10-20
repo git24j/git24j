@@ -1,0 +1,7 @@
+int git_annotated_commit_from_ref(git_annotated_commit **out, git_repository *repo, const git_reference *ref);
+int git_annotated_commit_from_fetchhead(git_annotated_commit **out, git_repository *repo, const char *branch_name, const char *remote_url, const git_oid *id);
+int git_annotated_commit_lookup(git_annotated_commit **out, git_repository *repo, const git_oid *id);
+int git_annotated_commit_from_revspec(git_annotated_commit **out, git_repository *repo, const char *revspec);
+const git_oid * git_annotated_commit_id(const git_annotated_commit *commit);
+const char * git_annotated_commit_ref(const git_annotated_commit *commit);
+void git_annotated_commit_free(git_annotated_commit *commit);

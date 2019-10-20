@@ -3,7 +3,7 @@ package com.github.git24j.core;
 import java.util.concurrent.atomic.AtomicLong;
 
 public class Branch {
-    static final native int jniCreate(
+    static native int jniCreate(
             AtomicLong outRef, long repoPtr, String branchName, long targetPtr, int force);
 
     /**

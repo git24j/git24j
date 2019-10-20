@@ -39,7 +39,7 @@ extern "C"
     unsigned char *j_unsigned_chars_from_java(JNIEnv *env, jbyteArray array);
 
     /** Copy git_oid value to java Oid vis setter. */
-    void j_git_oid_to_java(JNIEnv *env, git_oid *c_oid, jobject oid);
+    void j_git_oid_to_java(JNIEnv *env, const git_oid *c_oid, jobject oid);
 
     /** Copy value of java Oid to git_oid struct in c. */
     void j_git_oid_from_java(JNIEnv *env, jobject oid, git_oid *c_oid);
