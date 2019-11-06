@@ -34,9 +34,12 @@ extern "C"
 
     /** 
      * Copy jni jbyteArray to unsigned char array. 
+     * @param array jni array from which content is copied.
+     * @param out_len length of the output array.
+     * @return pointer to the output array.
      * Returned array should be free-ed by the caller.
      * */
-    unsigned char *j_unsigned_chars_from_java(JNIEnv *env, jbyteArray array);
+    unsigned char *j_unsigned_chars_from_java(JNIEnv *env, jbyteArray array, int *out_len);
 
     /** Copy git_oid value to java Oid vis setter. */
     void j_git_oid_to_java(JNIEnv *env, const git_oid *c_oid, jobject oid);

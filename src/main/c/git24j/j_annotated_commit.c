@@ -61,7 +61,6 @@ JNIEXPORT void JNICALL J_MAKE_METHOD(AnnotatedCommit_jniId)(JNIEnv *env, jclass 
 JNIEXPORT jstring JNICALL J_MAKE_METHOD(AnnotatedCommit_jniRef)(JNIEnv *env, jclass obj, jlong acPtr)
 {
     const char *ref = git_annotated_commit_ref((git_annotated_commit *)acPtr);
-    printf("qqqqq_DELETE_ME ref = %s \n", ref);
     return (*env)->NewStringUTF(env, ref);
 }
 

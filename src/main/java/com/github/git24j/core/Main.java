@@ -7,7 +7,6 @@ public class Main {
 
     public static void main(String[] args) {
         Libgit2.init();
-        new HelloWorld().call();
     }
 
     public String sayHello() {

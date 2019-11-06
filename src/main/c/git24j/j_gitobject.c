@@ -13,9 +13,10 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(GitObject_jniType)(JNIEnv *env, jclass obj,
     return git_object_type((git_object *)objPtr);
 }
 
-JNIEXPORT jlong JNICALL J_MAKE_METHOD(GitObject_jniId)(JNIEnv *env, jclass obj, jobject objPtr)
+JNIEXPORT void JNICALL J_MAKE_METHOD(GitObject_jniId)(JNIEnv *env, jclass obj, jobject objPtr, jobject outId)
 {
-    return (long)git_object_id((git_object *)objPtr);
+    const git_oid *c_oid = git_object_id((git_object *)objPtr);
+    j_git_oid_to_java(env, c_oid, outId);
 }
 
 JNIEXPORT jint JNICALL J_MAKE_METHOD(GitObject_jniShortId)(JNIEnv *env, jclass obj, jobject outBuf, jlong objPtr)
@@ -27,18 +28,22 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(GitObject_jniShortId)(JNIEnv *env, jclass o
     return error;
 }
 
-JNIEXPORT jint JNICALL J_MAKE_METHOD(GitObject_jniLookup)(JNIEnv *env, jclass obj, jobject outObj, jlong repoPtr, jlong oidPtr, int objType)
+JNIEXPORT jint JNICALL J_MAKE_METHOD(GitObject_jniLookup)(JNIEnv *env, jclass obj, jobject outObj, jlong repoPtr, jobject oid, jint objType)
 {
     git_object *out_obj;
-    int error = git_object_lookup(&out_obj, (git_repository *)repoPtr, (git_oid *)oidPtr, (git_object_t)objType);
+    git_oid c_oid;
+    j_git_oid_from_java(env, oid, &c_oid);
+    int error = git_object_lookup(&out_obj, (git_repository *)repoPtr, &c_oid, (git_object_t)objType);
     j_save_c_pointer(env, (void *)out_obj, outObj, "set");
     return error;
 }
 
-JNIEXPORT jint JNICALL J_MAKE_METHOD(GitObject_jniLookupPrefix)(JNIEnv *env, jclass obj, jobject outObj, jlong repoPtr, jlong oidPtr, jint len, int objType)
+JNIEXPORT jint JNICALL J_MAKE_METHOD(GitObject_jniLookupPrefix)(JNIEnv *env, jclass obj, jobject outObj, jlong repoPtr, jobject oid, jint len, jint objType)
 {
     git_object *out_obj;
-    int error = git_object_lookup_prefix(&out_obj, (git_repository *)repoPtr, (git_oid *)oidPtr, (size_t)len, (git_object_t)objType);
+    git_oid c_oid;
+    j_git_oid_from_java(env, oid, &c_oid);
+    int error = git_object_lookup_prefix(&out_obj, (git_repository *)repoPtr, &c_oid, (size_t)len, (git_object_t)objType);
     j_save_c_pointer(env, (void *)out_obj, outObj, "set");
     return error;
 }

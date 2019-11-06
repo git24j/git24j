@@ -14,6 +14,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Config_jniFindGlobal)(JNIEnv *env, jclass o
     git_buf c_buf = {0};
     int e = git_config_find_global(&c_buf);
     j_git_buf_to_java(env, &c_buf, buf);
+    git_buf_dispose(&c_buf);
     return e;
 }
 
@@ -24,6 +25,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Config_jniGetStringBuf)(JNIEnv *env, jclass
     char *c_name = j_copy_of_jstring(env, name, false);
     int e = git_config_get_string_buf(&c_buf, (git_config *)cfgPtr, c_name);
     j_git_buf_to_java(env, &c_buf, buf);
+    git_buf_dispose(&c_buf);
     free(c_name);
     return e;
 }

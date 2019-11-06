@@ -364,6 +364,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Repository_jniMessage)(JNIEnv *env, jclass 
     git_buf c_buf = {0};
     int e = git_repository_message(&c_buf, (git_repository *)repoPtr);
     j_git_buf_to_java(env, &c_buf, outBuf);
+    git_buf_dispose(&c_buf);
     return e;
 }
 

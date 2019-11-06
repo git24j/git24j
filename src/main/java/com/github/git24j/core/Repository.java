@@ -356,7 +356,7 @@ public class Repository implements AutoCloseable {
      * @throws GitException git errors
      */
     public Oid hashfile(Path path, GitObject.Type type, String asPath) {
-        Oid oid = new Oid(0);
+        Oid oid = new Oid();
         Error.throwIfNeeded(
                 jniHashfile(oid, getRawPointer(), path.toString(), type.getValue(), asPath));
         return oid;

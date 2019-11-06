@@ -1,5 +1,7 @@
 package com.github.git24j.core;
 
+import java.util.Arrays;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicLong;
 
 // TODO: change this class to immutable java object
@@ -7,39 +9,44 @@ public class Oid {
     public static final int RAWSZ = 20;
     public static final int HEXSZ = RAWSZ * 2;
     private static final char[] HEX_ARRAY = "0123456789abcdef".toCharArray();
-    private final AtomicLong rawPtr = new AtomicLong();
-    private byte[] id;
 
-    /** TODO: should allow creating Oid from String */
-    Oid(long rawPointer) {
-        this.id = new byte[RAWSZ];
-        this.rawPtr.set(rawPointer);
+    /** in case of short sha, only up to {@code eSize} bytes are effective */
+    private int eSize = RAWSZ;
+    private byte[] id = new byte[RAWSZ];
+
+    Oid() { }
+
+    Oid(byte []bytes) {
+        eSize = bytes.length;
+        System.arraycopy(bytes, 0, this.id, 0, eSize);
     }
 
-    Oid() {}
-
     public static Oid of(byte[] bytes) {
-        Oid oid = new Oid();
-        oid.id = new byte[RAWSZ];
-        // must make a copy arguments can be deleted from c side soon.
-        System.arraycopy(bytes, 0, oid.id, 0, RAWSZ);
-        return oid;
+        return new Oid(bytes);
     }
 
     public static Oid of(String hexSha) {
-        Oid oid = new Oid();
-        oid.id = hexStringToByteArray(hexSha.toLowerCase());
-        return oid;
+        byte[] bytes = hexStringToByteArray(hexSha.toLowerCase());
+        return new Oid(bytes);
     }
 
-    private static String bytesToHex(byte[] bytes) {
+    public boolean isShortId() {
+        return getEffectiveSize() < RAWSZ;
+    }
+
+    private static String bytesToHex(byte[] bytes, int len) {
+        int cutoffLen = Math.min(len, bytes.length);
         char[] hexChars = new char[bytes.length * 2];
-        for (int j = 0; j < bytes.length; j++) {
+        for (int j = 0; j < cutoffLen; j++) {
             int v = bytes[j] & 0xFF;
             hexChars[j * 2] = HEX_ARRAY[v >>> 4];
             hexChars[j * 2 + 1] = HEX_ARRAY[v & 0x0F];
         }
         return new String(hexChars);
+    }
+
+    private static String bytesToHex(byte[] bytes) {
+        return bytesToHex(bytes, bytes.length);
     }
 
     public static byte[] hexStringToByteArray(String s) {
@@ -62,12 +69,43 @@ public class Oid {
         this.id = id;
     }
 
-    long getRawPointer() {
-        return rawPtr.get();
+    @Override
+    public String toString() {
+        return id == null ? "" : bytesToHex(id, eSize);
+    }
+
+    /**
+     * Get effective size of the oid. Normally, it should be {@code RAWSZ} but can
+     * be smaller in case of short sha.
+     */
+    public int getEffectiveSize() {
+        return eSize;
     }
 
     @Override
-    public String toString() {
-        return id == null ? "" : bytesToHex(id);
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        Oid oid = (Oid) o;
+        if (eSize != oid.eSize) {
+            return false;
+        }
+        for (int i = 0; i <eSize; i++) {
+            if (id[i] != oid.id[i]) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = Objects.hash(eSize);
+        result = 31 * result + Objects.hash(toString());
+        return result;
     }
 }

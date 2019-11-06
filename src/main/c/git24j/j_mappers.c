@@ -119,11 +119,18 @@ jbyteArray j_byte_array_from_c(JNIEnv *env, const unsigned char *buf, int len)
 }
 
 /** create jni jbyteArray from c unsigned char array. */
-unsigned char *j_unsigned_chars_from_java(JNIEnv *env, jbyteArray array)
+unsigned char *j_unsigned_chars_from_java(JNIEnv *env, jbyteArray array, int *out_len)
 {
+    if (array == NULL)
+    {
+        *out_len = 0;
+        return NULL;
+    }
+
     int len = (*env)->GetArrayLength(env, array);
     unsigned char *buf = (unsigned char *)malloc(sizeof(unsigned char) * len);
     (*env)->GetByteArrayRegion(env, array, 0, len, (jbyte *)buf);
+    *out_len = len;
     return buf;
 }
 
@@ -141,18 +148,14 @@ void j_git_oid_to_java(JNIEnv *env, const git_oid *c_oid, jobject oid)
 /** Copy value of java Oid to git_oid struct in c. */
 void j_git_oid_from_java(JNIEnv *env, jobject oid, git_oid *c_oid)
 {
-    if (oid == NULL || c_oid == NULL)
-    {
-        return;
-    }
-
     jclass clz = (*env)->GetObjectClass(env, oid);
     assert(clz && "Oid class not found");
-    jbyteArray raw = j_call_getter_byte_array(env, clz, oid, "getId");
-    unsigned char *c_raw = j_unsigned_chars_from_java(env, raw);
-    git_oid_fromraw(c_oid, c_raw);
-    free(c_raw);
-    (*env)->DeleteGlobalRef(env, raw);
+    jbyteArray jBytes = j_call_getter_byte_array(env, clz, oid, "getId");
+    int out_len;
+    unsigned char *c_bytes = j_unsigned_chars_from_java(env, jBytes, &out_len);
+    git_oid_fromraw(c_oid, c_bytes);
+    free(c_bytes);
+    (*env)->DeleteGlobalRef(env, jBytes);
 }
 
 /** Call `obj.method(val)` to set a java object value. */

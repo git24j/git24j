@@ -14,14 +14,14 @@ public class GitObject implements AutoCloseable {
 
     static native int jniType(long objPtr);
 
-    static native long jniId(long objPtr);
+    static native void jniId(long objPtr, Oid oid);
 
     static native int jniShortId(Buf buf, long objPtr);
 
-    static native int jniLookup(AtomicLong outObj, long repoPtr, long oidPtr, int objType);
+    static native int jniLookup(AtomicLong outObj, long repoPtr, Oid oid, int objType);
 
     static native int jniLookupPrefix(
-            AtomicLong outObj, long repoPtr, long oidPtr, int len, int objType);
+            AtomicLong outObj, long repoPtr, Oid oid, int len, int objType);
 
     static native long jniOwner(long objPtr);
 
@@ -66,7 +66,7 @@ public class GitObject implements AutoCloseable {
     public static GitObject lookup(Repository repository, Oid oid, Type type) {
         AtomicLong outObj = new AtomicLong();
         Error.throwIfNeeded(
-                jniLookup(outObj, repository.getRawPointer(), oid.getRawPointer(), type.value));
+                jniLookup(outObj, repository.getRawPointer(), oid, type.value));
         return GitObject.create(outObj.get());
     }
 
@@ -85,7 +85,7 @@ public class GitObject implements AutoCloseable {
         AtomicLong outObj = new AtomicLong();
         Error.throwIfNeeded(
                 jniLookupPrefix(
-                        outObj, repository.getRawPointer(), oid.getRawPointer(), len, type.value));
+                        outObj, repository.getRawPointer(), oid, len, type.value));
         return GitObject.create(outObj.get());
     }
 
@@ -121,7 +121,9 @@ public class GitObject implements AutoCloseable {
      * @return the SHA1 id
      */
     public Oid id() {
-        return new Oid(jniId(rawPtr.get()));
+        Oid oid = new Oid();
+        jniId(getRawPointer(), oid);
+        return oid;
     }
 
     /**
