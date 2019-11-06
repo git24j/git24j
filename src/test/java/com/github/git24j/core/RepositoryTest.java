@@ -18,7 +18,7 @@ public class RepositoryTest extends TestBase {
     public void open() {
         Path repoPath = TestRepo.SIMPLE1.tempCopy(folder);
         try (Repository repo = Repository.open(repoPath.toString())) {
-            Assert.assertEquals(repoPath.resolve(".git"), Paths.get(repo.getPath()));
+            Assert.assertTrue(sameFile(repoPath.resolve(".git"), Paths.get(repo.getPath())));
         }
     }
 
@@ -26,7 +26,7 @@ public class RepositoryTest extends TestBase {
     public void openBare() {
         Path repoPath = TestRepo.SIMPLE1_BARE.tempCopy(folder);
         try (Repository repo = Repository.openBare(repoPath.toString())) {
-            Assert.assertEquals(repoPath, Paths.get(repo.getPath()));
+            Assert.assertTrue(sameFile(repoPath, Paths.get(repo.getPath())));
         }
     }
 
@@ -86,8 +86,8 @@ public class RepositoryTest extends TestBase {
     public void getCommondir() {
         Path path = TestRepo.SIMPLE1.tempCopy(folder);
         try (Repository repository = Repository.open(path.toString())) {
-            Assert.assertEquals(path.toString() + "/.git/", repository.getPath());
-            Assert.assertEquals(path.toString() + "/.git/", repository.getCommondir());
+            Assert.assertTrue(sameFile(path.resolve(".git"), Paths.get(repository.getPath())));
+            Assert.assertTrue(sameFile(path.resolve(".git"), Paths.get(repository.getCommondir())));
         }
     }
 
@@ -107,11 +107,11 @@ public class RepositoryTest extends TestBase {
         Assert.assertTrue(w2.toFile().mkdirs());
         try (Repository repository = Repository.open(path.toString())) {
             Path wd = repository.workdir();
-            Assert.assertEquals(path, wd);
+            Assert.assertTrue(sameFile(path, wd));
             Assert.assertNotNull(wd);
             repository.setWorkdir(w2, true);
             wd = repository.workdir();
-            Assert.assertEquals(w2, wd);
+            Assert.assertTrue(sameFile(w2, wd));
         }
     }
 
