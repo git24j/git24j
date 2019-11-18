@@ -120,9 +120,9 @@ public class Blob extends GitObject {
 
     static native int jniDup(AtomicLong outDest, long srcPtr);
 
-    public static Blob dup(Blob src) {
+    public Blob dup() {
         AtomicLong out = new AtomicLong();
-        Error.throwIfNeeded(jniDup(out, src.getRawPointer()));
+        Error.throwIfNeeded(jniDup(out, getRawPointer()));
         return new Blob(out.get());
     }
 

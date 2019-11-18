@@ -35,4 +35,4 @@ clean_wrapper:
 
 test: | build_wrapper
 	mvn test
-	mvn exec:java -Dexec.mainClass="org.shijinglu.HelloWorld"
+
