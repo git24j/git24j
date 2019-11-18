@@ -15,6 +15,8 @@ public class WriteStream extends CAutoCloseable {
     @Override
     public void close() {
         jniClose(getRawPointer());
+        jniFree(getRawPointer());
+        _rawPtr.set(0);
     }
 
     public int write(byte[] content) {

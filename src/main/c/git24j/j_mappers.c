@@ -118,7 +118,7 @@ jbyteArray j_byte_array_from_c(JNIEnv *env, const unsigned char *buf, int len)
     return array;
 }
 
-/** create jni jbyteArray from c unsigned char array. */
+/** create c unsigned char array from jni jbyteArray. */
 unsigned char *j_unsigned_chars_from_java(JNIEnv *env, jbyteArray array, int *out_len)
 {
     if (array == NULL)

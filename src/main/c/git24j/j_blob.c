@@ -25,7 +25,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Blob_jniLookupPrefix)(JNIEnv *env, jclass o
 }
 
 /** void git_blob_free(git_blob *blob); */
-JNIEXPORT jint JNICALL J_MAKE_METHOD(Blob_jniFree)(JNIEnv *env, jclass obj, long blobPtr)
+JNIEXPORT void JNICALL J_MAKE_METHOD(Blob_jniFree)(JNIEnv *env, jclass obj, long blobPtr)
 {
     git_blob_free((git_blob *)blobPtr);
 }
