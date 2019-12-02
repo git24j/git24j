@@ -20,11 +20,12 @@ void j_save_c_pointer(JNIEnv *env, void *ptr, jobject object, const char *setter
     }
 
     (*env)->CallVoidMethod(env, object, method, (long)ptr);
+    (*env)->DeleteLocalRef(env, clz);
 }
 
 void git_strarray_of_jobject_array(JNIEnv *env, jobjectArray jstrarr, git_strarray *out)
 {
-    assert(out);
+    assert(out && "accepting git_strarray pointer must not be null");
 
     jsize len = (*env)->GetArrayLength(env, jstrarr);
     out->count = len;

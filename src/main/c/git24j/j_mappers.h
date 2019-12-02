@@ -7,6 +7,14 @@
 extern "C"
 {
 #endif
+
+    /**Pack jni objects to pass to update callback. */
+    typedef struct
+    {
+        JNIEnv *env;
+        jobject consumer;
+    } j_cb_payload;
+
     /**
      * Duplicate c string, returned string needs to be free-ed separately.
      * */
@@ -76,6 +84,9 @@ extern "C"
 
     /** Call obj.field = val to set string value. */
     void j_set_string_field_c(JNIEnv *env, jclass clz, jobject obj, const char *val, const char *field);
+
+    /** Copy values from git_strarray to java::List<String> */
+    void j_strarray_to_java_list(JNIEnv *env, git_strarray *src, jobject strList);
 
 #ifdef __cplusplus
 }

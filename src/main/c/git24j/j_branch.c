@@ -54,6 +54,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Branch_jniNext)(JNIEnv *env, jclass obj, jo
     assert(jclz && "Could not find outType class from given outType object");
     j_save_c_pointer(env, (void *)c_out_ref, outRef, "set");
     j_call_setter_int(env, NULL, outType, "set", (jint)c_out_branch_type);
+    (*env)->DeleteLocalRef(env, jclz);
     return e;
 }
 
@@ -90,6 +91,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Branch_jniName)(JNIEnv *env, jclass obj, jo
     assert(jclz && "Could not find AtomicReference class from given outStr object");
     int e = git_branch_name(&out_name, (git_reference *)refPtr);
     j_call_setter_string_c(env, jclz, outStr, "set", out_name);
+    (*env)->DeleteLocalRef(env, jclz);
     return e;
 }
 /**int git_branch_upstream(git_reference **out, const git_reference *branch); */

@@ -147,6 +147,7 @@ void init_options_copy_to_java(JNIEnv *env, git_repository_init_options *c_init_
     (*env)->DeleteLocalRef(env, templatePath);
     (*env)->DeleteLocalRef(env, description);
     (*env)->DeleteLocalRef(env, workdirPath);
+    (*env)->DeleteLocalRef(env, jclz);
 }
 
 typedef struct
@@ -188,6 +189,7 @@ void init_options_copy_from_java(JNIEnv *env, jobject initOpts, git_repository_i
     c_init_opts->template_path = j_call_getter_string(env, jclz, initOpts, "getTemplatePath");
     c_init_opts->initial_head = j_call_getter_string(env, jclz, initOpts, "getInitialHead");
     c_init_opts->origin_url = j_call_getter_string(env, jclz, initOpts, "getOriginUrl");
+    (*env)->DeleteLocalRef(env, jclz);
 }
 
 /** free all fields of init_opts. Note: this does not free init_opts itself. */
@@ -380,13 +382,6 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Repository_jniStateCleanup)(JNIEnv *env, jc
     return git_repository_state_cleanup((git_repository *)repoPtr);
 }
 
-/**Pack jni objects to pass to update callback. */
-typedef struct
-{
-    JNIEnv *env;
-    jobject consumer;
-} j_cb_payload;
-
 /**int git_repository_fetchhead_foreach_cb(const char *ref_name, const char *remote_url, const git_oid *oid, unsigned int is_merge, void *payload);*/
 int j_fetchhead_foreach_cb(const char *ref_name, const char *remote_url, const git_oid *oid, unsigned int is_merge, void *payload)
 {
@@ -423,7 +418,7 @@ int j_mergehead_foreach_cb(const git_oid *oid, void *payload)
     jbyteArray bytes = j_byte_array_from_c(env, oid->id, GIT_OID_RAWSZ);
     int r = (*env)->CallIntMethod(env, consumer, accept, bytes);
     (*env)->DeleteLocalRef(env, bytes);
-    (*env)->DeleteGlobalRef(env, jclz);
+    (*env)->DeleteLocalRef(env, jclz);
     return r;
 }
 

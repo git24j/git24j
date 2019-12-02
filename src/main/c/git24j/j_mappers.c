@@ -104,6 +104,7 @@ void index_entry_from_java(JNIEnv *env, git_index_entry *c_entry, jobject entry)
     c_entry->flags_extended = j_get_int_field(env, jclz, entry, "flagsExtended");
     free((void *)c_entry->path);
     c_entry->path = j_get_string_field(env, jclz, entry, "path");
+    (*env)->DeleteLocalRef(env, jclz);
 }
 
 /** create jni jbyteArray from c unsigned char array. */
@@ -142,6 +143,7 @@ void j_git_oid_to_java(JNIEnv *env, const git_oid *c_oid, jobject oid)
     jbyteArray raw = j_byte_array_from_c(env, c_oid->id, GIT_OID_RAWSZ);
     j_call_setter_byte_array(env, clz, oid, "setId", raw);
     (*env)->DeleteLocalRef(env, raw);
+    (*env)->DeleteLocalRef(env, clz);
 }
 
 //TODO: test oid copying functions
@@ -155,7 +157,8 @@ void j_git_oid_from_java(JNIEnv *env, jobject oid, git_oid *c_oid)
     unsigned char *c_bytes = j_unsigned_chars_from_java(env, jBytes, &out_len);
     git_oid_fromraw(c_oid, c_bytes);
     free(c_bytes);
-    (*env)->DeleteGlobalRef(env, jBytes);
+    (*env)->DeleteLocalRef(env, jBytes);
+    (*env)->DeleteLocalRef(env, clz);
 }
 
 /** Call `obj.method(val)` to set a java object value. */
@@ -213,4 +216,15 @@ void j_set_string_field_c(JNIEnv *env, jclass clz, jobject obj, const char *val,
     jstring jVal = (*env)->NewStringUTF(env, val);
     j_set_object_field(env, clz, obj, jVal, field, "Ljava/lang/String;");
     (*env)->DeleteLocalRef(env, jVal);
+}
+
+/** Copy values from git_strarray to java::List<String> */
+void j_strarray_to_java_list(JNIEnv *env, git_strarray *src, jobject strList)
+{
+    jclass clz = (*env)->GetObjectClass(env, strList);
+    assert(clz && "Failed to copy native strings to java, could not find the class of the accepting object");
+    for (size_t i = 0; i < src->count; i++)
+    {
+        j_call_setter_string_c(env, clz, strList, "add", src->strings[i]);
+    }
 }
