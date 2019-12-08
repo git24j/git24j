@@ -13,7 +13,7 @@ public class Repository implements AutoCloseable {
      */
     private final AtomicLong _rawPtr = new AtomicLong();
 
-    private Repository(long rawPtr) {
+    Repository(long rawPtr) {
         _rawPtr.set(rawPtr);
     }
 
@@ -320,8 +320,6 @@ public class Repository implements AutoCloseable {
     public void stateCleanup() {
         Error.throwIfNeeded(jniStateCleanup(getRawPointer()));
     }
-    //
-    //    static native int jniFetchheadForeach(long repoPtr, FetchHeadForeachCb cb);
 
     /**
      * Invoke 'callback' for each entry in the given FETCH_HEAD file.
