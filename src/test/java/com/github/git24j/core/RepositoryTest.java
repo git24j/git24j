@@ -32,7 +32,8 @@ public class RepositoryTest extends TestBase {
 
     @Test
     public void initOptions() {
-        Repository.InitOptions initOptions = Repository.InitOptions.defaultOpts(Repository.InitOptions.VERSION);
+        Repository.InitOptions initOptions =
+                Repository.InitOptions.defaultOpts(Repository.InitOptions.VERSION);
         Assert.assertEquals(Repository.InitOptions.VERSION, initOptions.getVersion());
     }
 
@@ -49,7 +50,8 @@ public class RepositoryTest extends TestBase {
     public void iniExt() {
         Path repoPath = folder.getRoot().toPath();
         String initPath = repoPath.toString();
-        Repository.InitOptions opts = Repository.InitOptions.defaultOpts(Repository.InitOptions.VERSION);
+        Repository.InitOptions opts =
+                Repository.InitOptions.defaultOpts(Repository.InitOptions.VERSION);
         try (Repository repo = Repository.initExt(initPath, opts)) {
             Assert.assertNotNull(repo);
             Assert.assertTrue(repo.isEmpty());
@@ -136,7 +138,7 @@ public class RepositoryTest extends TestBase {
     public void config() {
         Path path = TestRepo.SIMPLE1.tempCopy(folder);
         try (Repository repository = Repository.open(path.toString())) {
-            try(Config cfg = repository.config()){
+            try (Config cfg = repository.config()) {
                 Assert.assertEquals("vim", cfg.getString("core.editor").orElse(""));
             }
         }
@@ -146,7 +148,7 @@ public class RepositoryTest extends TestBase {
     public void configSnapshot() {
         Path path = TestRepo.SIMPLE1.tempCopy(folder);
         try (Repository repository = Repository.open(path.toString())) {
-            try(Config cfg = repository.configSnapshot()){
+            try (Config cfg = repository.configSnapshot()) {
                 Assert.assertEquals("vim", cfg.getString("core.editor").orElse(""));
             }
         }
@@ -156,7 +158,7 @@ public class RepositoryTest extends TestBase {
     public void odb() {
         Path path = TestRepo.SIMPLE1.tempCopy(folder);
         try (Repository repository = Repository.open(path.toString())) {
-            try(Odb odb = repository.odb()){
+            try (Odb odb = repository.odb()) {
                 Assert.assertNotNull(odb);
             }
         }
@@ -166,7 +168,7 @@ public class RepositoryTest extends TestBase {
     public void refdb() {
         Path path = TestRepo.SIMPLE1.tempCopy(folder);
         try (Repository repository = Repository.open(path.toString())) {
-            try(Refdb refdb = repository.refdb()) {
+            try (Refdb refdb = repository.refdb()) {
                 Assert.assertNotNull(refdb);
             }
         }
@@ -179,7 +181,7 @@ public class RepositoryTest extends TestBase {
             Optional<String> maybeMsg = repository.message();
             Assert.assertEquals("prepared commit message file", maybeMsg.orElse("").trim());
             repository.messageRemove();
-            try{
+            try {
                 repository.message();
                 Assert.fail("should have throw error, because original valuek");
             } catch (GitException e) {
@@ -195,7 +197,7 @@ public class RepositoryTest extends TestBase {
             Optional<String> maybeMsg = repository.message();
             Assert.assertEquals("prepared commit message file", maybeMsg.orElse("").trim());
             repository.stateCleanup();
-            try{
+            try {
                 repository.message();
                 Assert.fail("should have throw error, because original valuek");
             } catch (GitException e) {
@@ -209,16 +211,18 @@ public class RepositoryTest extends TestBase {
         AtomicLong callCnt = new AtomicLong();
         Path path = TestRepo.SIMPLE1.tempCopy(folder);
         try (Repository repository = Repository.open(path.toString())) {
-            repository.fetchheadForeach(new Repository.FetchHeadForeachCb() {
-                @Override
-                public int call(String remoteUrl, Oid oid, boolean isMerge) {
-                    Assert.assertEquals("src/test/resources/simple1", remoteUrl);
-                    Assert.assertEquals("476f0c95825ef4479cab580b71f8b85f9dea4ee4", oid.toString());
-                    Assert.assertTrue(isMerge);
-                    callCnt.incrementAndGet();
-                    return 0;
-                }
-            });
+            repository.fetchheadForeach(
+                    new Repository.FetchHeadForeachCb() {
+                        @Override
+                        public int call(String remoteUrl, Oid oid, boolean isMerge) {
+                            Assert.assertEquals("src/test/resources/simple1", remoteUrl);
+                            Assert.assertEquals(
+                                    "476f0c95825ef4479cab580b71f8b85f9dea4ee4", oid.toString());
+                            Assert.assertTrue(isMerge);
+                            callCnt.incrementAndGet();
+                            return 0;
+                        }
+                    });
         }
         Assert.assertEquals(1, callCnt.get());
     }
@@ -228,14 +232,16 @@ public class RepositoryTest extends TestBase {
         Path path = TestRepo.MERGE1.tempCopy(folder);
         AtomicInteger callCnt = new AtomicInteger();
         try (Repository repository = Repository.open(path.toString())) {
-            repository.mergeHeadForeach(new Repository.MergeheadForeachCb() {
-                @Override
-                public int call(Oid oid) {
-                    Assert.assertEquals("476f0c95825ef4479cab580b71f8b85f9dea4ee4", oid.toString());
-                    callCnt.incrementAndGet();
-                    return 0;
-                }
-            });
+            repository.mergeHeadForeach(
+                    new Repository.MergeheadForeachCb() {
+                        @Override
+                        public int call(Oid oid) {
+                            Assert.assertEquals(
+                                    "476f0c95825ef4479cab580b71f8b85f9dea4ee4", oid.toString());
+                            callCnt.incrementAndGet();
+                            return 0;
+                        }
+                    });
         }
         Assert.assertEquals(1, callCnt.get());
     }
