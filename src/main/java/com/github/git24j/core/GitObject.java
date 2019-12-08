@@ -65,8 +65,7 @@ public class GitObject implements AutoCloseable {
      */
     public static GitObject lookup(Repository repository, Oid oid, Type type) {
         AtomicLong outObj = new AtomicLong();
-        Error.throwIfNeeded(
-                jniLookup(outObj, repository.getRawPointer(), oid, type.value));
+        Error.throwIfNeeded(jniLookup(outObj, repository.getRawPointer(), oid, type.value));
         return GitObject.create(outObj.get());
     }
 
@@ -84,8 +83,7 @@ public class GitObject implements AutoCloseable {
     public static GitObject lookupPrefix(Repository repository, Oid oid, int len, Type type) {
         AtomicLong outObj = new AtomicLong();
         Error.throwIfNeeded(
-                jniLookupPrefix(
-                        outObj, repository.getRawPointer(), oid, len, type.value));
+                jniLookupPrefix(outObj, repository.getRawPointer(), oid, len, type.value));
         return GitObject.create(outObj.get());
     }
 

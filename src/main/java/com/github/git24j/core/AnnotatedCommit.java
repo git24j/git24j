@@ -35,6 +35,7 @@ public class AnnotatedCommit extends CAutoCloseable {
 
     /**
      * Initialize {@link AnnotatedCommit} from FETCH_HEAD data
+     *
      * @param repo git repository
      * @param branchName branch name, nonnull
      * @param remoteUrl remote url, nonnull

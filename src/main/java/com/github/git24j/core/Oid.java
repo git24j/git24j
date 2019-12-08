@@ -1,8 +1,6 @@
 package com.github.git24j.core;
 
-import java.util.Arrays;
 import java.util.Objects;
-import java.util.concurrent.atomic.AtomicLong;
 
 // TODO: change this class to immutable java object
 public class Oid {
@@ -12,11 +10,12 @@ public class Oid {
 
     /** in case of short sha, only up to {@code eSize} bytes are effective */
     private int eSize = RAWSZ;
+
     private byte[] id = new byte[RAWSZ];
 
-    Oid() { }
+    Oid() {}
 
-    Oid(byte []bytes) {
+    Oid(byte[] bytes) {
         eSize = bytes.length;
         System.arraycopy(bytes, 0, this.id, 0, eSize);
     }
@@ -28,10 +27,6 @@ public class Oid {
     public static Oid of(String hexSha) {
         byte[] bytes = hexStringToByteArray(hexSha.toLowerCase());
         return new Oid(bytes);
-    }
-
-    public boolean isShortId() {
-        return getEffectiveSize() < RAWSZ;
     }
 
     private static String bytesToHex(byte[] bytes, int len) {
@@ -61,6 +56,10 @@ public class Oid {
         return data;
     }
 
+    public boolean isShortId() {
+        return getEffectiveSize() < RAWSZ;
+    }
+
     public byte[] getId() {
         return id;
     }
@@ -75,8 +74,8 @@ public class Oid {
     }
 
     /**
-     * Get effective size of the oid. Normally, it should be {@code RAWSZ} but can
-     * be smaller in case of short sha.
+     * Get effective size of the oid. Normally, it should be {@code RAWSZ} but can be smaller in
+     * case of short sha.
      */
     public int getEffectiveSize() {
         return eSize;
@@ -94,7 +93,7 @@ public class Oid {
         if (eSize != oid.eSize) {
             return false;
         }
-        for (int i = 0; i <eSize; i++) {
+        for (int i = 0; i < eSize; i++) {
             if (id[i] != oid.id[i]) {
                 return false;
             }

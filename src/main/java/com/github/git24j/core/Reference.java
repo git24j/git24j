@@ -6,24 +6,11 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
-public class Reference implements AutoCloseable {
+public class Reference {
     private final AtomicLong _rawPtr = new AtomicLong();
 
     public Reference(long rawPointer) {
         _rawPtr.set(rawPointer);
-    }
-
-    long getRawPointer() {
-        long ptr = _rawPtr.get();
-        if (ptr == 0) {
-            throw new IllegalStateException("Reference has been closed");
-        }
-        return ptr;
-    }
-
-    @Override
-    public void close() {
-        jniFree(_rawPtr.get());
     }
 
     /** const git_oid * git_reference_target(const git_reference *ref); */
@@ -74,6 +61,7 @@ public class Reference implements AutoCloseable {
     }
 
     static native int jniDwim(AtomicLong outRef, long repoPtr, String shorthand);
+
     /**
      * Lookup a reference by DWIMing its short name
      *
@@ -99,6 +87,7 @@ public class Reference implements AutoCloseable {
             int force,
             String currentValue,
             String logMessage);
+
     /**
      * Create a symbolic reference that points to another reference (target reference) and matches
      * the {@code currentValue} when updating.
@@ -162,6 +151,7 @@ public class Reference implements AutoCloseable {
 
     static native int jniCreate(
             AtomicLong outRef, long repoPtr, String name, Oid oid, int force, String logMessage);
+
     /**
      * Create a new direct reference that refers directly to an Oid.
      *
@@ -189,6 +179,7 @@ public class Reference implements AutoCloseable {
             int force,
             Oid currentId,
             String logMessage);
+
     /**
      * Conditionally create new direct reference
      *
@@ -224,190 +215,26 @@ public class Reference implements AutoCloseable {
 
     static native void jniTargetPeel(Oid oid, long refPtr);
 
-    /**
-     * Return the peeled OID target of this reference.
-     *
-     * <p>This peeled OID only applies to direct references that point to a hard Tag object: it is
-     * the result of peeling such Tag.
-     *
-     * @return peeled Oid
-     */
-    public Oid targetPeel() {
-        Oid oid = new Oid();
-        jniTargetPeel(oid, this.getRawPointer());
-        return oid;
-    }
-
     static native String jniSymbolicTarget(long refPtr);
-    /**
-     * Get full name to the reference pointed to by a symbolic reference.
-     *
-     * <p>Only available if the reference is symbolic.
-     *
-     * @return name of the reference
-     */
-    public String symbolicTarget() {
-        return jniSymbolicTarget(this.getRawPointer());
-    }
-
-    public enum ReferenceType implements IBitEnum {
-        INVALID(0),
-        DIRECT(1),
-        SYMBOLIC(2),
-        ALL(3);
-
-        private final int _value;
-
-        ReferenceType(int value) {
-            _value = value;
-        }
-
-        @Override
-        public int getBit() {
-            return 0;
-        }
-
-        static ReferenceType valueOf(int iVal) {
-            for (ReferenceType x : ReferenceType.values()) {
-                if (x._value == iVal) {
-                    return x;
-                }
-            }
-            return INVALID;
-        }
-    }
 
     static native int jniType(long refPtr);
-    /**
-     * Get the type of a reference.
-     *
-     * <p>Either direct (GIT_REFERENCE_DIRECT) or symbolic (GIT_REFERENCE_SYMBOLIC)
-     *
-     * @return the type
-     */
-    public ReferenceType referenceType() {
-        return ReferenceType.valueOf(jniType(this.getRawPointer()));
-    }
 
     static native String jniName(long refPtr);
-    /**
-     * Get the full name of a reference.
-     *
-     * <p>See `git_reference_symbolic_create()` for rules about valid names.
-     *
-     * @return the full name for the ref
-     */
-    public String name() {
-        return jniName(this.getRawPointer());
-    }
 
     static native int jniResolve(AtomicLong outRef, long refPtr);
-    /**
-     * Resolve a symbolic reference to a direct reference.
-     *
-     * <p>This method iteratively peels a symbolic reference until it resolves to a direct reference
-     * to an OID.
-     *
-     * <p>The peeled reference is returned in the `resolved_ref` argument, and must be freed
-     * manually once it's no longer needed.
-     *
-     * <p>If a direct reference is passed as an argument, a copy of that reference is returned. This
-     * copy must be manually freed too.
-     *
-     * @return resolved reference
-     * @throws GitException resolve attempt failed
-     */
-    public Reference resolve() {
-        AtomicLong outRef = new AtomicLong();
-        Error.throwIfNeeded(jniResolve(outRef, getRawPointer()));
-        return new Reference(outRef.get());
-    }
 
     static native long jniOwner(long refPtr);
-    /**
-     * Get the repository where a reference resides.
-     *
-     * @return owner repository
-     */
-    public Repository owner() {
-        return new Repository(jniOwner(getRawPointer()));
-    }
 
     static native int jniSymbolicSetTarget(
             AtomicLong outRef, long refPtr, String target, String logMessage);
-    /**
-     * Create a new reference with the same name as the given reference but a different symbolic
-     * target. The reference must be a symbolic reference, otherwise this will fail.
-     *
-     * <p>The new reference will be written to disk, overwriting the given reference.
-     *
-     * <p>The target name will be checked for validity. See `git_reference_symbolic_create()` for
-     * rules about valid names.
-     *
-     * <p>The message for the reflog will be ignored if the reference does not belong in the
-     * standard set (HEAD, branches and remote-tracking branches) and and it does not have a reflog.
-     *
-     * @param target The new target for the reference
-     * @param logMessage The one line long message to be appended to the reflog
-     * @return newly created Reference
-     * @throws GitException GIT_EINVALIDSPEC or an error code
-     */
-    public Reference symbolicSetTarget(String target, String logMessage) {
-        AtomicLong outRef = new AtomicLong();
-        Error.throwIfNeeded(jniSymbolicSetTarget(outRef, getRawPointer(), target, logMessage));
-        return new Reference(outRef.get());
-    }
 
     static native int jniSetTarget(AtomicLong outRef, long refPtr, Oid oid, String logMessage);
-
-    /**
-     * Conditionally create a new reference with the same name as the given reference but a
-     * different OID target. The reference must be a direct reference, otherwise this will fail.
-     *
-     * <p>The new reference will be written to disk, overwriting the given reference.
-     *
-     * @param oid The new target OID for the reference
-     * @param logMessage The one line long message to be appended to the reflog
-     * @return newly created Reference
-     * @throws GitException GIT_EMODIFIED if the value of the reference has changed since it was
-     *     read, or an error code
-     */
-    public Reference setTarget(Oid oid, String logMessage) {
-        AtomicLong outRef = new AtomicLong();
-        Error.throwIfNeeded(jniSetTarget(outRef, getRawPointer(), oid, logMessage));
-        return new Reference(outRef.get());
-    }
 
     static native int jniRename(
             AtomicLong outRef, long refPtr, String newName, int force, String logMessage);
 
-    /**
-     * Rename an existing reference.
-     *
-     * <p>This method works for both direct and symbolic references.
-     *
-     * <p>The new name will be checked for validity. See `git_reference_symbolic_create()` for rules
-     * about valid names.
-     *
-     * <p>If the `force` flag is not enabled, and there's already a reference with the given name,
-     * the renaming will fail.
-     *
-     * <p>IMPORTANT: The user needs to write a proper reflog entry if the reflog is enabled for the
-     * repository. We only rename the reflog if it exists.
-     *
-     * @param newName The new name for the reference
-     * @param force Overwrite an existing reference
-     * @param logMessage The one line long message to be appended to the reflog
-     * @return new reference
-     * @throws GitException GIT_EINVALIDSPEC, GIT_EEXISTS or an error code
-     */
-    public Reference rename(String newName, boolean force, String logMessage) {
-        AtomicLong outRef = new AtomicLong();
-        Error.throwIfNeeded(jniRename(outRef, getRawPointer(), newName, force ? 1 : 0, logMessage));
-        return new Reference(outRef.get());
-    }
-
     static native int jniDelete(long refPtr);
+
     /**
      * Delete an existing reference.
      *
@@ -427,6 +254,7 @@ public class Reference implements AutoCloseable {
     }
 
     static native int jniRemove(long repoPtr, String name);
+
     /**
      * Delete an existing reference by name
      *
@@ -442,6 +270,7 @@ public class Reference implements AutoCloseable {
     }
 
     static native int jniList(List<String> strList, long repoPtr);
+
     /**
      * Fill a list with all the references that can be found in a repository.
      *
@@ -479,9 +308,7 @@ public class Reference implements AutoCloseable {
                 jniForeach(
                         repo.getRawPointer(),
                         (ptr) -> {
-                            try (Reference ref = new Reference(ptr)) {
-                                callback.accept(ref);
-                            }
+                            callback.accept(new Reference(ptr));
                         });
         Error.throwIfNeeded(e);
     }
@@ -504,24 +331,8 @@ public class Reference implements AutoCloseable {
     }
 
     static native int jniDup(AtomicLong outDest, long sourcePtr);
-    /**
-     * Create a copy of an existing reference.
-     *
-     * <p>Call `git_reference_free` to free the data.
-     *
-     * @return 0 or an error code
-     */
-    public Reference dup() {
-        AtomicLong outRef = new AtomicLong();
-        Error.throwIfNeeded(jniDup(outRef, this.getRawPointer()));
-        return new Reference(outRef.get());
-    }
 
     static native void jniFree(long refPtr);
-
-    public void free() {
-        jniFree(getRawPointer());
-    }
 
     static native int jniCmp(long ref1Ptr, long ref2Ptr);
 
@@ -529,33 +340,10 @@ public class Reference implements AutoCloseable {
         return jniCmp(ref1.getRawPointer(), ref2.getRawPointer());
     }
 
-    public static class Iterator implements AutoCloseable {
-        private final AtomicLong _ptr = new AtomicLong();
-
-        public Iterator(long rawPointer) {
-            _ptr.set(rawPointer);
-        }
-
-        @Override
-        public void close() throws Exception {}
-    }
-
     static native int jniIteratorNew(AtomicLong outIter, long repoPtr);
 
-    /**
-     * Create an iterator for the repo's references
-     *
-     * @param repo the repository
-     * @return newly constructed iterator
-     * @throws GitException git error
-     */
-    public Iterator iteratorNew(Repository repo) {
-        AtomicLong outIter = new AtomicLong();
-        Error.throwIfNeeded(jniIteratorNew(outIter, repo.getRawPointer()));
-        return new Iterator(outIter.get());
-    }
-
     static native int jniIteratorGlobNew(AtomicLong outIter, long repoPtr, String glob);
+
     /**
      * Create an iterator for the repo's references that match the specified glob
      *
@@ -571,6 +359,7 @@ public class Reference implements AutoCloseable {
     }
 
     static native int jniNext(AtomicLong outRef, long iterPtr);
+
     /**
      * Get the next reference
      *
@@ -585,22 +374,9 @@ public class Reference implements AutoCloseable {
     }
 
     static native int jniNextName(AtomicReference<String> outName, long iterPtr);
-    /**
-     * Get the next reference's name
-     *
-     * <p>This function is provided for convenience in case only the names are interesting as it
-     * avoids the allocation of the `git_reference` object which `git_reference_next()` needs.
-     *
-     * @return name of the next reference
-     * @throws GitException GIT_ITEROVER if there are no more; or an error code
-     */
-    public String nextName() {
-        AtomicReference<String> outName = new AtomicReference<>();
-        Error.throwIfNeeded(jniNextName(outName, getRawPointer()));
-        return outName.get();
-    }
 
     static native void jniIteratorFree(long iterPtr);
+
     /**
      * Free the iterator and its associated resources
      *
@@ -610,11 +386,8 @@ public class Reference implements AutoCloseable {
         jniIteratorFree(iter._ptr.get());
     }
 
-    public interface ForeachGlobCb {
-        int accept(String name);
-    }
-
     static native int jniForeachGlob(long repoPtr, String glob, ForeachGlobCb callback);
+
     /**
      * Perform a callback on each reference in the repository whose name matches the given pattern.
      *
@@ -636,6 +409,7 @@ public class Reference implements AutoCloseable {
     }
 
     static native int jniHashLog(long repoPtr, String refname);
+
     /**
      * Check if a reflog exists for the specified reference.
      *
@@ -654,6 +428,7 @@ public class Reference implements AutoCloseable {
     }
 
     static native int jniEnsureLog(long repoPtr, String refname);
+
     /**
      * Ensure there is a reflog for a particular reference.
      *
@@ -668,46 +443,15 @@ public class Reference implements AutoCloseable {
     }
 
     static native int jniIsBranch(long refPtr);
-    /**
-     * Check if a reference is a local branch.
-     *
-     * @return true if the reference lives in the refs/heads namespace;
-     */
-    public boolean isBranch() {
-        return jniIsBranch(getRawPointer()) == 1;
-    }
 
     static native int jniIsRemote(long refPtr);
-    /**
-     * Check if a reference is a remote tracking branch
-     *
-     * @return true when the reference lives in the refs/remotes namespace;
-     */
-    public boolean isRemote() {
-        return jniIsRemote(getRawPointer()) == 1;
-    }
 
     static native int jniIsTag(long refPtr);
-    /**
-     * Check if a reference is a tag
-     *
-     * @return 1 when the reference lives in the refs/tags namespace;
-     */
-    public boolean isTag() {
-        return jniIsTag(getRawPointer()) == 1;
-    }
 
     static native int jniIsNote(long refPtr);
-    /**
-     * Check if a reference is a note
-     *
-     * @return 1 when the reference lives in the refs/notes namespace;
-     */
-    public boolean isNote() {
-        return jniIsNote(getRawPointer()) == 1;
-    }
 
     static native int jniNormalizeName(AtomicReference<String> outName, String name, int flags);
+
     /**
      * Normalize reference name and check validity.
      *
@@ -733,25 +477,6 @@ public class Reference implements AutoCloseable {
 
     static native int jniPeel(AtomicLong outObj, long refPtr, int objType);
 
-    /**
-     * Recursively peel reference until object of the specified type is found.
-     *
-     * <p>The retrieved `peeled` object is owned by the repository and should be closed with the
-     * `git_object_free` method.
-     *
-     * <p>If you pass `GIT_OBJECT_ANY` as the target type, then the object will be peeled until a
-     * non-tag object is met.
-     *
-     * @param objType The type of the requested object (GIT_OBJECT_COMMIT, GIT_OBJECT_TAG,
-     *     GIT_OBJECT_TREE, GIT_OBJECT_BLOB or GIT_OBJECT_ANY).
-     * @return 0 on success, GIT_EAMBIGUOUS, GIT_ENOTFOUND or an error code
-     */
-    public GitObject peel(GitObject.Type objType) {
-        AtomicLong outObj = new AtomicLong();
-        Error.throwIfNeeded(jniPeel(outObj, getRawPointer(), objType.getValue()));
-        return new GitObject(objType.getValue());
-    }
-
     static native int jniIsValid(String refname);
 
     /**
@@ -774,6 +499,259 @@ public class Reference implements AutoCloseable {
 
     static native String jniShorthand(long refPtr);
 
+    @Override
+    protected void finalize() {
+        jniFree(_rawPtr.get());
+    }
+
+    long getRawPointer() {
+        return _rawPtr.get();
+    }
+
+    /**
+     * Return the peeled OID target of this reference.
+     *
+     * <p>This peeled OID only applies to direct references that point to a hard Tag object: it is
+     * the result of peeling such Tag.
+     *
+     * @return peeled Oid
+     */
+    public Oid targetPeel() {
+        Oid oid = new Oid();
+        jniTargetPeel(oid, this.getRawPointer());
+        return oid;
+    }
+
+    /**
+     * Get full name to the reference pointed to by a symbolic reference.
+     *
+     * <p>Only available if the reference is symbolic.
+     *
+     * @return name of the reference
+     */
+    public String symbolicTarget() {
+        return jniSymbolicTarget(this.getRawPointer());
+    }
+
+    /**
+     * Get the type of a reference.
+     *
+     * <p>Either direct (GIT_REFERENCE_DIRECT) or symbolic (GIT_REFERENCE_SYMBOLIC)
+     *
+     * @return the type
+     */
+    public ReferenceType referenceType() {
+        return ReferenceType.valueOf(jniType(this.getRawPointer()));
+    }
+
+    /**
+     * Get the full name of a reference.
+     *
+     * <p>See `git_reference_symbolic_create()` for rules about valid names.
+     *
+     * @return the full name for the ref
+     */
+    public String name() {
+        return jniName(this.getRawPointer());
+    }
+
+    /**
+     * Resolve a symbolic reference to a direct reference.
+     *
+     * <p>This method iteratively peels a symbolic reference until it resolves to a direct reference
+     * to an OID.
+     *
+     * <p>The peeled reference is returned in the `resolved_ref` argument, and must be freed
+     * manually once it's no longer needed.
+     *
+     * <p>If a direct reference is passed as an argument, a copy of that reference is returned. This
+     * copy must be manually freed too.
+     *
+     * @return resolved reference
+     * @throws GitException resolve attempt failed
+     */
+    public Reference resolve() {
+        AtomicLong outRef = new AtomicLong();
+        Error.throwIfNeeded(jniResolve(outRef, getRawPointer()));
+        return new Reference(outRef.get());
+    }
+
+    /**
+     * Get the repository where a reference resides.
+     *
+     * @return owner repository
+     */
+    public Repository owner() {
+        return new Repository(jniOwner(getRawPointer()));
+    }
+
+    /**
+     * Create a new reference with the same name as the given reference but a different symbolic
+     * target. The reference must be a symbolic reference, otherwise this will fail.
+     *
+     * <p>The new reference will be written to disk, overwriting the given reference.
+     *
+     * <p>The target name will be checked for validity. See `git_reference_symbolic_create()` for
+     * rules about valid names.
+     *
+     * <p>The message for the reflog will be ignored if the reference does not belong in the
+     * standard set (HEAD, branches and remote-tracking branches) and and it does not have a reflog.
+     *
+     * @param target The new target for the reference
+     * @param logMessage The one line long message to be appended to the reflog
+     * @return newly created Reference
+     * @throws GitException GIT_EINVALIDSPEC or an error code
+     */
+    public Reference symbolicSetTarget(String target, String logMessage) {
+        AtomicLong outRef = new AtomicLong();
+        Error.throwIfNeeded(jniSymbolicSetTarget(outRef, getRawPointer(), target, logMessage));
+        return new Reference(outRef.get());
+    }
+
+    /**
+     * Conditionally create a new reference with the same name as the given reference but a
+     * different OID target. The reference must be a direct reference, otherwise this will fail.
+     *
+     * <p>The new reference will be written to disk, overwriting the given reference.
+     *
+     * @param oid The new target OID for the reference
+     * @param logMessage The one line long message to be appended to the reflog
+     * @return newly created Reference
+     * @throws GitException GIT_EMODIFIED if the value of the reference has changed since it was
+     *     read, or an error code
+     */
+    public Reference setTarget(Oid oid, String logMessage) {
+        AtomicLong outRef = new AtomicLong();
+        Error.throwIfNeeded(jniSetTarget(outRef, getRawPointer(), oid, logMessage));
+        return new Reference(outRef.get());
+    }
+
+    /**
+     * Rename an existing reference.
+     *
+     * <p>This method works for both direct and symbolic references.
+     *
+     * <p>The new name will be checked for validity. See `git_reference_symbolic_create()` for rules
+     * about valid names.
+     *
+     * <p>If the `force` flag is not enabled, and there's already a reference with the given name,
+     * the renaming will fail.
+     *
+     * <p>IMPORTANT: The user needs to write a proper reflog entry if the reflog is enabled for the
+     * repository. We only rename the reflog if it exists.
+     *
+     * @param newName The new name for the reference
+     * @param force Overwrite an existing reference
+     * @param logMessage The one line long message to be appended to the reflog
+     * @return new reference
+     * @throws GitException GIT_EINVALIDSPEC, GIT_EEXISTS or an error code
+     */
+    public Reference rename(String newName, boolean force, String logMessage) {
+        AtomicLong outRef = new AtomicLong();
+        Error.throwIfNeeded(jniRename(outRef, getRawPointer(), newName, force ? 1 : 0, logMessage));
+        return new Reference(outRef.get());
+    }
+
+    /**
+     * Create a copy of an existing reference.
+     *
+     * <p>Call `git_reference_free` to free the data.
+     *
+     * @return 0 or an error code
+     */
+    public Reference dup() {
+        AtomicLong outRef = new AtomicLong();
+        Error.throwIfNeeded(jniDup(outRef, this.getRawPointer()));
+        return new Reference(outRef.get());
+    }
+
+    public void free() {
+        jniFree(getRawPointer());
+    }
+
+    /**
+     * Create an iterator for the repo's references
+     *
+     * @param repo the repository
+     * @return newly constructed iterator
+     * @throws GitException git error
+     */
+    public Iterator iteratorNew(Repository repo) {
+        AtomicLong outIter = new AtomicLong();
+        Error.throwIfNeeded(jniIteratorNew(outIter, repo.getRawPointer()));
+        return new Iterator(outIter.get());
+    }
+
+    /**
+     * Get the next reference's name
+     *
+     * <p>This function is provided for convenience in case only the names are interesting as it
+     * avoids the allocation of the `git_reference` object which `git_reference_next()` needs.
+     *
+     * @return name of the next reference
+     * @throws GitException GIT_ITEROVER if there are no more; or an error code
+     */
+    public String nextName() {
+        AtomicReference<String> outName = new AtomicReference<>();
+        Error.throwIfNeeded(jniNextName(outName, getRawPointer()));
+        return outName.get();
+    }
+
+    /**
+     * Check if a reference is a local branch.
+     *
+     * @return true if the reference lives in the refs/heads namespace;
+     */
+    public boolean isBranch() {
+        return jniIsBranch(getRawPointer()) == 1;
+    }
+
+    /**
+     * Check if a reference is a remote tracking branch
+     *
+     * @return true when the reference lives in the refs/remotes namespace;
+     */
+    public boolean isRemote() {
+        return jniIsRemote(getRawPointer()) == 1;
+    }
+
+    /**
+     * Check if a reference is a tag
+     *
+     * @return 1 when the reference lives in the refs/tags namespace;
+     */
+    public boolean isTag() {
+        return jniIsTag(getRawPointer()) == 1;
+    }
+
+    /**
+     * Check if a reference is a note
+     *
+     * @return 1 when the reference lives in the refs/notes namespace;
+     */
+    public boolean isNote() {
+        return jniIsNote(getRawPointer()) == 1;
+    }
+
+    /**
+     * Recursively peel reference until object of the specified type is found.
+     *
+     * <p>The retrieved `peeled` object is owned by the repository and should be closed with the
+     * `git_object_free` method.
+     *
+     * <p>If you pass `GIT_OBJECT_ANY` as the target type, then the object will be peeled until a
+     * non-tag object is met.
+     *
+     * @param objType The type of the requested object (GIT_OBJECT_COMMIT, GIT_OBJECT_TAG,
+     *     GIT_OBJECT_TREE, GIT_OBJECT_BLOB or GIT_OBJECT_ANY).
+     * @return 0 on success, GIT_EAMBIGUOUS, GIT_ENOTFOUND or an error code
+     */
+    public GitObject peel(GitObject.Type objType) {
+        AtomicLong outObj = new AtomicLong();
+        Error.throwIfNeeded(jniPeel(outObj, getRawPointer(), objType.getValue()));
+        return new GitObject(objType.getValue());
+    }
+
     /**
      * Get the reference's short name
      *
@@ -787,6 +765,7 @@ public class Reference implements AutoCloseable {
     public String shorthand() {
         return jniShorthand(getRawPointer());
     }
+
     /**
      * Get the OID pointed to by a direct reference.
      *
@@ -808,5 +787,48 @@ public class Reference implements AutoCloseable {
     /** @return target of this reference. */
     public Oid id() {
         return target();
+    }
+
+    public enum ReferenceType implements IBitEnum {
+        INVALID(0),
+        DIRECT(1),
+        SYMBOLIC(2),
+        ALL(3);
+
+        private final int _value;
+
+        ReferenceType(int value) {
+            _value = value;
+        }
+
+        static ReferenceType valueOf(int iVal) {
+            for (ReferenceType x : ReferenceType.values()) {
+                if (x._value == iVal) {
+                    return x;
+                }
+            }
+            return INVALID;
+        }
+
+        @Override
+        public int getBit() {
+            return 0;
+        }
+    }
+    public interface ForeachGlobCb {
+        int accept(String name);
+    }
+
+    public static class Iterator {
+        private final AtomicLong _ptr = new AtomicLong();
+
+        public Iterator(long rawPointer) {
+            _ptr.set(rawPointer);
+        }
+
+        @Override
+        protected void finalize() {
+            jniIteratorFree(_ptr.get());
+        }
     }
 }

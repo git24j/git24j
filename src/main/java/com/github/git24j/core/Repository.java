@@ -8,9 +8,7 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 
 public class Repository implements AutoCloseable {
-    /**
-     * C Pointer.
-     */
+    /** C Pointer. */
     private final AtomicLong _rawPtr = new AtomicLong();
 
     Repository(long rawPtr) {
@@ -124,10 +122,10 @@ public class Repository implements AutoCloseable {
     /**
      * Creates a new Git repository in the given folder.
      *
-     * @param path   the path to the repository
+     * @param path the path to the repository
      * @param isBare if true, a Git repository without a working directory is created at the pointed
-     *               path. If false, provided path will be considered as the working directory into which the
-     *               .git directory will be created.
+     *     path. If false, provided path will be considered as the working directory into which the
+     *     .git directory will be created.
      * @return repo just initialized.
      * @throws GitException git error.
      */
@@ -141,7 +139,7 @@ public class Repository implements AutoCloseable {
     /**
      * Create a new Git repository in the given folder with extended controls.
      *
-     * @param path     The path to the repository.
+     * @param path The path to the repository.
      * @param initOpts {@code InitOptions}
      * @return Repo just created or reinitialized.
      * @throws GitException git error
@@ -155,14 +153,14 @@ public class Repository implements AutoCloseable {
     /**
      * Find and open a repository with extended controls.
      *
-     * @param path        Path to open as git repository. If the flags permit "searching", then this can be
-     *                    a path to a subdirectory inside the working directory of the repository. May be NULL if
-     *                    flags is GIT_REPOSITORY_OPEN_FROM_ENV.
-     * @param flags       A combination of the OpenFlag flags.
+     * @param path Path to open as git repository. If the flags permit "searching", then this can be
+     *     a path to a subdirectory inside the working directory of the repository. May be NULL if
+     *     flags is GIT_REPOSITORY_OPEN_FROM_ENV.
+     * @param flags A combination of the OpenFlag flags.
      * @param ceilingDirs A GIT_PATH_LIST_SEPARATOR delimited list of path prefixes at which the
-     *                    search for a containing repository should terminate.
+     *     search for a containing repository should terminate.
      * @return repo just opened. This can actually be NULL if you only want to use the error code to
-     * see if a repo at this path could be opened.
+     *     see if a repo at this path could be opened.
      * @throws GitException git error.
      */
     public static Repository openExt(String path, EnumSet<OpenFlag> flags, String ceilingDirs) {
@@ -207,9 +205,9 @@ public class Repository implements AutoCloseable {
     /**
      * Set the path to the working directory for this repository
      *
-     * @param path          The path to a working directory
+     * @param path The path to a working directory
      * @param updateGitLink Create/update gitlink in workdir and set config "core.worktree" (if
-     *                      workdir is not the parent of the .git directory)
+     *     workdir is not the parent of the .git directory)
      * @throws GitException git error
      */
     public void setWorkdir(Path path, boolean updateGitLink) {
@@ -344,12 +342,12 @@ public class Repository implements AutoCloseable {
     /**
      * Calculate hash of file using repository filtering rules.
      *
-     * @param path   Path to file on disk whose contents should be hashed. If the repository is not
-     *               NULL, this can be a relative path.
-     * @param type   The object type to hash as (e.g. GIT_OBJECT_BLOB)
+     * @param path Path to file on disk whose contents should be hashed. If the repository is not
+     *     NULL, this can be a relative path.
+     * @param type The object type to hash as (e.g. GIT_OBJECT_BLOB)
      * @param asPath The path to use to look up filtering rules. If this is NULL, then the `path`
-     *               parameter will be used instead. If this is passed as the empty string, then no filters
-     *               will be applied when calculating the hash.
+     *     parameter will be used instead. If this is passed as the empty string, then no filters
+     *     will be applied when calculating the hash.
      * @return Output value of calculated SHA
      * @throws GitException git errors
      */
@@ -379,9 +377,7 @@ public class Repository implements AutoCloseable {
         Error.throwIfNeeded(jniSetHeadDetached(getRawPointer(), oid));
     }
 
-    /**
-     * Detach the HEAD.
-     */
+    /** Detach the HEAD. */
     public void detachHead() {
         Error.throwIfNeeded(jniDetachHead(getRawPointer()));
     }
@@ -416,16 +412,14 @@ public class Repository implements AutoCloseable {
      * <p>This namespace affects all reference operations for the repo. See `man gitnamespaces`
      *
      * @param namespace The namespace. This should not include the refs folder, e.g. to namespace
-     *                  all references under `refs/namespaces/foo/`, use `foo` as the namespace.
+     *     all references under `refs/namespaces/foo/`, use `foo` as the namespace.
      * @throws GitException git error
      */
     public void setNamespace(String namespace) {
         Error.throwIfNeeded(jniSetNamespace(getRawPointer(), namespace));
     }
 
-    /**
-     * Determine if the repository was a shallow clone.
-     */
+    /** Determine if the repository was a shallow clone. */
     public boolean isShadow() {
         return jniIsShadow(getRawPointer()) == 1;
     }
@@ -443,7 +437,7 @@ public class Repository implements AutoCloseable {
     /**
      * Set the identity to be used for writing reflogs
      *
-     * @param name  the name to use for the reflog entries
+     * @param name the name to use for the reflog entries
      * @param email the email to use for the reflog entries
      * @throws GitException git error
      */
@@ -470,9 +464,7 @@ public class Repository implements AutoCloseable {
         free();
     }
 
-    /**
-     * Close the repository, no-op if not opened.
-     */
+    /** Close the repository, no-op if not opened. */
     public void free() {
         jniFree(_rawPtr.get());
         _rawPtr.set(0);
@@ -773,8 +765,8 @@ public class Repository implements AutoCloseable {
          * Callback used to iterate over each FETCH_HEAD entry
          *
          * @param remoteUrl The remote URL
-         * @param oid       The reference target OID
-         * @param isMerge   Was the reference the result of a merge
+         * @param oid The reference target OID
+         * @param isMerge Was the reference the result of a merge
          * @return non-zero to terminate the iteration
          */
         public abstract int call(String remoteUrl, Oid oid, boolean isMerge);

@@ -79,9 +79,6 @@ public class Revparse {
             if (obj != null) {
                 obj.close();
             }
-            if (ref != null) {
-                ref.close();
-            }
         }
 
         /** single object found from rev parsing. */
