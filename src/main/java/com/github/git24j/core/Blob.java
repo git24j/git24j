@@ -1,6 +1,5 @@
 package com.github.git24j.core;
 
-import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 
 public class Blob extends GitObject {
@@ -120,6 +119,41 @@ public class Blob extends GitObject {
 
     static native int jniDup(AtomicLong outDest, long srcPtr);
 
+    /**
+     * Lookup a blob from sha in a repository.
+     *
+     * @param repo git repo
+     * @param oid sha of the blob to search
+     * @return found blob or null
+     * @throws GitException git error
+     */
+    public static Blob lookup(Repository repo, Oid oid) {
+        AtomicLong out = new AtomicLong();
+        if (oid.isShortId()) {
+            Error.throwIfNeeded(
+                    jniLookupPrefix(out, repo.getRawPointer(), oid, oid.getEffectiveSize()));
+        } else {
+            Error.throwIfNeeded(jniLookup(out, repo.getRawPointer(), oid));
+        }
+        return out.get() == 0 ? null : new Blob(out.get());
+    }
+
+    /**
+     * Lookup a blob from short sha in a repository. You probably want to use {@code Blob::lookup}
+     * instead.
+     *
+     * @param repo git repo
+     * @param oid sha of the blob to search.
+     * @return found blob or null
+     * @throws GitException git error
+     */
+    public static Blob lookupPrefix(Repository repo, Oid oid) {
+        AtomicLong outBlob = new AtomicLong();
+        Error.throwIfNeeded(
+                jniLookupPrefix(outBlob, repo.getRawPointer(), oid, oid.getEffectiveSize()));
+        return outBlob.get() == 0 ? null : new Blob(outBlob.get());
+    }
+
     public Blob dup() {
         AtomicLong out = new AtomicLong();
         Error.throwIfNeeded(jniDup(out, getRawPointer()));
@@ -152,39 +186,5 @@ public class Blob extends GitObject {
 
     public boolean isBinary() {
         return jniIsBinary(getRawPointer()) == 1;
-    }
-
-    /**
-     * Lookup a blob from sha in a repository.
-     *
-     * @param repo git repo
-     * @param oid sha of the blob to search
-     * @return found blob or null
-     * @throws GitException git error
-     */
-    public static Blob lookup(Repository repo, Oid oid) {
-        AtomicLong out = new AtomicLong();
-        if (oid.isShortId()) {
-            Error.throwIfNeeded(
-                    jniLookupPrefix(out, repo.getRawPointer(), oid, oid.getEffectiveSize()));
-        } else {
-            Error.throwIfNeeded(jniLookup(out, repo.getRawPointer(), oid));
-        }
-        return out.get() == 0 ? null : new Blob(out.get());
-    }
-
-    /**
-     * Lookup a blob from short sha in a repository. You probably want to use {@code Blob::lookup} instead.
-     *
-     * @param repo git repo
-     * @param oid sha of the blob to search.
-     * @return found blob or null
-     * @throws GitException git error
-     */
-    public static Blob lookupPrefix(Repository repo, Oid oid) {
-        AtomicLong outBlob = new AtomicLong();
-        Error.throwIfNeeded(
-                jniLookupPrefix(outBlob, repo.getRawPointer(), oid, oid.getEffectiveSize()));
-        return outBlob.get() == 0 ? null : new Blob(outBlob.get());
     }
 }
