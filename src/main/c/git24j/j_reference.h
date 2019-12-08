@@ -66,7 +66,7 @@ extern "C"
     /**int git_reference_next(git_reference **out, git_reference_iterator *iter); */
     JNIEXPORT jint JNICALL J_MAKE_METHOD(Reference_jniNext)(JNIEnv *env, jclass obj, jobject outRef, jlong iterPtr);
     /**int git_reference_next_name(const char **out, git_reference_iterator *iter); */
-    JNIEXPORT jint JNICALL J_MAKE_METHOD(Reference_jniNextName)(JNIEnv *env, jclass obj, jstring outRef, jlong iterPtr);
+    JNIEXPORT jint JNICALL J_MAKE_METHOD(Reference_jniNextName)(JNIEnv *env, jclass obj, jobject outName, jlong iterPtr);
     /**void git_reference_iterator_free(git_reference_iterator *iter); */
     JNIEXPORT void JNICALL J_MAKE_METHOD(Reference_jniIteratorFree)(JNIEnv *env, jclass obj, jlong iterPtr);
     /**int git_reference_foreach_glob(git_repository *repo, const char *glob, git_reference_foreach_name_cb callback, void *payload); */

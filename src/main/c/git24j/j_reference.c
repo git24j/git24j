@@ -6,6 +6,9 @@
 #include <assert.h>
 #include <git2.h>
 #include <stdio.h>
+#include <string.h>
+
+const size_t MAX_REF_NAME_SIZE = 32768;
 
 /**
  * int git_reference_foreach_cb(git_reference *reference, void *payload);
@@ -284,13 +287,13 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Reference_jniNext)(JNIEnv *env, jclass obj,
     return e;
 }
 /**int git_reference_next_name(const char **out, git_reference_iterator *iter); */
-JNIEXPORT jint JNICALL J_MAKE_METHOD(Reference_jniNextName)(JNIEnv *env, jclass obj, jstring outRef, jlong iterPtr)
+JNIEXPORT jint JNICALL J_MAKE_METHOD(Reference_jniNextName)(JNIEnv *env, jclass obj, jobject outName, jlong iterPtr)
 {
     const char *out_str;
     int e = git_reference_next_name(&out_str, (git_reference_iterator *)iterPtr);
-    jclass clz = (*env)->GetObjectClass(env, obj);
+    jclass clz = (*env)->GetObjectClass(env, outName);
     assert(clz && "Failed to identify object class in Reference::jniNextName");
-    j_call_setter_string_c(env, clz, obj, "set", out_str);
+    j_call_setter_string_c(env, clz, outName, "set", out_str);
     return e;
 }
 /**void git_reference_iterator_free(git_reference_iterator *iter); */
@@ -343,15 +346,46 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Reference_jniIsNote)(JNIEnv *env, jclass ob
 {
     return git_reference_is_note((git_reference *)refPtr);
 }
+
+/**
+ * Call git_reference_normalize_name with auto increasing buffer. 
+ * Note: out_name must be free-ed after the call, *out_size must start with 0 and *out_name should start with NULL
+ * */
+int _git_reference_normalize_name_dynamic(char **out_name, size_t *out_size, const char *name, int flags)
+{
+    if (*out_size > MAX_REF_NAME_SIZE)
+    {
+        return GIT_EBUFS;
+    }
+
+    if (*out_size == 0)
+    {
+        out_size = 256;
+        free(*out_name);
+    }
+
+    *out_name = (char *)malloc(sizeof(char) * (*out_size));
+    memset(*out_name, '\0', sizeof(char) * (*out_size));
+    int e = git_reference_normalize_name(*out_name, *out_size, name, flags);
+    if (e == GIT_EBUFS)
+    {
+        *out_size *= 2;
+        return _git_reference_normalize_name_dynamic(out_name, out_size, name, flags);
+    }
+    return e;
+}
 /**int git_reference_normalize_name(char *buffer_out, size_t buffer_size, const char *name, unsigned int flags); */
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Reference_jniNormalizeName)(JNIEnv *env, jclass obj, jobject bufferOut, jstring name, jint flags)
 {
-    char *buffer_out = j_copy_of_jstring(env, bufferOut, true);
-    char *c_name = j_copy_of_jstring(env, name, false);
-    jsize buffer_size = (*env)->GetStringLength(env, bufferOut);
-    int e = git_reference_normalize_name(buffer_out, buffer_size, c_name, flags);
-    free(c_name);
-    free(buffer_out);
+    char *out_name = NULL;
+    int out_size = 0;
+    jclass clz = (*env)->GetObjectClass(env, bufferOut);
+    assert(clz && "could not idenfity class of bufferOut in the call to Reference::jniNormalizeName");
+    int e = _git_reference_normalize_name_dynamic(&out_name, &out_size, name, flags);
+    j_call_setter_string_c(env, clz, bufferOut, "set", *out_name);
+    (*env)->DeleteLocalRef(env, clz);
+    free(*out_name);
+    out_name = NULL;
     return e;
 }
 /**int git_reference_peel(git_object **out, const git_reference *ref, git_object_t type); */
