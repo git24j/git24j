@@ -23,12 +23,11 @@ public class BranchTest extends TestBase {
     @Test
     public void createFromAnnotated() {
         try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {
-            try (Revparse.ExtReturn ret = Revparse.ext(testRepo, "master")) {
-                Reference ref = ret.getRef();
-                AnnotatedCommit ac = AnnotatedCommit.fromRef(testRepo, ref);
-                Reference br = Branch.createFromAnnotated(testRepo, "test_branch_ac", ac, true);
-                Assert.assertEquals(MASTER_HASH, br.target().toString());
-            }
+            Revparse.ExtReturn ret = Revparse.ext(testRepo, "master");
+            Reference ref = ret.getRef();
+            AnnotatedCommit ac = AnnotatedCommit.fromRef(testRepo, ref);
+            Reference br = Branch.createFromAnnotated(testRepo, "test_branch_ac", ac, true);
+            Assert.assertEquals(MASTER_HASH, br.target().toString());
         }
     }
 }

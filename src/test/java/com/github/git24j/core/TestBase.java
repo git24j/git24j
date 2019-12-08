@@ -69,6 +69,27 @@ public class TestBase {
         }
     }
 
+    /**
+     * Test two paths are effectively the same (respect soft and hardlinks).
+     *
+     * @param path1
+     * @param path2
+     * @return
+     */
+    public static boolean sameFile(Path path1, Path path2) {
+        try {
+            if (Files.isSameFile(path1, path2)) {
+                return true;
+            }
+            if (Files.getAttribute(path1, "unix:ino") == Files.getAttribute(path2, "unix:ino")) {
+                return true;
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        return false;
+    }
+
     public enum TestRepo {
         SIMPLE1("simple1"),
         SIMPLE1_BARE("simple1_bare"),
@@ -95,25 +116,5 @@ public class TestBase {
         public Repository tempRepo(TemporaryFolder folder) {
             return Repository.open(this.tempCopy(folder).toString());
         }
-    }
-
-    /**
-     * Test two paths are effectively the same (respect soft and hardlinks).
-     * @param path1
-     * @param path2
-     * @return
-     */
-    public static boolean sameFile(Path path1, Path path2) {
-        try {
-            if (Files.isSameFile(path1, path2)) {
-                return true;
-            }
-            if (Files.getAttribute(path1, "unix:ino") == Files.getAttribute(path2, "unix:ino")) {
-                return true;
-            }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        return false;
     }
 }

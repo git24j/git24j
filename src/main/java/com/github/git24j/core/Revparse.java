@@ -65,20 +65,13 @@ public class Revparse {
         }
     }
 
-    public static class ExtReturn implements AutoCloseable {
+    public static class ExtReturn {
         private final GitObject obj;
         private final Reference ref;
 
         public ExtReturn(GitObject obj, Reference ref) {
             this.obj = obj;
             this.ref = ref;
-        }
-
-        @Override
-        public void close() {
-            if (obj != null) {
-                obj.close();
-            }
         }
 
         /** single object found from rev parsing. */
@@ -92,7 +85,7 @@ public class Revparse {
         }
     }
 
-    public static class Revspec implements AutoCloseable {
+    public static class Revspec {
         GitObject from;
         GitObject to;
         EnumSet<Mode> flags;
@@ -128,16 +121,6 @@ public class Revparse {
         /** setter exposed to jni. */
         void setFlags(int flags) {
             this.flags = IBitEnum.parse(flags, Mode.class);
-        }
-
-        @Override
-        public void close() {
-            if (from != null) {
-                from.close();
-            }
-            if (to != null) {
-                to.close();
-            }
         }
     }
 }

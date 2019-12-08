@@ -48,18 +48,15 @@ public class GitObjectTest extends TestBase {
     public void peel() {
         Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder);
         GitObject obj = Revparse.single(testRepo, "HEAD");
-        try (GitObject peel = obj.peel(GitObject.Type.COMMIT)) {
-            Assert.assertNotNull(peel);
-        }
+        GitObject peel = obj.peel(GitObject.Type.COMMIT);
+        Assert.assertNotNull(peel);
     }
 
     @Test
     public void dup() {
         Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder);
-        try (GitObject obj = Revparse.single(testRepo, "HEAD")) {
-            try (GitObject copy = obj.dup()) {
-                Assert.assertEquals(copy.shortId().getPtr(), obj.shortId().getPtr());
-            }
-        }
+        GitObject obj = Revparse.single(testRepo, "HEAD");
+        GitObject copy = obj.dup();
+        Assert.assertEquals(copy.shortId().getPtr(), obj.shortId().getPtr());
     }
 }

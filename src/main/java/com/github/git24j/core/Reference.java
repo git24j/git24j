@@ -500,8 +500,9 @@ public class Reference {
     static native String jniShorthand(long refPtr);
 
     @Override
-    protected void finalize() {
+    protected void finalize() throws Throwable {
         jniFree(_rawPtr.get());
+        super.finalize();
     }
 
     long getRawPointer() {
@@ -815,6 +816,7 @@ public class Reference {
             return 0;
         }
     }
+
     public interface ForeachGlobCb {
         int accept(String name);
     }
@@ -827,8 +829,9 @@ public class Reference {
         }
 
         @Override
-        protected void finalize() {
+        protected void finalize() throws Throwable {
             jniIteratorFree(_ptr.get());
+            super.finalize();
         }
     }
 }

@@ -12,12 +12,11 @@ public class AnnotatedCommitTest extends TestBase {
     @Test
     public void fromRef() {
         try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {
-            try (Revparse.ExtReturn ret = Revparse.ext(testRepo, "master")) {
-                Reference ref = ret.getRef();
-                AnnotatedCommit ac = AnnotatedCommit.fromRef(testRepo, ref);
-                Assert.assertEquals(MASTER_HASH, ac.id().toString());
-                Assert.assertEquals("refs/heads/master", ac.ref());
-            }
+            Revparse.ExtReturn ret = Revparse.ext(testRepo, "master");
+            Reference ref = ret.getRef();
+            AnnotatedCommit ac = AnnotatedCommit.fromRef(testRepo, ref);
+            Assert.assertEquals(MASTER_HASH, ac.id().toString());
+            Assert.assertEquals("refs/heads/master", ac.ref());
         }
     }
 
@@ -26,10 +25,7 @@ public class AnnotatedCommitTest extends TestBase {
         try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {
             AnnotatedCommit ac =
                     AnnotatedCommit.fromFetchHead(
-                            testRepo,
-                            "master",
-                            "src/test/resources/simple1",
-                            Oid.of(MASTER_HASH));
+                            testRepo, "master", "src/test/resources/simple1", Oid.of(MASTER_HASH));
             Assert.assertEquals(MASTER_HASH, ac.id().toString());
         }
     }
@@ -37,8 +33,7 @@ public class AnnotatedCommitTest extends TestBase {
     @Test
     public void lookup() {
         try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {
-            AnnotatedCommit ac =
-                    AnnotatedCommit.lookup(testRepo, Oid.of(MASTER_HASH));
+            AnnotatedCommit ac = AnnotatedCommit.lookup(testRepo, Oid.of(MASTER_HASH));
             Assert.assertEquals(MASTER_HASH, ac.id().toString());
         }
     }
@@ -46,8 +41,7 @@ public class AnnotatedCommitTest extends TestBase {
     @Test
     public void fromRevspec() {
         try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {
-            AnnotatedCommit ac =
-                    AnnotatedCommit.fromRevspec(testRepo, "HEAD");
+            AnnotatedCommit ac = AnnotatedCommit.fromRevspec(testRepo, "HEAD");
             Assert.assertEquals(MASTER_HASH, ac.id().toString());
         }
     }

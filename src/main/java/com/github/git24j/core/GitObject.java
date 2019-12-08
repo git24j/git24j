@@ -2,8 +2,8 @@ package com.github.git24j.core;
 
 import java.util.concurrent.atomic.AtomicLong;
 
-/** Generic git object. */
-public class GitObject implements AutoCloseable {
+/** Generic git object: {@code Commit}, {@code Tag}, {@code Tree} or {@code Blob} */
+public class GitObject {
     private final AtomicLong rawPtr = new AtomicLong();
 
     protected GitObject(long rawPointer) {
@@ -102,10 +102,10 @@ public class GitObject implements AutoCloseable {
         return ptr;
     }
 
-    /** Free the given reference. */
     @Override
-    public void close() {
+    protected void finalize() throws Throwable {
         jniFree(rawPtr.getAndSet(0));
+        super.finalize();
     }
 
     /** TODO: change to type() Get the object type of an object. */
