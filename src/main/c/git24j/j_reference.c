@@ -226,7 +226,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Reference_jniList)(JNIEnv *env, jclass obj,
 {
     git_strarray *c_array = (git_strarray *)malloc(sizeof(git_strarray));
     int e = git_reference_list(c_array, (git_repository *)repoPtr);
-    j_strarray_to_java_list(env, c_array, array);
+    j_strarray_to_java_list(env, c_array, strList);
     git_strarray_free(c_array);
     return e;
 }
@@ -360,7 +360,7 @@ int _git_reference_normalize_name_dynamic(char **out_name, size_t *out_size, con
 
     if (*out_size == 0)
     {
-        out_size = 256;
+        *out_size = 256;
         free(*out_name);
     }
 
@@ -378,13 +378,15 @@ int _git_reference_normalize_name_dynamic(char **out_name, size_t *out_size, con
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Reference_jniNormalizeName)(JNIEnv *env, jclass obj, jobject bufferOut, jstring name, jint flags)
 {
     char *out_name = NULL;
-    int out_size = 0;
+    size_t out_size = 0;
     jclass clz = (*env)->GetObjectClass(env, bufferOut);
     assert(clz && "could not idenfity class of bufferOut in the call to Reference::jniNormalizeName");
-    int e = _git_reference_normalize_name_dynamic(&out_name, &out_size, name, flags);
-    j_call_setter_string_c(env, clz, bufferOut, "set", *out_name);
+    char *c_name = j_copy_of_jstring(env, name, false);
+    int e = _git_reference_normalize_name_dynamic(&out_name, &out_size, c_name, flags);
+    j_call_setter_string_c(env, clz, bufferOut, "set", out_name);
     (*env)->DeleteLocalRef(env, clz);
-    free(*out_name);
+    free(c_name);
+    free(out_name);
     out_name = NULL;
     return e;
 }

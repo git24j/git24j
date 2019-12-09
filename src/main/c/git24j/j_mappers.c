@@ -146,7 +146,6 @@ void j_git_oid_to_java(JNIEnv *env, const git_oid *c_oid, jobject oid)
     (*env)->DeleteLocalRef(env, clz);
 }
 
-//TODO: test oid copying functions
 /** Copy value of java Oid to git_oid struct in c. */
 void j_git_oid_from_java(JNIEnv *env, jobject oid, git_oid *c_oid)
 {

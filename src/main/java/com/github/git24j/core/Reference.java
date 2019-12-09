@@ -63,9 +63,10 @@ public class Reference {
     static native int jniDwim(AtomicLong outRef, long repoPtr, String shorthand);
 
     /**
-     * Lookup a reference by DWIMing its short name
+     * Do What I Mean (dwim). Lookup a reference by DWIMing its short name. For example {@code dwim}
+     * can find reference given name like "feature/dev", but look only understands "refs/heads/feature/dev"
      *
-     * <p>Apply the git precendence rules to the given shorthand to determine which reference the
+     * <p>Apply the git precedences rules to the given shorthand to determine which reference the
      * user is referring to.
      *
      * @param repo the repository in which to look
@@ -79,7 +80,7 @@ public class Reference {
         return new Reference(outRef.get());
     }
 
-    static native int jniSymbolicMatching(
+    static native int jniSymbolicCreateMatching(
             AtomicLong outRef,
             long repoPtr,
             String name,
@@ -91,6 +92,17 @@ public class Reference {
     /**
      * Create a symbolic reference that points to another reference (target reference) and matches
      * the {@code currentValue} when updating.
+     *
+     * For example, creating a soft ref pointing to "refs/heads/master":
+     *  {@code symbolicCreateMatching(repo, "HEAD", "refs/heads/master", false, null, null); }
+     *
+     * For atomicity concern, enxure the target ref is not moved:
+     *  {@code symbolicCreateMatching(repo, "HEAD", "refs/heads/master", false, "refs/heads/master", null); }
+     *
+     *  To view/find symbolic refs:
+     *  <li> {@code ls -l .git/}
+     *  <li> {@code git rev-parse <symbolic refname>}
+     *  <li> {@code git symbolic ref ...}
      *
      * @param repo Repository where the target reference and the symbolic reference live
      * @param name name of the symbolic reference
@@ -110,7 +122,7 @@ public class Reference {
             String logMessage) {
         AtomicLong outRef = new AtomicLong();
         Error.throwIfNeeded(
-                jniSymbolicMatching(
+                jniSymbolicCreateMatching(
                         outRef,
                         repo.getRawPointer(),
                         name,
