@@ -5,6 +5,9 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
+import java.util.function.Function;
+
+import static com.github.git24j.core.GitException.ErrorCode;
 
 public class Reference {
     private final AtomicLong _rawPtr = new AtomicLong();
@@ -27,12 +30,16 @@ public class Reference {
      * @param repo the repository to look up the reference
      * @param name the long name for the reference (e.g. HEAD, refs/heads/master, refs/tags/v0.1.0,
      *     ...)
-     * @return found reference, if not found, a GitException will be thrown.
-     * @throws GitException
+     * @return found reference, if not found, return null.
+     * @throws GitException GIT_EINVALIDSPEC or other relevant git errors.
      */
     public static Reference lookup(Repository repo, String name) {
         AtomicLong outRef = new AtomicLong();
-        Error.throwIfNeeded(jniLookup(outRef, repo.getRawPointer(), name));
+        int e = jniLookup(outRef, repo.getRawPointer(), name);
+        if (ErrorCode.of(e) == ErrorCode.ENOTFOUND) {
+            return null;
+        }
+        Error.throwIfNeeded(e);
         return new Reference(outRef.get());
     }
 
@@ -63,9 +70,11 @@ public class Reference {
     static native int jniDwim(AtomicLong outRef, long repoPtr, String shorthand);
 
     /**
-     * Lookup a reference by DWIMing its short name
+     * Do What I Mean (dwim). Lookup a reference by DWIMing its short name. For example {@code dwim}
+     * can find reference given name like "feature/dev", but look only understands
+     * "refs/heads/feature/dev"
      *
-     * <p>Apply the git precendence rules to the given shorthand to determine which reference the
+     * <p>Apply the git precedences rules to the given shorthand to determine which reference the
      * user is referring to.
      *
      * @param repo the repository in which to look
@@ -79,7 +88,7 @@ public class Reference {
         return new Reference(outRef.get());
     }
 
-    static native int jniSymbolicMatching(
+    static native int jniSymbolicCreateMatching(
             AtomicLong outRef,
             long repoPtr,
             String name,
@@ -91,6 +100,18 @@ public class Reference {
     /**
      * Create a symbolic reference that points to another reference (target reference) and matches
      * the {@code currentValue} when updating.
+     *
+     * <p>For example, creating a soft ref pointing to "refs/heads/master": {@code
+     * symbolicCreateMatching(repo, "HEAD", "refs/heads/master", false, null, null); }
+     *
+     * <p>For atomicity concern, enxure the target ref is not moved: {@code
+     * symbolicCreateMatching(repo, "HEAD", "refs/heads/master", false, "refs/heads/master", null);
+     * }
+     *
+     * <p>To view/find symbolic refs:
+     * <li>{@code ls -l .git/}
+     * <li>{@code git rev-parse <symbolic refname>}
+     * <li>{@code git symbolic ref ...}
      *
      * @param repo Repository where the target reference and the symbolic reference live
      * @param name name of the symbolic reference
@@ -110,7 +131,7 @@ public class Reference {
             String logMessage) {
         AtomicLong outRef = new AtomicLong();
         Error.throwIfNeeded(
-                jniSymbolicMatching(
+                jniSymbolicCreateMatching(
                         outRef,
                         repo.getRawPointer(),
                         name,
@@ -181,7 +202,8 @@ public class Reference {
             String logMessage);
 
     /**
-     * Conditionally create new direct reference
+     * Conditionally create new direct reference Note: this methods is untested, use with caution
+     * (you are welcome to contribute a test here).
      *
      * @param repo Repository where that reference will live
      * @param name The name of the reference
@@ -265,7 +287,7 @@ public class Reference {
      * @param name The reference to remove
      * @throws GitException git error
      */
-    public static void remote(Repository repo, String name) {
+    public static void remove(Repository repo, String name) {
         Error.throwIfNeeded(jniRemove(repo.getRawPointer(), name));
     }
 
@@ -287,7 +309,7 @@ public class Reference {
         return strList;
     }
 
-    static native int jniForeach(long repoPtr, Consumer<Integer> consumer);
+    static native int jniForeach(long repoPtr, ForeachCb consumer);
 
     /**
      * Perform a callback on each reference in the repository.
@@ -300,20 +322,18 @@ public class Reference {
      * reference passed to it.
      *
      * @param repo Repository where to find the refs
-     * @param callback Function which will be called for every listed ref
+     * @param callback Function which will be called for every listed ref, return non-zero to
+     *     terminate the iteration.
      * @throws GitException git errors
      */
-    public static void foreach(Repository repo, Consumer<Reference> callback) {
-        int e =
-                jniForeach(
-                        repo.getRawPointer(),
-                        (ptr) -> {
-                            callback.accept(new Reference(ptr));
-                        });
+    public static void foreach(Repository repo, Function<Reference, Integer> callback) {
+        ForeachCb cb = ptr -> callback.apply(new Reference(ptr));
+        int e = jniForeach(repo.getRawPointer(), cb);
+
         Error.throwIfNeeded(e);
     }
 
-    static native int jniForeachName(long repoPtr, Consumer<String> consumer);
+    static native int jniForeachName(long repoPtr, ForeachNameCb consumer);
 
     /**
      * Perform a callback on the fully-qualified name of each reference.
@@ -326,8 +346,8 @@ public class Reference {
      * @param callback Function which will be called for every listed ref name
      * @throws GitException git errors
      */
-    public static void foreachName(Repository repo, Consumer<String> callback) {
-        Error.throwIfNeeded(jniForeachName(repo.getRawPointer(), callback));
+    public static void foreachName(Repository repo, Function<String, Integer> callback) {
+        Error.throwIfNeeded(jniForeachName(repo.getRawPointer(), callback::apply));
     }
 
     static native int jniDup(AtomicLong outDest, long sourcePtr);
@@ -386,7 +406,7 @@ public class Reference {
         jniIteratorFree(iter._ptr.get());
     }
 
-    static native int jniForeachGlob(long repoPtr, String glob, ForeachGlobCb callback);
+    static native int jniForeachGlob(long repoPtr, String glob, ForeachNameCb callback);
 
     /**
      * Perform a callback on each reference in the repository whose name matches the given pattern.
@@ -404,7 +424,7 @@ public class Reference {
      * @param callback Function which will be called for every listed ref
      * @throws GitException GIT_EUSER on non-zero callback, or error code
      */
-    public static void foreachGlob(Repository repo, String glob, ForeachGlobCb callback) {
+    public static void foreachGlob(Repository repo, String glob, ForeachNameCb callback) {
         jniForeachGlob(repo.getRawPointer(), glob, callback);
     }
 
@@ -515,12 +535,12 @@ public class Reference {
      * <p>This peeled OID only applies to direct references that point to a hard Tag object: it is
      * the result of peeling such Tag.
      *
-     * @return peeled Oid
+     * @return peeled Oid or null
      */
     public Oid targetPeel() {
         Oid oid = new Oid();
         jniTargetPeel(oid, this.getRawPointer());
-        return oid;
+        return oid.getId() == null ? null : oid;
     }
 
     /**
@@ -541,7 +561,7 @@ public class Reference {
      *
      * @return the type
      */
-    public ReferenceType referenceType() {
+    public ReferenceType type() {
         return ReferenceType.valueOf(jniType(this.getRawPointer()));
     }
 
@@ -817,8 +837,14 @@ public class Reference {
         }
     }
 
-    public interface ForeachGlobCb {
+    @FunctionalInterface
+    public interface ForeachNameCb {
         int accept(String name);
+    }
+
+    @FunctionalInterface
+    public interface ForeachCb {
+        int accept(long refPtr);
     }
 
     public static class Iterator {
