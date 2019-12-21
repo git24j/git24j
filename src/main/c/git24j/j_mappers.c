@@ -178,14 +178,16 @@ void j_call_setter_int(JNIEnv *env, jclass clz, jobject obj, const char *method,
 void j_call_setter_string(JNIEnv *env, jclass clz, jobject obj, const char *method, jstring val)
 {
     jmethodID setter = (*env)->GetMethodID(env, clz, method, "(Ljava/lang/String;)V");
+    assert(setter && "could not find setter method.");
     (*env)->CallVoidMethod(env, obj, setter, val);
 }
 
 void j_call_setter_string_c(JNIEnv *env, jclass clz, jobject obj, const char *method, const char *val)
 {
     jstring jVal = (*env)->NewStringUTF(env, val);
+    printf("qqqqq j_call_setter_string_c(env, clz, obj, method=%s, val=%s) \n", method, val);
     j_call_setter_string(env, clz, obj, method, jVal);
-    (*env)->DeleteLocalRef(env, jVal);
+    // (*env)->DeleteLocalRef(env, jVal);
 }
 
 void j_call_setter_byte_array(JNIEnv *env, jclass clz, jobject obj, const char *method, jbyteArray val)
@@ -221,9 +223,33 @@ void j_set_string_field_c(JNIEnv *env, jclass clz, jobject obj, const char *val,
 void j_strarray_to_java_list(JNIEnv *env, git_strarray *src, jobject strList)
 {
     jclass clz = (*env)->GetObjectClass(env, strList);
-    assert(clz && "Failed to copy native strings to java, could not find the class of the accepting object");
+    assert(clz && "Could not find the class of the accepting object");
+    jmethodID midAdd = (*env)->GetMethodID(env, clz, "add", "(Ljava/lang/Object;)Z");
+    assert(midAdd && "Could not get List.add method");
     for (size_t i = 0; i < src->count; i++)
     {
-        j_call_setter_string_c(env, clz, strList, "add", src->strings[i]);
+        jstring jVal = (*env)->NewStringUTF(env, src->strings[i]);
+        (*env)->CallBooleanMethod(env, strList, midAdd, jVal);
     }
+}
+
+/** FOR DEBUG: inspect object class */
+void __debug_inspect(JNIEnv *env, jobject obj)
+{
+    printf("------------------ INSPECT obj(%p) ----------------- \n", obj);
+    jclass clz = (*env)->GetObjectClass(env, obj);
+    // First get the class object
+    jmethodID midGetClass = (*env)->GetMethodID(env, clz, "getClass", "()Ljava/lang/Class;");
+    jobject clsObj = (*env)->CallObjectMethod(env, obj, midGetClass);
+
+    // Now get the class object's class descriptor
+    jclass clzClz = (*env)->GetObjectClass(env, clsObj);
+    // Find the getName() method on the class object
+    jmethodID midGetName = (*env)->GetMethodID(env, clzClz, "getName", "()Ljava/lang/String;");
+
+    // Call the getName() to get a jstring object back
+    jstring objClassName = (jstring)(*env)->CallObjectMethod(env, clsObj, midGetName);
+    printf("qqqqq class of the object: %s \n", j_copy_of_jstring(env, objClassName, true));
+    (*env)->CallObjectMethod(env, clz, midGetName);
+    printf("------------------ INSPECT end ----------------- \n");
 }

@@ -785,4 +785,24 @@ public class Repository implements AutoCloseable {
          */
         public abstract int call(Oid oid);
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        Repository that = (Repository) o;
+        if (this._rawPtr.equals(that._rawPtr)) {
+            return true;
+        }
+        return Objects.equals(this.getPath(), that.getPath());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getPath());
+    }
 }

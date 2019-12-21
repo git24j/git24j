@@ -48,9 +48,9 @@ extern "C"
     /**int git_reference_remove(git_repository *repo, const char *name); */
     JNIEXPORT jint JNICALL J_MAKE_METHOD(Reference_jniRemove)(JNIEnv *env, jclass obj, jlong repoPtr, jstring name);
     /**int git_reference_list(git_strarray *array, git_repository *repo); */
-    JNIEXPORT jint JNICALL J_MAKE_METHOD(Reference_jniList)(JNIEnv *env, jclass obj, jobjectArray strList, jlong repoPtr);
+    JNIEXPORT jint JNICALL J_MAKE_METHOD(Reference_jniList)(JNIEnv *env, jclass obj, jobject strList, jlong repoPtr);
     /**int git_reference_foreach(git_repository *repo, git_reference_foreach_cb callback, void *payload); */
-    JNIEXPORT jint JNICALL J_MAKE_METHOD(Reference_jniForeach)(JNIEnv *env, jclass obj, jlong repoPtr, jobject consumer);
+    JNIEXPORT jint JNICALL J_MAKE_METHOD(Reference_jniForeach)(JNIEnv *env, jclass obj, jlong repoPtr, jobject callback);
     /**int git_reference_foreach_name(git_repository *repo, git_reference_foreach_name_cb callback, void *payload); */
     JNIEXPORT jint JNICALL J_MAKE_METHOD(Reference_jniForeachName)(JNIEnv *env, jclass obj, jlong repoPtr, jobject consumer);
     /**int git_reference_dup(git_reference **dest, git_reference *source); */

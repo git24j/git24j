@@ -23,6 +23,7 @@ int j_git_reference_foreach_cb(git_reference *reference, void *payload)
     jclass jclz = (*env)->GetObjectClass(env, consumer);
     assert(jclz && "jni error: could not resolve consumer class");
     jmethodID accept = (*env)->GetMethodID(env, jclz, "accept", "(J)I");
+    // __debug_inspect(env, consumer);
     assert(accept && "jni error: could not resolve method consumer method");
     int r = (*env)->CallIntMethod(env, consumer, accept, (long)reference);
     (*env)->DeleteLocalRef(env, jclz);
@@ -181,8 +182,9 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Reference_jniSymbolicSetTarget)(JNIEnv *env
 {
     git_reference *c_out;
     char *c_target = j_copy_of_jstring(env, target, false);
-    char *log_message = j_copy_of_jstring(env, target, false);
+    char *log_message = j_copy_of_jstring(env, logMessage, false);
     int e = git_reference_symbolic_set_target(&c_out, (git_reference *)refPtr, c_target, log_message);
+    j_save_c_pointer(env, (void *)c_out, outRef, "set");
     free(c_target);
     free(log_message);
     return e;
@@ -192,8 +194,10 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Reference_jniSetTarget)(JNIEnv *env, jclass
 {
     git_reference *c_out;
     git_oid c_oid;
+    j_git_oid_from_java(env, oid, &c_oid);
     char *log_message = j_copy_of_jstring(env, logMessage, true);
     int e = git_reference_set_target(&c_out, (git_reference *)refPtr, &c_oid, log_message);
+    j_save_c_pointer(env, (void *)c_out, outRef, "set");
     free(log_message);
     return e;
 }
@@ -204,6 +208,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Reference_jniRename)(JNIEnv *env, jclass ob
     char *new_name = j_copy_of_jstring(env, newName, false);
     char *log_message = j_copy_of_jstring(env, logMessage, true);
     int e = git_reference_rename(&new_ref, (git_reference *)refPtr, new_name, force, log_message);
+    j_save_c_pointer(env, (void *)new_ref, outRef, "set");
     free(log_message);
     free(new_name);
     return e;
@@ -222,7 +227,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Reference_jniRemove)(JNIEnv *env, jclass ob
     return e;
 }
 /**int git_reference_list(git_strarray *array, git_repository *repo); */
-JNIEXPORT jint JNICALL J_MAKE_METHOD(Reference_jniList)(JNIEnv *env, jclass obj, jobjectArray strList, jlong repoPtr)
+JNIEXPORT jint JNICALL J_MAKE_METHOD(Reference_jniList)(JNIEnv *env, jclass obj, jobject strList, jlong repoPtr)
 {
     git_strarray *c_array = (git_strarray *)malloc(sizeof(git_strarray));
     int e = git_reference_list(c_array, (git_repository *)repoPtr);
@@ -231,9 +236,9 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Reference_jniList)(JNIEnv *env, jclass obj,
     return e;
 }
 /**int git_reference_foreach(git_repository *repo, git_reference_foreach_cb callback, void *payload); */
-JNIEXPORT jint JNICALL J_MAKE_METHOD(Reference_jniForeach)(JNIEnv *env, jclass obj, jlong repoPtr, jobject consumer)
+JNIEXPORT jint JNICALL J_MAKE_METHOD(Reference_jniForeach)(JNIEnv *env, jclass obj, jlong repoPtr, jobject callback)
 {
-    j_cb_payload payload = {env, consumer};
+    j_cb_payload payload = {env, callback};
     return git_reference_foreach((git_repository *)repoPtr, j_git_reference_foreach_cb, &payload);
 }
 /**int git_reference_foreach_name(git_repository *repo, git_reference_foreach_name_cb callback, void *payload); */
