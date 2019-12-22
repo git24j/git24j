@@ -88,7 +88,7 @@ extern "C"
     /**int git_reference_peel(git_object **out, const git_reference *ref, git_object_t type); */
     JNIEXPORT jint JNICALL J_MAKE_METHOD(Reference_jniPeel)(JNIEnv *env, jclass obj, jobject outObj, jlong refPtr, jint objType);
     /**int git_reference_is_valid_name(const char *refname); */
-    JNIEXPORT jint JNICALL J_MAKE_METHOD(Reference_jniIsValid)(JNIEnv *env, jclass obj, jstring refname);
+    JNIEXPORT jint JNICALL J_MAKE_METHOD(Reference_jniIsValidName)(JNIEnv *env, jclass obj, jstring refname);
     /**const char * git_reference_shorthand(const git_reference *ref); */
     JNIEXPORT jstring JNICALL J_MAKE_METHOD(Reference_jniShorthand)(JNIEnv *env, jclass obj, jlong refPtr);
     /**int git_reference_foreach_cb(git_reference *reference, void *payload); */

@@ -120,6 +120,11 @@ public class GitException extends RuntimeException {
             }
             return UNKNOWN;
         }
+
+        /** libgit2 error code in integer. */
+        public int getCode() {
+            return code;
+        }
     }
 
     /** Error classes */
