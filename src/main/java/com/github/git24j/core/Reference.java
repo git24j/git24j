@@ -1,10 +1,10 @@
 package com.github.git24j.core;
 
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Consumer;
 import java.util.function.Function;
 
 import static com.github.git24j.core.GitException.ErrorCode;
@@ -384,12 +384,16 @@ public class Reference {
      * Get the next reference
      *
      * @param iter the iterator
-     * @return next reference
-     * @throws GitException GIT_ITEROVER if there are no more; or an error code
+     * @return next reference, null GIT_ITEROVER if there are no more;
+     * @throws GitException or an error code
      */
     public static Reference next(Iterator iter) {
         AtomicLong outRef = new AtomicLong();
-        Error.throwIfNeeded(jniNext(outRef, iter._ptr.get()));
+        int e = jniNext(outRef, iter._ptr.get());
+        if (e == ErrorCode.ITEROVER.getCode()) {
+            return null;
+        }
+        Error.throwIfNeeded(e);
         return new Reference(outRef.get());
     }
 
@@ -428,10 +432,11 @@ public class Reference {
         jniForeachGlob(repo.getRawPointer(), glob, callback);
     }
 
-    static native int jniHashLog(long repoPtr, String refname);
+    static native int jniHasLog(long repoPtr, String refname);
 
     /**
-     * Check if a reflog exists for the specified reference.
+     * Check if a reflog exists for the specified reference. Same as cli: {@code git reflog exists
+     * refs/heads/master}
      *
      * @param repo the repository
      * @param refname the reference's name
@@ -439,7 +444,7 @@ public class Reference {
      * @throws GitException git errors
      */
     public static boolean hasLog(Repository repo, String refname) {
-        int e = jniHashLog((repo.getRawPointer()), refname);
+        int e = jniHasLog((repo.getRawPointer()), refname);
         if (e == 0 || e == 1) {
             return e == 1;
         }
@@ -472,8 +477,43 @@ public class Reference {
 
     static native int jniNormalizeName(AtomicReference<String> outName, String name, int flags);
 
+    public enum Format implements IBitEnum {
+        /** No particular normalization. */
+        NORMAL(0),
+        /**
+         * Control whether one-level refnames are accepted (i.e., refnames that do not contain
+         * multiple /-separated components). Those are expected to be written only using uppercase
+         * letters and underscore (FETCH_HEAD, ...)
+         */
+        ALLOW_ONELEVEL(1 << 0),
+        /**
+         * Interpret the provided name as a reference pattern for a refspec (as used with remote
+         * repositories). If this option is enabled, the name is allowed to contain a single *
+         * (<star>) in place of a one full pathname component (e.g., foo/<star>/bar but not
+         * foo/bar<star>).
+         */
+        REFSPEC_PATTERN(1 << 1),
+        /**
+         * Interpret the name as part of a refspec in shorthand form so the `ONELEVEL` naming rules
+         * aren't enforced and 'master' becomes a valid name.
+         */
+        REFSPEC_SHORTHAND(1 << 2),
+        ;
+
+        private final int bit;
+
+        Format(int bit) {
+            this.bit = bit;
+        }
+
+        @Override
+        public int getBit() {
+            return bit;
+        }
+    }
     /**
-     * Normalize reference name and check validity.
+     * Normalize reference name and check validity. See also {@code git check-ref-format
+     * [--normalize]}
      *
      * <p>This will normalize the reference name by removing any leading slash '/' characters and
      * collapsing runs of adjacent slashes between name components into a single slash.
@@ -489,15 +529,15 @@ public class Reference {
      * @return normalized name
      * @throws GitException GIT_EBUFS if buffer is too small, GIT_EINVALIDSPEC or an error code.
      */
-    public static String normalizeName(String name, int flags) {
+    public static String normalizeName(String name, EnumSet<Format> flags) {
         AtomicReference<String> outName = new AtomicReference<>();
-        jniNormalizeName(outName, name, flags);
+        Error.throwIfNeeded(jniNormalizeName(outName, name, IBitEnum.bitOrAll(flags)));
         return outName.get();
     }
 
     static native int jniPeel(AtomicLong outObj, long refPtr, int objType);
 
-    static native int jniIsValid(String refname);
+    static native int jniIsValidName(String refname);
 
     /**
      * Ensure the reference name is well-formed.
@@ -513,8 +553,8 @@ public class Reference {
      * @return 1 if the reference name is acceptable; 0 if it isn't
      * @throws GitException git error
      */
-    public static boolean isValid(String refname) {
-        return jniIsValid(refname) == 1;
+    public static boolean isValidName(String refname) {
+        return jniIsValidName(refname) == 1;
     }
 
     static native String jniShorthand(long refPtr);
@@ -697,7 +737,7 @@ public class Reference {
      * @return newly constructed iterator
      * @throws GitException git error
      */
-    public Iterator iteratorNew(Repository repo) {
+    public static Iterator iteratorNew(Repository repo) {
         AtomicLong outIter = new AtomicLong();
         Error.throwIfNeeded(jniIteratorNew(outIter, repo.getRawPointer()));
         return new Iterator(outIter.get());
@@ -709,12 +749,16 @@ public class Reference {
      * <p>This function is provided for convenience in case only the names are interesting as it
      * avoids the allocation of the `git_reference` object which `git_reference_next()` needs.
      *
-     * @return name of the next reference
-     * @throws GitException GIT_ITEROVER if there are no more; or an error code
+     * @return name of the next reference, null there are no more (GIT_ITEROVER).
+     * @throws GitException git error
      */
-    public String nextName() {
+    public static String nextName(Iterator iterator) {
         AtomicReference<String> outName = new AtomicReference<>();
-        Error.throwIfNeeded(jniNextName(outName, getRawPointer()));
+        int e = jniNextName(outName, iterator._ptr.get());
+        if (ErrorCode.ITEROVER.getCode() == e) {
+            return null;
+        }
+        Error.throwIfNeeded(e);
         return outName.get();
     }
 
@@ -765,11 +809,16 @@ public class Reference {
      *
      * @param objType The type of the requested object (GIT_OBJECT_COMMIT, GIT_OBJECT_TAG,
      *     GIT_OBJECT_TREE, GIT_OBJECT_BLOB or GIT_OBJECT_ANY).
-     * @return 0 on success, GIT_EAMBIGUOUS, GIT_ENOTFOUND or an error code
+     * @return GitObject on success, null if not found
+     * @throws GitException GIT_EAMBIGUOUS or an error code
      */
     public GitObject peel(GitObject.Type objType) {
         AtomicLong outObj = new AtomicLong();
-        Error.throwIfNeeded(jniPeel(outObj, getRawPointer(), objType.getValue()));
+        int e = jniPeel(outObj, getRawPointer(), objType.getValue());
+        if (e == ErrorCode.ENOTFOUND.getCode()) {
+            return null;
+        }
+        Error.throwIfNeeded(e);
         return new GitObject(objType.getValue());
     }
 
@@ -859,5 +908,13 @@ public class Reference {
             jniIteratorFree(_ptr.get());
             super.finalize();
         }
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Reference reference = (Reference) o;
+        return Reference.cmp(reference, this) == 0;
     }
 }

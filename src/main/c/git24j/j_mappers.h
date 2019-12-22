@@ -64,8 +64,11 @@ extern "C"
     /** Call `obj.method(val)` to set a java object value. */
     void j_call_setter_long(JNIEnv *env, jclass clz, jobject obj, const char *method, jlong val);
 
-    /** Call `obj.method(val)` to set a java object value. */
+    /** Call `obj.method(val)` to pass an integer to java. */
     void j_call_setter_int(JNIEnv *env, jclass clz, jobject obj, const char *method, jint val);
+
+    /** Call receiver.method(val) to set a java object value. */
+    void j_call_setter_object(JNIEnv *env, jclass clz, jobject receiver, const char *method, jobject jval);
 
     /** Call `obj.method(val)` to set a java object value. */
     void j_call_setter_string(JNIEnv *env, jclass clz, jobject obj, const char *method, jstring val);

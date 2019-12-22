@@ -23,7 +23,6 @@ int j_git_reference_foreach_cb(git_reference *reference, void *payload)
     jclass jclz = (*env)->GetObjectClass(env, consumer);
     assert(jclz && "jni error: could not resolve consumer class");
     jmethodID accept = (*env)->GetMethodID(env, jclz, "accept", "(J)I");
-    // __debug_inspect(env, consumer);
     assert(accept && "jni error: could not resolve method consumer method");
     int r = (*env)->CallIntMethod(env, consumer, accept, (long)reference);
     (*env)->DeleteLocalRef(env, jclz);
@@ -298,7 +297,12 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Reference_jniNextName)(JNIEnv *env, jclass 
     int e = git_reference_next_name(&out_str, (git_reference_iterator *)iterPtr);
     jclass clz = (*env)->GetObjectClass(env, outName);
     assert(clz && "Failed to identify object class in Reference::jniNextName");
-    j_call_setter_string_c(env, clz, outName, "set", out_str);
+    jstring jVal = (*env)->NewStringUTF(env, out_str);
+    jmethodID midSet = (*env)->GetMethodID(env, clz, "set", "(Ljava/lang/Object;)V");
+    assert(midSet && "jniNextName: setter method not found");
+    (*env)->CallVoidMethod(env, outName, midSet, jVal);
+    (*env)->DeleteLocalRef(env, jVal);
+    (*env)->DeleteLocalRef(env, clz);
     return e;
 }
 /**void git_reference_iterator_free(git_reference_iterator *iter); */
@@ -388,7 +392,9 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Reference_jniNormalizeName)(JNIEnv *env, jc
     assert(clz && "could not idenfity class of bufferOut in the call to Reference::jniNormalizeName");
     char *c_name = j_copy_of_jstring(env, name, false);
     int e = _git_reference_normalize_name_dynamic(&out_name, &out_size, c_name, flags);
-    j_call_setter_string_c(env, clz, bufferOut, "set", out_name);
+    jstring outName = (*env)->NewStringUTF(env, out_name);
+    j_call_setter_object(env, clz, bufferOut, "set", outName);
+    (*env)->DeleteLocalRef(env, outName);
     (*env)->DeleteLocalRef(env, clz);
     free(c_name);
     free(out_name);
@@ -404,7 +410,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Reference_jniPeel)(JNIEnv *env, jclass obj,
     return e;
 }
 /**int git_reference_is_valid_name(const char *refname); */
-JNIEXPORT jint JNICALL J_MAKE_METHOD(Reference_jniIsValid)(JNIEnv *env, jclass obj, jstring refname)
+JNIEXPORT jint JNICALL J_MAKE_METHOD(Reference_jniIsValidName)(JNIEnv *env, jclass obj, jstring refname)
 {
     char *c_refname = j_copy_of_jstring(env, refname, false);
     int e = git_reference_is_valid_name(c_refname);

@@ -6,6 +6,7 @@ import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.List;
 
 public class ReferenceTest extends TestBase {
@@ -17,7 +18,7 @@ public class ReferenceTest extends TestBase {
     private static final String OID_STR_TAG01 = "d9420a0ba5cbe2efdb1c3927adc1a2dd9355caff";
 
     private static final String ANNO_TAG_1_NAME = "refs/tags/annotated_tag_3";
-    private static final String ANNO_TAG_2_NAME = "refs/tags/annotated_tag_2";
+    private static final String ANNO_TAG_1_SHA = "db179e4ff84cab6fad68b0e979f85937c4d85a90";
 
     @Rule public TemporaryFolder folder = new TemporaryFolder();
 
@@ -246,6 +247,167 @@ public class ReferenceTest extends TestBase {
                         return list.add(name) ? 0 : 1;
                     });
             Assert.assertEquals(6, list.size());
+        }
+    }
+
+    @Test
+    public void dup() {
+        try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {
+            Reference ref = Reference.lookup(testRepo, REF_NAME_DEV);
+            Reference ref2 = ref.dup();
+            Assert.assertEquals(REF_NAME_DEV, ref2.name());
+        }
+    }
+
+    @Test
+    public void cmp() {
+        try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {
+            Reference ref = Reference.lookup(testRepo, REF_NAME_DEV);
+            Reference ref2 = ref.dup();
+            Assert.assertEquals(0, Reference.cmp(ref, ref2));
+            Reference ref3 = Reference.lookup(testRepo, REF_NAME_DEV);
+            Assert.assertEquals(0, Reference.cmp(ref, ref3));
+        }
+    }
+
+    @Test
+    public void iterator() {
+        try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {
+            ArrayList<String> refList = new ArrayList<>();
+
+            Reference.Iterator iterator = Reference.iteratorNew(testRepo);
+            Reference ref = Reference.next(iterator);
+            while (ref != null) {
+                refList.add(ref.name());
+                ref = Reference.next(iterator);
+            }
+            Assert.assertEquals(6, refList.size());
+
+            Reference.Iterator iterGlob = Reference.iteratorGlobNew(testRepo, "refs/heads/*");
+            refList.clear();
+            String refName = Reference.nextName(iterGlob);
+            while (refName != null) {
+                refList.add(refName);
+                refName = Reference.nextName(iterGlob);
+            }
+            Assert.assertEquals(2, refList.size());
+        }
+    }
+
+    @Test
+    public void iteratorName() {
+        try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {
+            ArrayList<String> refList = new ArrayList<>();
+            Reference.Iterator iterator = Reference.iteratorGlobNew(testRepo, "refs/heads/*");
+            String refName = Reference.nextName(iterator);
+            while (refName != null) {
+                refList.add(refName);
+                refName = Reference.nextName(iterator);
+            }
+            Assert.assertEquals(2, refList.size());
+        }
+    }
+
+    @Test
+    public void foreachGlob() {
+        try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {
+            ArrayList<String> list = new ArrayList<>();
+            Reference.foreachGlob(
+                    testRepo,
+                    "refs/heads/*",
+                    name -> {
+                        return list.add(name) ? 0 : 1;
+                    });
+            Assert.assertEquals(2, list.size());
+        }
+    }
+
+    @Test
+    public void hasLog() {
+        try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {
+            Assert.assertTrue(Reference.hasLog(testRepo, REF_NAME_DEV));
+            Assert.assertFalse(Reference.hasLog(testRepo, TAG_NAME_V01));
+            Assert.assertFalse(Reference.hasLog(testRepo, ANNO_TAG_1_NAME));
+            Assert.assertFalse(Reference.hasLog(testRepo, "master"));
+        }
+    }
+
+    @Test
+    public void ensureLog() {
+        try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {
+            Reference.ensureLog(testRepo, REF_NAME_DEV);
+            Reference.ensureLog(testRepo, TAG_NAME_V01);
+            Reference.ensureLog(testRepo, ANNO_TAG_1_NAME);
+            Reference.ensureLog(testRepo, "master");
+            Assert.assertTrue(Reference.hasLog(testRepo, TAG_NAME_V01));
+            Assert.assertTrue(Reference.hasLog(testRepo, ANNO_TAG_1_NAME));
+            Assert.assertTrue(Reference.hasLog(testRepo, "master"));
+        }
+    }
+
+    @Test
+    public void isBranch() {
+        try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {
+            Assert.assertTrue(Reference.lookup(testRepo, REF_NAME_DEV).isBranch());
+            Assert.assertFalse(Reference.lookup(testRepo, TAG_NAME_V01).isBranch());
+        }
+    }
+
+    @Test
+    public void isRemote() {
+        try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {
+            Assert.assertFalse(Reference.lookup(testRepo, REF_NAME_DEV).isRemote());
+            Assert.assertFalse(Reference.lookup(testRepo, TAG_NAME_V01).isRemote());
+        }
+    }
+
+    @Test
+    public void isTag() {
+        try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {
+            Assert.assertFalse(Reference.lookup(testRepo, REF_NAME_DEV).isTag());
+            Assert.assertTrue(Reference.lookup(testRepo, TAG_NAME_V01).isTag());
+        }
+    }
+
+    @Test
+    public void isNote() {
+        try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {
+            Assert.assertFalse(Reference.lookup(testRepo, REF_NAME_DEV).isNote());
+            Assert.assertFalse(Reference.lookup(testRepo, TAG_NAME_V01).isNote());
+        }
+    }
+
+    @Test
+    public void normalizeName() {
+        String refname = Reference.normalizeName(REF_NAME_DEV, EnumSet.of(Reference.Format.NORMAL));
+        Assert.assertEquals(REF_NAME_DEV, refname);
+    }
+
+    /**
+     * TODO: this tests nothing but not throwing unexpected errors. Peel is very confusing, find a
+     * useful case.
+     */
+    @Test
+    public void peel() {
+        try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {
+            Reference ref1 = Reference.lookup(testRepo, ANNO_TAG_1_NAME);
+            ref1.peel(GitObject.Type.COMMIT);
+        }
+    }
+
+    @Test
+    public void isValidName() {
+        Assert.assertTrue(Reference.isValidName("refs/heads/master"));
+        Assert.assertTrue(Reference.isValidName("DEV_HEAD"));
+        Assert.assertFalse(Reference.isValidName("@{NAME}"));
+    }
+
+    @Test
+    public void shortHand() {
+        try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {
+            Reference ref1 = Reference.lookup(testRepo, ANNO_TAG_1_NAME);
+            String shortHand = ref1.shorthand();
+            Assert.assertEquals("annotated_tag_3", shortHand);
         }
     }
 }

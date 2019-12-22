@@ -175,6 +175,14 @@ void j_call_setter_int(JNIEnv *env, jclass clz, jobject obj, const char *method,
     (*env)->CallVoidMethod(env, obj, setter, val);
 }
 
+/** Call receiver.method(val) to set a java object value. */
+void j_call_setter_object(JNIEnv *env, jclass clz, jobject receiver, const char *method, jobject jval)
+{
+    jmethodID setter = (*env)->GetMethodID(env, clz, method, "(Ljava/lang/Object;)V");
+    assert(setter && "could not find setter method.");
+    (*env)->CallVoidMethod(env, receiver, setter, jval);
+}
+
 void j_call_setter_string(JNIEnv *env, jclass clz, jobject obj, const char *method, jstring val)
 {
     jmethodID setter = (*env)->GetMethodID(env, clz, method, "(Ljava/lang/String;)V");
@@ -185,9 +193,8 @@ void j_call_setter_string(JNIEnv *env, jclass clz, jobject obj, const char *meth
 void j_call_setter_string_c(JNIEnv *env, jclass clz, jobject obj, const char *method, const char *val)
 {
     jstring jVal = (*env)->NewStringUTF(env, val);
-    printf("qqqqq j_call_setter_string_c(env, clz, obj, method=%s, val=%s) \n", method, val);
     j_call_setter_string(env, clz, obj, method, jVal);
-    // (*env)->DeleteLocalRef(env, jVal);
+    (*env)->DeleteLocalRef(env, jVal);
 }
 
 void j_call_setter_byte_array(JNIEnv *env, jclass clz, jobject obj, const char *method, jbyteArray val)
@@ -230,7 +237,9 @@ void j_strarray_to_java_list(JNIEnv *env, git_strarray *src, jobject strList)
     {
         jstring jVal = (*env)->NewStringUTF(env, src->strings[i]);
         (*env)->CallBooleanMethod(env, strList, midAdd, jVal);
+        (*env)->DeleteLocalRef(env, jVal);
     }
+    (*env)->DeleteLocalRef(env, clz);
 }
 
 /** FOR DEBUG: inspect object class */
@@ -252,4 +261,8 @@ void __debug_inspect(JNIEnv *env, jobject obj)
     printf("qqqqq class of the object: %s \n", j_copy_of_jstring(env, objClassName, true));
     (*env)->CallObjectMethod(env, clz, midGetName);
     printf("------------------ INSPECT end ----------------- \n");
+    (*env)->DeleteLocalRef(env, objClassName);
+    (*env)->DeleteLocalRef(env, clzClz);
+    (*env)->DeleteLocalRef(env, clsObj);
+    (*env)->DeleteLocalRef(env, clz);
 }
