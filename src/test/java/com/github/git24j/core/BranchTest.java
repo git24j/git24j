@@ -14,10 +14,10 @@ public class BranchTest extends TestBase {
 
     @Test
     public void create() {
-        // TODO: finish the test
+        // TODO: finish the test, waiting for Commit implementation
         Path repoPath = TestRepo.SIMPLE1.tempCopy(folder);
         Repository repo = Repository.open(repoPath.toString());
-        // Branch.create(repo, )
+        // Branch.create(repo, "test/b1", Commit.f)
     }
 
     @Test

@@ -1,17 +1,12 @@
 
+# Git24J 
+> Git24J, (git2 library for java) is a java bindings to the [libgit2](http://libgit2.github.com/) project.
 
+Still in active development, pull requests are welcomed.
 
-## Coding style
+## Quick Start
 
-in .c/.h files, jni associated variables should be named in camel case. C variables are in snake case. 
+```bash
+$ make test
+``` 
 
-| java Variables   | jni variables in .h/.c |   native variables |
-| ---------------- | :--------------------: | -----------------: |
-| addOptions       |       addOptions       |        add_options |
-| repo             |          repo          |             c_repo |
-| long sourceEntry |   jlong source_entry   | void *source_entry |
-
-
-## Variable mapping rules:
-
-If possible, use c pointers in jni code. 
