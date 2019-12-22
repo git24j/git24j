@@ -26,10 +26,6 @@ public class Branch {
         return new Reference(outRef.get());
     }
 
-    //    /**int git_branch_create_from_annotated(git_reference **ref_out, git_repository
-    // *repository, const char *branch_name, const git_annotated_commit *commit, int force); */
-    //    JNIEXPORT jint JNICALL J_MAKE_METHOD(Branch_jniCreateFromAnnotated)(JNIEnv *env, jclass
-    // obj, jobject outRef, jlong repoPtr, jstring branchName, jlong annoCommitPtr, jint force);
     static native int jniCreateFromAnnotated(
             AtomicLong outRef, long repoPtr, String branchName, long annoCommitPtr, int force);
     /**
@@ -63,6 +59,17 @@ public class Branch {
     //    /**int git_branch_delete(git_reference *branch); */
     //    JNIEXPORT jint JNICALL J_MAKE_METHOD(Branch_jniDelete)(JNIEnv *env, jclass obj, jlong
     // refPtr);
+    static native int jniDelete(long refPtr);
+
+    /**
+     * Delete a branch and free corresponding branch reference.
+     * @param branch
+     * @throws GitException git error
+     */
+    public static void delete(Reference branch) {
+        Error.throwIfNeeded(jniDelete(branch.getRawPointer()));
+        branch.free();
+    }
     //    /**int git_branch_iterator_new(git_branch_iterator **out, git_repository *repo,
     // git_branch_t list_flags); */
     //    JNIEXPORT jint JNICALL J_MAKE_METHOD(Branch_jniIteratorNew)(JNIEnv *env, jclass obj,
