@@ -91,6 +91,9 @@ extern "C"
     /** Copy values from git_strarray to java::List<String> */
     void j_strarray_to_java_list(JNIEnv *env, git_strarray *src, jobject strList);
 
+    /** Copy values from git_signature to git24j.Signature. */
+    void j_signature_to_java(JNIEnv *env, const git_signature *c_sig, jobject sig);
+
     /** FOR DEBUG: inspect object class */
     void __debug_inspect(JNIEnv *env, jobject obj);
 #ifdef __cplusplus

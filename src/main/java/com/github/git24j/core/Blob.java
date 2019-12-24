@@ -11,7 +11,7 @@ public class Blob extends GitObject {
 
     static native int jniLookupPrefix(AtomicLong outBlob, long repoPtr, Oid oid, int len);
 
-    static native int jniFree(long blobPtr);
+    static native void jniFree(long blobPtr);
 
     static native void jniId(long blobPtr, Oid oid);
 

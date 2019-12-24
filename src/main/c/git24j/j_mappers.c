@@ -242,6 +242,18 @@ void j_strarray_to_java_list(JNIEnv *env, git_strarray *src, jobject strList)
     (*env)->DeleteLocalRef(env, clz);
 }
 
+/** Copy values from git_signature to git24j.Signature. */
+void j_signature_to_java(JNIEnv *env, const git_signature *c_sig, jobject sig)
+{
+    jclass clz = (*env)->GetObjectClass(env, sig);
+    assert(clz && "Signature class not found");
+    j_call_setter_string_c(env, clz, sig, "setName", c_sig->name);
+    j_call_setter_string_c(env, clz, sig, "setEmail", c_sig->email);
+    jmethodID midSetWhen = (*env)->GetMethodID(env, clz, "setWhen", "(JIC)V");
+    assert(midSetWhen && "Signature::setWhen method not found");
+    (*env)->CallVoidMethod(env, sig, midSetWhen, c_sig->when.time, c_sig->when.offset, c_sig->when.sign);
+}
+
 /** FOR DEBUG: inspect object class */
 void __debug_inspect(JNIEnv *env, jobject obj)
 {

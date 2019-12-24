@@ -3,6 +3,9 @@ package com.github.git24j.core;
 import java.util.Objects;
 
 // TODO: change this class to immutable java object
+/**
+ * An Oid is a 20 bytes array (each byte coded 32bit), or a 40 hex characters string (16 bit coded)
+ */
 public class Oid {
     public static final int RAWSZ = 20;
     public static final int HEXSZ = RAWSZ * 2;
@@ -31,7 +34,7 @@ public class Oid {
 
     private static String bytesToHex(byte[] bytes, int len) {
         int cutoffLen = Math.min(len, bytes.length);
-        char[] hexChars = new char[bytes.length * 2];
+        char[] hexChars = new char[cutoffLen * 2];
         for (int j = 0; j < cutoffLen; j++) {
             int v = bytes[j] & 0xFF;
             hexChars[j * 2] = HEX_ARRAY[v >>> 4];
@@ -47,11 +50,13 @@ public class Oid {
     public static byte[] hexStringToByteArray(String s) {
         int len = s.length();
         byte[] data = new byte[len / 2];
-        for (int i = 0; i < len; i += 2) {
-            data[i / 2] =
-                    (byte)
-                            ((Character.digit(s.charAt(i), 16) << 4)
-                                    + Character.digit(s.charAt(i + 1), 16));
+        for (int i = 0; i + 1 < len; i += 2) {
+            int front4 = Character.digit(s.charAt(i), 16);
+            int end4 = Character.digit(s.charAt(i + 1), 16);
+            if (front4 < 0 || end4 < 0) {
+                throw new IllegalArgumentException("Invalid hex string: " + s);
+            }
+            data[i / 2] = (byte) ((front4 << 4) + end4);
         }
         return data;
     }
