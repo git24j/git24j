@@ -29,7 +29,20 @@ public class Signature {
     }
 
     public OffsetDateTime getWhen() {
+        // when.getOffset().getTotalSeconds()
         return when;
+    }
+
+    /**
+     * @return get epoc second of {@code when}
+     */
+    public long getWhenEpocSecond() {
+        return when.toEpochSecond();
+    }
+
+    /** @return get offset of when in minutes. */
+    public int getWhenOffsetMinutes() {
+        return when.getOffset().getTotalSeconds() / 60;
     }
 
     public void setName(String name) {

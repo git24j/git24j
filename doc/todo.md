@@ -37,3 +37,5 @@
 ## Future
 - [ ] API for for customized backend
 
+## House Keeping
+- [ ] Avoid calling `getObjectClass` excessively by promoting classes of AtomicLong, AtomicReference to constant.

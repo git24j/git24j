@@ -165,4 +165,15 @@ public class Commit extends GitObject {
         jniAuthor(getRawPointer(), outSig);
         return outSig;
     }
+
+    static native int jniCommitterWithMailmap(Signature outSig, long commitPtr, long mailmapPtr);
+
+    public Signature committerWithMailmap() {
+        Signature outSig = new Signature();
+        jniCommitterWithMailmap(outSig, getRawPointer(), 0);
+        return outSig;
+    }
+
+    static native int jniAuthorWithMailmap(Signature outSig, long commitPtr, long mailmapPtr);
+
 }

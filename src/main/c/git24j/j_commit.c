@@ -72,3 +72,23 @@ JNIEXPORT void JNICALL J_MAKE_METHOD(Commit_jniAuthor)(JNIEnv *env, jclass obj, 
     const git_signature *c_sig = git_commit_author((git_commit *)commitPtr);
     j_signature_to_java(env, c_sig, outSig);
 }
+
+/**int git_commit_committer_with_mailmap(git_signature **out, const git_commit *commit, const git_mailmap *mailmap); */
+JNIEXPORT jint JNICALL J_MAKE_METHOD(Commit_jniCommitterWithMailmap)(JNIEnv *env, jclass obj, jobject outSig, jlong commitPtr, jlong mailmapPtr)
+{
+    git_signature *c_sig;
+    int e = git_commit_committer_with_mailmap(&c_sig, (git_commit *)commitPtr, (git_mailmap *)mailmapPtr);
+    j_signature_to_java(env, c_sig, outSig);
+    git_signature_free(c_sig);
+    return e;
+}
+
+/**int git_commit_author_with_mailmap(git_signature **out, const git_commit *commit, const git_mailmap *mailmap); */
+JNIEXPORT jint JNICALL J_MAKE_METHOD(Commit_jniAuthorWithMailmap)(JNIEnv *env, jclass obj, jobject outSig, jlong commitPtr, jlong mailmapPtr)
+{
+    git_signature *c_sig;
+    int e = git_commit_author_with_mailmap(&c_sig, (git_commit *)commitPtr, (git_mailmap *)mailmapPtr);
+    j_signature_to_java(env, c_sig, outSig);
+    git_signature_free(c_sig);
+    return e;
+}

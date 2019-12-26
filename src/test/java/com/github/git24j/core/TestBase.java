@@ -94,6 +94,7 @@ public class TestBase {
         SIMPLE1("simple1"),
         SIMPLE1_BARE("simple1_bare"),
         MERGE1("merge1"),
+        MAILMAP("mailmap"),
         WORKTREE1("worktree1");
         private final String name;
 
