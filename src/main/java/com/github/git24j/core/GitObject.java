@@ -4,13 +4,13 @@ import java.util.concurrent.atomic.AtomicLong;
 
 /** Generic git object: {@code Commit}, {@code Tag}, {@code Tree} or {@code Blob} */
 public class GitObject {
-    private final AtomicLong rawPtr = new AtomicLong();
+    protected final AtomicLong rawPtr = new AtomicLong();
 
     protected GitObject(long rawPointer) {
         rawPtr.set(rawPointer);
     }
 
-    static native int jniFree(long objPtr);
+    static native void jniFree(long objPtr);
 
     static native int jniType(long objPtr);
 
@@ -39,7 +39,11 @@ public class GitObject {
         if (objPtr == 0) {
             throw new IllegalStateException("object address is NULL, has it been closed?");
         }
-        switch (Type.valueOf(jniType(objPtr))) {
+        return GitObject.create(objPtr, Type.valueOf(jniType(objPtr)));
+    }
+
+    static GitObject create(long objPtr, Type type) {
+        switch (type) {
             case INVALID:
                 throw new IllegalStateException("invalid git object");
             case COMMIT:
@@ -48,7 +52,9 @@ public class GitObject {
                 return new Blob(objPtr);
             case TAG:
                 return new Tag(objPtr);
-            default: // TODO: make sure types are exhaustive.
+            case TREE:
+                return new Tree(objPtr);
+            default:
                 return new GitObject(objPtr);
         }
     }
@@ -65,13 +71,16 @@ public class GitObject {
      */
     public static GitObject lookup(Repository repository, Oid oid, Type type) {
         AtomicLong outObj = new AtomicLong();
-        Error.throwIfNeeded(jniLookup(outObj, repository.getRawPointer(), oid, type.value));
-        return GitObject.create(outObj.get());
+        if (oid.isShortId()) {
+            Error.throwIfNeeded(jniLookupPrefix(outObj, repository.getRawPointer(), oid, oid.getEffectiveSize(), type.value));
+        } else {
+            Error.throwIfNeeded(jniLookup(outObj, repository.getRawPointer(), oid, type.value));
+        }
+        return GitObject.create(outObj.get(), type);
     }
 
     /**
-     * TODO: passing len can't be the right thing, change this once {@code Oid} is designed
-     * properly. Lookup a reference to one of the objects in a repository, given a prefix of its
+     * Lookup a reference to one of the objects in a repository, given a prefix of its
      * identifier (short id).
      *
      * @param repository the repository to look up the object
@@ -79,6 +88,7 @@ public class GitObject {
      * @param len the length of the short identifier
      * @param type the type of the object
      * @return looked-up object
+     * @deprecated in preference to {@code lookup} which already handles the short oid case.
      */
     public static GitObject lookupPrefix(Repository repository, Oid oid, int len, Type type) {
         AtomicLong outObj = new AtomicLong();

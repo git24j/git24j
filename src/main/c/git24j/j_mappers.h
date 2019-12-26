@@ -61,6 +61,12 @@ extern "C"
      */
     char *j_call_getter_string(JNIEnv *env, jclass clz, jobject obj, const char *methodName);
 
+    /** Call `int obj.methodName()` to get the int value. */
+    int j_call_getter_int(JNIEnv *env, jclass clz, jobject obj, const char *methodName);
+
+    /** Call `long obj.methodName()` to get the long value. */
+    long j_call_getter_long(JNIEnv *env, jclass clz, jobject obj, const char *methodName);
+
     /** Call `obj.method(val)` to set a java object value. */
     void j_call_setter_long(JNIEnv *env, jclass clz, jobject obj, const char *method, jlong val);
 
@@ -90,6 +96,12 @@ extern "C"
 
     /** Copy values from git_strarray to java::List<String> */
     void j_strarray_to_java_list(JNIEnv *env, git_strarray *src, jobject strList);
+
+    /** Copy values from git_signature to git24j.Signature. */
+    void j_signature_to_java(JNIEnv *env, const git_signature *c_sig, jobject sig);
+
+    /** Copy values from it24j.Signature to git_signature */
+    int j_signature_from_java(JNIEnv *env, jobject sig, git_signature **out_sig);
 
     /** FOR DEBUG: inspect object class */
     void __debug_inspect(JNIEnv *env, jobject obj);

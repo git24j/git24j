@@ -43,6 +43,20 @@ char *j_call_getter_string(JNIEnv *env, jclass clz, jobject obj, const char *met
     return j_copy_of_jstring(env, jstr, true);
 }
 
+int j_call_getter_int(JNIEnv *env, jclass clz, jobject obj, const char *methodName)
+{
+    jmethodID method = (*env)->GetMethodID(env, clz, methodName, "()I");
+    assert(method && "j_call_getter_int getter method not found");
+    return (*env)->CallIntMethod(env, obj, method);
+}
+
+long j_call_getter_long(JNIEnv *env, jclass clz, jobject obj, const char *methodName)
+{
+    jmethodID method = (*env)->GetMethodID(env, clz, methodName, "()J");
+    assert(method && "j_call_getter_long getter method not found");
+    return (*env)->CallLongMethod(env, obj, method);
+}
+
 char *j_copy_of_jstring(JNIEnv *env, jstring jstr, bool nullable)
 {
     if (!jstr)
@@ -240,6 +254,34 @@ void j_strarray_to_java_list(JNIEnv *env, git_strarray *src, jobject strList)
         (*env)->DeleteLocalRef(env, jVal);
     }
     (*env)->DeleteLocalRef(env, clz);
+}
+
+/** Copy values from git_signature to git24j.Signature. */
+void j_signature_to_java(JNIEnv *env, const git_signature *c_sig, jobject sig)
+{
+    jclass clz = (*env)->GetObjectClass(env, sig);
+    assert(clz && "Signature class not found");
+    j_call_setter_string_c(env, clz, sig, "setName", c_sig->name);
+    j_call_setter_string_c(env, clz, sig, "setEmail", c_sig->email);
+    jmethodID midSetWhen = (*env)->GetMethodID(env, clz, "setWhen", "(JIC)V");
+    assert(midSetWhen && "Signature::setWhen method not found");
+    (*env)->CallVoidMethod(env, sig, midSetWhen, c_sig->when.time, c_sig->when.offset, c_sig->when.sign);
+}
+
+/** Copy values from it24j.Signature to git_signature, `c_sig` should be pre allocated */
+int j_signature_from_java(JNIEnv *env, jobject sig, git_signature **out_sig)
+{
+    jclass clz = (*env)->GetObjectClass(env, sig);
+    assert(clz && "Signature class not found");
+    char *name = j_call_getter_string(env, clz, sig, "getName");
+    char *email = j_call_getter_string(env, clz, sig, "getEmail");
+    git_time_t gt = j_call_getter_long(env, clz, sig, "getWhenEpocSecond");
+    int offset = j_call_getter_int(env, clz, sig, "getWhenOffsetMinutes");
+    int e = git_signature_new(out_sig, name, email, gt, offset);
+    free(name);
+    free(email);
+    (*env)->DeleteLocalRef(env, clz);
+    return e;
 }
 
 /** FOR DEBUG: inspect object class */
