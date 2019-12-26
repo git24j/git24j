@@ -1,6 +1,5 @@
 package com.github.git24j.core;
 
-import java.time.Duration;
 import java.time.Instant;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -99,8 +98,6 @@ public class Commit extends GitObject {
         return jniSummary(getRawPointer());
     }
 
-    /**const char * git_commit_body(git_commit *commit); */
-    // JNIEXPORT jstring JNICALL J_MAKE_METHOD(Commit_jniBody)(JNIEnv *env, jclass obj, jlong commitPtr);
     static native String jniBody(long commitPtr);
 
     /**
@@ -168,12 +165,60 @@ public class Commit extends GitObject {
 
     static native int jniCommitterWithMailmap(Signature outSig, long commitPtr, long mailmapPtr);
 
-    public Signature committerWithMailmap() {
+    /**
+     * Get the committer of a commit, using the mailmap to map names and email
+     * addresses to canonical real names and email addresses.
+     *
+     * @param mailmap the mailmap to resolve with. (may be null)
+     * @return signature that contains the committer identity
+     * @throws GitException git errors
+     */
+    public Signature committerWithMailmap(Mailmap mailmap) {
         Signature outSig = new Signature();
-        jniCommitterWithMailmap(outSig, getRawPointer(), 0);
+        Error.throwIfNeeded(jniCommitterWithMailmap(outSig, getRawPointer(), mailmap == null ? 0 : mailmap.getRawPointer()));
         return outSig;
     }
 
     static native int jniAuthorWithMailmap(Signature outSig, long commitPtr, long mailmapPtr);
 
+    /**
+     * Get the author of a commit, using the mailmap to map names and email
+     * addresses to canonical real names and email addresses.
+     *
+     * @param mailmap the mailmap to resolve with. (may be NULL)
+     * @return signature that contains the author information
+     * @throws GitException git errors
+     */
+
+    public Signature authorWithMailmap(Mailmap mailmap) {
+        Signature outSig = new Signature();
+        Error.throwIfNeeded(jniAuthorWithMailmap(outSig, getRawPointer(), mailmap == null ? 0 : mailmap.getRawPointer()));
+        return outSig;
+    }
+
+    static native String jniRawHeader(long commitPtr);
+
+    /**
+     * Get the full raw text of the commit header.
+     *
+     * @return the header text of the commit
+     */
+    public String rawHeader() {
+        return jniRawHeader(getRawPointer());
+    }
+
+    static native int jniTree(AtomicLong outTreePtr, long commitPtr);
+
+    /**
+     * Get the tree pointed to by a commit. Equiv to {@code git rev-parse "$COMMIT^{tree}"}
+     * or {@code git cat-file $COMMIT | grep tree}
+     *
+     * @return tree object
+     * @throws GitException git errors
+     */
+    public Tree tree() {
+        AtomicLong outTreePtr = new AtomicLong();
+        Error.throwIfNeeded(jniTree(outTreePtr, getRawPointer()));
+        return new Tree(outTreePtr.get());
+    }
 }

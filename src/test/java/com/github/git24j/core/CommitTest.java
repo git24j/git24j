@@ -9,6 +9,7 @@ import java.time.Instant;
 
 public class CommitTest extends TestBase {
     private final String MASTER_HASH = "476f0c95825ef4479cab580b71f8b85f9dea4ee4";
+    private final String MASTER_TREE_HASH = "8c5f4d727b339fe7d9ee4d1806aa9ca3a5cc5b3e";
     private final Oid MASTER_OID = Oid.of(MASTER_HASH);
 
     @Rule public TemporaryFolder folder = new TemporaryFolder();
@@ -122,6 +123,46 @@ public class CommitTest extends TestBase {
             Assert.assertNotNull(sig.getName());
             Assert.assertNotNull(sig.getEmail());
             Assert.assertNotNull(sig.getWhen());
+        }
+    }
+
+    @Test
+    public void committerWithMailmap() {
+        try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {
+            Commit commit = Commit.lookup(testRepo, MASTER_OID);
+            Signature sig = commit.committerWithMailmap(null);
+            Assert.assertNotNull(sig.getName());
+            Assert.assertNotNull(sig.getEmail());
+            Assert.assertNotNull(sig.getWhen());
+        }
+    }
+
+    @Test
+    public void authorWithMailmap() {
+        try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {
+            Commit commit = Commit.lookup(testRepo, MASTER_OID);
+            Signature sig = commit.authorWithMailmap(null);
+            Assert.assertNotNull(sig.getName());
+            Assert.assertNotNull(sig.getEmail());
+            Assert.assertNotNull(sig.getWhen());
+        }
+    }
+
+    @Test
+    public void rawHeader() {
+        try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {
+            Commit commit = Commit.lookup(testRepo, MASTER_OID);
+            String rh = commit.rawHeader();
+            Assert.assertTrue(rh.length() > 0);
+        }
+    }
+
+    @Test
+    public void tree() {
+        try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {
+            Commit commit = Commit.lookup(testRepo, MASTER_OID);
+            Tree masterTree = commit.tree();
+            Assert.assertEquals(MASTER_TREE_HASH, masterTree.id().toString());
         }
     }
 }

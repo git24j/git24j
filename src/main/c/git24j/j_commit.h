@@ -46,9 +46,15 @@ extern "C"
 
     /**int git_commit_author_with_mailmap(git_signature **out, const git_commit *commit, const git_mailmap *mailmap); */
     JNIEXPORT jint JNICALL J_MAKE_METHOD(Commit_jniAuthorWithMailmap)(JNIEnv *env, jclass obj, jobject outSig, jlong commitPtr, jlong mailmapPtr);
+
     /**const char * git_commit_raw_header(const git_commit *commit); */
+    JNIEXPORT jstring JNICALL J_MAKE_METHOD(Commit_jniRawHeader)(JNIEnv *env, jclass obj, jlong commitPtr);
+
     /**int git_commit_tree(git_tree **tree_out, const git_commit *commit); */
+    JNIEXPORT jint JNICALL J_MAKE_METHOD(Commit_jniTree)(JNIEnv *env, jclass obj, jobject outTreePtr, jlong commitPtr);
+
     /**const git_oid * git_commit_tree_id(const git_commit *commit); */
+
     /**unsigned int git_commit_parentcount(const git_commit *commit); */
     /**int git_commit_parent(git_commit **out, const git_commit *commit, unsigned int n); */
     /**const git_oid * git_commit_parent_id(const git_commit *commit, unsigned int n); */

@@ -92,3 +92,19 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Commit_jniAuthorWithMailmap)(JNIEnv *env, j
     git_signature_free(c_sig);
     return e;
 }
+
+/**const char * git_commit_raw_header(const git_commit *commit); */
+JNIEXPORT jstring JNICALL J_MAKE_METHOD(Commit_jniRawHeader)(JNIEnv *env, jclass obj, jlong commitPtr)
+{
+    const char *raw_header = git_commit_raw_header((git_commit *)commitPtr);
+    return (*env)->NewStringUTF(env, raw_header);
+}
+
+/**int git_commit_tree(git_tree **tree_out, const git_commit *commit); */
+JNIEXPORT jint JNICALL J_MAKE_METHOD(Commit_jniTree)(JNIEnv *env, jclass obj, jobject outTreePtr, jlong commitPtr)
+{
+    git_tree *tree;
+    int e = git_commit_tree(&tree, (git_commit *)commitPtr);
+    j_save_c_pointer(env, (void *)tree, outTreePtr, "set");
+    return e;
+}
