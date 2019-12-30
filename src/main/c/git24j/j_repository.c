@@ -100,6 +100,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Repository_jniInit)(JNIEnv *env, jclass obj
 
 void init_options_copy_to_java(JNIEnv *env, git_repository_init_options *c_init_opts, jobject initOpts)
 {
+    assert(initOpts && "receiving object must not be null");
     jclass jclz = (*env)->GetObjectClass(env, initOpts);
     assert(jclz && "InitOptions.class not found");
 
@@ -165,6 +166,7 @@ typedef struct
  */
 void init_options_copy_from_java(JNIEnv *env, jobject initOpts, git_repository_init_options *c_init_opts)
 {
+    assert(initOpts && "receiving object must not be null");
     jclass jclz = (*env)->GetObjectClass(env, initOpts);
     assert(jclz && "InitOptions.class not found");
 
@@ -389,6 +391,7 @@ int j_fetchhead_foreach_cb(const char *ref_name, const char *remote_url, const g
     j_cb_payload *j_payload = (j_cb_payload *)payload;
     JNIEnv *env = j_payload->env;
     jobject consumer = j_payload->consumer;
+    assert(consumer && "consumer must not be null");
     jclass jclz = (*env)->GetObjectClass(env, consumer);
     assert(jclz && "jni error: could not resolve consumer class");
     /** int accetp(String remoteUrl, byte[] oid, int isMerge)*/
@@ -509,6 +512,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Repository_jniIsShadow)(JNIEnv *env, jclass
 /** int git_repository_ident(const char **name, const char **email, const git_repository *repo); */
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Repository_jniIdent)(JNIEnv *env, jclass obj, jobject identity, jlong repoPtr)
 {
+    assert(identity && "receiving object must not be null");
     jclass clz = (*env)->GetObjectClass(env, identity);
     const char *c_name;
     const char *c_email;

@@ -94,7 +94,7 @@ public class GitObject {
         AtomicLong outObj = new AtomicLong();
         Error.throwIfNeeded(
                 jniLookupPrefix(outObj, repository.getRawPointer(), oid, len, type.value));
-        return GitObject.create(outObj.get());
+        return GitObject.create(outObj.get(), type);
     }
 
     /**
@@ -166,7 +166,7 @@ public class GitObject {
     public GitObject dup() {
         AtomicLong out = new AtomicLong();
         Error.throwIfNeeded(jniDup(out, getRawPointer()));
-        return new GitObject(out.get());
+        return GitObject.create(out.get());
     }
 
     /**

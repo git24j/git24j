@@ -6,9 +6,14 @@ import java.time.ZoneOffset;
 import java.util.Objects;
 
 public class Signature {
-    private String name;
-    private String email;
-    private OffsetDateTime when;
+    private String name = "";
+    private String email = "";
+    private OffsetDateTime when = OffsetDateTime.now();
+
+    public Signature(String name, String email) {
+        this.name = name;
+        this.email = email;
+    }
 
     public Signature(String name, String email, long whenEpocSec, int offsetMin) {
         this.name = name;

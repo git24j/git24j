@@ -20,6 +20,7 @@ int j_git_reference_foreach_cb(git_reference *reference, void *payload)
     j_cb_payload *j_payload = (j_cb_payload *)payload;
     JNIEnv *env = j_payload->env;
     jobject consumer = j_payload->consumer;
+    assert(consumer && "consumer must not be null");
     jclass jclz = (*env)->GetObjectClass(env, consumer);
     assert(jclz && "jni error: could not resolve consumer class");
     jmethodID accept = (*env)->GetMethodID(env, jclz, "accept", "(J)I");
@@ -34,6 +35,7 @@ int j_git_reference_foreach_name_cb(const char *name, void *payload)
     j_cb_payload *j_payload = (j_cb_payload *)payload;
     JNIEnv *env = j_payload->env;
     jobject consumer = j_payload->consumer;
+    assert(consumer && "consumer must not be null");
     jclass jclz = (*env)->GetObjectClass(env, consumer);
     assert(jclz && "jni error: could not resolve consumer class");
     jstring j_name = (*env)->NewStringUTF(env, name);
@@ -295,6 +297,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Reference_jniNextName)(JNIEnv *env, jclass 
 {
     const char *out_str;
     int e = git_reference_next_name(&out_str, (git_reference_iterator *)iterPtr);
+    assert(outName && "receiving object must not be null");
     jclass clz = (*env)->GetObjectClass(env, outName);
     assert(clz && "Failed to identify object class in Reference::jniNextName");
     jstring jVal = (*env)->NewStringUTF(env, out_str);
@@ -388,6 +391,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Reference_jniNormalizeName)(JNIEnv *env, jc
 {
     char *out_name = NULL;
     size_t out_size = 0;
+    assert(bufferOut && "receiving object must not be null");
     jclass clz = (*env)->GetObjectClass(env, bufferOut);
     assert(clz && "could not idenfity class of bufferOut in the call to Reference::jniNormalizeName");
     char *c_name = j_copy_of_jstring(env, name, false);

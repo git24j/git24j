@@ -9,6 +9,7 @@
 
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Status_jniFile)(JNIEnv *env, jclass obj, jobject atomInt, jobject repo, jstring path)
 {
+    assert(atomInt && "receiving object must not be null");
     jclass jclz = (*env)->GetObjectClass(env, atomInt);
     jmethodID setter = (*env)->GetMethodID(env, jclz, "set", "(I)V");
     assert(setter && "setter 'set(int x)' not found");

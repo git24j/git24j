@@ -4,7 +4,7 @@
 - [x] GitObject
 - [x] Repository
 - [x] Reference
-- [ ] Commit
+- [x] Commit
 - [ ] Branch
 - [ ] Config
 - [ ] Index
@@ -39,3 +39,7 @@
 
 ## House Keeping
 - [ ] Avoid calling `getObjectClass` excessively by promoting classes of AtomicLong, AtomicReference to constant.
+- [ ] Consider simplify `Oid` to just String (aka remove bytes details)
+- [x] jni::GetObjectClass segfaults if object is null, so make sure every call is protected.
+- [ ] Replace `assert` with better alternatives (many build system disables assert by default).
+- [ ] Rename `consumer` in callbacks to `callback`
