@@ -23,7 +23,7 @@ char *j_strdup(const char *src)
 
 void j_git_buf_to_java(JNIEnv *env, git_buf *c_buf, jobject buf)
 {
-
+    assert(buf && "receiving object must not be null");
     jclass jclz = (*env)->GetObjectClass(env, buf);
     assert(jclz && "Could not find Buf class from given buf object");
     j_call_setter_string_c(env, jclz, buf, "setPtr", c_buf->ptr);
@@ -99,6 +99,11 @@ char *j_get_string_field(JNIEnv *env, jclass jclz, jobject obj, const char *fiel
 /** copy values of java Index.Entry object to git_index_entry struct. */
 void index_entry_from_java(JNIEnv *env, git_index_entry *c_entry, jobject entry)
 {
+    if (entry == NULL)
+    {
+        return;
+    }
+
     assert(c_entry);
     jclass jclz = (*env)->GetObjectClass(env, entry);
     assert(jclz && "Could not find Entry class from given entry object");
@@ -152,6 +157,7 @@ unsigned char *j_unsigned_chars_from_java(JNIEnv *env, jbyteArray array, int *ou
 /** Copy git_oid value to java Oid vis setter. */
 void j_git_oid_to_java(JNIEnv *env, const git_oid *c_oid, jobject oid)
 {
+    assert(oid && "receiving object must not be null");
     jclass clz = (*env)->GetObjectClass(env, oid);
     assert(clz && "Oid class not found");
     jbyteArray raw = j_byte_array_from_c(env, c_oid->id, GIT_OID_RAWSZ);
@@ -163,6 +169,11 @@ void j_git_oid_to_java(JNIEnv *env, const git_oid *c_oid, jobject oid)
 /** Copy value of java Oid to git_oid struct in c. */
 void j_git_oid_from_java(JNIEnv *env, jobject oid, git_oid *c_oid)
 {
+    if (oid == NULL)
+    {
+        return;
+    }
+
     jclass clz = (*env)->GetObjectClass(env, oid);
     assert(clz && "Oid class not found");
     jbyteArray jBytes = j_call_getter_byte_array(env, clz, oid, "getId");
@@ -243,6 +254,7 @@ void j_set_string_field_c(JNIEnv *env, jclass clz, jobject obj, const char *val,
 /** Copy values from git_strarray to java::List<String> */
 void j_strarray_to_java_list(JNIEnv *env, git_strarray *src, jobject strList)
 {
+    assert(strList && "receiving object must not be null");
     jclass clz = (*env)->GetObjectClass(env, strList);
     assert(clz && "Could not find the class of the accepting object");
     jmethodID midAdd = (*env)->GetMethodID(env, clz, "add", "(Ljava/lang/Object;)Z");
@@ -259,6 +271,7 @@ void j_strarray_to_java_list(JNIEnv *env, git_strarray *src, jobject strList)
 /** Copy values from git_signature to git24j.Signature. */
 void j_signature_to_java(JNIEnv *env, const git_signature *c_sig, jobject sig)
 {
+    assert(sig && "receiving object must not be null");
     jclass clz = (*env)->GetObjectClass(env, sig);
     assert(clz && "Signature class not found");
     j_call_setter_string_c(env, clz, sig, "setName", c_sig->name);
@@ -271,6 +284,11 @@ void j_signature_to_java(JNIEnv *env, const git_signature *c_sig, jobject sig)
 /** Copy values from it24j.Signature to git_signature, `c_sig` should be pre allocated */
 int j_signature_from_java(JNIEnv *env, jobject sig, git_signature **out_sig)
 {
+    if (sig == NULL)
+    {
+        return 0;
+    }
+
     jclass clz = (*env)->GetObjectClass(env, sig);
     assert(clz && "Signature class not found");
     char *name = j_call_getter_string(env, clz, sig, "getName");

@@ -33,6 +33,9 @@ build_wrapper: build_libgit2 $(LIBGIT2_TARGET)/libgit2.$(SO_EXTENSION)
 clean_wrapper:
 	-rm -rfv $(WRAPPER_TARGET)
 
+rebuild_wrapper: | clean_wrapper build_wrapper
+
 test: | build_wrapper
 	mvn test
 
+.DEFAULT_GOAL := rebuild_wrapper

@@ -3,8 +3,6 @@ package com.github.git24j.core;
 import org.junit.Assert;
 import org.junit.Test;
 
-import static org.junit.Assert.*;
-
 public class OidTest {
 
     private static final String SHA_A = "c33dfe912b2984d56283f0605f02dced514be799";

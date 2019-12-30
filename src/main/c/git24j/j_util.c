@@ -7,6 +7,7 @@
 
 void j_save_c_pointer(JNIEnv *env, void *ptr, jobject object, const char *setterName)
 {
+    assert(object && "receiving object must not be null");
     jclass clz = (*env)->GetObjectClass(env, object);
     if (clz == NULL)
     {

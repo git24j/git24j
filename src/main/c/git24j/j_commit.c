@@ -4,6 +4,7 @@
 #include "j_exception.h"
 #include "j_mappers.h"
 #include "j_util.h"
+#include <assert.h>
 #include <git2.h>
 #include <stdio.h>
 
@@ -90,5 +91,278 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Commit_jniAuthorWithMailmap)(JNIEnv *env, j
     int e = git_commit_author_with_mailmap(&c_sig, (git_commit *)commitPtr, (git_mailmap *)mailmapPtr);
     j_signature_to_java(env, c_sig, outSig);
     git_signature_free(c_sig);
+    return e;
+}
+
+/**const char * git_commit_raw_header(const git_commit *commit); */
+JNIEXPORT jstring JNICALL J_MAKE_METHOD(Commit_jniRawHeader)(JNIEnv *env, jclass obj, jlong commitPtr)
+{
+    const char *raw_header = git_commit_raw_header((git_commit *)commitPtr);
+    return (*env)->NewStringUTF(env, raw_header);
+}
+
+/**int git_commit_tree(git_tree **tree_out, const git_commit *commit); */
+JNIEXPORT jint JNICALL J_MAKE_METHOD(Commit_jniTree)(JNIEnv *env, jclass obj, jobject outTreePtr, jlong commitPtr)
+{
+    git_tree *tree;
+    int e = git_commit_tree(&tree, (git_commit *)commitPtr);
+    j_save_c_pointer(env, (void *)tree, outTreePtr, "set");
+    return e;
+}
+
+/**const git_oid * git_commit_tree_id(const git_commit *commit); */
+JNIEXPORT void JNICALL J_MAKE_METHOD(Commit_jniTreeId)(JNIEnv *env, jclass obj, jobject outOid, jlong commitPtr)
+{
+    const git_oid *c_oid = git_commit_tree_id((git_commit *)commitPtr);
+    j_git_oid_to_java(env, c_oid, outOid);
+}
+
+/**unsigned int git_commit_parentcount(const git_commit *commit); */
+JNIEXPORT jint JNICALL J_MAKE_METHOD(Commit_jniParentCount)(JNIEnv *env, jclass obj, long commitPtr)
+{
+    return (jint)git_commit_parentcount((git_commit *)commitPtr);
+}
+
+/**int git_commit_parent(git_commit **out, const git_commit *commit, unsigned int n); */
+JNIEXPORT jint JNICALL J_MAKE_METHOD(Commit_jniParent)(JNIEnv *env, jclass obj, jobject outPtr, long commitPtr, jint n)
+{
+    git_commit *c_out;
+    int e = git_commit_parent(&c_out, (git_commit *)commitPtr, (unsigned int)n);
+    j_save_c_pointer(env, (void *)c_out, outPtr, "set");
+    return e;
+}
+
+/**const git_oid * git_commit_parent_id(const git_commit *commit, unsigned int n); */
+JNIEXPORT void JNICALL J_MAKE_METHOD(Commit_jniParentId)(JNIEnv *env, jclass obj, jobject outOid, jlong commitPtr, jint n)
+{
+    const git_oid *c_oid = git_commit_parent_id((git_commit *)commitPtr, (unsigned int)n);
+    printf("qqqqq c_oid = %s \n", git_oid_tostr_s(c_oid));
+    j_git_oid_to_java(env, c_oid, outOid);
+}
+
+/**int git_commit_nth_gen_ancestor(git_commit **ancestor, const git_commit *commit, unsigned int n); */
+JNIEXPORT jint JNICALL J_MAKE_METHOD(Commit_jniNthGenAncestor)(JNIEnv *env, jclass obj, jobject outPtr, jlong commitPtr, jint n)
+{
+    git_commit *ancestor;
+    int e = git_commit_nth_gen_ancestor(&ancestor, (git_commit *)commitPtr, (unsigned int)n);
+    j_save_c_pointer(env, (void *)ancestor, outPtr, "set");
+    return e;
+}
+
+/**int git_commit_header_field(git_buf *out, const git_commit *commit, const char *field); */
+JNIEXPORT jint JNICALL J_MAKE_METHOD(Commit_jniHeaderField)(JNIEnv *env, jclass obj, jobject outBuf, jlong commitPtr, jstring field)
+{
+    git_buf c_buf = {0};
+    char *c_field = j_copy_of_jstring(env, field, true);
+    int e = git_commit_header_field(&c_buf, (git_commit *)commitPtr, c_field);
+    j_git_buf_to_java(env, &c_buf, outBuf);
+    git_buf_dispose(&c_buf);
+    free(c_field);
+    return e;
+}
+
+/**
+ * int git_commit_create(git_oid *id, 
+ *                       git_repository *repo, 
+ *                       const char *update_ref, 
+ *                       const git_signature *author, 
+ *                       const git_signature *committer,
+ *                       const char *message_encoding,
+ *                       const char *message,
+ *                       const git_tree *tree,
+ *                       size_t parent_count,
+ *                       const git_commit *[] parents);
+ *  */
+JNIEXPORT jint JNICALL J_MAKE_METHOD(Commit_jniCreate)(JNIEnv *env,
+                                                       jclass obj,
+                                                       jobject outOid,
+                                                       jlong repoPtr,
+                                                       jstring updateRef,
+                                                       jobject author,
+                                                       jobject committer,
+                                                       jstring msgEncoding,
+                                                       jstring message,
+                                                       jlong treePtr,
+                                                       jlongArray parents)
+{
+    assert(parents && "parents must not be null");
+    int e = 0;
+    git_signature *c_author, *c_committer;
+    e = j_signature_from_java(env, author, &c_author);
+    if (e != 0)
+    {
+        git_signature_free(c_author);
+        return e;
+    }
+
+    j_signature_from_java(env, committer, &c_committer);
+    if (e != 0)
+    {
+        git_signature_free(c_committer);
+        return e;
+    }
+
+    jsize np = (*env)->GetArrayLength(env, parents);
+    const git_commit **c_parents = (const git_commit **)malloc(sizeof(git_commit *) * np);
+    for (jsize i = 0; i < np; i++)
+    {
+        jlong *x = (*env)->GetLongArrayElements(env, parents, 0);
+        c_parents[i] = (git_commit *)(*x);
+    }
+    char *update_ref = j_copy_of_jstring(env, updateRef, true);
+    char *message_encoding = j_copy_of_jstring(env, msgEncoding, true);
+    char *c_message = j_copy_of_jstring(env, message, true);
+    git_oid c_oid;
+    e = git_commit_create(&c_oid,
+                          (git_repository *)repoPtr,
+                          update_ref,
+                          c_author,
+                          c_committer,
+                          message_encoding,
+                          c_message,
+                          (git_tree *)treePtr,
+                          np,
+                          c_parents);
+    j_git_oid_to_java(env, &c_oid, outOid);
+    free(c_parents);
+    free(c_message);
+    free(message_encoding);
+    free(update_ref);
+    git_signature_free(c_committer);
+    return e;
+}
+
+/**int git_commit_amend(git_oid *id, 
+ *                      const git_commit *commit_to_amend, 
+ *                      const char *update_ref, 
+ *                      const git_signature *author, 
+ *                      const git_signature *committer, 
+ *                      const char *message_encoding, 
+ *                      const char *message, 
+ *                      const git_tree *tree); 
+ * */
+JNIEXPORT jint JNICALL J_MAKE_METHOD(Commit_jniAmend)(JNIEnv *env, jclass obj,
+                                                      jobject outOid,
+                                                      jlong commitToAmend,
+                                                      jstring updateRef,
+                                                      jobject author,
+                                                      jobject committer,
+                                                      jstring messageEncoding,
+                                                      jstring message,
+                                                      jlong treePtr)
+{
+    int e = 0;
+    git_signature *c_author = NULL, *c_committer = NULL;
+    e = j_signature_from_java(env, author, &c_author);
+    if (e != 0)
+    {
+        git_signature_free(c_author);
+        return e;
+    }
+    e = j_signature_from_java(env, committer, &c_committer);
+    if (e != 0)
+    {
+        git_signature_free(c_committer);
+        return e;
+    }
+
+    git_oid c_oid;
+    char *update_ref = j_copy_of_jstring(env, updateRef, true);
+    char *message_encoding = j_copy_of_jstring(env, messageEncoding, true);
+    char *c_message = j_copy_of_jstring(env, message, true);
+    e = git_commit_amend(
+        &c_oid,
+        (git_commit *)commitToAmend,
+        update_ref,
+        c_author,
+        c_committer,
+        message_encoding,
+        c_message,
+        (git_tree *)treePtr);
+    j_git_oid_to_java(env, &c_oid, outOid);
+    free(c_message);
+    free(message_encoding);
+    free(update_ref);
+    git_signature_free(c_author);
+    git_signature_free(c_committer);
+    return e;
+}
+
+JNIEXPORT jint JNICALL J_MAKE_METHOD(Commit_jniCreateBuffer)(JNIEnv *env, jclass obj,
+                                                             jobject outBuf,
+                                                             jlong repoPtr,
+                                                             jobject author,
+                                                             jobject committer,
+                                                             jstring messageEncodeing,
+                                                             jstring message,
+                                                             jlong treePtr,
+                                                             jlongArray parents)
+{
+    assert(parents && "parents must not be null");
+    int e = 0;
+    git_signature *c_author, *c_committer;
+    e = j_signature_from_java(env, author, &c_author);
+    if (e != 0)
+    {
+        git_signature_free(c_author);
+        return e;
+    }
+
+    j_signature_from_java(env, committer, &c_committer);
+    if (e != 0)
+    {
+        git_signature_free(c_committer);
+        return e;
+    }
+
+    jsize np = (*env)->GetArrayLength(env, parents);
+    const git_commit **c_parents = (const git_commit **)malloc(sizeof(git_commit *) * np);
+    for (jsize i = 0; i < np; i++)
+    {
+        jlong *x = (*env)->GetLongArrayElements(env, parents, 0);
+        c_parents[i] = (git_commit *)(*x);
+    }
+    char *message_encoding = j_copy_of_jstring(env, messageEncodeing, true);
+    char *c_message = j_copy_of_jstring(env, message, true);
+    git_buf c_buf = {0};
+    e = git_commit_create_buffer(&c_buf,
+                                 (git_repository *)repoPtr,
+                                 c_author,
+                                 c_committer,
+                                 message_encoding,
+                                 c_message,
+                                 (git_tree *)treePtr,
+                                 np,
+                                 c_parents);
+    j_git_buf_to_java(env, &c_buf, outBuf);
+    git_buf_dispose(&c_buf);
+    free(c_parents);
+    free(c_message);
+    free(message_encoding);
+    git_signature_free(c_committer);
+    return e;
+}
+
+JNIEXPORT jint JNICALL J_MAKE_METHOD(Commit_jniCreateWithSignature)(JNIEnv *env, jclass obj,
+                                                                    jobject outOid,
+                                                                    jlong repoPtr,
+                                                                    jstring commitContent,
+                                                                    jstring signature,
+                                                                    jstring signatureField)
+{
+    git_oid c_oid;
+    char *commit_content = j_copy_of_jstring(env, commitContent, true);
+    char *c_signature = j_copy_of_jstring(env, signature, true);
+    char *signature_field = j_copy_of_jstring(env, signatureField, true);
+    int e = git_commit_create_with_signature(
+        &c_oid,
+        (git_repository *)repoPtr,
+        commit_content,
+        c_signature,
+        signature_field);
+    free(signature_field);
+    free(c_signature);
+    free(commit_content);
+    j_git_oid_to_java(env, &c_oid, outOid);
     return e;
 }

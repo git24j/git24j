@@ -49,6 +49,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Mailmap_jniFromRepository)(JNIEnv *env, jcl
 /** GIT_EXTERN(int) git_mailmap_resolve( const char **real_name, const char **real_email, const git_mailmap *mm, const char *name, const char *email); */
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Mailmap_jniResolve)(JNIEnv *env, jclass obj, jobject outRealName, jobject outRealEmail, jlong mmPtr, jstring name, jstring email)
 {
+    assert(outRealName && "receiving object must not be null");
     jclass clz = (*env)->GetObjectClass(env, outRealName);
     /* jclass clz = (*env)->FindClass(env, "Ljava/util/concurrent/atomic/AtomicReference;"); */
     assert(clz && "Mailmap::jniResolve: could not identify the class of receivers");

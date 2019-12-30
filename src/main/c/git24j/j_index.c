@@ -4,6 +4,7 @@
 #include "j_mappers.h"
 #include "j_repository.h"
 #include "j_util.h"
+#include <assert.h>
 #include <git2.h>
 #include <jni.h>
 #include <stdio.h>
@@ -24,6 +25,7 @@ int standard_matched_cb(const char *path, const char *matched_pathspec, void *pa
     j_mached_cb_paylocads *j_payload = (j_mached_cb_paylocads *)payload;
     JNIEnv *env = j_payload->env;
     jobject biConsumer = j_payload->biConsumer;
+    assert(biConsumer && "consumer object must not be null");
     jclass jclz = (*env)->GetObjectClass(env, biConsumer);
     if (jclz == NULL)
     {

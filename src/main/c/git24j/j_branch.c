@@ -47,6 +47,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Branch_jniIteratorNew)(JNIEnv *env, jclass 
 /**int git_branch_next(git_reference **out, git_branch_t *out_type, git_branch_iterator *iter); */
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Branch_jniNext)(JNIEnv *env, jclass obj, jobject outRef, jobject outType, jlong branchIterPtr)
 {
+    assert(outRef && "receiving object must not be null");
     git_reference *c_out_ref;
     git_branch_t c_out_branch_type;
     int e = git_branch_next(&c_out_ref, &c_out_branch_type, (git_branch_iterator *)branchIterPtr);
@@ -86,6 +87,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Branch_jniLookup)(JNIEnv *env, jclass obj, 
 /**int git_branch_name(const char **out, const git_reference *ref); */
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Branch_jniName)(JNIEnv *env, jclass obj, jobject outStr, jlong refPtr)
 {
+    assert(outStr && "receiving object must not be null");
     const char *out_name;
     jclass jclz = (*env)->GetObjectClass(env, outStr);
     assert(jclz && "Could not find AtomicReference class from given outStr object");
