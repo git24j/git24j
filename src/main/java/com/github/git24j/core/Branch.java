@@ -1,6 +1,10 @@
 package com.github.git24j.core;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class Branch {
     static native int jniCreate(
@@ -19,10 +23,16 @@ public class Branch {
      * @throws GitException git error.
      * @throws IllegalStateException if repository has already been closed.
      */
-    public static Reference create(Repository repo, String branchName, Commit target, int force) {
+    public static Reference create(
+            Repository repo, String branchName, Commit target, boolean force) {
         AtomicLong outRef = new AtomicLong();
         Error.throwIfNeeded(
-                jniCreate(outRef, repo.getRawPointer(), branchName, target.getRawPointer(), force));
+                jniCreate(
+                        outRef,
+                        repo.getRawPointer(),
+                        branchName,
+                        target.getRawPointer(),
+                        force ? 0 : 1));
         return new Reference(outRef.get());
     }
 
@@ -56,13 +66,12 @@ public class Branch {
                         force ? 1 : 0));
         return new Reference(outRef.get());
     }
-    //    /**int git_branch_delete(git_reference *branch); */
-    //    JNIEXPORT jint JNICALL J_MAKE_METHOD(Branch_jniDelete)(JNIEnv *env, jclass obj, jlong
-    // refPtr);
+
     static native int jniDelete(long refPtr);
 
     /**
      * Delete a branch and free corresponding branch reference.
+     *
      * @param branch
      * @throws GitException git error
      */
@@ -70,51 +79,319 @@ public class Branch {
         Error.throwIfNeeded(jniDelete(branch.getRawPointer()));
         branch.free();
     }
-    //    /**int git_branch_iterator_new(git_branch_iterator **out, git_repository *repo,
-    // git_branch_t list_flags); */
-    //    JNIEXPORT jint JNICALL J_MAKE_METHOD(Branch_jniIteratorNew)(JNIEnv *env, jclass obj,
-    // jobject outBranchIter, jlong repoPtr, jint listFlags);
-    //    /**int git_branch_next(git_reference **out, git_branch_t *out_type, git_branch_iterator
-    // *iter); */
-    //    JNIEXPORT jint JNICALL J_MAKE_METHOD(Branch_jniNext)(JNIEnv *env, jclass obj, jobject
-    // outRef, jobject outType, jlong branchIterPtr);
-    //    /**void git_branch_iterator_free(git_branch_iterator *iter); */
-    //    JNIEXPORT void JNICALL J_MAKE_METHOD(Branch_jniIteratorFree)(JNIEnv *env, jclass obj,
-    // jlong branchIterPtr);
-    //    /**int git_branch_move(git_reference **out, git_reference *branch, const char
-    // *new_branch_name, int force); */
-    //    JNIEXPORT jint JNICALL J_MAKE_METHOD(Branch_jniMove)(JNIEnv *env, jclass obj, jobject
-    // outRef, jlong branchPtr, jstring branchName, jint force);
-    //    /**int git_branch_lookup(git_reference **out, git_repository *repo, const char
-    // *branch_name, git_branch_t branch_type); */
-    //    JNIEXPORT jint JNICALL J_MAKE_METHOD(Branch_jniLookup)(JNIEnv *env, jclass obj, jobject
-    // outRef, jlong repoPtr, jstring branchName, jint branchType);
-    //    /**int git_branch_name(const char **out, const git_reference *ref); */
-    //    JNIEXPORT jint JNICALL J_MAKE_METHOD(Branch_jniName)(JNIEnv *env, jclass obj, jobject
-    // outStr, jlong refPtr);
-    //    /**int git_branch_upstream(git_reference **out, const git_reference *branch); */
-    //    JNIEXPORT jint JNICALL J_MAKE_METHOD(Branch_jniUpstream)(JNIEnv *env, jclass obj, jobject
-    // outRef, jlong branchPtr);
-    //    /**int git_branch_set_upstream(git_reference *branch, const char *upstream_name); */
-    //    JNIEXPORT jint JNICALL J_MAKE_METHOD(Branch_jniSetUpstream)(JNIEnv *env, jclass obj, jlong
-    // refPtr, jstring upstreamName);
-    //    /**int git_branch_upstream_name(git_buf *out, git_repository *repo, const char *refname);
-    // */
-    //    JNIEXPORT jint JNICALL J_MAKE_METHOD(Branch_jniUpstreamName)(JNIEnv *env, jclass obj,
-    // jobject outBuf, jlong repoPtr, jstring refName);
-    //    /**int git_branch_is_head(const git_reference *branch); */
-    //    JNIEXPORT jint JNICALL J_MAKE_METHOD(Branch_jniIsHead)(JNIEnv *env, jclass obj, jlong
-    // refPtr);
-    //    /**int git_branch_is_checked_out(const git_reference *branch); */
-    //    JNIEXPORT jint JNICALL J_MAKE_METHOD(Branch_jniIsCheckedOut)(JNIEnv *env, jclass obj,
-    // jlong rePftr);
-    //    /**int git_branch_remote_name(git_buf *out, git_repository *repo, const char
-    // *canonical_branch_name); */
-    //    JNIEXPORT jint JNICALL J_MAKE_METHOD(Branch_jniRemoteName)(JNIEnv *env, jclass obj,
-    // jobject outBuf, jlong repoPtr, jstring canonicalBranchName);
-    //    /**int git_branch_upstream_remote(git_buf *buf, git_repository *repo, const char
-    // *refname); */
-    //    JNIEXPORT jint JNICALL J_MAKE_METHOD(Branch_jniUpstreamRemote)(JNIEnv *env, jclass obj,
-    // jobject outBuf, jlong repoPtr, jstring refName);
 
+    public static class Iterator {
+        private final AtomicLong _ptr = new AtomicLong();
+
+        public Iterator(long rawPointer) {
+            _ptr.set(rawPointer);
+        }
+
+        @Override
+        protected void finalize() throws Throwable {
+            jniIteratorFree(_ptr.get());
+            super.finalize();
+        }
+        /**
+         * Create an iterator which loops over the requested branches.
+         *
+         * @param repo Repository where to find the branches.
+         * @param flag Filtering flags for the branch listing. Valid values are GIT_BRANCH_LOCAL, GIT_BRANCH_REMOTE
+         * or GIT_BRANCH_ALL.
+         *
+         * @return the iterator
+         * @throws GitException git errors
+         */
+        public static Iterator create(Repository repo, BranchType flag) {
+            AtomicLong outRef = new AtomicLong();
+            Error.throwIfNeeded(jniIteratorNew(outRef, repo.getRawPointer(), flag.ordinal()));
+            return new Iterator(outRef.get());
+        }
+        /**
+         * Retrieve the next branch from the iterator
+         *
+         * @return the reference and the type, null if there are no more branches
+         * @throws GitException git errors.
+         */
+        public Map.Entry<Reference, BranchType> next() {
+            AtomicLong outRef = new AtomicLong();
+            AtomicInteger outType = new AtomicInteger();
+            int e = jniNext(outRef, outType, _ptr.get());
+            if (e == GitException.ErrorCode.ITEROVER.getCode()) {
+                return null;
+            }
+            Error.throwIfNeeded(e);
+            Reference ref = new Reference(outRef.get());
+            BranchType type = BranchType.valueOf(outType.get());
+            return new HashMap.SimpleImmutableEntry<>(ref, type);
+        }
+    }
+
+    static native int jniIteratorNew(AtomicLong outBranchIter, long repoPtr, int listFlags);
+
+    static native int jniNext(AtomicLong outRef, AtomicInteger outType, long branchIterPtr);
+
+    static native void jniIteratorFree(long branchIterPtr);
+
+    static native int jniMove(AtomicLong outRef, long branchPtr, String branchName, int force);
+
+    /**
+     * Move/rename an existing local branch reference.
+     *
+     * <p>The new branch name will be checked for validity. See `git_tag_create()` for rules about
+     * valid names.
+     *
+     * <p>Note that if the move succeeds, the old reference object will not + be valid anymore, and
+     * should be freed immediately by the user using + `git_reference_free()`.
+     *
+     * @param branch Current underlying reference of the branch.
+     * @param branchName Target name of the branch once the move is performed; this name is
+     *     validated for consistency.
+     * @param force Overwrite existing branch.
+     * @return New reference object for the updated name.0 on success,
+     * @throws GitException git errors
+     */
+    public static Reference move(Reference branch, String branchName, boolean force) {
+        AtomicLong outRef = new AtomicLong();
+        Error.throwIfNeeded(jniMove(outRef, branch.getRawPointer(), branchName, force ? 0 : 1));
+        Reference.jniFree(branch.getRawPointer());
+        return new Reference(outRef.get());
+    }
+
+    public enum BranchType implements IBitEnum {
+        INVALID(0),
+        LOCAL(1),
+        REMOTE(2),
+        ALL(3);
+
+        private final int _value;
+
+        BranchType(int value) {
+            _value = value;
+        }
+
+        static BranchType valueOf(int iVal) {
+            for (BranchType x : BranchType.values()) {
+                if (x._value == iVal) {
+                    return x;
+                }
+            }
+            return INVALID;
+        }
+
+        @Override
+        public int getBit() {
+            return _value;
+        }
+    }
+
+    static native int jniLookup(AtomicLong outRef, long repoPtr, String branchName, int branchType);
+
+    /**
+     * Lookup a branch by its name in a repository.
+     *
+     * <p>The generated reference must be freed by the user. The branch name will be checked for
+     * validity.
+     *
+     * @param repo the repository to look up the branch
+     * @param branchName Name of the branch to be looked-up; this name is validated for consistency.
+     * @param branchType Type of the considered branch. This should be valued with either
+     *     GIT_BRANCH_LOCAL or GIT_BRANCH_REMOTE.
+     * @return pointer to the looked-up branch reference or null when no matching branch exists.
+     * @throws GitException GIT_EINVALIDSPEC, otherwise an error code.
+     */
+    public static Reference lookup(Repository repo, String branchName, BranchType branchType) {
+        AtomicLong outRef = new AtomicLong();
+        int e = jniLookup(outRef, repo.getRawPointer(), branchName, branchType.ordinal());
+        if (e == GitException.ErrorCode.ENOTFOUND.getCode()) {
+            return null;
+        }
+        Error.throwIfNeeded(e);
+        return new Reference(outRef.get());
+    }
+
+    static native int jniName(AtomicReference<String> outStr, long refPtr);
+
+
+    /**
+     * Get the branch name
+     *
+     * Given a reference object, this will check that it really is a branch (ie.
+     * it lives under "refs/heads/" or "refs/remotes/"), and return the branch part
+     * of it.
+     *
+     * @param branch A reference object, ideally pointing to a branch
+     *
+     * @return reference name.
+     * @throws GitException git errors
+     */
+    public static String name(Reference branch) {
+        if (branch == null) {
+            return null;
+        }
+        AtomicReference<String> outStr = new AtomicReference<>();
+        Error.throwIfNeeded(jniName(outStr, branch.getRawPointer()));
+        return outStr.get();
+    }
+
+    static native int jniUpstream(AtomicLong outRef, long branchPtr);
+    /**
+     * Get the upstream of a branch
+     *
+     * Given a reference, this will return a new reference object corresponding
+     * to its remote tracking branch. The reference must be a local branch.
+     *
+     * @param branch Current underlying reference of the branch.
+     *
+     * @return the retrieved reference, or null when no remote tracking
+     *         reference exists
+     * @throws GitException
+     */
+    public static Reference upstream(Reference branch) {
+        if (branch == null) {
+            return null;
+        }
+        AtomicLong outRef = new AtomicLong();
+        int e = jniUpstream(outRef, branch.getRawPointer());
+        if (e == GitException.ErrorCode.ENOTFOUND.getCode()) {
+            return null;
+        }
+        Error.throwIfNeeded(e);
+        return new Reference(outRef.get());
+    }
+
+    static native int jniSetUpstream(long refPtr, String upstreamName);
+
+    /**
+     * Set a branch's upstream branch
+     *
+     * This will update the configuration to set the branch named `name` as the upstream of `branch`.
+     * Pass a NULL name to unset the upstream information.
+     *
+     * @note the actual tracking reference must have been already created for the
+     * operation to succeed.
+     *
+     * @param branch the branch to configure
+     * @param upstreamName remote-tracking or local branch to set as upstream.
+     *
+     * @return 0 on success; GIT_ENOTFOUND if there's no branch named `branch_name`
+     *         or an error code
+     */
+    public static void setUpstream(Reference branch, String upstreamName) {
+        if (branch == null) {
+            return;
+        }
+        Error.throwIfNeeded(jniSetUpstream(branch.getRawPointer(), upstreamName));
+    }
+
+    static native int jniUpstreamName(Buf outBuf, long repoPtr, String refName);
+
+    /**
+     * Get the upstream name of a branch
+     *
+     * Given a local branch, this will return its remote-tracking branch information,
+     * as a full reference name, ie. "feature/nice" would become
+     * "refs/remote/origin/feature/nice", depending on that branch's configuration.
+     *
+     * @param repo the repository where the branches live.
+     * @param refname reference name of the local branch.
+     *
+     * @return remote branch name or null remote tracking reference exists.
+     * @throws GitException git errors
+     */
+    public static String upstreamName(Repository repo, String refname) {
+        Buf outBuf = new Buf();
+        int e = jniUpstreamName(outBuf, repo.getRawPointer(), refname);
+        if (e == GitException.ErrorCode.ENOTFOUND.getCode()) {
+            return null;
+        }
+        Error.throwIfNeeded(e);
+        return outBuf.getPtr();
+    }
+
+    static native int jniIsHead(long refPtr);
+    /**
+     * Determine if HEAD points to the given branch
+     *
+     * @param branch A reference to a local branch.
+     *
+     * @return true if HEAD points at the branch, false if it isn't
+     * @throws GitException git errors
+     */
+    public static boolean isHead(Reference branch) {
+        if (branch == null) {
+            return false;
+        }
+        int e = jniIsHead(branch.getRawPointer());
+        Error.throwIfNeeded(e);
+        return e == 1;
+    }
+
+    static native int jniIsCheckedOut(long refPtr);
+    /**
+     * Determine if any HEAD points to the current branch
+     *
+     * This will iterate over all known linked repositories (usually in the form of
+     * worktrees) and report whether any HEAD is pointing at the current branch.
+     *
+     * @param branch A reference to a local branch.
+     *
+     * @return true if branch is checked out, 0 if it isn't,
+     * @throws GitException git error
+     */
+    public static boolean isCheckedOut(Reference branch) {
+        int e = jniIsCheckedOut(branch.getRawPointer());
+        Error.throwIfNeeded(e);
+        return e == 1;
+    }
+
+    static native int jniRemoteName(Buf outBuf, long repoPtr, String canonicalBranchName);
+    /**
+     * Find the remote name of a remote-tracking branch
+     *
+     * This will return the name of the remote whose fetch refspec is matching
+     * the given branch. E.g. given a branch "refs/remotes/test/master", it will
+     * extract the "test" part. If refspecs from multiple remotes match,
+     * the function will return GIT_EAMBIGUOUS.
+     *
+     * @param repo The repository where the branch lives.
+     * @param canonicalBranchName complete name of the remote tracking branch.
+     *
+     * @return remote name or null when no matching remote was found,
+     * @throws GitException git errors
+     */
+    public static String remoteName(Repository repo, String canonicalBranchName) {
+        if (repo == null) {
+            return null;
+        }
+        Buf outBuf = new Buf();
+        int e = jniRemoteName(outBuf, repo.getRawPointer(), canonicalBranchName);
+        if (e == GitException.ErrorCode.ENOTFOUND.getCode()) {
+            return null;
+        }
+        Error.throwIfNeeded(e);
+        return outBuf.getPtr();
+    }
+
+    static native int jniUpstreamRemote(Buf outBuf, long repoPtr, String refName);
+
+    /**
+     * Retrieve the upstream remote of a local branch
+     *
+     * This will return the currently configured "branch.*.remote" for a given
+     * branch. This branch must be local.
+     *
+     * @param repo the repository in which to look
+     * @param refName the full name of the branch
+     * @return name of the upstream remote
+     * @throws GitException git errors
+     */
+    public static String upstreamRemote(Repository repo, String refName) {
+        Buf outBuf = new Buf();
+        int e = jniUpstreamRemote(outBuf, repo.getRawPointer(), refName);
+        if (e == GitException.ErrorCode.ENOTFOUND.getCode()) {
+            return null;
+        }
+        return outBuf.getPtr();
+    }
 }
