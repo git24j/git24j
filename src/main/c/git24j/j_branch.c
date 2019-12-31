@@ -51,10 +51,11 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Branch_jniNext)(JNIEnv *env, jclass obj, jo
     git_reference *c_out_ref;
     git_branch_t c_out_branch_type;
     int e = git_branch_next(&c_out_ref, &c_out_branch_type, (git_branch_iterator *)branchIterPtr);
+    j_save_c_pointer(env, (void *)c_out_ref, outRef, "set");
+
     jclass jclz = (*env)->GetObjectClass(env, outType);
     assert(jclz && "Could not find outType class from given outType object");
-    j_save_c_pointer(env, (void *)c_out_ref, outRef, "set");
-    j_call_setter_int(env, NULL, outType, "set", (jint)c_out_branch_type);
+    j_call_setter_int(env, jclz, outType, "set", (jint)c_out_branch_type);
     (*env)->DeleteLocalRef(env, jclz);
     return e;
 }
@@ -71,6 +72,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Branch_jniMove)(JNIEnv *env, jclass obj, jo
     git_reference *c_out_ref;
     char *branch_name = j_copy_of_jstring(env, branchName, false);
     int e = git_branch_move(&c_out_ref, (git_reference *)branchPtr, branch_name, force);
+    j_save_c_pointer(env, (void *)c_out_ref, outRef, "set");
     free(branch_name);
     return e;
 }
@@ -80,6 +82,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Branch_jniLookup)(JNIEnv *env, jclass obj, 
     git_reference *c_out_ref;
     char *branch_name = j_copy_of_jstring(env, branchName, false);
     int e = git_branch_lookup(&c_out_ref, (git_repository *)repoPtr, branch_name, (git_branch_t)branchType);
+    j_save_c_pointer(env, (void *)c_out_ref, outRef, "set");
     free(branch_name);
     return e;
 }
@@ -92,7 +95,9 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Branch_jniName)(JNIEnv *env, jclass obj, jo
     jclass jclz = (*env)->GetObjectClass(env, outStr);
     assert(jclz && "Could not find AtomicReference class from given outStr object");
     int e = git_branch_name(&out_name, (git_reference *)refPtr);
-    j_call_setter_string_c(env, jclz, outStr, "set", out_name);
+    jstring outName = (*env)->NewStringUTF(env, out_name);
+    j_call_setter_object(env, jclz, outStr, "set", outName);
+    (*env)->DeleteLocalRef(env, outName);
     (*env)->DeleteLocalRef(env, jclz);
     return e;
 }
