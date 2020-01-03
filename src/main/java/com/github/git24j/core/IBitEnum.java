@@ -19,7 +19,11 @@ public interface IBitEnum {
     static <T extends Enum<T> & IBitEnum> EnumSet<T> parse(int flags, Class<T> clz) {
         List<T> matched = new ArrayList<>();
         for (T x : clz.getEnumConstants()) {
-            if ((x.getBit() & flags) != 0) {
+            int b = x.getBit();
+            if ((b < 0 && flags > 0) || (b > 0 && flags < 0)) {
+                continue;
+            }
+            if ((b & flags) != 0) {
                 matched.add(x);
             }
         }

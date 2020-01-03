@@ -6,57 +6,174 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.BiConsumer;
 
 public class Index implements AutoCloseable {
-    private final AtomicLong idxPtr;
+    final AtomicLong _rawPtr = new AtomicLong();
 
-    public Index(AtomicLong idxPtr) {
-        this.idxPtr = idxPtr;
+    /** int git_index_open(git_index **out, const char *index_path); */
+    // JNIEXPORT jint JNICALL J_MAKE_METHOD(Index_jniOpen)(JNIEnv *env, jclass obj, jobject
+    // outIndexPtr, jstring indexPath)
+    static native int jniOpen(AtomicLong outIndexPtr, String indexPath);
+
+    public Index() {}
+
+    public Index(long rawPtr) {
+        this._rawPtr.set(rawPtr);
     }
 
-    static native int jniUpdateAll(
-            long idxPtr, String[] pathSpec, BiConsumer<String, String> callback);
+    long getRawPointer() {
+        long ptr = _rawPtr.get();
+        if (ptr == 0) {
+            throw new IllegalStateException("Repository has been closed");
+        }
+        return ptr;
+    }
 
-    static native int jniAdd(long idxPtr, Entry sourceEntry);
+    public enum Capability implements IBitEnum {
+        IGNORE_CASE(1),
+        NO_FILEMODE(1 << 1),
+        NO_SYMLINKS(1 << 2),
+        FROM_OWNER(-1),
+        ;
 
-    static native int jniAddByPath(long idxPtr, String path);
+        private final int bit;
 
-    static native int jniAddAll(long idxPtr, String[] pathSpec, int flags, Callback callback);
+        Capability(int bit) {
+            this.bit = bit;
+        }
 
-    static native int jniWrite(long idxPtr);
+        @Override
+        public int getBit() {
+            return bit;
+        }
+    }
+    /**
+     * Create a new bare Git index object as a memory representation of the Git index file in
+     * 'indexPath', without a repository to back it.
+     *
+     * <p>Since there is no ODB or working directory behind this index, any Index methods which rely
+     * on these (e.g. index_add_bypath) will fail with the GIT_ERROR error code.
+     *
+     * <p>If you need to access the index of an actual repository, use the `git_repository_index`
+     * wrapper.
+     *
+     * <p>The index must be freed once it's no longer in use.
+     *
+     * @param indexPath the path to the index file in disk
+     * @return the pointer for the new index
+     * @throws GitException git errors
+     */
+    public static Index open(String indexPath) {
+        Index outIdx = new Index();
+        Error.throwIfNeeded(jniOpen(outIdx._rawPtr, indexPath));
+        return outIdx;
+    }
 
-    static native void jniFree(long idxPtr);
+    /** git_repository * git_index_owner(const git_index *index); */
+    // JNIEXPORT jlong JNICALL J_MAKE_METHOD(Index_jniOwner)(JNIEnv *env, jclass obj, jlong indexPtr);
+    static native long jniOwner(long idxPtr);
 
     /**
-     * Update all index entries to match the working directory
+     * Get the repository this index relates to
+     *
+     * @return the repository that owns the index
+     */
+    public Repository owner() {
+        long ptr = jniOwner(getRawPointer());
+        if (ptr == 0) {
+            throw new GitException(GitException.ErrorClass.INDEX, "Index owner not found");
+        }
+        return new Repository(ptr);
+
+    }
+
+    static native int jniCaps(long idxPtr);
+
+    /**
+     * Read index capabilities flags.
+     *
+     * @return A combination of Capability enums
+     */
+    public EnumSet<Capability> caps() {
+        int c = jniCaps(getRawPointer());
+        if (c < 0) {
+            return EnumSet.of(Capability.FROM_OWNER);
+        }
+        return IBitEnum.parse(c, Capability.class);
+    }
+
+    static native int jniSetCaps(long idxPtr, int caps);
+
+    /**
+     * Set index capabilities flags.
+     *
+     * If you pass `GIT_INDEX_CAPABILITY_FROM_OWNER` for the caps, then
+     * capabilities will be read from the config of the owner object,
+     * looking at `core.ignorecase`, `core.filemode`, `core.symlinks`.
+     *
+     * @param caps A combination of Index.Capability values
+     * @throws GitException git errors
+     */
+    public void setCaps(EnumSet<Capability> caps) {
+        if (caps.contains(Capability.FROM_OWNER)) {
+            Error.throwIfNeeded(jniSetCaps(getRawPointer(), Capability.FROM_OWNER.getBit()));
+            return;
+        }
+        Error.throwIfNeeded(jniSetCaps(getRawPointer(), IBitEnum.bitOrAll(caps)));
+    }
+
+    static native int jniVersion(long indexPtr);
+    /**
+     * Get index on-disk version.
+     *
+     * Valid return values are 2, 3, or 4.  If 3 is returned, an index
+     * with version 2 may be written instead, if the extension data in
+     * version 3 is not necessary.
+     *
+     * @return the index version
+     */
+    public int version() {
+        return jniVersion(getRawPointer());
+    }
+
+    static native int jniSetVersion(long indexPtr, int version);
+    /**
+     * Set index on-disk version.
+     *
+     * Valid values are 2, 3, or 4.  If 2 is given, git_index_write may
+     * write an index with version 3 instead, if necessary to accurately
+     * represent the index.
+     *
+     * @param version The new version number
+     * @throws GitException git errors
+     */
+    public void setVersion(int version) {
+        Error.throwIfNeeded(jniSetVersion(getRawPointer(), version));
+    }
+
+    static native int jniUpdateAll(long idxPtr, String[] pathSpec, Callback callback);
+
+    /**
+     * Update all index entries, which have already been included and match the {@code pathSpec} pattern),
+     * to line up with the working directory.
+     *
+     * <pre>
+     *  # show which files are included in existing index,
+     *  $ git ls-files --cached
+     *  # make a trivial change to one of the file, say "README.md"
+     *  $ echo "" >> README.md
+     *  # update the index: `updateAll(List.of("README.md", (path, pathSpec)-> {})`
+     *  $ git update-index README.md
+     * <pre/>
      *
      * @param pathSpec array of path patterns
      * @param callback notification callback for each updated path (also gets index of matching
      *     pathspec entry); can be NULL; return 0 to add, >0 to skip, < 0 to abort scan.
      * @throws GitException git error.
      */
-    public void updateAll(String[] pathSpec, BiConsumer<String, String> callback) {
-        Error.throwIfNeeded(jniUpdateAll(idxPtr.get(), pathSpec, callback));
+    public void updateAll(List<String> pathSpec, Callback callback) {
+        Error.throwIfNeeded(jniUpdateAll(getRawPointer(), pathSpec.toArray(new String[0]), callback));
     }
 
-    /** See also {@link #updateAll(String[], BiConsumer)}. */
-    public void updateAll(List<String> pathSpec, BiConsumer<String, String> callback) {
-        updateAll(pathSpec.toArray(new String[0]), callback);
-    }
-
-    /**
-     * Write an existing index object from memory back to disk using an atomic file lock.
-     *
-     * @throws GitException git error.
-     */
-    public void write() {
-        Error.throwIfNeeded(jniWrite(idxPtr.get()));
-    }
-
-    /** Delegate {@code git_index_free} Free an existing index object. */
-    @Override
-    public void close() {
-        jniFree(idxPtr.get());
-        idxPtr.set(0);
-    }
+    static native int jniAdd(long idxPtr, Entry sourceEntry);
 
     /**
      * Add or update an index entry from an in-memory struct.
@@ -65,19 +182,10 @@ public class Index implements AutoCloseable {
      * @throws GitException git error
      */
     public void add(Entry sourceEntry) {
-        Error.throwIfNeeded(jniAdd(idxPtr.get(), sourceEntry));
+        Error.throwIfNeeded(jniAdd(getRawPointer(), sourceEntry));
     }
 
-    /**
-     * Add or update an index entry from a file on disk
-     *
-     * @param path filename to add
-     * @throws GitException git error
-     */
-    public void add(String path) {
-        Error.throwIfNeeded(jniAddByPath(idxPtr.get(), path));
-    }
-
+    static native int jniAddAll(long idxPtr, String[] pathSpec, int flags, Callback callback);
     /**
      * Add or update index entries matching files in the working directory.
      *
@@ -90,7 +198,44 @@ public class Index implements AutoCloseable {
     public void addAll(
             String[] pathSpec, EnumSet<AddOption> flags, BiConsumer<String, String> callback) {
         Error.throwIfNeeded(
-                jniAddAll(idxPtr.get(), pathSpec, IBitEnum.bitOrAll(flags), callback::accept));
+                jniAddAll(getRawPointer(), pathSpec, IBitEnum.bitOrAll(flags), callback::accept));
+    }
+
+    static native int jniWrite(long idxPtr);
+    /**
+     * Write an existing index object from memory back to disk using an atomic file lock.
+     *
+     * @throws GitException git error.
+     */
+    public void write() {
+        Error.throwIfNeeded(jniWrite(getRawPointer()));
+    }
+
+    static native String jniPath(long indexPtr);
+
+    public String path() {
+        return jniPath(getRawPointer());
+    }
+
+    static native void jniFree(long idxPtr);
+
+    /** Delegate {@code git_index_free} Free an existing index object. */
+    @Override
+    public void close() {
+        jniFree(getRawPointer());
+        _rawPtr.set(0);
+    }
+
+    static native int jniAddByPath(long idxPtr, String path);
+
+    /**
+     * Add or update an index entry from a file on disk
+     *
+     * @param path filename to add
+     * @throws GitException git error
+     */
+    public void add(String path) {
+        Error.throwIfNeeded(jniAddByPath(getRawPointer(), path));
     }
 
     public enum AddOption implements IBitEnum {

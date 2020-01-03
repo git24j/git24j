@@ -5,7 +5,7 @@
 - [x] Repository
 - [x] Reference
 - [x] Commit
-- [ ] Branch
+- [x] Branch
 - [ ] Config
 - [ ] Index
 - [ ] Diff
@@ -43,3 +43,4 @@
 - [x] jni::GetObjectClass segfaults if object is null, so make sure every call is protected.
 - [ ] Replace `assert` with better alternatives (many build system disables assert by default).
 - [ ] Rename `consumer` in callbacks to `callback`
+- [ ] Buf is a stupid idea, replace it with plain String or a POJO
