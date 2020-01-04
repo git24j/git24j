@@ -552,10 +552,10 @@ public class Repository implements AutoCloseable {
      * @throws GitException git error.
      */
     public Index index() {
-        AtomicLong outIdx = new AtomicLong();
-        int error = jniIndex(outIdx, _rawPtr.get());
+        Index index = new Index();
+        int error = jniIndex(index._rawPtr, _rawPtr.get());
         Error.throwIfNeeded(error);
-        return new Index(outIdx);
+        return index;
     }
 
     public enum Item {

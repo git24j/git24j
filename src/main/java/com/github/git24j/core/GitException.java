@@ -8,8 +8,12 @@ public class GitException extends RuntimeException {
     private ErrorClass klass;
 
     public GitException(int klass, String message) {
+        this(ErrorClass.of(klass), message);
+    }
+
+    public GitException(ErrorClass klass, String message) {
         super(message);
-        this.klass = ErrorClass.of(klass);
+        this.klass = klass;
         this.message = message;
     }
 

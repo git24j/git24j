@@ -39,6 +39,7 @@
                     <windowtitle>API for ${project.name} ${project.version}</windowtitle>
                     <testDoctitle>Test API for ${project.name} ${project.version}</testDoctitle>
                     <testWindowtitle>Test API for ${project.name} ${project.version}</testWindowtitle>
+                    <doclint>none</doclint>
                 </configuration>
             </plugin>
 
