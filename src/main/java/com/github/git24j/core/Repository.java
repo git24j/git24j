@@ -558,6 +558,8 @@ public class Repository implements AutoCloseable {
         return index;
     }
 
+
+
     public enum Item {
         GITDIR,
         WORKDIR,
