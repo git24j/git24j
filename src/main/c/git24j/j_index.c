@@ -92,6 +92,12 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Index_jniSetVersion)(JNIEnv *env, jclass ob
     return git_index_set_version((git_index *)idxPtr, (unsigned int)version);
 }
 
+/** int git_index_read(git_index *index, int force); */
+JNIEXPORT jint JNICALL J_MAKE_METHOD(Index_jniRead)(JNIEnv *env, jclass obj, jlong indexPtr, int force)
+{
+    return git_index_read((git_index *)indexPtr, force);
+}
+
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Index_jniWrite)(JNIEnv *env, jclass obj, jlong index)
 {
     return git_index_write((git_index *)index);
@@ -102,6 +108,80 @@ JNIEXPORT jstring JNICALL J_MAKE_METHOD(Index_jniPath)(JNIEnv *env, jclass obj, 
 {
     const char *path = git_index_path((git_index *)idxPtr);
     return (*env)->NewStringUTF(env, path);
+}
+
+/** const git_oid * git_index_checksum(git_index *index); */
+JNIEXPORT void JNICALL J_MAKE_METHOD(Index_jniChecksum)(JNIEnv *env, jclass obj, jobject outOid, jlong indexPtr)
+{
+    const git_oid *c_oid = git_index_checksum((git_index *)indexPtr);
+    j_git_oid_to_java(env, c_oid, outOid);
+}
+
+/** int git_index_read_tree(git_index *index, const git_tree *tree); */
+JNIEXPORT jint JNICALL J_MAKE_METHOD(Index_jniReadTree)(JNIEnv *env, jclass obj, jlong indexPtr, jlong treePtr)
+{
+    return git_index_read_tree((git_index *)indexPtr, (git_tree *)treePtr);
+}
+
+/** int git_index_write_tree(git_oid *out, git_index *index); */
+JNIEXPORT jint JNICALL J_MAKE_METHOD(Index_jniWriteTree)(JNIEnv *env, jclass obj, jobject outOid, jlong indexPtr)
+{
+    git_oid c_oid = {0};
+    int e = git_index_write_tree(&c_oid, (git_index *)indexPtr);
+    j_git_oid_to_java(env, &c_oid, outOid);
+    return e;
+}
+/** int git_index_write_tree_to(git_oid *out, git_index *index, git_repository *repo); */
+JNIEXPORT jint JNICALL J_MAKE_METHOD(Index_jniWriteTreeTo)(JNIEnv *env, jclass obj, jobject outOid, jlong indexPtr, jlong repoPtr)
+{
+    git_oid c_oid = {0};
+    int e = git_index_write_tree_to(&c_oid, (git_index *)indexPtr, (git_repository *)repoPtr);
+    j_git_oid_to_java(env, &c_oid, outOid);
+    return e;
+}
+
+/** size_t git_index_entrycount(const git_index *index); */
+JNIEXPORT jint JNICALL J_MAKE_METHOD(Index_jniEntryCount)(JNIEnv *env, jclass obj, jlong indexPtr)
+{
+    return (jint)git_index_entrycount((git_index *)indexPtr);
+}
+
+/** int git_index_clear(git_index *index); */
+JNIEXPORT jint JNICALL J_MAKE_METHOD(Index_jniClear)(JNIEnv *env, jclass obj, jlong indexPtr)
+{
+    return git_index_clear((git_index *)indexPtr);
+}
+
+/** const git_index_entry * git_index_get_byindex(git_index *index, size_t n); */
+JNIEXPORT jlong JNICALL J_MAKE_METHOD(Index_jniGetByIndex)(JNIEnv *env, jclass obj, jlong indexPtr, jint n)
+{
+    return (jlong)git_index_get_byindex((git_index *)indexPtr, (size_t)n);
+}
+/** const git_index_entry * git_index_get_bypath(git_index *index, const char *path, int stage); */
+JNIEXPORT jlong JNICALL J_MAKE_METHOD(Index_jniGetByPath)(JNIEnv *env, jclass obj, jlong indexPtr, jstring path, jint stage)
+{
+    char *c_path = j_copy_of_jstring(env, path, true);
+    const git_index_entry *entry = git_index_get_bypath((git_index *)indexPtr, c_path, stage);
+    free(c_path);
+    return (jlong)entry;
+}
+
+/** int git_index_remove(git_index *index, const char *path, int stage); */
+JNIEXPORT jint JNICALL J_MAKE_METHOD(Index_jniRemove)(JNIEnv *env, jclass obj, jlong indexPtr, jstring path, jint stage)
+{
+    char *c_path = j_copy_of_jstring(env, path, true);
+    int e = git_index_remove((git_index *)indexPtr, c_path, stage);
+    free(c_path);
+    return e;
+}
+
+/** int git_index_remove_directory(git_index *index, const char *dir, int stage); */
+JNIEXPORT jint JNICALL J_MAKE_METHOD(Index_jniRemoveDirectory)(JNIEnv *env, jclass obj, jlong indexPtr, jstring dir, jint stage)
+{
+    char *c_dir = j_copy_of_jstring(env, dir, true);
+    int e = git_index_remove_directory((git_index *)indexPtr, c_dir, stage);
+    free(c_dir);
+    return e;
 }
 
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Index_jniAdd)(JNIEnv *env, jclass obj, jlong index, jobject srcEntry)

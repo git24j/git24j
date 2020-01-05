@@ -14,14 +14,16 @@ import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
+import static com.github.git24j.core.GitObject.Type.TREE;
 import static com.github.git24j.core.Index.Capability.IGNORE_CASE;
 import static com.github.git24j.core.Index.Capability.NO_SYMLINKS;
 
 public class IndexTest extends TestBase {
     @Rule public TemporaryFolder folder = new TemporaryFolder();
+
+    private static final String FEATURE_DEV_TREE_SHA = "3b597d284bc12d61638124054b19889587127208";
 
     @Test
     public void open() {
@@ -37,7 +39,7 @@ public class IndexTest extends TestBase {
     public void updateAll() throws IOException {
         final String fname = "a";
         try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {
-            try (Index idx =testRepo.index()) {
+            try (Index idx = testRepo.index()) {
                 Map<String, String> cache = new HashMap<>();
                 Path p = testRepo.workdir().resolve(fname);
                 Files.write(p, Arrays.asList("line1", "line2"));
@@ -51,7 +53,7 @@ public class IndexTest extends TestBase {
     @Test
     public void owner() {
         try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {
-            try (Index idx =testRepo.index()) {
+            try (Index idx = testRepo.index()) {
                 Assert.assertEquals(testRepo, idx.owner());
             }
         }
@@ -60,7 +62,7 @@ public class IndexTest extends TestBase {
     @Test
     public void caps() {
         try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {
-            try (Index idx =testRepo.index()) {
+            try (Index idx = testRepo.index()) {
                 EnumSet<Index.Capability> caps = EnumSet.of(IGNORE_CASE, NO_SYMLINKS);
                 idx.setCaps(caps);
                 Assert.assertEquals(caps, idx.caps());
@@ -71,12 +73,98 @@ public class IndexTest extends TestBase {
     @Test
     public void version() {
         try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {
-            try (Index idx =testRepo.index()) {
+            try (Index idx = testRepo.index()) {
                 idx.setVersion(3);
                 Assert.assertEquals(3, idx.version());
             }
         }
     }
+
+    @Test
+    public void read() {
+        try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {
+            try (Index idx = testRepo.index()) {
+                idx.read(true);
+            }
+        }
+    }
+
+    @Test
+    public void checksum() {
+        try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {
+            try (Index idx = testRepo.index()) {
+                Oid oid = idx.checksum();
+                Assert.assertTrue(oid.toString().length() > 0);
+            }
+        }
+    }
+
+    /**
+     *
+     *
+     * <pre>
+     *     $ git read-tree 'feature/dev^{tree}'
+     *     $ git write-tree
+     *     > 3b597d284bc12d61638124054b19889587127208
+     * </pre>
+     */
+    @Test
+    public void readWriteTree() {
+        try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {
+            Tree dev = (Tree) Tree.lookup(testRepo, Oid.of(FEATURE_DEV_TREE_SHA), TREE);
+            try (Index idx = testRepo.index()) {
+                idx.readTree(dev);
+                Oid oid1 = idx.writeTree();
+                Assert.assertEquals("3b597d284bc12d61638124054b19889587127208", oid1.toString());
+                Oid oid2 = idx.writeTreeTo(testRepo);
+                Assert.assertEquals(oid1, oid2);
+            }
+        }
+    }
+
+    @Test
+    public void entryCount() {
+        try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {
+            try (Index idx = testRepo.index()) {
+                Assert.assertTrue(idx.entryCount() > 0);
+            }
+        }
+    }
+
+    @Test
+    public void clear() {
+        try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {
+            try (Index idx = testRepo.index()) {
+                idx.clear();
+            }
+        }
+    }
+
+    @Test
+    public void getEntry() {
+        try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {
+            try (Index idx = testRepo.index()) {
+                Index.Entry e1 = Index.Entry.getByIndex(idx, 0);
+                Assert.assertNotNull(e1);
+                Index.Entry e2 = Index.Entry.getByPath(idx, "a", 0);
+                Assert.assertNotNull(e2);
+            }
+        }
+    }
+
+    @Test
+    public void remove() {
+        try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {
+            try (Index idx = testRepo.index()) {
+                int originalCount = idx.entryCount();
+                idx.remove("a", 0);
+                Assert.assertEquals(originalCount - 1, idx.entryCount());
+                idx.remoteDirectory("non-exist", 0);
+                Assert.assertEquals(originalCount - 1, idx.entryCount());
+            }
+        }
+    }
+
     @Test
     public void addAll() throws IOException {
         Path repoPath = tempCopyOf(TestRepo.SIMPLE1, folder.getRoot().toPath());

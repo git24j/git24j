@@ -57,9 +57,6 @@ public class Commit extends GitObject {
         return jniMessageEncoding(getRawPointer());
     }
 
-    /** const char * git_commit_message(const git_commit *commit); */
-    // JNIEXPORT jstring JNICALL J_MAKE_METHOD(Commit_jniMessage)(JNIEnv *env, jclass obj, jlong
-    // commitPtr);
     static native String jniMessage(long commitPtr);
 
     /**
@@ -74,9 +71,6 @@ public class Commit extends GitObject {
         return jniMessage(getRawPointer());
     }
 
-    /** const char * git_commit_message_raw(const git_commit *commit); */
-    // JNIEXPORT jstring JNICALL J_MAKE_METHOD(Commit_jniMessageRaw)(JNIEnv *env, jclass obj, jlong
-    // commitPtr);
     static native String jniMessageRaw(long commitPtr);
 
     /**
@@ -464,17 +458,6 @@ public class Commit extends GitObject {
         Error.throwIfNeeded(e);
         return outOid;
     }
-    /*
-    JNIEXPORT jint JNICALL J_MAKE_METHOD(Commit_jniCreateBuffer)(JNIEnv *env, jclass obj,
-                                                             jobject outBuf,
-                                                             jlong repoPtr,
-                                                             jobject author,
-                                                             jobject committer,
-                                                             jstring messageEncodeing,
-                                                             jstring message,
-                                                             jlong treePtr,
-                                                             jlongArray parents)
-    */
     static native int jniCreateBuffer(
             Buf outBuf,
             long repoPtr,
