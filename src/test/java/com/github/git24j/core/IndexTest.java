@@ -166,6 +166,26 @@ public class IndexTest extends TestBase {
     }
 
     @Test
+    public void add() {
+        try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {
+            try (Index idx = testRepo.index()) {
+                idx.add(Index.Entry.getByIndex(idx, 1));
+            }
+        }
+    }
+
+    @Test
+    public void entry() {
+        try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {
+            try (Index idx = testRepo.index()) {
+                Index.Entry entry = Index.Entry.getByIndex(idx, 1);
+                Assert.assertEquals(0, entry.state());
+                Assert.assertFalse(entry.isConflict());
+            }
+        }
+    }
+
+    @Test
     public void addAll() throws IOException {
         Path repoPath = tempCopyOf(TestRepo.SIMPLE1, folder.getRoot().toPath());
         FileUtils.writeStringToFile(repoPath.resolve("a").toFile(), "test");
@@ -191,5 +211,26 @@ public class IndexTest extends TestBase {
             }
         }
         FileUtils.copyDirectory(repoPath.toFile(), new File("/tmp/test-indexAddByPath"));
+    }
+
+    @Test
+    public void addFromBuffer() {
+        try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {
+            try (Index idx = testRepo.index()) {
+                Index.Entry e = idx.getEntryByIndex(0);
+                idx.addFromBuffer(e, "abc".getBytes());
+            }
+        }
+    }
+
+    @Test
+    public void removeByPath() {
+        try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {
+            try (Index idx = testRepo.index()) {
+                int originalCount = idx.entryCount();
+                idx.removeByPath("a");
+                Assert.assertEquals(originalCount - 1, idx.entryCount());
+            }
+        }
     }
 }

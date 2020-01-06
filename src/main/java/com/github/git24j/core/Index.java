@@ -1,7 +1,9 @@
 package com.github.git24j.core;
 
 import java.util.EnumSet;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.BiConsumer;
 
@@ -185,18 +187,6 @@ public class Index implements AutoCloseable {
                 jniUpdateAll(getRawPointer(), pathSpec.toArray(new String[0]), callback));
     }
 
-    static native int jniAdd(long idxPtr, Entry sourceEntry);
-
-    /**
-     * Add or update an index entry from an in-memory struct.
-     *
-     * @param sourceEntry new entry object
-     * @throws GitException git error
-     */
-    public void add(Entry sourceEntry) {
-        Error.throwIfNeeded(jniAdd(getRawPointer(), sourceEntry));
-    }
-
     static native int jniAddAll(long idxPtr, String[] pathSpec, int flags, Callback callback);
     /**
      * Add or update index entries matching files in the working directory.
@@ -343,7 +333,15 @@ public class Index implements AutoCloseable {
 
     static native long jniGetByIndex(long indexPtr, int n);
 
+    public Entry getEntryByIndex(int n) {
+        return Entry.getByIndex(this, n);
+    }
+
     static native long jniGetByPath(long indexPtr, String path, int stage);
+
+    public Entry getEntryByPath(String path, int stage) {
+        return Entry.getByPath(this, path, stage);
+    }
 
     static native int jniRemove(long indexPtr, String path, int stage);
 
@@ -371,6 +369,25 @@ public class Index implements AutoCloseable {
         Error.throwIfNeeded(jniRemoveDirectory(getRawPointer(), dir, stage));
     }
 
+
+    static native int jniAdd(long idxPtr, long entryPtr);
+
+    /**
+     * Add or update an index entry from an in-memory struct.
+     *
+     * @param sourceEntry new entry object
+     * @throws GitException git error
+     */
+    public void add(Entry sourceEntry) {
+        if (sourceEntry == null) {
+            return;
+        }
+        Error.throwIfNeeded(jniAdd(getRawPointer(), sourceEntry._ptr.get()));
+    }
+
+    static native int jniEntryStage(long entryPtr);
+    static native int jniEntryIsConflict(long entryPtr);
+
     static native void jniFree(long idxPtr);
 
     /** Delegate {@code git_index_free} Free an existing index object. */
@@ -382,6 +399,56 @@ public class Index implements AutoCloseable {
 
     static native int jniAddByPath(long idxPtr, String path);
 
+    static native int jniAddFromBuffer(long indexPtr, long entryPtr, byte[]buffer);
+
+    /**
+     * Add or update an index entry from a buffer in memory
+     *
+     * This method will create a blob in the repository that owns the
+     * index and then add the index entry to the index.  The `path` of the
+     * entry represents the position of the blob relative to the
+     * repository's root folder.
+     *
+     * If a previous index entry exists that has the same path as the
+     * given 'entry', it will be replaced.  Otherwise, the 'entry' will be
+     * added. The `id` and the `file_size` of the 'entry' are updated with the
+     * real value of the blob.
+     *
+     * This forces the file to be added to the index, not looking
+     * at gitignore rules.  Those rules can be evaluated through
+     * the git_status APIs (in status.h) before calling this.
+     *
+     * If this file currently is the result of a merge conflict, this
+     * file will no longer be marked as conflicting.  The data about
+     * the conflict will be moved to the "resolve undo" (REUC) section.
+     *
+     * @param entry filename to add
+     * @param buffer data to be written into the blob
+     * @throws GitException git errors
+     */
+    public void addFromBuffer(Entry entry, byte []buffer) {
+        Error.throwIfNeeded(jniAddFromBuffer(getRawPointer(), entry._ptr.get(), buffer));
+    }
+    /** int git_index_remove_bypath(git_index *index, const char *path); */
+
+    static native int jniRemoveByPath(long indexPtr, String path);
+
+    /**
+     * Remove an index entry corresponding to a file on disk
+     *
+     * The file `path` must be relative to the repository's
+     * working folder.  It may exist.
+     *
+     * If this file currently is the result of a merge conflict, this
+     * file will no longer be marked as conflicting.  The data about
+     * the conflict will be moved to the "resolve undo" (REUC) section.
+     *
+     * @param path filename to remove
+     * @throws GitException git erros
+     */
+    public void removeByPath(String path) {
+        Error.throwIfNeeded(jniRemoveByPath(getRawPointer(), path));
+    }
     /**
      * Add or update an index entry from a file on disk
      *
@@ -464,6 +531,57 @@ public class Index implements AutoCloseable {
                 return null;
             }
             return new Entry(ptr);
+        }
+
+        /**
+         * Return the stage number from a git index entry
+         *
+         * This entry is calculated from the entry's flag attribute like this:
+         *
+         *    (entry->flags & GIT_INDEX_ENTRY_STAGEMASK) >> GIT_INDEX_ENTRY_STAGESHIFT
+         *
+         * @return the stage number
+         */
+        public int state() {
+            return Index.jniEntryStage(_ptr.get());
+        }
+
+        /**
+         * Return whether the given index entry is a conflict (has a high stage
+         * entry).  This is simply shorthand for `git_index_entry_stage > 0`.
+         *
+         * @return if the entry is a conflict entry
+         */
+        public boolean isConflict() {
+            return Index.jniEntryIsConflict(_ptr.get()) == 1;
+        }
+    }
+
+    static native int jniIteratorNew(AtomicLong outIterPtr, long indexPtr);
+    static native int jniIteratorNext(AtomicLong outEntryPtr, long iterPtr);
+    static native int jniIteratorFree(long iterPtr);
+
+    public static class Iterator {
+        private final AtomicLong _ptr = new AtomicLong();
+
+        Iterator(long rawPointer) {
+            _ptr.set(rawPointer);
+        }
+
+        public Iterator(Index index) {
+            Index.jniIteratorNew(_ptr, index.getRawPointer());
+        }
+
+        public Entry next() {
+            Entry nextEntry = new Entry(0);
+            Index.jniIteratorNext(nextEntry._ptr, _ptr.get());
+            return nextEntry;
+        }
+
+        @Override
+        protected void finalize() throws Throwable {
+            Index.jniIteratorFree(_ptr.get());
+            super.finalize();
         }
     }
 }
