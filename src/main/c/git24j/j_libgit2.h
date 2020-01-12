@@ -1,4 +1,5 @@
 #include "j_common.h"
+#include "j_mappers.h"
 #include <jni.h>
 
 #ifndef __GIT24J_GLOBAL_H__
@@ -7,6 +8,8 @@
 extern "C"
 {
 #endif
+
+    extern j_constants_t *jniConstants;
 
     JNIEXPORT void JNICALL J_MAKE_METHOD(Libgit2_init)(JNIEnv *, jclass);
 

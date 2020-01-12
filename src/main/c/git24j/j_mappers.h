@@ -15,6 +15,20 @@ extern "C"
         jobject consumer;
     } j_cb_payload;
 
+    typedef struct
+    {
+        jclass clzAtomicInt;
+        jclass clzAtomicLong;
+        jclass clzAtomicReference;
+
+        jmethodID midAtomicIntSet;
+        jmethodID midAtomicLongSet;
+        jmethodID midAtomicReferenceSet;
+    } j_constants_t;
+
+    /** commonly used constants. */
+    j_constants_t *jniConstants;
+
     /**
      * Duplicate c string, returned string needs to be free-ed separately.
      * */

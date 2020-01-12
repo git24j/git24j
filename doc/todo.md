@@ -32,6 +32,7 @@
 - [ ] docs
 - [ ] publish to jitpack.io or github
 - [ ] publish to maven central
+- [ ] replace most (if not all) FindObjectClass with using global classes
 
 
 ## Future

@@ -4,8 +4,11 @@ import java.util.EnumSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.BiConsumer;
+
+import static com.github.git24j.core.GitException.ErrorCode.ENOTFOUND;
 
 public class Index implements AutoCloseable {
     final AtomicLong _rawPtr = new AtomicLong();
@@ -65,7 +68,14 @@ public class Index implements AutoCloseable {
         Error.throwIfNeeded(jniOpen(outIdx._rawPtr, indexPath));
         return outIdx;
     }
+    static native void jniFree(long idxPtr);
 
+    /** Delegate {@code git_index_free} Free an existing index object. */
+    @Override
+    public void close() {
+        jniFree(getRawPointer());
+        _rawPtr.set(0);
+    }
     static native long jniOwner(long idxPtr);
 
     /**
@@ -162,47 +172,6 @@ public class Index implements AutoCloseable {
         Error.throwIfNeeded(jniRead(getRawPointer(), force ? 0 : 1));
     }
 
-    static native int jniUpdateAll(long idxPtr, String[] pathSpec, Callback callback);
-
-    /**
-     * Update all index entries, which have already been included and match the {@code pathSpec} pattern),
-     * to line up with the working directory.
-     *
-     * <pre>
-     *  # show which files are included in existing index,
-     *  $ git ls-files --cached
-     *  # make a trivial change to one of the file, say "README.md"
-     *  $ echo "" >> README.md
-     *  # update the index: `updateAll(List.of("README.md", (path, pathSpec)-> {})`
-     *  $ git update-index README.md
-     * <pre/>
-     *
-     * @param pathSpec array of path patterns
-     * @param callback notification callback for each updated path (also gets index of matching
-     *     pathspec entry); can be NULL; return 0 to add, >0 to skip, < 0 to abort scan.
-     * @throws GitException git error.
-     */
-    public void updateAll(List<String> pathSpec, Callback callback) {
-        Error.throwIfNeeded(
-                jniUpdateAll(getRawPointer(), pathSpec.toArray(new String[0]), callback));
-    }
-
-    static native int jniAddAll(long idxPtr, String[] pathSpec, int flags, Callback callback);
-    /**
-     * Add or update index entries matching files in the working directory.
-     *
-     * @param pathSpec array of path patterns
-     * @param flags combination of git_index_add_option_t flags
-     * @param callback notification callback for each added/updated path (also gets index of
-     *     matching pathspec entry); can be NULL; return 0 to add, >0 to skip, < 0 to abort scan.
-     * @throws GitException git error
-     */
-    public void addAll(
-            String[] pathSpec, EnumSet<AddOption> flags, BiConsumer<String, String> callback) {
-        Error.throwIfNeeded(
-                jniAddAll(getRawPointer(), pathSpec, IBitEnum.bitOrAll(flags), callback::accept));
-    }
-
     static native int jniWrite(long idxPtr);
     /**
      * Write an existing index object from memory back to disk using an atomic file lock.
@@ -212,6 +181,11 @@ public class Index implements AutoCloseable {
     public void write() {
         Error.throwIfNeeded(jniWrite(getRawPointer()));
     }
+
+
+
+
+
 
     static native String jniPath(long indexPtr);
 
@@ -365,7 +339,7 @@ public class Index implements AutoCloseable {
      * @param stage stage to search
      * @throws GitException git errors
      */
-    public void remoteDirectory(String dir, int stage) {
+    public void removeDirectory(String dir, int stage) {
         Error.throwIfNeeded(jniRemoveDirectory(getRawPointer(), dir, stage));
     }
 
@@ -388,14 +362,7 @@ public class Index implements AutoCloseable {
     static native int jniEntryStage(long entryPtr);
     static native int jniEntryIsConflict(long entryPtr);
 
-    static native void jniFree(long idxPtr);
 
-    /** Delegate {@code git_index_free} Free an existing index object. */
-    @Override
-    public void close() {
-        jniFree(getRawPointer());
-        _rawPtr.set(0);
-    }
 
     static native int jniAddByPath(long idxPtr, String path);
 
@@ -583,5 +550,79 @@ public class Index implements AutoCloseable {
             Index.jniIteratorFree(_ptr.get());
             super.finalize();
         }
+    }
+
+    static native int jniAddAll(long idxPtr, String[] pathSpec, int flags, Callback callback);
+    /**
+     * Add or update index entries matching files in the working directory.
+     *
+     * @param pathSpec array of path patterns
+     * @param flags combination of git_index_add_option_t flags
+     * @param callback notification callback for each added/updated path (also gets index of
+     *     matching pathspec entry); can be NULL; return 0 to add, >0 to skip, < 0 to abort scan.
+     * @throws GitException git error
+     */
+    public void addAll(
+            String[] pathSpec, EnumSet<AddOption> flags, BiConsumer<String, String> callback) {
+        Error.throwIfNeeded(
+                jniAddAll(getRawPointer(), pathSpec, IBitEnum.bitOrAll(flags), callback::accept));
+    }
+
+    static native int jniUpdateAll(long idxPtr, String[] pathSpec, Callback callback);
+
+    /**
+     * Update all index entries, which have already been included and match the {@code pathSpec} pattern),
+     * to line up with the working directory.
+     *
+     * <pre>
+     *  # show which files are included in existing index,
+     *  $ git ls-files --cached
+     *  # make a trivial change to one of the file, say "README.md"
+     *  $ echo "" >> README.md
+     *  # update the index: `updateAll(List.of("README.md", (path, pathSpec)-> {})`
+     *  $ git update-index README.md
+     * <pre/>
+     *
+     * @param pathSpec array of path patterns
+     * @param callback notification callback for each updated path (also gets index of matching
+     *     pathspec entry); can be NULL; return 0 to add, >0 to skip, < 0 to abort scan.
+     * @throws GitException git error.
+     */
+    public void updateAll(List<String> pathSpec, Callback callback) {
+        Error.throwIfNeeded(
+                jniUpdateAll(getRawPointer(), pathSpec.toArray(new String[0]), callback));
+    }
+
+    static native int jniFind(AtomicInteger outPos, long indexPtr, String path);
+
+    /**
+     * Find the first position of any entries which point to given
+     * path in the Git index.
+     *
+     * @param path path to search
+     * @return a zero-based position in the index if found; GIT_ENOTFOUND otherwise
+     */
+    public int find(String path) {
+        AtomicInteger outPos = new AtomicInteger();
+        int e = jniFind(outPos, getRawPointer(), path);
+        Error.throwIfNeeded(e);
+        return outPos.get();
+    }
+
+
+    static native int jniFindPrefix(AtomicInteger outPos, long indexPtr, String prefix);
+    /**
+     * Find the first position of any entries matching a prefix. To find the first position
+     * of a path inside a given folder, suffix the prefix with a '/'.
+     *
+     * @param prefix the prefix to search for
+     * @return 0 with valid value in at_pos;
+     * @throws GitException git errors like GIT_ENOTFOUND
+     */
+    public int findPrefix(String prefix) {
+        AtomicInteger outPos = new AtomicInteger();
+        int e = jniFindPrefix(outPos, getRawPointer(), prefix);
+        Error.throwIfNeeded(e);
+        return outPos.get();
     }
 }

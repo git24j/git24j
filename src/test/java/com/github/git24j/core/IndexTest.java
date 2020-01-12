@@ -15,6 +15,7 @@ import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.github.git24j.core.GitObject.Type.TREE;
 import static com.github.git24j.core.Index.Capability.IGNORE_CASE;
@@ -159,7 +160,7 @@ public class IndexTest extends TestBase {
                 int originalCount = idx.entryCount();
                 idx.remove("a", 0);
                 Assert.assertEquals(originalCount - 1, idx.entryCount());
-                idx.remoteDirectory("non-exist", 0);
+                idx.removeDirectory("non-exist", 0);
                 Assert.assertEquals(originalCount - 1, idx.entryCount());
             }
         }
@@ -233,4 +234,17 @@ public class IndexTest extends TestBase {
             }
         }
     }
+
+    @Test
+    public void find() {
+        try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {
+            try (Index idx = testRepo.index()) {
+                int ia = idx.find("a");
+                AtomicInteger outPos = new AtomicInteger();
+                int ib = idx.findPrefix("b");
+                Assert.assertTrue(ia + ib > 0);
+            }
+        }
+    }
+
 }

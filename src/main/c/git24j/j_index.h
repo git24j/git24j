@@ -100,7 +100,11 @@ extern "C"
     JNIEXPORT jint JNICALL J_MAKE_METHOD(Index_jniUpdateAll)(JNIEnv *env, jclass obj, jlong index, jobjectArray pathspec, jobject biConsumer);
 
     /** int git_index_find(size_t *at_pos, git_index *index, const char *path); */
+    JNIEXPORT jint JNICALL J_MAKE_METHOD(Index_jniFind)(JNIEnv *env, jclass obj, jobject outPos, jlong indexPtr, jstring path);
+
     /** int git_index_find_prefix(size_t *at_pos, git_index *index, const char *prefix); */
+    JNIEXPORT jint JNICALL J_MAKE_METHOD(Index_jniFindPrefix)(JNIEnv *env, jclass obj, jobject outPos, jlong indexPtr, jstring prefix);
+
     /** int git_index_conflict_add(git_index *index, const git_index_entry *ancestor_entry, const git_index_entry *our_entry, const git_index_entry *their_entry); */
     /** int git_index_conflict_get(const git_index_entry **ancestor_out, const git_index_entry **our_out, const git_index_entry **their_out, git_index *index, const char *path); */
     /** int git_index_conflict_remove(git_index *index, const char *path); */

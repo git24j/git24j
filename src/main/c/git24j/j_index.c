@@ -9,6 +9,8 @@
 #include <jni.h>
 #include <stdio.h>
 
+extern j_constants_t *jniConstants;
+
 /**Pack jni objects to pass to update callback. */
 typedef struct
 {
@@ -275,4 +277,26 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Index_jniUpdateAll)(JNIEnv *env, jclass obj
     int error = git_index_update_all(c_index, &c_pathspec, standard_matched_cb, (void *)(&j_payloads));
     git_strarray_free(&c_pathspec);
     return error;
+}
+
+/** int git_index_find(size_t *at_pos, git_index *index, const char *path); */
+JNIEXPORT jint JNICALL J_MAKE_METHOD(Index_jniFind)(JNIEnv *env, jclass obj, jobject outPos, jlong indexPtr, jstring path)
+{
+    char *c_path = j_copy_of_jstring(env, path, true);
+    size_t at_pos;
+    int e = git_index_find(&at_pos, (git_index *)indexPtr, c_path);
+    (*env)->CallVoidMethod(env, outPos, jniConstants->midAtomicIntSet, (jint)at_pos);
+    free(c_path);
+    return e;
+}
+
+/** int git_index_find_prefix(size_t *at_pos, git_index *index, const char *prefix); */
+JNIEXPORT jint JNICALL J_MAKE_METHOD(Index_jniFindPrefix)(JNIEnv *env, jclass obj, jobject outPos, jlong indexPtr, jstring prefix)
+{
+    char *c_prefix = j_copy_of_jstring(env, prefix, true);
+    size_t at_pos;
+    int e = git_index_find_prefix(&at_pos, (git_index *)indexPtr, c_prefix);
+    (*env)->CallVoidMethod(env, outPos, jniConstants->midAtomicIntSet, (jint)at_pos);
+    free(c_prefix);
+    return e;
 }

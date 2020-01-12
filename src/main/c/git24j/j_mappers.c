@@ -195,6 +195,11 @@ void j_call_setter_long(JNIEnv *env, jclass clz, jobject obj, const char *method
 /** Call `obj.method(val)` to set a java object value. */
 void j_call_setter_int(JNIEnv *env, jclass clz, jobject obj, const char *method, jint val)
 {
+    if (!obj)
+    {
+        return;
+    }
+
     jmethodID setter = (*env)->GetMethodID(env, clz, method, "(I)V");
     assert(setter && "setter not found");
     (*env)->CallVoidMethod(env, obj, setter, val);
