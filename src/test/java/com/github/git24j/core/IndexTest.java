@@ -15,6 +15,7 @@ import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.github.git24j.core.GitObject.Type.TREE;
 import static com.github.git24j.core.Index.Capability.IGNORE_CASE;
@@ -159,8 +160,28 @@ public class IndexTest extends TestBase {
                 int originalCount = idx.entryCount();
                 idx.remove("a", 0);
                 Assert.assertEquals(originalCount - 1, idx.entryCount());
-                idx.remoteDirectory("non-exist", 0);
+                idx.removeDirectory("non-exist", 0);
                 Assert.assertEquals(originalCount - 1, idx.entryCount());
+            }
+        }
+    }
+
+    @Test
+    public void add() {
+        try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {
+            try (Index idx = testRepo.index()) {
+                idx.add(Index.Entry.getByIndex(idx, 1));
+            }
+        }
+    }
+
+    @Test
+    public void entry() {
+        try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {
+            try (Index idx = testRepo.index()) {
+                Index.Entry entry = Index.Entry.getByIndex(idx, 1);
+                Assert.assertEquals(0, entry.state());
+                Assert.assertFalse(entry.isConflict());
             }
         }
     }
@@ -192,4 +213,38 @@ public class IndexTest extends TestBase {
         }
         FileUtils.copyDirectory(repoPath.toFile(), new File("/tmp/test-indexAddByPath"));
     }
+
+    @Test
+    public void addFromBuffer() {
+        try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {
+            try (Index idx = testRepo.index()) {
+                Index.Entry e = idx.getEntryByIndex(0);
+                idx.addFromBuffer(e, "abc".getBytes());
+            }
+        }
+    }
+
+    @Test
+    public void removeByPath() {
+        try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {
+            try (Index idx = testRepo.index()) {
+                int originalCount = idx.entryCount();
+                idx.removeByPath("a");
+                Assert.assertEquals(originalCount - 1, idx.entryCount());
+            }
+        }
+    }
+
+    @Test
+    public void find() {
+        try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {
+            try (Index idx = testRepo.index()) {
+                int ia = idx.find("a");
+                AtomicInteger outPos = new AtomicInteger();
+                int ib = idx.findPrefix("b");
+                Assert.assertTrue(ia + ib > 0);
+            }
+        }
+    }
+
 }

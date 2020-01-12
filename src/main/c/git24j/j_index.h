@@ -70,19 +70,28 @@ extern "C"
     JNIEXPORT jint JNICALL J_MAKE_METHOD(Index_jniRemove)(JNIEnv *env, jclass obj, jlong indexPtr, jstring path, jint stage);
     /** int git_index_remove_directory(git_index *index, const char *dir, int stage); */
     JNIEXPORT jint JNICALL J_MAKE_METHOD(Index_jniRemoveDirectory)(JNIEnv *env, jclass obj, jlong indexPtr, jstring dir, jint stage);
-    /** int git_index_add(git_index *index, const git_index_entry *source_entry); */
-    JNIEXPORT jint JNICALL J_MAKE_METHOD(Index_jniAdd)(JNIEnv *env, jclass obj, jlong index, jobject srcEntry);
 
+    /** int git_index_add(git_index *index, const git_index_entry *source_entry); */
+    JNIEXPORT jint JNICALL J_MAKE_METHOD(Index_jniAdd)(JNIEnv *env, jclass obj, jlong index, jlong entryPtr);
     /** int git_index_entry_stage(const git_index_entry *entry); */
+    JNIEXPORT jint JNICALL J_MAKE_METHOD(Index_jniEntryStage)(JNIEnv *env, jclass obj, jlong entryPtr);
     /** int git_index_entry_is_conflict(const git_index_entry *entry); */
+    JNIEXPORT jint JNICALL J_MAKE_METHOD(Index_jniEntryIsConflict)(JNIEnv *env, jclass obj, jlong entryPtr);
+
     /** int git_index_iterator_new(git_index_iterator **iterator_out, git_index *index); */
+    JNIEXPORT jint JNICALL J_MAKE_METHOD(Index_jniIteratorNew)(JNIEnv *env, jclass obj, jobject outIterPtr, jlong indexptr);
     /** int git_index_iterator_next(const git_index_entry **out, git_index_iterator *iterator); */
+    JNIEXPORT jint JNICALL J_MAKE_METHOD(Index_jniIteratorNext)(JNIEnv *env, jclass obj, jobject outEntryPtr, jlong iterPtr);
     /** void git_index_iterator_free(git_index_iterator *iterator); */
+    JNIEXPORT void JNICALL J_MAKE_METHOD(Index_jniIteratorFree)(JNIEnv *env, jclass obj, jlong iterPtr);
+
     /** int git_index_add_bypath(git_index *index, const char *path); */
     JNIEXPORT jint JNICALL J_MAKE_METHOD(Index_jniAddByPath)(JNIEnv *env, jclass obj, jlong index, jstring path);
 
     /** int git_index_add_from_buffer(git_index *index, const git_index_entry *entry, const void *buffer, size_t len); */
+    JNIEXPORT jint JNICALL J_MAKE_METHOD(Index_jniAddFromBuffer)(JNIEnv *env, jclass obj, jlong indexPtr, jlong entryPtr, jbyteArray buffer);
     /** int git_index_remove_bypath(git_index *index, const char *path); */
+    JNIEXPORT jint JNICALL J_MAKE_METHOD(Index_jniRemoveByPath)(JNIEnv *env, jclass obj, jlong indexPtr, jstring path);
     /** int git_index_add_all(git_index *index, const git_strarray *pathspec, unsigned int flags, git_index_matched_path_cb callback, void *payload); */
     JNIEXPORT jint JNICALL J_MAKE_METHOD(Index_jniAddAll)(JNIEnv *env, jclass obj, jlong index, jobjectArray pathspec, jint flags, jobject biConsumer);
 
@@ -91,7 +100,11 @@ extern "C"
     JNIEXPORT jint JNICALL J_MAKE_METHOD(Index_jniUpdateAll)(JNIEnv *env, jclass obj, jlong index, jobjectArray pathspec, jobject biConsumer);
 
     /** int git_index_find(size_t *at_pos, git_index *index, const char *path); */
+    JNIEXPORT jint JNICALL J_MAKE_METHOD(Index_jniFind)(JNIEnv *env, jclass obj, jobject outPos, jlong indexPtr, jstring path);
+
     /** int git_index_find_prefix(size_t *at_pos, git_index *index, const char *prefix); */
+    JNIEXPORT jint JNICALL J_MAKE_METHOD(Index_jniFindPrefix)(JNIEnv *env, jclass obj, jobject outPos, jlong indexPtr, jstring prefix);
+
     /** int git_index_conflict_add(git_index *index, const git_index_entry *ancestor_entry, const git_index_entry *our_entry, const git_index_entry *their_entry); */
     /** int git_index_conflict_get(const git_index_entry **ancestor_out, const git_index_entry **our_out, const git_index_entry **their_out, git_index *index, const char *path); */
     /** int git_index_conflict_remove(git_index *index, const char *path); */

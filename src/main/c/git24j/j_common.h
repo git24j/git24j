@@ -14,8 +14,6 @@ extern "C"
 
 #define J_NO_CLASS_ERROR "java/lang/NoClassDefFoundError"
 
-    /**TODO: replace asserts to return error codes*/
-
 #ifdef __cplusplus
 }
 #endif

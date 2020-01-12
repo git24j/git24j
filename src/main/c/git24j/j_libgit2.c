@@ -1,15 +1,50 @@
 
 #include "j_libgit2.h"
+#include <assert.h>
 #include <git2.h>
 #include <jni.h>
+#include <stdio.h>
+
+jclass __find_and_hold_clz(JNIEnv *env, const char *descriptor)
+{
+    jclass clz = (*env)->FindClass(env, descriptor);
+    assert(clz && "class not found");
+    jclass gClz = (jclass)(*env)->NewGlobalRef(env, clz);
+    (*env)->DeleteLocalRef(env, clz);
+    return gClz;
+}
+
+void git24j_init(JNIEnv *env)
+{
+    assert(env && "cannot initiate git24j without jvm");
+    jniConstants = (j_constants_t *)malloc(sizeof(j_constants_t));
+    jniConstants->clzAtomicInt = __find_and_hold_clz(env, "Ljava/util/concurrent/atomic/AtomicInteger;");
+    jniConstants->clzAtomicLong = __find_and_hold_clz(env, "Ljava/util/concurrent/atomic/AtomicLong;");
+    jniConstants->clzAtomicReference = __find_and_hold_clz(env, "Ljava/util/concurrent/atomic/AtomicReference;");
+    assert(jniConstants->clzAtomicInt && "AtomicInteger::set not found");
+    jniConstants->midAtomicIntSet = (*env)->GetMethodID(env, jniConstants->clzAtomicInt, "set", "(I)V");
+    jniConstants->midAtomicLongSet = (*env)->GetMethodID(env, jniConstants->clzAtomicLong, "set", "(J)V");
+    jniConstants->midAtomicReferenceSet = (*env)->GetMethodID(env, jniConstants->clzAtomicReference, "set", "(Ljava/lang/Object;)V");
+}
+
+void git24j_shutdown(JNIEnv *env)
+{
+    assert(jniConstants && env && "jvm was shutdown unexpected");
+    (*env)->DeleteGlobalRef(env, jniConstants->clzAtomicInt);
+    (*env)->DeleteGlobalRef(env, jniConstants->clzAtomicLong);
+    (*env)->DeleteGlobalRef(env, jniConstants->clzAtomicReference);
+    free(jniConstants);
+}
 
 JNIEXPORT void JNICALL J_MAKE_METHOD(Libgit2_init)(JNIEnv *env, jclass obj)
 {
     git_libgit2_init();
+    git24j_init(env);
 }
 
 JNIEXPORT void JNICALL J_MAKE_METHOD(Libgit2_shutdown)(JNIEnv *env, jclass obj)
 {
+    git24j_shutdown(env);
     git_libgit2_shutdown();
 }
 

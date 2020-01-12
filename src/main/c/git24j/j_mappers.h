@@ -15,6 +15,20 @@ extern "C"
         jobject consumer;
     } j_cb_payload;
 
+    typedef struct
+    {
+        jclass clzAtomicInt;
+        jclass clzAtomicLong;
+        jclass clzAtomicReference;
+
+        jmethodID midAtomicIntSet;
+        jmethodID midAtomicLongSet;
+        jmethodID midAtomicReferenceSet;
+    } j_constants_t;
+
+    /** commonly used constants. */
+    j_constants_t *jniConstants;
+
     /**
      * Duplicate c string, returned string needs to be free-ed separately.
      * */
@@ -45,7 +59,7 @@ extern "C"
      * @param array jni array from which content is copied.
      * @param out_len length of the output array.
      * @return pointer to the output array.
-     * Returned array should be free-ed by the caller.
+     * Returned array should be released by the caller via `ReleaseByteArrayElements`.
      * */
     unsigned char *j_unsigned_chars_from_java(JNIEnv *env, jbyteArray array, int *out_len);
 

@@ -1,9 +1,14 @@
 package com.github.git24j.core;
 
 import java.util.EnumSet;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map.Entry;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.BiConsumer;
+
+import static com.github.git24j.core.GitException.ErrorCode.ENOTFOUND;
 
 public class Index implements AutoCloseable {
     final AtomicLong _rawPtr = new AtomicLong();
@@ -63,7 +68,14 @@ public class Index implements AutoCloseable {
         Error.throwIfNeeded(jniOpen(outIdx._rawPtr, indexPath));
         return outIdx;
     }
+    static native void jniFree(long idxPtr);
 
+    /** Delegate {@code git_index_free} Free an existing index object. */
+    @Override
+    public void close() {
+        jniFree(getRawPointer());
+        _rawPtr.set(0);
+    }
     static native long jniOwner(long idxPtr);
 
     /**
@@ -160,59 +172,6 @@ public class Index implements AutoCloseable {
         Error.throwIfNeeded(jniRead(getRawPointer(), force ? 0 : 1));
     }
 
-    static native int jniUpdateAll(long idxPtr, String[] pathSpec, Callback callback);
-
-    /**
-     * Update all index entries, which have already been included and match the {@code pathSpec} pattern),
-     * to line up with the working directory.
-     *
-     * <pre>
-     *  # show which files are included in existing index,
-     *  $ git ls-files --cached
-     *  # make a trivial change to one of the file, say "README.md"
-     *  $ echo "" >> README.md
-     *  # update the index: `updateAll(List.of("README.md", (path, pathSpec)-> {})`
-     *  $ git update-index README.md
-     * <pre/>
-     *
-     * @param pathSpec array of path patterns
-     * @param callback notification callback for each updated path (also gets index of matching
-     *     pathspec entry); can be NULL; return 0 to add, >0 to skip, < 0 to abort scan.
-     * @throws GitException git error.
-     */
-    public void updateAll(List<String> pathSpec, Callback callback) {
-        Error.throwIfNeeded(
-                jniUpdateAll(getRawPointer(), pathSpec.toArray(new String[0]), callback));
-    }
-
-    static native int jniAdd(long idxPtr, Entry sourceEntry);
-
-    /**
-     * Add or update an index entry from an in-memory struct.
-     *
-     * @param sourceEntry new entry object
-     * @throws GitException git error
-     */
-    public void add(Entry sourceEntry) {
-        Error.throwIfNeeded(jniAdd(getRawPointer(), sourceEntry));
-    }
-
-    static native int jniAddAll(long idxPtr, String[] pathSpec, int flags, Callback callback);
-    /**
-     * Add or update index entries matching files in the working directory.
-     *
-     * @param pathSpec array of path patterns
-     * @param flags combination of git_index_add_option_t flags
-     * @param callback notification callback for each added/updated path (also gets index of
-     *     matching pathspec entry); can be NULL; return 0 to add, >0 to skip, < 0 to abort scan.
-     * @throws GitException git error
-     */
-    public void addAll(
-            String[] pathSpec, EnumSet<AddOption> flags, BiConsumer<String, String> callback) {
-        Error.throwIfNeeded(
-                jniAddAll(getRawPointer(), pathSpec, IBitEnum.bitOrAll(flags), callback::accept));
-    }
-
     static native int jniWrite(long idxPtr);
     /**
      * Write an existing index object from memory back to disk using an atomic file lock.
@@ -222,6 +181,11 @@ public class Index implements AutoCloseable {
     public void write() {
         Error.throwIfNeeded(jniWrite(getRawPointer()));
     }
+
+
+
+
+
 
     static native String jniPath(long indexPtr);
 
@@ -343,7 +307,15 @@ public class Index implements AutoCloseable {
 
     static native long jniGetByIndex(long indexPtr, int n);
 
+    public Entry getEntryByIndex(int n) {
+        return Entry.getByIndex(this, n);
+    }
+
     static native long jniGetByPath(long indexPtr, String path, int stage);
+
+    public Entry getEntryByPath(String path, int stage) {
+        return Entry.getByPath(this, path, stage);
+    }
 
     static native int jniRemove(long indexPtr, String path, int stage);
 
@@ -367,21 +339,83 @@ public class Index implements AutoCloseable {
      * @param stage stage to search
      * @throws GitException git errors
      */
-    public void remoteDirectory(String dir, int stage) {
+    public void removeDirectory(String dir, int stage) {
         Error.throwIfNeeded(jniRemoveDirectory(getRawPointer(), dir, stage));
     }
 
-    static native void jniFree(long idxPtr);
 
-    /** Delegate {@code git_index_free} Free an existing index object. */
-    @Override
-    public void close() {
-        jniFree(getRawPointer());
-        _rawPtr.set(0);
+    static native int jniAdd(long idxPtr, long entryPtr);
+
+    /**
+     * Add or update an index entry from an in-memory struct.
+     *
+     * @param sourceEntry new entry object
+     * @throws GitException git error
+     */
+    public void add(Entry sourceEntry) {
+        if (sourceEntry == null) {
+            return;
+        }
+        Error.throwIfNeeded(jniAdd(getRawPointer(), sourceEntry._ptr.get()));
     }
+
+    static native int jniEntryStage(long entryPtr);
+    static native int jniEntryIsConflict(long entryPtr);
+
+
 
     static native int jniAddByPath(long idxPtr, String path);
 
+    static native int jniAddFromBuffer(long indexPtr, long entryPtr, byte[]buffer);
+
+    /**
+     * Add or update an index entry from a buffer in memory
+     *
+     * This method will create a blob in the repository that owns the
+     * index and then add the index entry to the index.  The `path` of the
+     * entry represents the position of the blob relative to the
+     * repository's root folder.
+     *
+     * If a previous index entry exists that has the same path as the
+     * given 'entry', it will be replaced.  Otherwise, the 'entry' will be
+     * added. The `id` and the `file_size` of the 'entry' are updated with the
+     * real value of the blob.
+     *
+     * This forces the file to be added to the index, not looking
+     * at gitignore rules.  Those rules can be evaluated through
+     * the git_status APIs (in status.h) before calling this.
+     *
+     * If this file currently is the result of a merge conflict, this
+     * file will no longer be marked as conflicting.  The data about
+     * the conflict will be moved to the "resolve undo" (REUC) section.
+     *
+     * @param entry filename to add
+     * @param buffer data to be written into the blob
+     * @throws GitException git errors
+     */
+    public void addFromBuffer(Entry entry, byte []buffer) {
+        Error.throwIfNeeded(jniAddFromBuffer(getRawPointer(), entry._ptr.get(), buffer));
+    }
+    /** int git_index_remove_bypath(git_index *index, const char *path); */
+
+    static native int jniRemoveByPath(long indexPtr, String path);
+
+    /**
+     * Remove an index entry corresponding to a file on disk
+     *
+     * The file `path` must be relative to the repository's
+     * working folder.  It may exist.
+     *
+     * If this file currently is the result of a merge conflict, this
+     * file will no longer be marked as conflicting.  The data about
+     * the conflict will be moved to the "resolve undo" (REUC) section.
+     *
+     * @param path filename to remove
+     * @throws GitException git erros
+     */
+    public void removeByPath(String path) {
+        Error.throwIfNeeded(jniRemoveByPath(getRawPointer(), path));
+    }
     /**
      * Add or update an index entry from a file on disk
      *
@@ -465,5 +499,130 @@ public class Index implements AutoCloseable {
             }
             return new Entry(ptr);
         }
+
+        /**
+         * Return the stage number from a git index entry
+         *
+         * This entry is calculated from the entry's flag attribute like this:
+         *
+         *    (entry->flags & GIT_INDEX_ENTRY_STAGEMASK) >> GIT_INDEX_ENTRY_STAGESHIFT
+         *
+         * @return the stage number
+         */
+        public int state() {
+            return Index.jniEntryStage(_ptr.get());
+        }
+
+        /**
+         * Return whether the given index entry is a conflict (has a high stage
+         * entry).  This is simply shorthand for `git_index_entry_stage > 0`.
+         *
+         * @return if the entry is a conflict entry
+         */
+        public boolean isConflict() {
+            return Index.jniEntryIsConflict(_ptr.get()) == 1;
+        }
+    }
+
+    static native int jniIteratorNew(AtomicLong outIterPtr, long indexPtr);
+    static native int jniIteratorNext(AtomicLong outEntryPtr, long iterPtr);
+    static native int jniIteratorFree(long iterPtr);
+
+    public static class Iterator {
+        private final AtomicLong _ptr = new AtomicLong();
+
+        Iterator(long rawPointer) {
+            _ptr.set(rawPointer);
+        }
+
+        public Iterator(Index index) {
+            Index.jniIteratorNew(_ptr, index.getRawPointer());
+        }
+
+        public Entry next() {
+            Entry nextEntry = new Entry(0);
+            Index.jniIteratorNext(nextEntry._ptr, _ptr.get());
+            return nextEntry;
+        }
+
+        @Override
+        protected void finalize() throws Throwable {
+            Index.jniIteratorFree(_ptr.get());
+            super.finalize();
+        }
+    }
+
+    static native int jniAddAll(long idxPtr, String[] pathSpec, int flags, Callback callback);
+    /**
+     * Add or update index entries matching files in the working directory.
+     *
+     * @param pathSpec array of path patterns
+     * @param flags combination of git_index_add_option_t flags
+     * @param callback notification callback for each added/updated path (also gets index of
+     *     matching pathspec entry); can be NULL; return 0 to add, >0 to skip, < 0 to abort scan.
+     * @throws GitException git error
+     */
+    public void addAll(
+            String[] pathSpec, EnumSet<AddOption> flags, BiConsumer<String, String> callback) {
+        Error.throwIfNeeded(
+                jniAddAll(getRawPointer(), pathSpec, IBitEnum.bitOrAll(flags), callback::accept));
+    }
+
+    static native int jniUpdateAll(long idxPtr, String[] pathSpec, Callback callback);
+
+    /**
+     * Update all index entries, which have already been included and match the {@code pathSpec} pattern),
+     * to line up with the working directory.
+     *
+     * <pre>
+     *  # show which files are included in existing index,
+     *  $ git ls-files --cached
+     *  # make a trivial change to one of the file, say "README.md"
+     *  $ echo "" >> README.md
+     *  # update the index: `updateAll(List.of("README.md", (path, pathSpec)-> {})`
+     *  $ git update-index README.md
+     * <pre/>
+     *
+     * @param pathSpec array of path patterns
+     * @param callback notification callback for each updated path (also gets index of matching
+     *     pathspec entry); can be NULL; return 0 to add, >0 to skip, < 0 to abort scan.
+     * @throws GitException git error.
+     */
+    public void updateAll(List<String> pathSpec, Callback callback) {
+        Error.throwIfNeeded(
+                jniUpdateAll(getRawPointer(), pathSpec.toArray(new String[0]), callback));
+    }
+
+    static native int jniFind(AtomicInteger outPos, long indexPtr, String path);
+
+    /**
+     * Find the first position of any entries which point to given
+     * path in the Git index.
+     *
+     * @param path path to search
+     * @return a zero-based position in the index if found; GIT_ENOTFOUND otherwise
+     */
+    public int find(String path) {
+        AtomicInteger outPos = new AtomicInteger();
+        int e = jniFind(outPos, getRawPointer(), path);
+        Error.throwIfNeeded(e);
+        return outPos.get();
+    }
+
+
+    static native int jniFindPrefix(AtomicInteger outPos, long indexPtr, String prefix);
+    /**
+     * Find the first position of any entries matching a prefix. To find the first position
+     * of a path inside a given folder, suffix the prefix with a '/'.
+     *
+     * @param prefix the prefix to search for
+     * @return 0 with valid value in at_pos;
+     * @throws GitException git errors like GIT_ENOTFOUND
+     */
+    public int findPrefix(String prefix) {
+        AtomicInteger outPos = new AtomicInteger();
+        int e = jniFindPrefix(outPos, getRawPointer(), prefix);
+        Error.throwIfNeeded(e);
+        return outPos.get();
     }
 }
