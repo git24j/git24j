@@ -307,6 +307,11 @@ int j_signature_from_java(JNIEnv *env, jobject sig, git_signature **out_sig)
     return e;
 }
 
+void j_atomic_long_set(JNIEnv *env, long val, jobject outAL)
+{
+    (*env)->CallVoidMethod(env, outAL, jniConstants->midAtomicLongSet, val);
+}
+
 /** FOR DEBUG: inspect object class */
 void __debug_inspect(JNIEnv *env, jobject obj)
 {

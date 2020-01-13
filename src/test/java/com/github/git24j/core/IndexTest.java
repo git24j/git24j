@@ -247,4 +247,41 @@ public class IndexTest extends TestBase {
         }
     }
 
+    @Test
+    public void conflict() {
+        try (Repository testRepo = TestRepo.CONFLICT.tempRepo(folder)) {
+            try (Index idx = testRepo.index()) {
+                Index.Conflict conflict = idx.conflictGet("README.md");
+                Assert.assertTrue(idx.hasConflicts());
+                Assert.assertTrue(conflict.ancestor.isConflict());
+                idx.conflictRemove("README.md");
+                Assert.assertFalse(idx.hasConflicts());
+            }
+        }
+    }
+
+    @Test
+    public void conflictCleanup() {
+        try (Repository testRepo = TestRepo.CONFLICT.tempRepo(folder)) {
+            try (Index idx = testRepo.index()) {
+                Index.Conflict conflict = idx.conflictGet("README.md");
+                idx.conflictAdd(conflict);
+                Assert.assertTrue(idx.hasConflicts());
+                idx.conflictCleanup();
+                Assert.assertFalse(idx.hasConflicts());
+            }
+        }
+    }
+
+    @Test
+    public void conflictIterator() {
+        try (Repository testRepo = TestRepo.CONFLICT.tempRepo(folder)) {
+            try (Index idx = testRepo.index()) {
+                Index.ConflictIterator iter = idx.conflictIteratorNew();
+                Index.Conflict conflict = iter.next();
+                Assert.assertTrue(conflict.our.isConflict());
+                Assert.assertNull(iter.next());
+            }
+        }
+    }
 }
