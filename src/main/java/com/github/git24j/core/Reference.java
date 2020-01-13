@@ -10,7 +10,7 @@ import java.util.function.Function;
 import static com.github.git24j.core.GitException.ErrorCode;
 
 public class Reference {
-    private final AtomicLong _rawPtr = new AtomicLong();
+    final AtomicLong _rawPtr = new AtomicLong();
 
     public Reference(long rawPointer) {
         _rawPtr.set(rawPointer);
@@ -561,7 +561,9 @@ public class Reference {
 
     @Override
     protected void finalize() throws Throwable {
-        jniFree(_rawPtr.get());
+        if (_rawPtr.get() > 0) {
+            jniFree(_rawPtr.get());
+        }
         super.finalize();
     }
 
@@ -813,13 +815,7 @@ public class Reference {
      * @throws GitException GIT_EAMBIGUOUS or an error code
      */
     public GitObject peel(GitObject.Type objType) {
-        AtomicLong outObj = new AtomicLong();
-        int e = jniPeel(outObj, getRawPointer(), objType.getValue());
-        if (e == ErrorCode.ENOTFOUND.getCode()) {
-            return null;
-        }
-        Error.throwIfNeeded(e);
-        return new GitObject(objType.getValue());
+        throw new UnsupportedOperationException("not implemented yet");
     }
 
     /**

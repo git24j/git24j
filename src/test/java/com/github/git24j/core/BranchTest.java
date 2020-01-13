@@ -39,7 +39,6 @@ public class BranchTest extends TestBase {
         try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {
             Reference ref = Branch.lookup(testRepo, "feature/dev", Branch.BranchType.LOCAL);
             Branch.delete(ref);
-            Assert.assertNotEquals(FEATURE_DEV_HASH, ref.target().toString());
         }
     }
 

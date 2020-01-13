@@ -76,7 +76,7 @@ public class Branch {
      * @throws GitException git error
      */
     public static void delete(Reference branch) {
-        Error.throwIfNeeded(jniDelete(branch.getRawPointer()));
+        Error.throwIfNeeded(jniDelete(branch._rawPtr.getAndSet(0)));
         branch.free();
     }
 
@@ -89,7 +89,9 @@ public class Branch {
 
         @Override
         protected void finalize() throws Throwable {
-            jniIteratorFree(_ptr.get());
+            if (_ptr.get() > 0 ){
+                jniIteratorFree(_ptr.get());
+            }
             super.finalize();
         }
         /**
@@ -152,10 +154,10 @@ public class Branch {
      * @throws GitException git errors
      */
     public static Reference move(Reference branch, String branchName, boolean force) {
-        AtomicLong outRef = new AtomicLong();
-        Error.throwIfNeeded(jniMove(outRef, branch.getRawPointer(), branchName, force ? 0 : 1));
-        Reference.jniFree(branch.getRawPointer());
-        return new Reference(outRef.get());
+        Reference outRef = new Reference(0);
+        Error.throwIfNeeded(jniMove(outRef._rawPtr, branch.getRawPointer(), branchName, force ? 0 : 1));
+        Reference.jniFree(branch._rawPtr.getAndSet(0));
+        return outRef;
     }
 
     public enum BranchType implements IBitEnum {
