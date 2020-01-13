@@ -117,6 +117,9 @@ extern "C"
     /** Copy values from it24j.Signature to git_signature */
     int j_signature_from_java(JNIEnv *env, jobject sig, git_signature **out_sig);
 
+    /** pass a long value to java's AtomicLong */
+    void j_atomic_long_set(JNIEnv *env, long val, jobject outAL);
+
     /** FOR DEBUG: inspect object class */
     void __debug_inspect(JNIEnv *env, jobject obj);
 #ifdef __cplusplus

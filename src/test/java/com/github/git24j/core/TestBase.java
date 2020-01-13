@@ -93,6 +93,7 @@ public class TestBase {
     public enum TestRepo {
         SIMPLE1("simple1"),
         SIMPLE1_BARE("simple1_bare"),
+        CONFLICT("conflict"),
         MERGE1("merge1"),
         MAILMAP("mailmap"),
         WORKTREE1("worktree1");

@@ -1,14 +1,12 @@
 package com.github.git24j.core;
 
 import java.util.EnumSet;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map.Entry;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.BiConsumer;
 
-import static com.github.git24j.core.GitException.ErrorCode.ENOTFOUND;
+import static com.github.git24j.core.GitException.ErrorCode.ITEROVER;
 
 public class Index implements AutoCloseable {
     final AtomicLong _rawPtr = new AtomicLong();
@@ -68,6 +66,7 @@ public class Index implements AutoCloseable {
         Error.throwIfNeeded(jniOpen(outIdx._rawPtr, indexPath));
         return outIdx;
     }
+
     static native void jniFree(long idxPtr);
 
     /** Delegate {@code git_index_free} Free an existing index object. */
@@ -76,6 +75,7 @@ public class Index implements AutoCloseable {
         jniFree(getRawPointer());
         _rawPtr.set(0);
     }
+
     static native long jniOwner(long idxPtr);
 
     /**
@@ -181,11 +181,6 @@ public class Index implements AutoCloseable {
     public void write() {
         Error.throwIfNeeded(jniWrite(getRawPointer()));
     }
-
-
-
-
-
 
     static native String jniPath(long indexPtr);
 
@@ -343,7 +338,6 @@ public class Index implements AutoCloseable {
         Error.throwIfNeeded(jniRemoveDirectory(getRawPointer(), dir, stage));
     }
 
-
     static native int jniAdd(long idxPtr, long entryPtr);
 
     /**
@@ -360,55 +354,49 @@ public class Index implements AutoCloseable {
     }
 
     static native int jniEntryStage(long entryPtr);
+
     static native int jniEntryIsConflict(long entryPtr);
-
-
 
     static native int jniAddByPath(long idxPtr, String path);
 
-    static native int jniAddFromBuffer(long indexPtr, long entryPtr, byte[]buffer);
+    static native int jniAddFromBuffer(long indexPtr, long entryPtr, byte[] buffer);
 
     /**
      * Add or update an index entry from a buffer in memory
      *
-     * This method will create a blob in the repository that owns the
-     * index and then add the index entry to the index.  The `path` of the
-     * entry represents the position of the blob relative to the
-     * repository's root folder.
+     * <p>This method will create a blob in the repository that owns the index and then add the
+     * index entry to the index. The `path` of the entry represents the position of the blob
+     * relative to the repository's root folder.
      *
-     * If a previous index entry exists that has the same path as the
-     * given 'entry', it will be replaced.  Otherwise, the 'entry' will be
-     * added. The `id` and the `file_size` of the 'entry' are updated with the
-     * real value of the blob.
+     * <p>If a previous index entry exists that has the same path as the given 'entry', it will be
+     * replaced. Otherwise, the 'entry' will be added. The `id` and the `file_size` of the 'entry'
+     * are updated with the real value of the blob.
      *
-     * This forces the file to be added to the index, not looking
-     * at gitignore rules.  Those rules can be evaluated through
-     * the git_status APIs (in status.h) before calling this.
+     * <p>This forces the file to be added to the index, not looking at gitignore rules. Those rules
+     * can be evaluated through the git_status APIs (in status.h) before calling this.
      *
-     * If this file currently is the result of a merge conflict, this
-     * file will no longer be marked as conflicting.  The data about
-     * the conflict will be moved to the "resolve undo" (REUC) section.
+     * <p>If this file currently is the result of a merge conflict, this file will no longer be
+     * marked as conflicting. The data about the conflict will be moved to the "resolve undo" (REUC)
+     * section.
      *
      * @param entry filename to add
      * @param buffer data to be written into the blob
      * @throws GitException git errors
      */
-    public void addFromBuffer(Entry entry, byte []buffer) {
+    public void addFromBuffer(Entry entry, byte[] buffer) {
         Error.throwIfNeeded(jniAddFromBuffer(getRawPointer(), entry._ptr.get(), buffer));
     }
     /** int git_index_remove_bypath(git_index *index, const char *path); */
-
     static native int jniRemoveByPath(long indexPtr, String path);
 
     /**
      * Remove an index entry corresponding to a file on disk
      *
-     * The file `path` must be relative to the repository's
-     * working folder.  It may exist.
+     * <p>The file `path` must be relative to the repository's working folder. It may exist.
      *
-     * If this file currently is the result of a merge conflict, this
-     * file will no longer be marked as conflicting.  The data about
-     * the conflict will be moved to the "resolve undo" (REUC) section.
+     * <p>If this file currently is the result of a merge conflict, this file will no longer be
+     * marked as conflicting. The data about the conflict will be moved to the "resolve undo" (REUC)
+     * section.
      *
      * @param path filename to remove
      * @throws GitException git erros
@@ -450,15 +438,11 @@ public class Index implements AutoCloseable {
     }
 
     public static class Entry {
+        /** Index.Entry holds pointer to const git_index_entry and should not be free-ed. */
         private final AtomicLong _ptr = new AtomicLong();
 
         Entry(long rawPtr) {
             _ptr.set(rawPtr);
-        }
-
-        @Override
-        protected void finalize() throws Throwable {
-            super.finalize();
         }
 
         /**
@@ -503,9 +487,9 @@ public class Index implements AutoCloseable {
         /**
          * Return the stage number from a git index entry
          *
-         * This entry is calculated from the entry's flag attribute like this:
+         * <p>This entry is calculated from the entry's flag attribute like this:
          *
-         *    (entry->flags & GIT_INDEX_ENTRY_STAGEMASK) >> GIT_INDEX_ENTRY_STAGESHIFT
+         * <p>(entry->flags & GIT_INDEX_ENTRY_STAGEMASK) >> GIT_INDEX_ENTRY_STAGESHIFT
          *
          * @return the stage number
          */
@@ -514,8 +498,8 @@ public class Index implements AutoCloseable {
         }
 
         /**
-         * Return whether the given index entry is a conflict (has a high stage
-         * entry).  This is simply shorthand for `git_index_entry_stage > 0`.
+         * Return whether the given index entry is a conflict (has a high stage entry). This is
+         * simply shorthand for `git_index_entry_stage > 0`.
          *
          * @return if the entry is a conflict entry
          */
@@ -525,7 +509,9 @@ public class Index implements AutoCloseable {
     }
 
     static native int jniIteratorNew(AtomicLong outIterPtr, long indexPtr);
+
     static native int jniIteratorNext(AtomicLong outEntryPtr, long iterPtr);
+
     static native int jniIteratorFree(long iterPtr);
 
     public static class Iterator {
@@ -596,8 +582,7 @@ public class Index implements AutoCloseable {
     static native int jniFind(AtomicInteger outPos, long indexPtr, String path);
 
     /**
-     * Find the first position of any entries which point to given
-     * path in the Git index.
+     * Find the first position of any entries which point to given path in the Git index.
      *
      * @param path path to search
      * @return a zero-based position in the index if found; GIT_ENOTFOUND otherwise
@@ -609,11 +594,10 @@ public class Index implements AutoCloseable {
         return outPos.get();
     }
 
-
     static native int jniFindPrefix(AtomicInteger outPos, long indexPtr, String prefix);
     /**
-     * Find the first position of any entries matching a prefix. To find the first position
-     * of a path inside a given folder, suffix the prefix with a '/'.
+     * Find the first position of any entries matching a prefix. To find the first position of a
+     * path inside a given folder, suffix the prefix with a '/'.
      *
      * @param prefix the prefix to search for
      * @return 0 with valid value in at_pos;
@@ -625,4 +609,143 @@ public class Index implements AutoCloseable {
         Error.throwIfNeeded(e);
         return outPos.get();
     }
+
+    /** A set of Entry that represents a conflict. */
+    public static class Conflict {
+        public final Entry ancestor;
+        public final Entry our;
+        public final Entry their;
+
+        Conflict() {
+            ancestor = new Entry(0);
+            our = new Entry(0);
+            their = new Entry(0);
+        }
+    }
+
+    static native int jniConflictAdd(
+            long indexPtr, long ancestorEntryPtr, long ourEntryPtr, long theirEntryPtr);
+
+    /**
+     * Add or update index entries to represent a conflict. Any staged entries that exist at the
+     * given paths will be removed.
+     *
+     * <p>The entries are the entries from the tree included in the merge. Any entry may be null to
+     * indicate that that file was not present in the trees during the merge. For example,
+     * ancestor_entry may be NULL to indicate that a file was added in both branches and must be
+     * resolved.
+     *
+     * @param conflict a set of entry that represents a conflict
+     * @throws GitException git errors
+     */
+    public void conflictAdd(Conflict conflict) {
+        Error.throwIfNeeded(
+                jniConflictAdd(
+                        getRawPointer(),
+                        conflict.ancestor._ptr.get(),
+                        conflict.our._ptr.get(),
+                        conflict.their._ptr.get()));
+    }
+
+    static native int jniConflictGet(
+            AtomicLong ancestorOut,
+            AtomicLong ourOut,
+            AtomicLong theirOut,
+            long indexPtr,
+            String path);
+
+    /**
+     * Roughly equals to {@code git ls-files -u}
+     *
+     * @see <a href=https://libgit2.org/libgit2/#HEAD/group/index/git_index_conflict_get></a>
+     * @param path path to get the conflict
+     * @throws GitException git errors
+     */
+    Conflict conflictGet(String path) {
+        Conflict conflict = new Conflict();
+        jniConflictGet(
+                conflict.ancestor._ptr,
+                conflict.our._ptr,
+                conflict.their._ptr,
+                getRawPointer(),
+                path);
+        return conflict;
+    }
+
+    static native int jniConflictRemove(long indexPtr, String path);
+
+    /**
+     * Removes the index entries that represent a conflict of a single file.
+     *
+     * @param path path to remove conflicts for
+     * @throws GitException git errors
+     */
+    public void conflictRemove(String path) {
+        Error.throwIfNeeded(jniConflictRemove(getRawPointer(), path));
+    }
+
+    static native int jniConflictCleanup(long indexPtr);
+    /**
+     * Remove all conflicts in the index (entries with a stage greater than 0).
+     *
+     * @throws GitException git errors
+     */
+    public void conflictCleanup() {
+        Error.throwIfNeeded(jniConflictCleanup(getRawPointer()));
+    }
+
+    static native int jniHasConflicts(long indexPtr);
+
+    /**
+     * Determine if the index contains entries representing file conflicts.
+     *
+     * @return 1 if at least one conflict is found, 0 otherwise.
+     */
+    public boolean hasConflicts() {
+        return jniHasConflicts(getRawPointer()) == 1;
+    }
+
+    /** int git_index_conflict_iterator_new(git_index_conflict_iterator **iterator_out, git_index *index); */
+    // JNIEXPORT jint JNICALL J_MAKE_METHOD(Index_jniConflictIteratorNew)(JNIEnv *env, jclass obj, jobject outIterPtr, jlong indexPtr);
+    static native int jniConflictIteratorNew(AtomicLong outIter, long indexPtr);
+    /** int git_index_conflict_next(const git_index_entry **ancestor_out, const git_index_entry **our_out, const git_index_entry **their_out, git_index_conflict_iterator *iterator); */
+    // JNIEXPORT jint JNICALL J_MAKE_METHOD(Index_jniConflictNext)(JNIEnv *env, jclass obj, jobject ancestorOut, jobject ourOut, jobject theirOut, jlong iterPtr);
+    static native int jniConflictNext(AtomicLong ancestorOut, AtomicLong ourOut, AtomicLong theirOut, long iterPtr);
+    /** void git_index_conflict_iterator_free(git_index_conflict_iterator *iterator); */
+    // JNIEXPORT void JNICALL J_MAKE_METHOD(Index_jniConflictIteratorFree)(JNIEnv *env, jclass obj, jlong iterPtr);
+    static native void jniConflictIteratorFree(long iterPtr);
+
+
+    public static class ConflictIterator {
+        AtomicLong _ptr = new AtomicLong();
+
+        @Override
+        protected void finalize() throws Throwable {
+            if (_ptr.get() > 0)  {
+                jniConflictIteratorFree(_ptr.get());
+            }
+            super.finalize();
+        }
+
+        public Conflict next() {
+            Conflict conflict = new Conflict();
+            int e = jniConflictNext(conflict.ancestor._ptr, conflict.our._ptr, conflict.their._ptr, _ptr.get());
+            if (e == ITEROVER.getCode()) {
+                return null;
+            }
+            Error.throwIfNeeded(e);
+            return conflict;
+        }
+    }
+
+    /**
+     * @return an iterator that can loops over iterator
+     */
+    public ConflictIterator conflictIteratorNew() {
+        ConflictIterator iterator = new ConflictIterator();
+        Error.throwIfNeeded(jniConflictIteratorNew(iterator._ptr, getRawPointer()));
+        return iterator;
+    }
+
+
 }
