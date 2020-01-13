@@ -1,0 +1,10 @@
+language: java
+jdk:
+ - openjdk8
+
+before_install:
+  - sudo apt-get update
+  - sudo apt-get -y install cmake libssl-dev maven
+  - git submodule update --init --recursive
+  - make
+
