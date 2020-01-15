@@ -6,22 +6,24 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class Mailmap {
-    private final AtomicLong rawPtr = new AtomicLong();
+    private final AtomicLong _rawPtr = new AtomicLong();
 
     public Mailmap(long ptr) {
-        rawPtr.set(ptr);
+        _rawPtr.set(ptr);
     }
 
-    static native void jniFree();
+    static native void jniFree(long rawPtr);
 
     @Override
     protected void finalize() throws Throwable {
-        jniFree();
+        if (_rawPtr.get() > 0) {
+            jniFree(_rawPtr.getAndSet(0));
+        }
         super.finalize();
     }
 
     long getRawPointer() {
-        return rawPtr.get();
+        return _rawPtr.get();
     }
 
     static native int jniAddEntry(long mmPtr, String realName, String realEmail, String replaceName, String replaceEmail);
@@ -53,9 +55,9 @@ public class Mailmap {
      */
 
     public static Mailmap fromBuffer(String buf) {
-        AtomicLong outPtr = new AtomicLong();
-        jniFromBuffer(outPtr, buf);
-        return new Mailmap(outPtr.get());
+        Mailmap mm = new Mailmap(0);
+        jniFromBuffer(mm._rawPtr, buf);
+        return mm;
     }
 
     static native int jniFromRepository(AtomicLong outPtr, long repoPtr);

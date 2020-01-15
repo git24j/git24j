@@ -466,8 +466,9 @@ public class Repository implements AutoCloseable {
 
     /** Close the repository, no-op if not opened. */
     public void free() {
-        jniFree(_rawPtr.get());
-        _rawPtr.set(0);
+        if (_rawPtr.get() > 0 ){
+            jniFree(_rawPtr.getAndSet(0));
+        }
     }
 
     /**

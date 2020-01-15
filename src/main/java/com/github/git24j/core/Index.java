@@ -72,8 +72,9 @@ public class Index implements AutoCloseable {
     /** Delegate {@code git_index_free} Free an existing index object. */
     @Override
     public void close() {
-        jniFree(getRawPointer());
-        _rawPtr.set(0);
+        if (_rawPtr.get() > 0) {
+            jniFree(_rawPtr.getAndSet(0));
+        }
     }
 
     static native long jniOwner(long idxPtr);

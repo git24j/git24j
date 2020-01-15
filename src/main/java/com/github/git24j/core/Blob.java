@@ -154,15 +154,11 @@ public class Blob extends GitObject {
         return outBlob.get() == 0 ? null : new Blob(outBlob.get());
     }
 
+    @Override
     public Blob dup() {
         AtomicLong out = new AtomicLong();
         Error.throwIfNeeded(jniDup(out, getRawPointer()));
         return new Blob(out.get());
-    }
-
-    /** Free jni resources. */
-    public void free() {
-        jniFree(getRawPointer());
     }
 
     /** Get the id of a blob. */

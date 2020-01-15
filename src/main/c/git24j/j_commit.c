@@ -136,7 +136,6 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Commit_jniParent)(JNIEnv *env, jclass obj, 
 JNIEXPORT void JNICALL J_MAKE_METHOD(Commit_jniParentId)(JNIEnv *env, jclass obj, jobject outOid, jlong commitPtr, jint n)
 {
     const git_oid *c_oid = git_commit_parent_id((git_commit *)commitPtr, (unsigned int)n);
-    printf("qqqqq c_oid = %s \n", git_oid_tostr_s(c_oid));
     j_git_oid_to_java(env, c_oid, outOid);
 }
 

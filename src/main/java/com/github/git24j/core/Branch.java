@@ -77,7 +77,6 @@ public class Branch {
      */
     public static void delete(Reference branch) {
         Error.throwIfNeeded(jniDelete(branch._rawPtr.getAndSet(0)));
-        branch.free();
     }
 
     public static class Iterator {
@@ -156,7 +155,6 @@ public class Branch {
     public static Reference move(Reference branch, String branchName, boolean force) {
         Reference outRef = new Reference(0);
         Error.throwIfNeeded(jniMove(outRef._rawPtr, branch.getRawPointer(), branchName, force ? 0 : 1));
-        Reference.jniFree(branch._rawPtr.getAndSet(0));
         return outRef;
     }
 
