@@ -728,10 +728,6 @@ public class Reference {
         return new Reference(outRef.get());
     }
 
-    public void free() {
-        jniFree(getRawPointer());
-    }
-
     /**
      * Create an iterator for the repo's references
      *

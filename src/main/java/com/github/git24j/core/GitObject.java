@@ -4,10 +4,10 @@ import java.util.concurrent.atomic.AtomicLong;
 
 /** Generic git object: {@code Commit}, {@code Tag}, {@code Tree} or {@code Blob} */
 public class GitObject {
-    protected final AtomicLong rawPtr = new AtomicLong();
+    protected final AtomicLong _rawPtr = new AtomicLong();
 
     protected GitObject(long rawPointer) {
-        rawPtr.set(rawPointer);
+        _rawPtr.set(rawPointer);
     }
 
     static native void jniFree(long objPtr);
@@ -104,7 +104,7 @@ public class GitObject {
      * @throws IllegalStateException if repository has already been closed.
      */
     long getRawPointer() {
-        long ptr = rawPtr.get();
+        long ptr = _rawPtr.get();
         if (ptr == 0) {
             throw new IllegalStateException(
                     "Object has invalid memory address, likely it has been closed.");
@@ -114,13 +114,15 @@ public class GitObject {
 
     @Override
     protected void finalize() throws Throwable {
-        jniFree(rawPtr.getAndSet(0));
+        if (_rawPtr.get() > 0) {
+            jniFree(_rawPtr.getAndSet(0));
+        }
         super.finalize();
     }
 
     /** TODO: change to type() Get the object type of an object. */
     public Type type() {
-        return Type.valueOf(jniType(rawPtr.get()));
+        return Type.valueOf(jniType(_rawPtr.get()));
     }
 
     /**
@@ -142,7 +144,7 @@ public class GitObject {
      */
     public Buf shortId() {
         Buf buf = new Buf();
-        Error.throwIfNeeded(jniShortId(buf, rawPtr.get()));
+        Error.throwIfNeeded(jniShortId(buf, _rawPtr.get()));
         return buf;
     }
 
@@ -176,7 +178,7 @@ public class GitObject {
      * @return the repository who owns this object
      */
     public Repository owner() {
-        return Repository.ofRaw(jniOwner(rawPtr.get()));
+        return Repository.ofRaw(jniOwner(_rawPtr.get()));
     }
 
     public enum Type {

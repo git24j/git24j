@@ -33,7 +33,9 @@ public class Config extends CAutoCloseable {
 
     @Override
     public void close() {
-        jniFree(_rawPtr.getAndSet(0));
+        if (_rawPtr.get() > 0) {
+            jniFree(_rawPtr.getAndSet(0));
+        }
     }
 
     /**
