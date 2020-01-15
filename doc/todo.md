@@ -7,7 +7,7 @@
 - [x] Commit
 - [x] Branch
 - [ ] Config
-- [ ] Index
+- [x] Index
 - [ ] Diff
 - [ ] Merge
 - [ ] Rebase
@@ -17,6 +17,7 @@
 - [ ] Worktree
 - [ ] Note
 - [ ] Tag
+- [ ] Status
 
 
 ## API polishing
@@ -28,7 +29,7 @@
 ## Administrative
 - [x] Basic make/build/test framework
 - [x] Minimum docs
-- [ ] adding ci
+- [x] adding ci
 - [ ] docs
 - [ ] publish to jitpack.io or github
 - [ ] publish to maven central
