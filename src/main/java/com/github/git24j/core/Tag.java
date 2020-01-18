@@ -80,12 +80,113 @@ public class Tag extends GitObject {
     static native String jniMessage(long tagPtr);
 
     /**
+     *
+     *
      * <pre>
      *     git show tag $tag_name
      * </pre>
+     *
      * @return message associated with the tag.
      */
     public String message() {
         return jniMessage(getRawPointer());
     }
+
+    static native int jniCreate(
+            Oid oid,
+            long repoPtr,
+            String tagName,
+            long targetPtr,
+            Signature tagger,
+            String message,
+            int force);
+
+    /**
+     * Create a new tag in the repository from an object
+     *
+     * <p>A new reference will also be created pointing to this tag object. If `force` is true and a
+     * reference already exists with the given name, it'll be replaced.
+     *
+     * <p>The message will not be cleaned up. This can be achieved through `git_message_prettify()`.
+     *
+     * <p>The tag name will be checked for validity. You must avoid the characters '~', '^', ':',
+     * '\\', '?', '[', and '*', and the sequences ".." and "@{" which have special meaning to
+     * revparse.
+     *
+     * @param repo Repository where to store the tag
+     * @param tagName Name for the tag; this name is validated for consistency. It should also not
+     *     conflict with an already existing tag name
+     * @param target Object to which this tag points. This object must belong to the given `repo`.
+     * @param tagger Signature of the tagger for this tag, and of the tagging time
+     * @param message Full message for this tag
+     * @param force Overwrite existing references
+     * @return OID of the * newly created tag. If the tag already exists, this parameter * will be
+     *     the oid of the existing tag, and the function will * return a GIT_EEXISTS error code. 0
+     *     on success, GIT_EINVALIDSPEC or an error code A tag object is written to the ODB, an
+     * @throws GitException GIT_EEXISTS if tag already exists, GIT_EINVALIDSPEC or error writing to
+     *     ODB
+     */
+    public static Oid create(
+            Repository repo,
+            String tagName,
+            GitObject target,
+            Signature tagger,
+            String message,
+            boolean force) {
+        Oid outOid = new Oid();
+        int e =
+                jniCreate(
+                        outOid,
+                        repo.getRawPointer(),
+                        tagName,
+                        target.getRawPointer(),
+                        tagger,
+                        message,
+                        force ? 1 : 0);
+        Error.throwIfNeeded(e);
+        return outOid;
+    }
+
+    static native int jniAnnotationCreate(
+            Oid oid,
+            long repoPtr,
+            String tagName,
+            long targetPtr,
+            Signature tagger,
+            String message);
+
+    /**
+     * Create a new tag in the object database pointing to a git_object
+     *
+     * <p>The message will not be cleaned up. This can be achieved through `git_message_prettify()`.
+     *
+     * @param repo Repository where to store the tag
+     * @param tagName Name for the tag
+     * @param target Object to which this tag points. This object must belong to the given `repo`.
+     * @param tagger Signature of the tagger for this tag, and of the tagging time
+     * @param message Full message for this tag
+     * @return oid to the newly created tag
+     * @throws GitException 0 on success or an error code
+     */
+    public static Oid annotationCreate(
+            Repository repo, String tagName, GitObject target, Signature tagger, String message) {
+        Oid outOid = new Oid();
+        int e =
+                jniAnnotationCreate(
+                        outOid,
+                        repo.getRawPointer(),
+                        tagName,
+                        target.getRawPointer(),
+                        tagger,
+                        message);
+        Error.throwIfNeeded(e);
+        return outOid;
+    }
+
+    static native int jniCreateFromBuffer(Oid oid, long repoPtr, String buffer, int force);
+
+    static native int jniCreateLightWeight(
+            Oid oid, long repoPtr, String tagName, long targetPtr, int force);
+
+    static native int jniDelete(long repoPtr, String tagName);
 }
