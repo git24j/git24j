@@ -129,3 +129,24 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Tag_jniDelete)(JNIEnv *env, jclass obj, jlo
     free(tag_name);
     return e;
 }
+
+/** int git_tag_list(git_strarray *tag_names, git_repository *repo); */
+/** int git_tag_list_match(git_strarray *tag_names, const char *pattern, git_repository *repo); */
+JNIEXPORT jint JNICALL J_MAKE_METHOD(Tag_jniList)(JNIEnv *env, jclass obj, jobjectArray tag_names, jlong repoPtr)
+{
+    git_strarray c_tag_names;
+    git_strarray_of_jobject_array(env, tag_names, &c_tag_names);
+    int r = git_tag_list(&c_tag_names, (git_repository *)repoPtr);
+    git_strarray_free(&c_tag_names);
+    return r;
+}
+JNIEXPORT jint JNICALL J_MAKE_METHOD(Tag_jniListMatch)(JNIEnv *env, jclass obj, jobjectArray tag_names, jstring pattern, jlong repoPtr)
+{
+    git_strarray c_tag_names;
+    git_strarray_of_jobject_array(env, tag_names, &c_tag_names);
+    char *c_pattern = j_copy_of_jstring(env, pattern, true);
+    int r = git_tag_list_match(&c_tag_names, c_pattern, (git_repository *)repoPtr);
+    git_strarray_free(&c_tag_names);
+    free(c_pattern);
+    return r;
+}

@@ -11,12 +11,13 @@ class Git2TypeConstRepository(Git2Type):
         - (wrapper_after): ""
         - (jni param): Oid oid
         """
-    PAT = re.compile(r"\b(?P<const>const)?\s+git_repository\s+(?P<is_pointer>\*?)(?P<var_name>\S+)\b")
+    PAT = re.compile(
+        r"^(?P<const>const\s+)?git_repository\s+(?P<is_pointer>\*)\s*(?P<var_name>\w+)$")
     C_HEADER_PARAM_STR = "jlong {var_name}Ptr"
     C_WRAPPER_BEFORE_STR = ""
     C_PARAM_STR = "(git_repository *){var_name}Ptr"
     C_WRAPPER_AFTER_STR = ""
-    JNI_PARAM_STR = "long repoPtr"
+    JNI_PARAM_STR = "long {jni_var_name}"
 
 
 class Git2TypeOutRepository(Git2Type):
@@ -28,9 +29,10 @@ class Git2TypeOutRepository(Git2Type):
         - (wrapper_after): "(*env)->CallVoidMethod(env, out, jniConstants->midAtomicLongSet, (long)c_out);"
         - (jni param): "AtomicLong out"
         """
-    PAT = re.compile(r"\b(?P<const>const)?\s+git_repository\s+(?P<is_pointer>\*\*)(?P<var_name>\S+)\b")
+    PAT = re.compile(
+        r"(?P<const>const\s+)?git_repository\s+(?P<is_pointer>\*\*)\s*(?P<var_name>\w+)")
     C_HEADER_PARAM_STR = "jobject {var_name}"
     C_WRAPPER_BEFORE_STR = "git_repository *c_{var_name};"
     C_PARAM_STR = "&c_{var_name}"
     C_WRAPPER_AFTER_STR = "(*env)->CallVoidMethod(env, {var_name}, jniConstants->midAtomicLongSet, (long)c_{var_name});"
-    JNI_PARAM_STR = "AtomicLong {var_name}"
+    JNI_PARAM_STR = "AtomicLong {jni_var_name}"

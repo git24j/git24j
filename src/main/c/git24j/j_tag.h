@@ -43,6 +43,8 @@ extern "C"
     JNIEXPORT jint JNICALL J_MAKE_METHOD(Tag_jniDelete)(JNIEnv *env, jclass obj, jlong repoPtr, jstring tagName);
     /** int git_tag_list(git_strarray *tag_names, git_repository *repo); */
     /** int git_tag_list_match(git_strarray *tag_names, const char *pattern, git_repository *repo); */
+    JNIEXPORT jint JNICALL J_MAKE_METHOD(Tag_jniList)(JNIEnv *env, jclass obj, jobjectArray tag_names, jlong repoPtr);
+    JNIEXPORT jint JNICALL J_MAKE_METHOD(Tag_jniListMatch)(JNIEnv *env, jclass obj, jobjectArray tag_names, jstring pattern, jlong repoPtr);
     /** int git_tag_foreach(git_repository *repo, git_tag_foreach_cb callback, void *payload); */
     /** int git_tag_peel(git_object **tag_target_out, const git_tag *tag); */
     /** int git_tag_dup(git_tag **out, git_tag *source); */
