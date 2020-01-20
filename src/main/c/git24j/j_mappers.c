@@ -286,7 +286,7 @@ void j_signature_to_java(JNIEnv *env, const git_signature *c_sig, jobject sig)
     (*env)->CallVoidMethod(env, sig, midSetWhen, c_sig->when.time, c_sig->when.offset, c_sig->when.sign);
 }
 
-/** Copy values from it24j.Signature to git_signature, `c_sig` should be pre allocated */
+/** Copy values from it24j.Signature to git_signature, `out_sig` should be free-ed later by `git_signature_free` */
 int j_signature_from_java(JNIEnv *env, jobject sig, git_signature **out_sig)
 {
     if (sig == NULL)

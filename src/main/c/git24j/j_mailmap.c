@@ -76,16 +76,15 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Mailmap_jniResolveSignature)(JNIEnv *env, j
     int e = j_signature_from_java(env, sig, &src_sig);
     if (e != 0)
     {
-        git_signature_free(src_sig);
-        return e;
+        goto free_and_return;
     }
     e = git_mailmap_resolve_signature(&dest_sig, (git_mailmap *)mmPtr, src_sig);
     if (e != 0)
     {
-        git_signature_free(dest_sig);
-        return e;
+        goto free_and_return;
     }
     j_signature_to_java(env, dest_sig, outSig);
+free_and_return:
     git_signature_free(dest_sig);
     git_signature_free(src_sig);
     return 0;

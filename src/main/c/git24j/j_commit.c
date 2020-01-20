@@ -186,19 +186,19 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Commit_jniCreate)(JNIEnv *env,
 {
     assert(parents && "parents must not be null");
     int e = 0;
-    git_signature *c_author, *c_committer;
+    git_signature *c_author = NULL;
+    git_signature *c_committer = NULL;
     e = j_signature_from_java(env, author, &c_author);
+
     if (e != 0)
     {
-        git_signature_free(c_author);
-        return e;
+        goto free_and_return;
     }
 
     j_signature_from_java(env, committer, &c_committer);
     if (e != 0)
     {
-        git_signature_free(c_committer);
-        return e;
+        goto free_and_return;
     }
 
     jsize np = (*env)->GetArrayLength(env, parents);
@@ -227,6 +227,9 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Commit_jniCreate)(JNIEnv *env,
     free(c_message);
     free(message_encoding);
     free(update_ref);
+
+free_and_return:
+    git_signature_free(c_author);
     git_signature_free(c_committer);
     return e;
 }
@@ -255,14 +258,12 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Commit_jniAmend)(JNIEnv *env, jclass obj,
     e = j_signature_from_java(env, author, &c_author);
     if (e != 0)
     {
-        git_signature_free(c_author);
-        return e;
+        goto free_and_return;
     }
     e = j_signature_from_java(env, committer, &c_committer);
     if (e != 0)
     {
-        git_signature_free(c_committer);
-        return e;
+        goto free_and_return;
     }
 
     git_oid c_oid;
@@ -282,6 +283,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Commit_jniAmend)(JNIEnv *env, jclass obj,
     free(c_message);
     free(message_encoding);
     free(update_ref);
+free_and_return:
     git_signature_free(c_author);
     git_signature_free(c_committer);
     return e;
@@ -299,19 +301,17 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Commit_jniCreateBuffer)(JNIEnv *env, jclass
 {
     assert(parents && "parents must not be null");
     int e = 0;
-    git_signature *c_author, *c_committer;
+    git_signature *c_author = NULL, *c_committer = NULL;
     e = j_signature_from_java(env, author, &c_author);
     if (e != 0)
     {
-        git_signature_free(c_author);
-        return e;
+        goto free_and_return;
     }
 
     j_signature_from_java(env, committer, &c_committer);
     if (e != 0)
     {
-        git_signature_free(c_committer);
-        return e;
+        goto free_and_return;
     }
 
     jsize np = (*env)->GetArrayLength(env, parents);
@@ -338,6 +338,8 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Commit_jniCreateBuffer)(JNIEnv *env, jclass
     free(c_parents);
     free(c_message);
     free(message_encoding);
+free_and_return:
+    git_signature_free(c_author);
     git_signature_free(c_committer);
     return e;
 }

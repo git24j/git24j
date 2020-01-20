@@ -32,12 +32,19 @@ extern "C"
     JNIEXPORT jstring JNICALL J_MAKE_METHOD(Tag_jniMessage)(JNIEnv *env, jclass obj, jlong tagPtr);
 
     /** int git_tag_create(git_oid *oid, git_repository *repo, const char *tag_name, const git_object *target, const git_signature *tagger, const char *message, int force); */
+    JNIEXPORT jint JNICALL J_MAKE_METHOD(Tag_jniCreate)(JNIEnv *env, jclass obj, jobject oid, jlong repoPtr, jstring tagName, jlong targetPtr, jobject tagger, jstring message, jint force);
     /** int git_tag_annotation_create(git_oid *oid, git_repository *repo, const char *tag_name, const git_object *target, const git_signature *tagger, const char *message); */
+    JNIEXPORT jint JNICALL J_MAKE_METHOD(Tag_jniAnnotationCreate)(JNIEnv *env, jclass obj, jobject oid, jlong repoPtr, jstring tagName, jlong targetPtr, jobject tagger, jstring message);
     /** int git_tag_create_from_buffer(git_oid *oid, git_repository *repo, const char *buffer, int force); */
+    JNIEXPORT jint JNICALL J_MAKE_METHOD(Tag_jniCreateFromBuffer)(JNIEnv *env, jclass obj, jobject oid, jlong repoPtr, jstring buffer, jint force);
     /** int git_tag_create_lightweight(git_oid *oid, git_repository *repo, const char *tag_name, const git_object *target, int force); */
+    JNIEXPORT jint JNICALL J_MAKE_METHOD(Tag_jniCreateLightWeight)(JNIEnv *env, jclass obj, jobject oid, jlong repoPtr, jstring tagName, jlong targetPtr, jint force);
     /** int git_tag_delete(git_repository *repo, const char *tag_name); */
+    JNIEXPORT jint JNICALL J_MAKE_METHOD(Tag_jniDelete)(JNIEnv *env, jclass obj, jlong repoPtr, jstring tagName);
     /** int git_tag_list(git_strarray *tag_names, git_repository *repo); */
     /** int git_tag_list_match(git_strarray *tag_names, const char *pattern, git_repository *repo); */
+    JNIEXPORT jint JNICALL J_MAKE_METHOD(Tag_jniList)(JNIEnv *env, jclass obj, jobjectArray tag_names, jlong repoPtr);
+    JNIEXPORT jint JNICALL J_MAKE_METHOD(Tag_jniListMatch)(JNIEnv *env, jclass obj, jobjectArray tag_names, jstring pattern, jlong repoPtr);
     /** int git_tag_foreach(git_repository *repo, git_tag_foreach_cb callback, void *payload); */
     /** int git_tag_peel(git_object **tag_target_out, const git_tag *tag); */
     /** int git_tag_dup(git_tag **out, git_tag *source); */
