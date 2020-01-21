@@ -1,5 +1,7 @@
 package com.github.git24j.core;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 
 public class Tag extends GitObject {
@@ -185,8 +187,150 @@ public class Tag extends GitObject {
 
     static native int jniCreateFromBuffer(Oid oid, long repoPtr, String buffer, int force);
 
+    /**
+     * Create a new tag in the repository from a buffer
+     *
+     * @param repo Repository where to store the tag
+     * @param buffer Raw tag data
+     * @param force Overwrite existing tags
+     * @return newly created tag
+     * @throws GitException git error
+     */
+    public Oid createFromBuffer(Repository repo, String buffer, boolean force) {
+        Oid outOid = new Oid();
+        Error.throwIfNeeded(
+                jniCreateFromBuffer(outOid, repo.getRawPointer(), buffer, force ? 1 : 0));
+        return outOid;
+    }
+
     static native int jniCreateLightWeight(
             Oid oid, long repoPtr, String tagName, long targetPtr, int force);
 
+    /**
+     * Create a new lightweight tag pointing at a target object
+     *
+     * <p>A new direct reference will be created pointing to this target object. If `force` is true
+     * and a reference already exists with the given name, it'll be replaced.
+     *
+     * <p>The tag name will be checked for validity. See `git_tag_create()` for rules about valid
+     * names.
+     *
+     * @param repo Repository where to store the lightweight tag
+     * @param tagName Name for the tag; this name is validated for consistency. It should also not
+     *     conflict with an already existing tag name
+     * @param target Object to which this tag points. This object must belong to the given `repo`.
+     * @param force Overwrite existing references
+     * @return newly created tag
+     * @throws GitException e.g GIT_EINVALIDSPEC and GIT_EEXISTS
+     */
+    public Oid createLightWeight(Repository repo, String tagName, GitObject target, boolean force) {
+        Oid oid = new Oid();
+        Error.throwIfNeeded(
+                jniCreateLightWeight(
+                        oid, repo.getRawPointer(), tagName, target.getRawPointer(), force ? 1 : 0));
+        return oid;
+    }
+
     static native int jniDelete(long repoPtr, String tagName);
+
+    /**
+     * Delete an existing tag reference.
+     *
+     * The tag name will be checked for validity.
+     * See `git_tag_create()` for rules about valid names.
+     *
+     * @param repo Repository where lives the tag
+     *
+     * @param tagName Name of the tag to be deleted;
+     * this name is validated for consistency.
+     *
+     * @throws GitException GIT_EINVALIDSPEC or other git errors
+     */
+    public static void delete(Repository repo, String tagName) {
+        Error.throwIfNeeded(jniDelete(repo.getRawPointer(), tagName));
+    }
+    static native int jniList(List<String> tagNames, long repoPtr);
+
+
+    /**
+     * Fill a list with all the tags in the Repository
+     *
+     * The string array will be filled with the names of the
+     * matching tags; these values are owned by the user and
+     * should be free'd manually when no longer needed, using
+     * `git_strarray_free`.
+     *
+     * @param repo Repository where to find the tags
+     * @return List of tag names
+     * @throws GitException git errors
+     */
+
+    public static List<String> list(Repository repo) {
+        List<String> tagNames = new ArrayList<>();
+        Error.throwIfNeeded(jniList(tagNames, repo.getRawPointer()));
+        return tagNames;
+    }
+    static native int jniListMatch(List<String> tagNames, String pattern, long repoPtr);
+
+    /**
+     * Fill a list with all the tags in the Repository
+     * which name match a defined pattern
+     *
+     * If an empty pattern is provided, all the tags
+     * will be returned.
+     *
+     * The string array will be filled with the names of the
+     * matching tags; these values are owned by the user and
+     * should be free'd manually when no longer needed, using
+     * `git_strarray_free`.
+     *
+     * @param pattern Standard fnmatch pattern
+     * @param repo Repository where to find the tags
+     * @return a list of tag names that matches the given pattern
+     */
+
+    public static List<String> listMatch(String pattern, Repository repo) {
+        List<String> tagNames = new ArrayList<>();
+        Error.throwIfNeeded(jniListMatch(tagNames, pattern, repo.getRawPointer()));
+        return tagNames;
+    }
+
+    /**
+     * Callback used to iterate over tag names, return non-zero to terminate iteration.
+     *
+     * @see Tag::foreach
+     */
+    @FunctionalInterface
+    public interface ForeachCb {
+        int accept(String name, String oid);
+    }
+
+    static native int jniForeach(long repoPtr, ForeachCb callback);
+
+    /**
+     * Call callback `cb' for each tag in the repository
+     *
+     * @param repo Repository
+     * @param callback Callback function
+     */
+    public static void foreach(Repository repo, ForeachCb callback) {
+        Error.throwIfNeeded(jniForeach(repo.getRawPointer(), callback));
+    }
+
+    static native int jniPeel(AtomicLong outTarget, long tagPtr);
+
+    /**
+     * Recursively peel a tag until a non tag git_object is found
+     *
+     * <p>The retrieved `tag_target` object is owned by the repository and should be closed with the
+     * `git_object_free` method.
+     *
+     * @return peeled GitObject
+     * @throws GitException git errors
+     */
+    public GitObject peel() {
+        GitObject target = new GitObject(0, true);
+        Error.throwIfNeeded(jniPeel(target._rawPtr, getRawPointer()));
+        return target;
+    }
 }

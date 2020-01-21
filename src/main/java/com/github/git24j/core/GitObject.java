@@ -4,12 +4,19 @@ import java.util.concurrent.atomic.AtomicLong;
 
 /** Generic git object: {@code Commit}, {@code Tag}, {@code Tree} or {@code Blob} */
 public class GitObject {
+    // weak referenced git_object won't be free-ed in the finalizer
+    private final boolean _isWeak;
     protected final AtomicLong _rawPtr = new AtomicLong();
 
     protected GitObject(long rawPointer) {
         _rawPtr.set(rawPointer);
+        _isWeak = false;
     }
 
+    protected GitObject(long rawPointer, boolean weak) {
+        _rawPtr.set(rawPointer);
+        _isWeak = weak;
+    }
     static native void jniFree(long objPtr);
 
     static native int jniType(long objPtr);
@@ -114,7 +121,7 @@ public class GitObject {
 
     @Override
     protected void finalize() throws Throwable {
-        if (_rawPtr.get() > 0) {
+        if (_rawPtr.get() > 0 && !_isWeak) {
             jniFree(_rawPtr.getAndSet(0));
         }
         super.finalize();
