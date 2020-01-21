@@ -16,7 +16,7 @@
 - [ ] Submodule
 - [ ] Worktree
 - [ ] Note
-- [ ] Tag
+- [x] Tag
 - [ ] Status
 
 

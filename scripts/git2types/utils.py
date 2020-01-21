@@ -3,7 +3,23 @@ from .git2_type_native import Git2TypeConstString, Git2TypePrimitive
 from .git2_type_oid import Git2TypeConstOid, Git2TypeOid
 from .git2_type_repository import Git2TypeConstRepository, Git2TypeOutRepository
 from .git2_type_strarray import Git2TypeStringArray, Git2TypeOutStringArray
-from .git2_type_common import Git2TypeConstIndex
+from .git2_type_buf import Git2TypeConstBuf, Git2TypeOutBuf
+from .git2_type_common import (
+    Git2TypeConstIndex,
+    Git2TypeConstConfigEntry,
+    Git2TypeOutConfigEntry,
+)
+from .git2_type_config import (
+    Git2TypeConstConfig,
+    Git2TypeOutConfig,
+    Git2TypeGitConfigLevelT,
+    Git2TypeConstConfigIterator,
+    Git2TypeOutConfigIterator,
+)
+from .git2_type_outs import (
+    Git2TypeOutInt32,
+    Git2TypeOutInt64,
+)
 
 import re
 
@@ -22,6 +38,17 @@ GIT2_PARAM_PARSERS = [
     Git2TypeOutStringArray,
     Git2TypeStringArray,
     Git2TypeConstIndex,
+    Git2TypeConstConfigEntry,
+    Git2TypeOutConfigEntry,
+    Git2TypeConstBuf,
+    Git2TypeOutBuf,
+    Git2TypeConstConfig,
+    Git2TypeOutConfig,
+    Git2TypeGitConfigLevelT,
+    Git2TypeConstConfigIterator,
+    Git2TypeOutConfigIterator,
+    Git2TypeOutInt32,
+    Git2TypeOutInt64,
 ]
 
 
@@ -76,7 +103,7 @@ def get_git2_param(param: str) -> 'Git2Type':
         t = p.parse(param)
         if t:
             return t
-    raise Exception(f"no matching type found for '{param}'")
+    raise NotImplementedError(f"no matching type found for '{param}'")
 
 
 def get_c_wrapper_param_list(param_list: List['Git2Type']) -> str:
