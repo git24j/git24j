@@ -43,12 +43,14 @@ extern "C"
     JNIEXPORT jint JNICALL J_MAKE_METHOD(Tag_jniDelete)(JNIEnv *env, jclass obj, jlong repoPtr, jstring tagName);
     /** int git_tag_list(git_strarray *tag_names, git_repository *repo); */
     /** int git_tag_list_match(git_strarray *tag_names, const char *pattern, git_repository *repo); */
-    JNIEXPORT jint JNICALL J_MAKE_METHOD(Tag_jniList)(JNIEnv *env, jclass obj, jobjectArray tag_names, jlong repoPtr);
-    JNIEXPORT jint JNICALL J_MAKE_METHOD(Tag_jniListMatch)(JNIEnv *env, jclass obj, jobjectArray tag_names, jstring pattern, jlong repoPtr);
+    JNIEXPORT jint JNICALL J_MAKE_METHOD(Tag_jniList)(JNIEnv *env, jclass obj, jobject tagNames, jlong repoPtr);
+    JNIEXPORT jint JNICALL J_MAKE_METHOD(Tag_jniListMatch)(JNIEnv *env, jclass obj, jobject tagNames, jstring pattern, jlong repoPtr);
     /** int git_tag_foreach(git_repository *repo, git_tag_foreach_cb callback, void *payload); */
+    JNIEXPORT jint JNICALL J_MAKE_METHOD(Tag_jniForeach)(JNIEnv *env, jclass obj, jlong repoPtr, jobject foreachCb);
     /** int git_tag_peel(git_object **tag_target_out, const git_tag *tag); */
+    JNIEXPORT jint JNICALL J_MAKE_METHOD(Tag_jniPeel)(JNIEnv *env, jclass obj, jobject outTarget, jlong tagPtr);
     /** int git_tag_dup(git_tag **out, git_tag *source); */
-    /** int git_tag_foreach_cb(const char *name, git_oid *oid, void *payload); */
+    JNIEXPORT jint JNICALL J_MAKE_METHOD(Tag_jniDup)(JNIEnv *env, jclass obj, jobject outTag, jlong sourcePtr);
 
 #ifdef __cplusplus
 }

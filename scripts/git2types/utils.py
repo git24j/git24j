@@ -2,7 +2,7 @@ from typing import List
 from .git2_type_native import Git2TypeConstString, Git2TypePrimitive
 from .git2_type_oid import Git2TypeConstOid, Git2TypeOid
 from .git2_type_repository import Git2TypeConstRepository, Git2TypeOutRepository
-from .git2_type_strarray import Git2TypeStringArray
+from .git2_type_strarray import Git2TypeStringArray, Git2TypeOutStringArray
 from .git2_type_common import Git2TypeConstIndex
 
 import re
@@ -19,6 +19,7 @@ GIT2_PARAM_PARSERS = [
     Git2TypeOid,
     Git2TypeConstRepository,
     Git2TypeOutRepository,
+    Git2TypeOutStringArray,
     Git2TypeStringArray,
     Git2TypeConstIndex,
 ]

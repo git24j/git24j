@@ -5,6 +5,10 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 public class TagTest extends TestBase {
     @Rule public TemporaryFolder folder = new TemporaryFolder();
 
@@ -30,6 +34,39 @@ public class TagTest extends TestBase {
             Assert.assertNotNull(tagger.getName());
             Assert.assertNotNull(tagger.getEmail());
             Assert.assertNotNull(v01.message());
+        }
+    }
+
+    @Test
+    public void listDelete() {
+        try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {
+            List<String> tags = Tag.list(testRepo);
+            Assert.assertTrue(tags.contains("v0.1"));
+            tags = Tag.listMatch("v*", testRepo);
+            Assert.assertTrue(tags.contains("v0.1"));
+            Tag.delete(testRepo, "v0.1");
+            Assert.assertFalse(Tag.list(testRepo).contains("v0.1"));
+        }
+    }
+
+    @Test
+    public void foreach() {
+        try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {
+            Map<String, String> tags = new HashMap<>();
+            Tag.foreach(testRepo, (name, oid) -> {
+                tags.put(name, oid);
+                return 0;
+            });
+            Assert.assertEquals(tags.get("refs/tags/v0.1"), TAG_V01_SHA);
+        }
+    }
+
+    @Test
+    public void peel() {
+        try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {
+            Tag v01 = Tag.lookup(testRepo, Oid.of(TAG_V01_SHA));
+            GitObject v01Target = v01.peel();
+            Assert.assertEquals(TAG_V01_TARGET, v01Target.id().toString());
         }
     }
 }

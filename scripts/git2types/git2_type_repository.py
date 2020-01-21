@@ -9,7 +9,7 @@ class Git2TypeConstRepository(Git2Type):
         - (wrapper_before): ""
         - (c function param): "(git_repository *)repoPtr"
         - (wrapper_after): ""
-        - (jni param): Oid oid
+        - (jni param): long repoPtr
         """
     PAT = re.compile(
         r"^(?P<const>const\s+)?git_repository\s+(?P<is_pointer>\*)\s*(?P<var_name>\w+)$")
@@ -17,7 +17,7 @@ class Git2TypeConstRepository(Git2Type):
     C_WRAPPER_BEFORE_STR = ""
     C_PARAM_STR = "(git_repository *){var_name}Ptr"
     C_WRAPPER_AFTER_STR = ""
-    JNI_PARAM_STR = "long {jni_var_name}"
+    JNI_PARAM_STR = "long {jni_var_name}Ptr"
 
 
 class Git2TypeOutRepository(Git2Type):
