@@ -1,5 +1,9 @@
 from typing import List
-from .git2_type_native import Git2TypeConstString, Git2TypePrimitive
+from .git2_type_native import (
+    Git2TypeOutString,
+    Git2TypeConstString,
+    Git2TypePrimitive,
+)
 from .git2_type_oid import Git2TypeConstOid, Git2TypeOid
 from .git2_type_repository import Git2TypeConstRepository, Git2TypeOutRepository
 from .git2_type_strarray import Git2TypeStringArray, Git2TypeOutStringArray
@@ -8,6 +12,10 @@ from .git2_type_common import (
     Git2TypeConstIndex,
     Git2TypeConstConfigEntry,
     Git2TypeOutConfigEntry,
+    Git2TypeOutInt32,
+    Git2TypeOutInt64,
+    Git2TypeInt32,
+    Git2TypeInt64,
 )
 from .git2_type_config import (
     Git2TypeConstConfig,
@@ -15,10 +23,11 @@ from .git2_type_config import (
     Git2TypeGitConfigLevelT,
     Git2TypeConstConfigIterator,
     Git2TypeOutConfigIterator,
-)
-from .git2_type_outs import (
-    Git2TypeOutInt32,
-    Git2TypeOutInt64,
+    Git2TypeConfigForeachCb,
+    Git2TypeVoidPtrPayload,
+    Git2TypeConstConfigMap,
+    Git2TypeConstConfigBackend,
+    Git2TypeOutTransaction,
 )
 
 import re
@@ -29,6 +38,7 @@ RAW_PAT = re.compile(
 STRING_PAT = re.compile(r"\b(?P<const>const)?\s*char\s*\*")
 
 GIT2_PARAM_PARSERS = [
+    Git2TypeOutString,
     Git2TypeConstString,
     Git2TypePrimitive,
     Git2TypeConstOid,
@@ -49,11 +59,21 @@ GIT2_PARAM_PARSERS = [
     Git2TypeOutConfigIterator,
     Git2TypeOutInt32,
     Git2TypeOutInt64,
+    Git2TypeInt32,
+    Git2TypeInt64,
+    Git2TypeConfigForeachCb,
+    Git2TypeVoidPtrPayload,
+    Git2TypeConstConfigMap,
+    Git2TypeConstConfigBackend,
+    Git2TypeOutTransaction,
 ]
 
 
 def get_jtype_raw(c_type: str) -> str:
-    m = RAW_PAT.match(c_type)
+    s = c_type.strip()
+    if 'void' == s:
+        return 'void'
+    m = RAW_PAT.match(s)
     if not m:
         return ""
     return 'j{}'.format(m.group('type_name'))
@@ -71,6 +91,7 @@ def get_jtype(c_type: str) -> str:
     return jni type of c types, e.g:
     int -> jint
     'const char *' -> jstring
+    'void' -> 'void'
     """
     s = c_type.strip()
     return get_jtype_raw(s) or get_jtype_string(s)

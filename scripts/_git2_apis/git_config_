@@ -33,8 +33,8 @@ int git_config_foreach(const git_config *cfg, git_config_foreach_cb callback, vo
 int git_config_iterator_new(git_config_iterator **out, const git_config *cfg);
 int git_config_iterator_glob_new(git_config_iterator **out, const git_config *cfg, const char *regexp);
 int git_config_foreach_match(const git_config *cfg, const char *regexp, git_config_foreach_cb callback, void *payload);
-int git_config_get_mapped(int *out, const git_config *cfg, const char *name, const git_configmap *maps, size_t map_n);
-int git_config_lookup_map_value(int *out, const git_configmap *maps, size_t map_n, const char *value);
+# int git_config_get_mapped(int *out, const git_config *cfg, const char *name, const git_configmap *maps, size_t map_n);
+# int git_config_lookup_map_value(int *out, const git_configmap *maps, size_t map_n, const char *value);
 int git_config_parse_bool(int *out, const char *value);
 int git_config_parse_int32(int32_t *out, const char *value);
 int git_config_parse_int64(int64_t *out, const char *value);

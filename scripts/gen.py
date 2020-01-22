@@ -29,9 +29,9 @@ def generate(sig_strs: List[str]) -> Dict[str, List[str]]:
         except NotImplementedError as e:
             print(f"<----- {e}, {s} ----->")
         else:
-            res['header'].append(git2f.header_sig)
-            res['body'].append(git2f.wrapper)
-            res['jni'].append(git2f.jni_sig)
+            res['header'].append(f"/** {s} */\n {git2f.header_sig}\n")
+            res['body'].append(f"/** {s} */\n {git2f.wrapper}\n")
+            res['jni'].append(f"/** {s} */\n {git2f.jni_sig}\n")
     return res
 
 
@@ -42,7 +42,7 @@ if __name__ == "__main__":
     if ns.string:
         sig_str = [ns.string.strip()]
     elif ns.file:
-        sig_str = [s.strip() for s in open(ns.file).readlines()]
+        sig_str = [s.strip() for s in open(ns.file).readlines() if '#' not in s]
 
     output = generate(sig_str)
     if ns.outtype == 'header' or ns.outtype == 'all':
