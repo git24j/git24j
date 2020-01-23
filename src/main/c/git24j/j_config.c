@@ -35,7 +35,7 @@ JNIEXPORT void JNICALL J_MAKE_METHOD(Config_jniEntryFree)(JNIEnv *env, jclass ob
 /** int git_config_find_global(git_buf *out); */
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Config_jniFindGlobal)(JNIEnv *env, jclass obj, jobject out)
 {
-    git_buf c_out;
+    git_buf c_out = {0};
     int r = git_config_find_global(&c_out);
     j_git_buf_to_java(env, &c_out, out);
     git_buf_dispose(&c_out);
@@ -45,7 +45,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Config_jniFindGlobal)(JNIEnv *env, jclass o
 /** int git_config_find_xdg(git_buf *out); */
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Config_jniFindXdg)(JNIEnv *env, jclass obj, jobject out)
 {
-    git_buf c_out;
+    git_buf c_out = {0};
     int r = git_config_find_xdg(&c_out);
     j_git_buf_to_java(env, &c_out, out);
     git_buf_dispose(&c_out);
@@ -55,7 +55,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Config_jniFindXdg)(JNIEnv *env, jclass obj,
 /** int git_config_find_system(git_buf *out); */
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Config_jniFindSystem)(JNIEnv *env, jclass obj, jobject out)
 {
-    git_buf c_out;
+    git_buf c_out = {0};
     int r = git_config_find_system(&c_out);
     j_git_buf_to_java(env, &c_out, out);
     git_buf_dispose(&c_out);
@@ -65,7 +65,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Config_jniFindSystem)(JNIEnv *env, jclass o
 /** int git_config_find_programdata(git_buf *out); */
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Config_jniFindProgramdata)(JNIEnv *env, jclass obj, jobject out)
 {
-    git_buf c_out;
+    git_buf c_out = {0};
     int r = git_config_find_programdata(&c_out);
     j_git_buf_to_java(env, &c_out, out);
     git_buf_dispose(&c_out);
@@ -164,7 +164,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Config_jniGetEntry)(JNIEnv *env, jclass obj
 /** int git_config_get_int32(int32_t *out, const git_config *cfg, const char *name); */
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Config_jniGetInt32)(JNIEnv *env, jclass obj, jobject out, jlong cfgPtr, jstring name)
 {
-    int c_out;
+    int32_t c_out;
     char *c_name = j_copy_of_jstring(env, name, true);
     int r = git_config_get_int32(&c_out, (git_config *)cfgPtr, c_name);
     (*env)->CallVoidMethod(env, out, jniConstants->midAtomicIntSet, c_out);
@@ -197,7 +197,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Config_jniGetBool)(JNIEnv *env, jclass obj,
 /** int git_config_get_path(git_buf *out, const git_config *cfg, const char *name); */
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Config_jniGetPath)(JNIEnv *env, jclass obj, jobject out, jlong cfgPtr, jstring name)
 {
-    git_buf c_out;
+    git_buf c_out = {0};
     char *c_name = j_copy_of_jstring(env, name, true);
     int r = git_config_get_path(&c_out, (git_config *)cfgPtr, c_name);
     j_git_buf_to_java(env, &c_out, out);
@@ -222,7 +222,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Config_jniGetString)(JNIEnv *env, jclass ob
 /** int git_config_get_string_buf(git_buf *out, const git_config *cfg, const char *name); */
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Config_jniGetStringBuf)(JNIEnv *env, jclass obj, jobject out, jlong cfgPtr, jstring name)
 {
-    git_buf c_out;
+    git_buf c_out = {0};
     char *c_name = j_copy_of_jstring(env, name, true);
     int r = git_config_get_string_buf(&c_out, (git_config *)cfgPtr, c_name);
     j_git_buf_to_java(env, &c_out, out);
@@ -398,7 +398,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Config_jniParseBool)(JNIEnv *env, jclass ob
 /** int git_config_parse_int32(int32_t *out, const char *value); */
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Config_jniParseInt32)(JNIEnv *env, jclass obj, jobject out, jstring value)
 {
-    int c_out;
+    int32_t c_out;
     char *c_value = j_copy_of_jstring(env, value, true);
     int r = git_config_parse_int32(&c_out, c_value);
     (*env)->CallVoidMethod(env, out, jniConstants->midAtomicIntSet, c_out);
@@ -420,7 +420,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Config_jniParseInt64)(JNIEnv *env, jclass o
 /** int git_config_parse_path(git_buf *out, const char *value); */
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Config_jniParsePath)(JNIEnv *env, jclass obj, jobject out, jstring value)
 {
-    git_buf c_out;
+    git_buf c_out = {0};
     char *c_value = j_copy_of_jstring(env, value, true);
     int r = git_config_parse_path(&c_out, c_value);
     j_git_buf_to_java(env, &c_out, out);

@@ -8,6 +8,7 @@
 extern "C"
 {
 #endif
+
     /** void git_config_entry_free(git_config_entry *entry); */
     JNIEXPORT void JNICALL J_MAKE_METHOD(Config_jniEntryFree)(JNIEnv *env, jclass obj, jlong entryPtr);
 

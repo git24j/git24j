@@ -46,12 +46,12 @@ if __name__ == "__main__":
 
     output = generate(sig_str)
     if ns.outtype == 'header' or ns.outtype == 'all':
-        print('-------- Signature of the header ----------')
+        print('/** -------- Signature of the header ---------- */')
         print('\n'.join(output['header']))
     if ns.outtype == 'all' or ns.outtype == 'body':
-        print('-------- Wrapper Body ----------')
+        print('/** -------- Wrapper Body ---------- */')
         print('\n'.join(output['body']))
     if ns.outtype == 'all' or ns.outtype == 'jni':
-        print('-------- Jni Signature ----------')
+        print('/** -------- Jni Signature ---------- */')
         print('\n'.join(output['jni']))
 

@@ -7,7 +7,7 @@ from .git2_type_native import (
 from .git2_type_oid import Git2TypeConstOid, Git2TypeOid
 from .git2_type_repository import Git2TypeConstRepository, Git2TypeOutRepository
 from .git2_type_strarray import Git2TypeStringArray, Git2TypeOutStringArray
-from .git2_type_buf import Git2TypeConstBuf, Git2TypeOutBuf
+from .git2_type_buf import Git2TypeOutBuf
 from .git2_type_common import (
     Git2TypeConstIndex,
     Git2TypeConstConfigEntry,
@@ -50,7 +50,6 @@ GIT2_PARAM_PARSERS = [
     Git2TypeConstIndex,
     Git2TypeConstConfigEntry,
     Git2TypeOutConfigEntry,
-    Git2TypeConstBuf,
     Git2TypeOutBuf,
     Git2TypeConstConfig,
     Git2TypeOutConfig,
@@ -132,8 +131,8 @@ def get_c_wrapper_param_list(param_list: List['Git2Type']) -> str:
     from: git_oid *out, git_index *index, git_repository *repo
     to: jobject outOid, jlong indexPtr, jlong repoPtr
     """
-
-    return ', '.join([p.c_header_param for p in param_list])
+    params = [p.c_header_param for p in param_list]
+    return ', '.join([x for x in params if x])
 
 
 def get_c_param_list(param_list: List['Git2Type']) -> str:
@@ -141,7 +140,8 @@ def get_c_param_list(param_list: List['Git2Type']) -> str:
     from: git_oid *out, git_index *index, git_repository *repo
     to: &c_oid, (git_index *)indexPtr, (git_repository *)repoPtr
     """
-    return ', '.join([p.c_wrapper_param for p in param_list])
+    params = [p.c_wrapper_param for p in param_list]
+    return ', '.join([x for x in params if x])
 
 
 def get_c_wrapper_before_list(param_list: List['Git2Type']) -> str:
@@ -165,4 +165,5 @@ def get_jni_param_list(param_list: List['Git2Type']) -> str:
     from: git_oid *out, git_index *index, git_repository *repo
     to: Oid out, long indexPtr, long repoPtr
     """
-    return ', '.join([p.jni_param for p in param_list])
+    params = [p.jni_param for p in param_list]
+    return ', '.join([x for x in params if x])
