@@ -1,4 +1,5 @@
 from .utils import *
+from _collections import defaultdict
 import re
 import stringcase
 
@@ -40,6 +41,9 @@ class Git2Function(object):
             return
         self.match = m
         d = m.groupdict()
+        for k, v in d.items():
+            if v is None:
+                d[k] = ''
         d['c_wrapper_return_assign'] = get_return_assign(d['return_type'])
         d['c_wrapper_return_var'] = get_return_var(d['return_type'])
         d['jni_return_type'] = get_jtype(d['return_type'])
