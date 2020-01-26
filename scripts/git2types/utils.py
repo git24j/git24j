@@ -30,6 +30,15 @@ from .git2_type_config import (
     Git2TypeOutTransaction,
 )
 
+from .git2_type_diff import (
+    Git2TypeDiffOptions,
+    Git2TypeDiffFindOptions,
+    Git2TypeConstDiff,
+    Git2TypeOutDiff,
+)
+
+from .git2_type_tree import Git2TypeTree
+
 import re
 
 
@@ -65,6 +74,11 @@ GIT2_PARAM_PARSERS = [
     Git2TypeConstConfigMap,
     Git2TypeConstConfigBackend,
     Git2TypeOutTransaction,
+    Git2TypeDiffOptions,
+    Git2TypeDiffFindOptions,
+    Git2TypeTree,
+    Git2TypeOutDiff,
+    Git2TypeConstDiff,
 ]
 
 

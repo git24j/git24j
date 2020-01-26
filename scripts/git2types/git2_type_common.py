@@ -20,7 +20,7 @@ class Git2TypeInt32(Git2Type):
     - (wrapper_after): ""
     - (jni param): "int value"
     """
-    PAT = re.compile(r"^(size_t|int|int32_t)\s+(?P<var_name>\w+)$")
+    PAT = re.compile(r"^(unsigned int|size_t|int|int32_t|git_delta_t)\s+(?P<var_name>\w+)$")
     C_HEADER_PARAM_STR = "jint {jni_var_name}"
     C_WRAPPER_BEFORE_STR = ""
     C_PARAM_STR = "{jni_var_name}"
@@ -115,7 +115,7 @@ class Git2TypeOutObject(Git2Type):
     """
     PAT = re.compile(PAT1_STR + "(?P<obj_name>object)" + PAT3_STR)
     C_HEADER_PARAM_STR = "jobject {jni_var_name}"
-    C_WRAPPER_BEFORE_STR = "git_{obj_name} *c_{var_name};\n"
+    C_WRAPPER_BEFORE_STR = "\t git_{obj_name} *c_{var_name};\n"
     C_PARAM_STR = "&c_{var_name}"
     C_WRAPPER_AFTER_STR = (
         "\t (*env)->CallVoidMethod(env, {jni_var_name}, jniConstants->midAtomicLongSet, (long)c_{var_name});\n"
