@@ -15,7 +15,7 @@ class Git2Function(object):
     TPL_WRAPPER_2 = "\t {c_wrapper_return_assign}git_{obj_name}_{func_name}({c_param_list});\n"
     TPL_WRAPPER_3 = "{c_wrapper_after_list}"
     TPL_WRAPPER_4 = "\t {c_wrapper_return_var}\n}}"
-    TPL_JNIFUNC = "static native {return_type} jni{jni_func_name}({jni_param_list});"
+    TPL_JNIFUNC = "static native {java_return_type} jni{jni_func_name}({jni_param_list});"
 
     def parse(self, fsig: str):
         """
@@ -47,6 +47,7 @@ class Git2Function(object):
         d['c_wrapper_return_assign'] = get_return_assign(d['return_type'])
         d['c_wrapper_return_var'] = get_return_var(d['return_type'])
         d['jni_return_type'] = get_jtype(d['return_type'])
+        d['java_return_type'] = get_java_type(d['jni_return_type'])
         d['jni_obj_name'] = stringcase.pascalcase(d['obj_name'])
         d['jni_func_name'] = stringcase.pascalcase(d['func_name'])
         param_list = [

@@ -16,5 +16,5 @@ class Git2TypeOutBuf(Git2Type):
     C_HEADER_PARAM_STR = "jobject {var_name}"
     C_WRAPPER_BEFORE_STR = "\t git_buf c_{var_name} = {{0}};\n"
     C_PARAM_STR = "&c_{var_name}"
-    C_WRAPPER_AFTER_STR = "\t j_git_buf_to_java(env, &c_{var_name}, {var_name}); \ngit_buf_dispose(&c_{var_name});\n"
+    C_WRAPPER_AFTER_STR = "\t j_git_buf_to_java(env, &c_{var_name}, {var_name}); \n\t git_buf_dispose(&c_{var_name});\n"
     JNI_PARAM_STR = "Buf {var_name}"

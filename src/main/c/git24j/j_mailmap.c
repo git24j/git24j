@@ -72,7 +72,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Mailmap_jniResolve)(JNIEnv *env, jclass obj
 /** GIT_EXTERN(int) git_mailmap_resolve_signature(git_signature **out, const git_mailmap *mm, const git_signature *sig); */
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Mailmap_jniResolveSignature)(JNIEnv *env, jclass obj, jobject outSig, jlong mmPtr, jobject sig)
 {
-    git_signature *src_sig, *dest_sig;
+    git_signature *src_sig = NULL, *dest_sig = NULL;
     int e = j_signature_from_java(env, sig, &src_sig);
     if (e != 0)
     {

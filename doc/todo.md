@@ -6,7 +6,7 @@
 - [x] Reference
 - [x] Commit
 - [x] Branch
-- [ ] Config
+- [x] Config (no test)
 - [x] Index
 - [ ] Diff
 - [ ] Merge
@@ -34,6 +34,7 @@
 - [ ] publish to jitpack.io or github
 - [ ] publish to maven central
 - [ ] replace most (if not all) FindObjectClass with using global classes
+- [ ] bump libgit2 to use HEAD
 
 
 ## Future

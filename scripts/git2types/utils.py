@@ -16,6 +16,7 @@ from .git2_type_common import (
     Git2TypeOutInt64,
     Git2TypeInt32,
     Git2TypeInt64,
+    Git2TypeConstVoid,
 )
 from .git2_type_config import (
     Git2TypeConstConfig,
@@ -30,12 +31,63 @@ from .git2_type_config import (
     Git2TypeOutTransaction,
 )
 
+from .git2_type_diff import (
+    Git2TypeDiffOptions,
+    Git2TypeDiffFindOptions,
+    Git2TypeConstDiff,
+    Git2TypeOutDiff,
+    Git2TypeDiffFileCb,
+    Git2TypeDiffBinaryCb,
+    Git2TypeDiffHunkCb,
+    Git2TypeDiffLineCb,
+    Git2TypeConstBlob,
+    Git2TypeOutBlob,
+    Git2TypeConstDiffStats,
+    Git2TypeOutDiffStats,
+    Git2TypeConstDiffFormatEmail,
+    Git2TypeOutDiffFormatEmail,
+    Git2TypeConstCommit,
+    Git2TypeOutCommit,
+    Git2TypeConstDiffPatchIdOptions,
+    Git2TypeOutDiffPatchIdOptions,
+    Git2TypeConstPatch,
+    Git2TypeOutPatch,
+    Git2TypeConstDiffHunk,
+    Git2TypeOutDiffHunk,
+    Git2TypeConstDiffLine,
+    Git2TypeOutDiffLine,
+)
+
+from .git2_type_tree import Git2TypeTree
+
 import re
 
 
 RAW_PAT = re.compile(
     r"\b(?P<type_name>byte|char|short|int|long|float|double)\b")
 STRING_PAT = re.compile(r"\b(?P<const>const)?\s*char\s*\*")
+INT_ISH_TYPE = re.compile(r"\b(?P<type_name>size_t)\b")
+LONG_ISH_TYPE = re.compile(r"^const\s+(?P<type_name>\w+)\s+\*")
+JNI_JAVA_TYPE_MAP = {
+    'void': 'void',
+    'jboolean': 'boolean',
+    'jbyte': 'byte',
+    'jchar': 'char',
+    'jshort': 'int',
+    'jint': 'int',
+    'jlong': 'long',
+    'jstring': 'String',
+    'jobject': 'Object',
+    'jclass': 'Class',
+    'jobjectArray': 'Object[]',
+    'jbooleanArray': 'boolean[]',
+    'jcharArray': 'char[]',
+    'jshortArray': 'int[]',
+    'jintArray': 'int[]',
+    'jlongArray': 'long[]',
+    'jfloatArray': 'float[]',
+    'jdoubleArray': 'double[]',
+}
 
 GIT2_PARAM_PARSERS = [
     Git2TypeOutString,
@@ -60,11 +112,37 @@ GIT2_PARAM_PARSERS = [
     Git2TypeOutInt64,
     Git2TypeInt32,
     Git2TypeInt64,
+    Git2TypeConstVoid,
     Git2TypeConfigForeachCb,
     Git2TypeVoidPtrPayload,
     Git2TypeConstConfigMap,
     Git2TypeConstConfigBackend,
     Git2TypeOutTransaction,
+    Git2TypeDiffOptions,
+    Git2TypeDiffFindOptions,
+    Git2TypeTree,
+    Git2TypeOutDiff,
+    Git2TypeConstDiff,
+    Git2TypeDiffFileCb,
+    Git2TypeDiffBinaryCb,
+    Git2TypeDiffHunkCb,
+    Git2TypeDiffLineCb,
+    Git2TypeConstBlob,
+    Git2TypeOutBlob,
+    Git2TypeConstDiffStats,
+    Git2TypeOutDiffStats,
+    Git2TypeConstDiffFormatEmail,
+    Git2TypeOutDiffFormatEmail,
+    Git2TypeConstCommit,
+    Git2TypeOutCommit,
+    Git2TypeConstDiffPatchIdOptions,
+    Git2TypeOutDiffPatchIdOptions,
+    Git2TypeConstPatch,
+    Git2TypeOutPatch,
+    Git2TypeConstDiffHunk,
+    Git2TypeOutDiffHunk,
+    Git2TypeConstDiffLine,
+    Git2TypeOutDiffLine,
 ]
 
 
@@ -85,6 +163,20 @@ def get_jtype_string(c_type: str) -> str:
     return "jstring"
 
 
+def get_jtype_int(c_type: str) -> str:
+    m = INT_ISH_TYPE.match(c_type)
+    if not m:
+        return ""
+    return 'jint'
+
+
+def get_jtype_long(c_type: str) -> str:
+    m = LONG_ISH_TYPE.match(c_type)
+    if not m:
+        return ""
+    return 'jlong'
+
+
 def get_jtype(c_type: str) -> str:
     """
     return jni type of c types, e.g:
@@ -93,7 +185,16 @@ def get_jtype(c_type: str) -> str:
     'void' -> 'void'
     """
     s = c_type.strip()
-    return get_jtype_raw(s) or get_jtype_string(s)
+    return get_jtype_raw(s) or get_jtype_string(s) or get_jtype_int(s) or get_jtype_long(s)
+
+
+def get_java_type(j_type: str) -> str:
+    """
+    return native java type of a jni type:
+    jint -> int
+    jstring -> String
+    """
+    return JNI_JAVA_TYPE_MAP[j_type]
 
 
 def get_return_assign(return_type: str) -> str:
