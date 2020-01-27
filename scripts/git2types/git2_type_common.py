@@ -20,7 +20,8 @@ class Git2TypeInt32(Git2Type):
     - (wrapper_after): ""
     - (jni param): "int value"
     """
-    PAT = re.compile(r"^(unsigned int|size_t|int|int32_t|git_delta_t)\s+(?P<var_name>\w+)$")
+    PAT = re.compile(
+        r"^(unsigned int|size_t|int|int32_t|git_delta_t|git_diff_format_t|git_diff_format_email_flags_t|git_diff_stats_format_t)\s+(?P<var_name>\w+)$")
     C_HEADER_PARAM_STR = "jint {jni_var_name}"
     C_WRAPPER_BEFORE_STR = ""
     C_PARAM_STR = "{jni_var_name}"
@@ -38,7 +39,8 @@ class Git2TypeOutInt32(Git2Type):
     - (wrapper_after): (*env)->CallVoidMethod(env, out, jniConstants->midAtomicIntSet, c_out);
     - (jni param): AtomicInteger out
     """
-    PAT = re.compile(r"^(?P<type_name>size_t|int|int32_t)\s+\*(?P<var_name>\w+)$")
+    PAT = re.compile(
+        r"^(?P<type_name>size_t|int|int32_t)\s+\*(?P<var_name>\w+)$")
     C_HEADER_PARAM_STR = "jobject {jni_var_name}"
     C_WRAPPER_BEFORE_STR = "\t {type_name} c_{var_name};\n"
     C_PARAM_STR = "&c_{var_name}"
@@ -86,6 +88,29 @@ class Git2TypeOutInt64(Git2Type):
     JNI_PARAM_STR = "AtomicLong {jni_var_name}"
 
 
+class Git2TypeConstVoid(Git2Type):
+    """
+    const void *buffer
+    - (header param): "jbyteArray buffer"
+    - (wrapper_before): 
+        "int out_len;"
+        "unsigned char *c_buffer = j_unsigned_chars_from_java(env, buffer, &out_len);"
+    - (c function param): "(void *)c_buffer"
+    - (wrapper_after): "(*env)->ReleaseByteArrayElements(env, buffer, (jbyte *)c_buffer, 0);"
+    - (jni param): byte[] buffer
+    """
+    PAT = re.compile(
+        r"^(?P<const>const)\s+(?P<obj_name>void)\s+\*(?P<var_name>\w+)$")
+    C_HEADER_PARAM_STR = "jbyteArray {jni_var_name}"
+    C_WRAPPER_BEFORE_STR = (
+        "\t int {var_name}_len;\n"
+        "\t unsigned char *c_{var_name} = j_unsigned_chars_from_java(env, {jni_var_name}, &{var_name}_len);\n"
+    )
+    C_PARAM_STR = "(void *)c_{var_name}"
+    C_WRAPPER_AFTER_STR = "\t (*env)->ReleaseByteArrayElements(env, {jni_var_name}, (jbyte *)c_{var_name}, 0);\n"
+    JNI_PARAM_STR = "byte[] {jni_var_name}"
+
+
 class Git2TypeConstObject(Git2Type):
     """
     const git_object *obj
@@ -129,8 +154,8 @@ class Git2TypeConstIndex(Git2TypeConstObject):
 
 
 class Git2TypeConstConfigEntry(Git2TypeConstObject):
-    PAT = re.compile(PAT1_STR + "(?P<obj_name>config_entry)" + PAT2_STR)
+    PAT = re.compile(PAT1_STR + "(?P<obj_name>patch)" + PAT2_STR)
 
 
 class Git2TypeOutConfigEntry(Git2TypeOutObject):
-    PAT = re.compile(PAT1_STR + "(?P<obj_name>config_entry)" + PAT3_STR)
+    PAT = re.compile(PAT1_STR + "(?P<obj_name>patch)" + PAT3_STR)

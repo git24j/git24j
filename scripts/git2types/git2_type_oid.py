@@ -32,7 +32,7 @@ class Git2TypeOid(Git2Type):
         """
     PAT = re.compile(r"^git_oid\s+(?P<is_pointer>\*)(?P<var_name>\w+)$")
     C_HEADER_PARAM_STR = "jobject {var_name}"
-    C_WRAPPER_BEFORE_STR = "\t git_oid c_{var_name};"
-    C_PARAM_STR = "&c_oid"
+    C_WRAPPER_BEFORE_STR = "\t git_oid c_{var_name};\n"
+    C_PARAM_STR = "&c_{var_name}"
     C_WRAPPER_AFTER_STR = "\t j_git_oid_to_java(env, &c_{var_name}, {var_name});\n"
     JNI_PARAM_STR = "Oid {var_name}"
