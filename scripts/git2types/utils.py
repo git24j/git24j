@@ -10,6 +10,7 @@ from .git2_type_strarray import Git2TypeStringArray, Git2TypeOutStringArray
 from .git2_type_buf import Git2TypeOutBuf
 from .git2_type_common import (
     Git2TypeConstIndex,
+    Git2TypeOutIndex,
     Git2TypeConstConfigEntry,
     Git2TypeOutConfigEntry,
     Git2TypeOutInt32,
@@ -58,6 +59,17 @@ from .git2_type_diff import (
     Git2TypeOutDiffLine,
 )
 
+from .git2_type_merge import (
+    Git2TypeConstMergeFileInput,
+    Git2TypeOutMergeFileInput,
+    Git2TypeConstOidArray,
+    Git2TypeOutOidArray,
+    Git2TypeConstMergeFileOptions,
+    Git2TypeOutMergeFileOptions,
+    Git2TypeConstMergeOptions,
+    Git2TypeOutMergeOptions,
+)
+
 from .git2_type_tree import Git2TypeTree
 
 import re
@@ -100,6 +112,7 @@ GIT2_PARAM_PARSERS = [
     Git2TypeOutStringArray,
     Git2TypeStringArray,
     Git2TypeConstIndex,
+    Git2TypeOutIndex,
     Git2TypeConstConfigEntry,
     Git2TypeOutConfigEntry,
     Git2TypeOutBuf,
@@ -143,6 +156,14 @@ GIT2_PARAM_PARSERS = [
     Git2TypeOutDiffHunk,
     Git2TypeConstDiffLine,
     Git2TypeOutDiffLine,
+    Git2TypeConstMergeFileInput,
+    Git2TypeOutMergeFileInput,
+    Git2TypeConstOidArray,
+    Git2TypeOutOidArray,
+    Git2TypeConstMergeFileOptions,
+    Git2TypeOutMergeFileOptions,
+    Git2TypeConstMergeOptions,
+    Git2TypeOutMergeOptions,
 ]
 
 

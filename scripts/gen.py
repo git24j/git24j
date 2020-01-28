@@ -27,7 +27,7 @@ def generate(sig_strs: List[str]) -> Dict[str, List[str]]:
         try:
             git2f.parse(s)
         except NotImplementedError as e:
-            print(f"<----- {e}, {s} ----->")
+            print(f"// {e} \n/** {s} */")
         else:
             res['header'].append(f"/** {s} */\n {git2f.header_sig}\n")
             res['body'].append(f"/** {s} */\n {git2f.wrapper}\n")
