@@ -21,7 +21,7 @@ class Git2TypeInt32(Git2Type):
     - (jni param): "int value"
     """
     PAT = re.compile(
-        r"^(unsigned int|size_t|int|int32_t|git_delta_t|git_diff_format_t|git_diff_format_email_flags_t|git_diff_stats_format_t)\s+(?P<var_name>\w+)$")
+        r"^(unsigned int|size_t|int|int32_t|git_delta_t|git_diff_format_t|git_diff_format_email_flags_t|git_diff_stats_format_t|git_merge_analysis_t)\s+(?P<var_name>\w+)$")
     C_HEADER_PARAM_STR = "jint {jni_var_name}"
     C_WRAPPER_BEFORE_STR = ""
     C_PARAM_STR = "{jni_var_name}"
@@ -78,7 +78,7 @@ class Git2TypeOutInt64(Git2Type):
     - (wrapper_after): (*env)->CallVoidMethod(env, out, jniConstants->midAtomicLongSet, (long)c_out);
     - (jni param): AtomicLong out
     """
-    PAT = re.compile(r"^(?P<type_name>long|int64_t)\s+\*(?P<var_name>\w+)$")
+    PAT = re.compile(r"^(?P<type_name>long|int64_t|git_merge_analysis_t|git_merge_preference_t)\s+\*(?P<var_name>\w+)$")
     C_HEADER_PARAM_STR = "jobject {jni_var_name}"
     C_WRAPPER_BEFORE_STR = "\t {type_name} c_{var_name};\n"
     C_PARAM_STR = "&c_{var_name}"
@@ -151,6 +151,10 @@ class Git2TypeOutObject(Git2Type):
 
 class Git2TypeConstIndex(Git2TypeConstObject):
     PAT = re.compile(PAT1_STR + "(?P<obj_name>index)" + PAT2_STR)
+
+
+class Git2TypeOutIndex(Git2TypeConstObject):
+    PAT = re.compile(PAT1_STR + "(?P<obj_name>index)" + PAT3_STR)
 
 
 class Git2TypeConstConfigEntry(Git2TypeConstObject):

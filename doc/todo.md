@@ -8,7 +8,7 @@
 - [x] Branch
 - [x] Config (no test)
 - [x] Index
-- [ ] Diff
+- [x] Diff
 - [ ] Merge
 - [ ] Rebase
 - [ ] Remote
