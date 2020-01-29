@@ -65,3 +65,24 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Merge_jniCommits)(JNIEnv *env, jclass obj, 
     int r = git_merge_commits((git_index *)outPtr, (git_repository *)repoPtr, (git_commit *)ourCommitPtr, (git_commit *)theirCommitPtr, (git_merge_options *)optsPtr);
     return r;
 }
+
+/** int git_merge_analysis(git_merge_analysis_t *analysis_out, git_merge_preference_t *preference_out, git_repository *repo, const git_annotated_commit **their_heads, size_t their_heads_len); */
+JNIEXPORT jint JNICALL J_MAKE_METHOD(Merge_jniAnalysis)(JNIEnv *env, jclass obj, jobject analysisOut, jobject preferenceOut, jlong repoPtr, jlongArray theirHeads)
+{
+
+    jsize theirHeadsLen = (*env)->GetArrayLength(env, theirHeads);
+    const git_annotated_commit **their_heads = (const git_annotated_commit **)malloc(sizeof(const git_annotated_commit *) * theirHeadsLen);
+    jlong *elements = (*env)->GetLongArrayElements(*env, theirHeads, 0);
+    for (jsize i = 0; i < theirHeadsLen; i++)
+    {
+        their_heads[i] = (const git_annotated_commit *)elements[i];
+    }
+
+    int analysis_out = 0;
+    int preference_out = 0;
+    int r = git_merge_analysis(&analysis_out, &preference_out, (git_repository *)repoPtr, their_heads, theirHeadsLen);
+    (*env)->CallVoidMethod(env, analysisOut, jniConstants->midAtomicIntSet, analysis_out);
+    (*env)->CallVoidMethod(env, preferenceOut, jniConstants->midAtomicIntSet, preference_out);
+    (*env)->ReleaseLongArrayElements(env, theirHeads, elements, 0);
+    return r;
+}
