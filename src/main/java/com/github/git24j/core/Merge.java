@@ -1,5 +1,7 @@
 package com.github.git24j.core;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -30,17 +32,67 @@ public class Merge {
      * const git_tree *our_tree, const git_tree *their_tree, const git_merge_options *opts);
      */
     static native int jniTrees(
-            long out, long repoPtr, long ancestorTree, long ourTree, long theirTree, long opts);
+            AtomicLong out,
+            long repoPtr,
+            long ancestorTree,
+            long ourTree,
+            long theirTree,
+            long opts);
 
     /**
      * int git_merge_commits(git_index **out, git_repository *repo, const git_commit *our_commit,
      * const git_commit *their_commit, const git_merge_options *opts);
      */
     static native int jniCommits(
-            long out, long repoPtr, long ourCommit, long theirCommit, long opts);
+            AtomicLong out, long repoPtr, long ourCommit, long theirCommit, long opts);
+    /**
+     * int git_merge_analysis(git_merge_analysis_t *analysis_out, git_merge_preference_t
+     * *preference_out, git_repository *repo, const git_annotated_commit **their_heads, size_t
+     * their_heads_len);
+     */
+    static native int jniAnalysis(
+            AtomicInteger analysisOut,
+            AtomicInteger preferenceOut,
+            long repoPtr,
+            long[] theirHeads);
 
-    /** int git_merge_analysis(git_merge_analysis_t *analysis_out, git_merge_preference_t *preference_out, git_repository *repo, const git_annotated_commit **their_heads, size_t their_heads_len); */
-    static native int jniAnalysis(AtomicInteger analysisOut, AtomicInteger preferenceOut, long repoPtr, long[] theirHeads);
+    /**
+     * int git_merge_analysis_for_ref(git_merge_analysis_t *analysis_out, git_merge_preference_t
+     * *preference_out, git_repository *repo, git_reference *our_ref, const git_annotated_commit
+     * **their_heads, size_t their_heads_len);
+     */
+    static native int jniAnalysisForRef(
+            AtomicInteger analysisOut,
+            AtomicInteger preferenceOut,
+            long repoPtr,
+            long ourRefPtr,
+            long[] theirHeads);
 
+    /**
+     * int git_merge_base_many(git_oid *out, git_repository *repo, size_t length, const git_oid []
+     * input_array);
+     */
+    static native int jniBaseMany(Oid outOid, long repoPtr, Oid[] inputArray);
+
+    /** Class to hold */
+    static class OidArray {
+        private final List<Oid> _oids = new ArrayList<>();
+
+        void add(byte[] oidRaw) {
+            _oids.add(Oid.of(oidRaw));
+        }
+    }
+
+    /**
+     * int git_merge_bases_many(git_oidarray *out, git_repository *repo, size_t length, const
+     * git_oid [] input_array);
+     */
+    static native int jniBasesMany(OidArray outOids, long repoPtr, Oid[] inputArray);
+
+    /**
+     * int git_merge_base_octopus(git_oid *out, git_repository *repo, size_t length, const git_oid
+     * [] input_array);
+     */
+    static native int jniBaseOctopus(Oid outOid, long repoPtr, Oid[] intputArray);
 
 }

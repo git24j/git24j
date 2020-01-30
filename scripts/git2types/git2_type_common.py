@@ -78,7 +78,8 @@ class Git2TypeOutInt64(Git2Type):
     - (wrapper_after): (*env)->CallVoidMethod(env, out, jniConstants->midAtomicLongSet, (long)c_out);
     - (jni param): AtomicLong out
     """
-    PAT = re.compile(r"^(?P<type_name>long|int64_t|git_merge_analysis_t|git_merge_preference_t)\s+\*(?P<var_name>\w+)$")
+    PAT = re.compile(
+        r"^(?P<type_name>long|int64_t|git_merge_analysis_t|git_merge_preference_t)\s+\*(?P<var_name>\w+)$")
     C_HEADER_PARAM_STR = "jobject {jni_var_name}"
     C_WRAPPER_BEFORE_STR = "\t {type_name} c_{var_name};\n"
     C_PARAM_STR = "&c_{var_name}"
@@ -153,7 +154,7 @@ class Git2TypeConstIndex(Git2TypeConstObject):
     PAT = re.compile(PAT1_STR + "(?P<obj_name>index)" + PAT2_STR)
 
 
-class Git2TypeOutIndex(Git2TypeConstObject):
+class Git2TypeOutIndex(Git2TypeOutObject):
     PAT = re.compile(PAT1_STR + "(?P<obj_name>index)" + PAT3_STR)
 
 
