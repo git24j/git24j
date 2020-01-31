@@ -95,4 +95,28 @@ public class Merge {
      */
     static native int jniBaseOctopus(Oid outOid, long repoPtr, Oid[] intputArray);
 
+    /**
+     * int git_merge_file(git_merge_file_result *out, const git_merge_file_input *ancestor, const
+     * git_merge_file_input *ours, const git_merge_file_input *theirs, const git_merge_file_options
+     * *opts);
+     */
+    static native int jniFile(
+            AtomicLong out, long acestorPtr, long oursPtr, long theirsPtr, long optsPtr);
+
+    public class FileResult extends CAutoReleasable {
+
+        protected FileResult(boolean isWeak, long rawPtr) {
+            super(isWeak, rawPtr);
+        }
+
+        @Override
+        protected void freeOnce(long cPtr) {
+            jniFileResultFree(cPtr);
+        }
+    }
+    /**
+     * void git_merge_file_result_free(git_merge_file_result *result); Note: this also frees the
+     * resultPtr itself.
+     */
+    static native void jniFileResultFree(long resultPtr);
 }

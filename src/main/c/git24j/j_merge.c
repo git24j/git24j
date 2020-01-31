@@ -177,3 +177,26 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Merge_jniBaseOctopus)(JNIEnv *env, jclass o
     free(input_array);
     return r;
 }
+
+/** int git_merge_file(git_merge_file_result *out, const git_merge_file_input *ancestor, const git_merge_file_input *ours, const git_merge_file_input *theirs, const git_merge_file_options *opts); */
+JNIEXPORT jint JNICALL J_MAKE_METHOD(Merge_jniFile)(JNIEnv *env, jclass obj, jobject out, jlong ancestorPtr, jlong oursPtr, jlong theirsPtr, jlong optsPtr)
+{
+    git_merge_file_result *c_out = (git_merge_file_result *)malloc(sizeof(git_merge_file_result));
+    int r = git_merge_file(
+        c_out,
+        (const git_merge_file_input *)ancestorPtr,
+        (const git_merge_file_input *)oursPtr,
+        (const git_merge_file_input *)theirsPtr,
+        (const git_merge_file_options *)optsPtr);
+    (*env)->CallVoidMethod(env, out, jniConstants->midAtomicLongSet, (long)c_out);
+    return r;
+}
+
+/** void git_merge_file_result_free(git_merge_file_result *result); 
+ * Note: this also frees the resultPtr itself.
+ */
+JNIEXPORT void JNICALL J_MAKE_METHOD(Merge_jniFileResultFree)(JNIEnv *env, jclass obj, jlong resultPtr)
+{
+    git_merge_file_result_free((git_merge_file_result *)resultPtr);
+    free((git_merge_file_result *)resultPtr);
+}
