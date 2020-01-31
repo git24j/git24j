@@ -48,12 +48,21 @@ extern "C"
     /** int git_merge_file(git_merge_file_result *out, const git_merge_file_input *ancestor, const git_merge_file_input *ours, const git_merge_file_input *theirs, const git_merge_file_options *opts); */
     JNIEXPORT jint JNICALL J_MAKE_METHOD(Merge_jniFile)(JNIEnv *env, jclass obj, jobject out, jlong acestorPtr, jlong oursPtr, jlong theirsPtr, jlong optsPtr);
     // no matching type found for 'git_merge_file_result *out'
-    /** int git_merge_file_from_index(git_merge_file_result *out, git_repository *repo, const git_index_entry *ancestor, const git_index_entry *ours, const git_index_entry *theirs, const git_merge_file_options *opts); */
-    // no matching type found for 'git_merge_file_result *result'
+    /** int git_merge_file_from_index(
+     *      git_merge_file_result *out, 
+     *      git_repository *repo,
+     *      const git_index_entry *ancestor, 
+     *      const git_index_entry *ours,
+     *      const git_index_entry *theirs,
+     *      const git_merge_file_options *opts); 
+     * */
+    JNIEXPORT jint JNICALL J_MAKE_METHOD(Merge_jniFileFromIndex)(JNIEnv *env, jclass obj, jobject out, jlong repoPtr, jlong ancestorPtr, jlong oursPtr, jlong theirsPtr, jlong optsPtr);
+
     /** void git_merge_file_result_free(git_merge_file_result *result); */
     JNIEXPORT void JNICALL J_MAKE_METHOD(Merge_jniFileResultFree)(JNIEnv *env, jclass obj, jlong resultPtr);
-    // no matching type found for 'const git_annotated_commit **their_heads'
+
     /** int git_merge_create(git_repository *repo, const git_annotated_commit **their_heads, size_t their_heads_len, const git_merge_options *merge_opts, const git_checkout_options *checkout_opts); */
+    JNIEXPORT jint JNICALL J_MAKE_METHOD(Merge_jniCreate)(JNIEnv *env, jclass obj, jlong repoPtr, jlongArray theirHeads, jlong mergeOptsPtr, jlong checkoutOpts);
 
 #ifdef __cplusplus
 }

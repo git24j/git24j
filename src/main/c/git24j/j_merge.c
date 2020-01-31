@@ -192,6 +192,28 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Merge_jniFile)(JNIEnv *env, jclass obj, job
     return r;
 }
 
+/** int git_merge_file_from_index(
+ *      git_merge_file_result *out, 
+ *      git_repository *repo,
+ *      const git_index_entry *ancestor, 
+ *      const git_index_entry *ours,
+ *      const git_index_entry *theirs,
+ *      const git_merge_file_options *opts); 
+ * */
+JNIEXPORT jint JNICALL J_MAKE_METHOD(Merge_jniFileFromIndex)(JNIEnv *env, jclass obj, jobject out, jlong repoPtr, jlong ancestorPtr, jlong oursPtr, jlong theirsPtr, jlong optsPtr)
+{
+    git_merge_file_result *c_out = (git_merge_file_result *)malloc(sizeof(git_merge_file_result));
+    int r = git_merge_file_from_index(
+        c_out,
+        (git_repository *)repoPtr,
+        (const git_index_entry *)ancestorPtr,
+        (const git_index_entry *)oursPtr,
+        (const git_index_entry *)theirsPtr,
+        (const git_merge_file_options *)optsPtr);
+    (*env)->CallVoidMethod(env, out, jniConstants->midAtomicLongSet, (long)c_out);
+    return r;
+}
+
 /** void git_merge_file_result_free(git_merge_file_result *result); 
  * Note: this also frees the resultPtr itself.
  */
@@ -199,4 +221,14 @@ JNIEXPORT void JNICALL J_MAKE_METHOD(Merge_jniFileResultFree)(JNIEnv *env, jclas
 {
     git_merge_file_result_free((git_merge_file_result *)resultPtr);
     free((git_merge_file_result *)resultPtr);
+}
+
+/** int git_merge_create(git_repository *repo, const git_annotated_commit **their_heads, size_t their_heads_len, const git_merge_options *merge_opts, const git_checkout_options *checkout_opts); */
+JNIEXPORT jint JNICALL J_MAKE_METHOD(Merge_jniCreate)(JNIEnv *env, jclass obj, jlong repoPtr, jlongArray theirHeads, jlong mergeOptsPtr, jlong checkoutOpts)
+{
+    jsize arrayLen = (*env)->GetArrayLength(env, theirHeads);
+    jlong *elements = (*env)->GetLongArrayElements(env, theirHeads, 0);
+    int r = git_merge((git_repository *)repoPtr, (const git_annotated_commit **)elements, arrayLen, (const git_merge_options *)mergeOptsPtr, (const git_checkout_options *)checkoutOpts);
+    (*env)->ReleaseLongArrayElements(env, theirHeads, elements, 0);
+    return r;
 }

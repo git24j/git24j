@@ -119,4 +119,12 @@ public class Merge {
      * resultPtr itself.
      */
     static native void jniFileResultFree(long resultPtr);
+
+    /**
+     * int git_merge_create(git_repository *repo, const git_annotated_commit **their_heads, size_t
+     * their_heads_len, const git_merge_options *merge_opts, const git_checkout_options
+     * *checkout_opts);
+     */
+    static native int jniCreate(
+            long repoPtr, long[] theirHeads, long mergeOptsPtr, long checkoutOpts);
 }
