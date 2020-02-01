@@ -121,7 +121,7 @@ class Git2TypeConstObject(Git2Type):
     - (wrapper_after): ""
     - (jni param): long objPtr
     """
-    PAT = re.compile(PAT1_STR + "(?P<obj_name>object)" + PAT2_STR)
+    PAT = re.compile(PAT1_STR + "(?P<obj_name>\w+)" + PAT2_STR)
     C_HEADER_PARAM_STR = "jlong {jni_var_name}Ptr"
     C_WRAPPER_BEFORE_STR = ""
     C_PARAM_STR = "(git_{obj_name} *){jni_var_name}Ptr"
@@ -139,7 +139,7 @@ class Git2TypeOutObject(Git2Type):
                        (*env)->CallVoidMethod(env, out, jniConstants->midAtomicLongSet, (long)c_out);
     - (jni param): AtomicLong out
     """
-    PAT = re.compile(PAT1_STR + "(?P<obj_name>object)" + PAT3_STR)
+    PAT = re.compile(PAT1_STR + "(?P<obj_name>\w+)" + PAT3_STR)
     C_HEADER_PARAM_STR = "jobject {jni_var_name}"
     C_WRAPPER_BEFORE_STR = "\t git_{obj_name} *c_{var_name};\n"
     C_PARAM_STR = "&c_{var_name}"
@@ -164,3 +164,10 @@ class Git2TypeConstConfigEntry(Git2TypeConstObject):
 
 class Git2TypeOutConfigEntry(Git2TypeOutObject):
     PAT = re.compile(PAT1_STR + "(?P<obj_name>patch)" + PAT3_STR)
+
+class Git2TypeConstAnnotatedCommit(Git2TypeConstObject):
+    PAT = re.compile(PAT1_STR + "(?P<obj_name>annotated_commit)" + PAT2_STR)
+
+
+class Git2TypeOutAnnotatedCommit(Git2TypeOutObject):
+    PAT = re.compile(PAT1_STR + "(?P<obj_name>annotated_commit)" + PAT3_STR)
