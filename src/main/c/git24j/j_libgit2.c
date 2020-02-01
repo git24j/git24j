@@ -21,10 +21,15 @@ void git24j_init(JNIEnv *env)
     jniConstants->clzAtomicInt = __find_and_hold_clz(env, "Ljava/util/concurrent/atomic/AtomicInteger;");
     jniConstants->clzAtomicLong = __find_and_hold_clz(env, "Ljava/util/concurrent/atomic/AtomicLong;");
     jniConstants->clzAtomicReference = __find_and_hold_clz(env, "Ljava/util/concurrent/atomic/AtomicReference;");
-    assert(jniConstants->clzAtomicInt && "AtomicInteger::set not found");
+    jniConstants->clzList = __find_and_hold_clz(env, "Ljava/util/List;");
+    assert(jniConstants->clzAtomicInt && "AtomicInteger class not found");
+    assert(jniConstants->clzAtomicLong && "AtomicLong class not found");
+    assert(jniConstants->clzAtomicReference && "AtomicReference class not found");
+    assert(jniConstants->clzList && "List class not found");
     jniConstants->midAtomicIntSet = (*env)->GetMethodID(env, jniConstants->clzAtomicInt, "set", "(I)V");
     jniConstants->midAtomicLongSet = (*env)->GetMethodID(env, jniConstants->clzAtomicLong, "set", "(J)V");
     jniConstants->midAtomicReferenceSet = (*env)->GetMethodID(env, jniConstants->clzAtomicReference, "set", "(Ljava/lang/Object;)V");
+    jniConstants->midListGetI = (*env)->GetMethodID(env, jniConstants->clzList, "get", "(I)Ljava/lang/Object;");
 }
 
 void git24j_shutdown(JNIEnv *env)
@@ -33,6 +38,7 @@ void git24j_shutdown(JNIEnv *env)
     (*env)->DeleteGlobalRef(env, jniConstants->clzAtomicInt);
     (*env)->DeleteGlobalRef(env, jniConstants->clzAtomicLong);
     (*env)->DeleteGlobalRef(env, jniConstants->clzAtomicReference);
+    (*env)->DeleteGlobalRef(env, jniConstants->clzList);
     free(jniConstants);
 }
 

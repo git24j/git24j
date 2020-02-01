@@ -20,10 +20,12 @@ extern "C"
         jclass clzAtomicInt;
         jclass clzAtomicLong;
         jclass clzAtomicReference;
+        jclass clzList;
 
         jmethodID midAtomicIntSet;
         jmethodID midAtomicLongSet;
         jmethodID midAtomicReferenceSet;
+        jmethodID midListGetI;
     } j_constants_t;
 
     /** commonly used constants. */
