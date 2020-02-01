@@ -9,8 +9,8 @@
 - [x] Config (no test)
 - [x] Index
 - [x] Diff
-- [ ] Merge
-- [ ] Rebase
+- [x] Merge
+- [x] Rebase
 - [ ] Remote
 - [ ] Revwalk
 - [ ] Submodule

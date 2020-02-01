@@ -18,6 +18,10 @@ from .git2_type_common import (
     Git2TypeInt32,
     Git2TypeInt64,
     Git2TypeConstVoid,
+    Git2TypeConstAnnotatedCommit,
+    Git2TypeOutAnnotatedCommit,
+    Git2TypeConstObject,
+    Git2TypeOutObject,
 )
 from .git2_type_config import (
     Git2TypeConstConfig,
@@ -70,6 +74,13 @@ from .git2_type_merge import (
     Git2TypeOutMergeOptions,
 )
 
+from .git2_type_rebase import (
+    Git2TypeConstRebaseOptions,
+    Git2TypeOutRebaseOptions,
+    Git2TypeConstRebase,
+    Git2TypeOutRebase,
+)
+
 from .git2_type_tree import Git2TypeTree
 
 import re
@@ -79,7 +90,7 @@ RAW_PAT = re.compile(
     r"\b(?P<type_name>byte|char|short|int|long|float|double)\b")
 STRING_PAT = re.compile(r"\b(?P<const>const)?\s*char\s*\*")
 INT_ISH_TYPE = re.compile(r"\b(?P<type_name>size_t)\b")
-LONG_ISH_TYPE = re.compile(r"^const\s+(?P<type_name>\w+)\s+\*")
+LONG_ISH_TYPE = re.compile(r"^(?P<const>const\s+)?\s*(?P<type_name>\w+)\s+\*")
 JNI_JAVA_TYPE_MAP = {
     'void': 'void',
     'jboolean': 'boolean',
@@ -164,6 +175,14 @@ GIT2_PARAM_PARSERS = [
     Git2TypeOutMergeFileOptions,
     Git2TypeConstMergeOptions,
     Git2TypeOutMergeOptions,
+    Git2TypeConstRebaseOptions,
+    Git2TypeOutRebaseOptions,
+    Git2TypeConstRebase,
+    Git2TypeOutRebase,
+    Git2TypeConstAnnotatedCommit,
+    Git2TypeOutAnnotatedCommit,
+    Git2TypeConstObject,
+    Git2TypeOutObject,
 ]
 
 
