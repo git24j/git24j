@@ -21,7 +21,7 @@ class Git2TypeInt32(Git2Type):
     - (jni param): "int value"
     """
     PAT = re.compile(
-        r"^(unsigned int|size_t|int|int32_t|git_delta_t|git_diff_format_t|git_diff_format_email_flags_t|git_diff_stats_format_t|git_merge_analysis_t|git_direction|git_remote_autotag_option_t|git_remote_autotag_option_t)\s+(?P<var_name>\w+)$")
+        r"^(unsigned int|size_t|int|int32_t|git_delta_t|git_diff_format_t|git_diff_format_email_flags_t|git_diff_stats_format_t|git_merge_analysis_t|git_direction|git_remote_autotag_option_t|git_remote_autotag_option_t|git_submodule_recurse_t|git_submodule_ignore_t|git_submodule_update_t)\s+(?P<var_name>\w+)$")
     C_HEADER_PARAM_STR = "jint {jni_var_name}"
     C_WRAPPER_BEFORE_STR = ""
     C_PARAM_STR = "{jni_var_name}"
@@ -40,7 +40,7 @@ class Git2TypeOutInt32(Git2Type):
     - (jni param): AtomicInteger out
     """
     PAT = re.compile(
-        r"^(?P<type_name>size_t|int|int32_t)\s+\*(?P<var_name>\w+)$")
+        r"^(?P<type_name>size_t|int|int32_t|unsigned int)\s+\*(?P<var_name>\w+)$")
     C_HEADER_PARAM_STR = "jobject {jni_var_name}"
     C_WRAPPER_BEFORE_STR = "\t {type_name} c_{var_name};\n"
     C_PARAM_STR = "&c_{var_name}"
@@ -164,6 +164,7 @@ class Git2TypeConstConfigEntry(Git2TypeConstObject):
 
 class Git2TypeOutConfigEntry(Git2TypeOutObject):
     PAT = re.compile(PAT1_STR + "(?P<obj_name>patch)" + PAT3_STR)
+
 
 class Git2TypeConstAnnotatedCommit(Git2TypeConstObject):
     PAT = re.compile(PAT1_STR + "(?P<obj_name>annotated_commit)" + PAT2_STR)
