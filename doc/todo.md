@@ -11,7 +11,7 @@
 - [x] Diff (no test)
 - [x] Merge (no test)
 - [x] Rebase (no test)
-- [ ] Remote
+- [x] Remote
 - [ ] Revwalk
 - [ ] Submodule
 - [ ] Worktree
