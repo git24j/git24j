@@ -1,0 +1,15 @@
+int git_worktree_add(git_worktree **out, git_repository *repo, const char *name, const char *path, const git_worktree_add_options *opts);
+int git_worktree_add_init_options(git_worktree_add_options *opts, unsigned int version);
+void git_worktree_free(git_worktree *wt);
+int git_worktree_is_locked(git_buf *reason, const git_worktree *wt);
+int git_worktree_is_prunable(git_worktree *wt, git_worktree_prune_options *opts);
+int git_worktree_list(git_strarray *out, git_repository *repo);
+int git_worktree_lock(git_worktree *wt, const char *reason);
+int git_worktree_lookup(git_worktree **out, git_repository *repo, const char *name);
+const char * git_worktree_name(const git_worktree *wt);
+int git_worktree_open_from_repository(git_worktree **out, git_repository *repo);
+const char * git_worktree_path(const git_worktree *wt);
+int git_worktree_prune(git_worktree *wt, git_worktree_prune_options *opts);
+int git_worktree_prune_init_options(git_worktree_prune_options *opts, unsigned int version);
+int git_worktree_unlock(git_worktree *wt);
+int git_worktree_validate(const git_worktree *wt);
