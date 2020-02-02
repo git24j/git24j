@@ -12,7 +12,7 @@
 - [x] Merge (no test)
 - [x] Rebase (no test)
 - [x] Remote
-- [ ] Revwalk
+- [x] Revwalk
 - [ ] Submodule
 - [ ] Worktree
 - [ ] Note
