@@ -181,6 +181,7 @@ GIT2_PARAM_PARSERS = [
     Git2TypeOutRebase,
     Git2TypeConstAnnotatedCommit,
     Git2TypeOutAnnotatedCommit,
+    # generic match should go last
     Git2TypeConstObject,
     Git2TypeOutObject,
 ]
@@ -234,7 +235,7 @@ def get_java_type(j_type: str) -> str:
     jint -> int
     jstring -> String
     """
-    return JNI_JAVA_TYPE_MAP[j_type]
+    return JNI_JAVA_TYPE_MAP.get(j_type, 'undefined')
 
 
 def get_return_assign(return_type: str) -> str:
