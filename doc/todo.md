@@ -8,9 +8,9 @@
 - [x] Branch
 - [x] Config (no test)
 - [x] Index
-- [x] Diff
-- [x] Merge
-- [x] Rebase
+- [x] Diff (no test)
+- [x] Merge (no test)
+- [x] Rebase (no test)
 - [ ] Remote
 - [ ] Revwalk
 - [ ] Submodule

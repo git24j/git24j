@@ -1,0 +1,141 @@
+#include "j_common.h"
+#include <git2.h>
+#include <jni.h>
+
+#ifndef __GIT24J_REMOTE_H__
+#define __GIT24J_REMOTE_H__
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+    // no matching type found for 'const git_remote_head ***out'
+    /** int git_remote_ls(const git_remote_head ***out, size_t *size, git_remote *remote); */
+    /** -------- Signature of the header ---------- */
+    /** int git_remote_add_fetch(git_repository *repo, const char *remote, const char *refspec); */
+    JNIEXPORT jint JNICALL J_MAKE_METHOD(Remote_jniAddFetch)(JNIEnv *env, jclass obj, jlong repoPtr, jstring remote, jstring refspec);
+
+    /** int git_remote_add_push(git_repository *repo, const char *remote, const char *refspec); */
+    JNIEXPORT jint JNICALL J_MAKE_METHOD(Remote_jniAddPush)(JNIEnv *env, jclass obj, jlong repoPtr, jstring remote, jstring refspec);
+
+    /** git_remote_autotag_option_t git_remote_autotag(const git_remote *remote); */
+    JNIEXPORT jint JNICALL J_MAKE_METHOD(Remote_jniAutotag)(JNIEnv *env, jclass obj, jlong remotePtr);
+
+    /** int git_remote_connect(git_remote *remote, git_direction direction, const git_remote_callbacks *callbacks, const git_proxy_options *proxy_opts, const git_strarray *custom_headers); */
+    JNIEXPORT jint JNICALL J_MAKE_METHOD(Remote_jniConnect)(JNIEnv *env, jclass obj, jlong remotePtr, jint direction, jlong callbacksPtr, jlong proxyOptsPtr, jobjectArray customHeaders);
+
+    /** int git_remote_connected(const git_remote *remote); */
+    JNIEXPORT jint JNICALL J_MAKE_METHOD(Remote_jniConnected)(JNIEnv *env, jclass obj, jlong remotePtr);
+
+    /** int git_remote_create(git_remote **out, git_repository *repo, const char *name, const char *url); */
+    JNIEXPORT jint JNICALL J_MAKE_METHOD(Remote_jniCreate)(JNIEnv *env, jclass obj, jobject out, jlong repoPtr, jstring name, jstring url);
+
+    /** int git_remote_create_anonymous(git_remote **out, git_repository *repo, const char *url); */
+    JNIEXPORT jint JNICALL J_MAKE_METHOD(Remote_jniCreateAnonymous)(JNIEnv *env, jclass obj, jobject out, jlong repoPtr, jstring url);
+
+    /** int git_remote_create_detached(git_remote **out, const char *url); */
+    JNIEXPORT jint JNICALL J_MAKE_METHOD(Remote_jniCreateDetached)(JNIEnv *env, jclass obj, jobject out, jstring url);
+
+    /** int git_remote_create_init_options(git_remote_create_options *opts, unsigned int version); */
+    JNIEXPORT jint JNICALL J_MAKE_METHOD(Remote_jniCreateInitOptions)(JNIEnv *env, jclass obj, jlong optsPtr, jint version);
+
+    /** int git_remote_create_with_fetchspec(git_remote **out, git_repository *repo, const char *name, const char *url, const char *fetch); */
+    JNIEXPORT jint JNICALL J_MAKE_METHOD(Remote_jniCreateWithFetchspec)(JNIEnv *env, jclass obj, jobject out, jlong repoPtr, jstring name, jstring url, jstring fetch);
+
+    /** int git_remote_create_with_opts(git_remote **out, const char *url, const git_remote_create_options *opts); */
+    JNIEXPORT jint JNICALL J_MAKE_METHOD(Remote_jniCreateWithOpts)(JNIEnv *env, jclass obj, jobject out, jstring url, jlong optsPtr);
+
+    /** int git_remote_default_branch(git_buf *out, git_remote *remote); */
+    JNIEXPORT jint JNICALL J_MAKE_METHOD(Remote_jniDefaultBranch)(JNIEnv *env, jclass obj, jobject out, jlong remotePtr);
+
+    /** int git_remote_delete(git_repository *repo, const char *name); */
+    JNIEXPORT jint JNICALL J_MAKE_METHOD(Remote_jniDelete)(JNIEnv *env, jclass obj, jlong repoPtr, jstring name);
+
+    /** void git_remote_disconnect(git_remote *remote); */
+    JNIEXPORT void JNICALL J_MAKE_METHOD(Remote_jniDisconnect)(JNIEnv *env, jclass obj, jlong remotePtr);
+
+    /** int git_remote_download(git_remote *remote, const git_strarray *refspecs, const git_fetch_options *opts); */
+    JNIEXPORT jint JNICALL J_MAKE_METHOD(Remote_jniDownload)(JNIEnv *env, jclass obj, jlong remotePtr, jobjectArray refspecs, jlong optsPtr);
+
+    /** int git_remote_dup(git_remote **dest, git_remote *source); */
+    JNIEXPORT jint JNICALL J_MAKE_METHOD(Remote_jniDup)(JNIEnv *env, jclass obj, jobject dest, jlong sourcePtr);
+
+    /** int git_remote_fetch(git_remote *remote, const git_strarray *refspecs, const git_fetch_options *opts, const char *reflog_message); */
+    JNIEXPORT jint JNICALL J_MAKE_METHOD(Remote_jniFetch)(JNIEnv *env, jclass obj, jlong remotePtr, jobjectArray refspecs, jlong optsPtr, jstring reflog_message);
+
+    /** void git_remote_free(git_remote *remote); */
+    JNIEXPORT void JNICALL J_MAKE_METHOD(Remote_jniFree)(JNIEnv *env, jclass obj, jlong remotePtr);
+
+    /** int git_remote_get_fetch_refspecs(git_strarray *array, const git_remote *remote); */
+    JNIEXPORT jint JNICALL J_MAKE_METHOD(Remote_jniGetFetchRefspecs)(JNIEnv *env, jclass obj, jobject array, jlong remotePtr);
+
+    /** int git_remote_get_push_refspecs(git_strarray *array, const git_remote *remote); */
+    JNIEXPORT jint JNICALL J_MAKE_METHOD(Remote_jniGetPushRefspecs)(JNIEnv *env, jclass obj, jobject array, jlong remotePtr);
+
+    /** const git_refspec * git_remote_get_refspec(const git_remote *remote, size_t n); */
+    JNIEXPORT jlong JNICALL J_MAKE_METHOD(Remote_jniGetRefspec)(JNIEnv *env, jclass obj, jlong remotePtr, jint n);
+
+    /** int git_remote_init_callbacks(git_remote_callbacks *opts, unsigned int version); */
+    JNIEXPORT jint JNICALL J_MAKE_METHOD(Remote_jniInitCallbacks)(JNIEnv *env, jclass obj, jlong optsPtr, jint version);
+
+    /** int git_remote_is_valid_name(const char *remote_name); */
+    JNIEXPORT jint JNICALL J_MAKE_METHOD(Remote_jniIsValidName)(JNIEnv *env, jclass obj, jstring remote_name);
+
+    /** int git_remote_list(git_strarray *out, git_repository *repo); */
+    JNIEXPORT jint JNICALL J_MAKE_METHOD(Remote_jniList)(JNIEnv *env, jclass obj, jobject out, jlong repoPtr);
+
+    /** int git_remote_lookup(git_remote **out, git_repository *repo, const char *name); */
+    JNIEXPORT jint JNICALL J_MAKE_METHOD(Remote_jniLookup)(JNIEnv *env, jclass obj, jobject out, jlong repoPtr, jstring name);
+
+    /** const char * git_remote_name(const git_remote *remote); */
+    JNIEXPORT jstring JNICALL J_MAKE_METHOD(Remote_jniName)(JNIEnv *env, jclass obj, jlong remotePtr);
+
+    /** git_repository * git_remote_owner(const git_remote *remote); */
+    JNIEXPORT jlong JNICALL J_MAKE_METHOD(Remote_jniOwner)(JNIEnv *env, jclass obj, jlong remotePtr);
+
+    /** int git_remote_prune(git_remote *remote, const git_remote_callbacks *callbacks); */
+    JNIEXPORT jint JNICALL J_MAKE_METHOD(Remote_jniPrune)(JNIEnv *env, jclass obj, jlong remotePtr, jlong callbacksPtr);
+
+    /** int git_remote_prune_refs(const git_remote *remote); */
+    JNIEXPORT jint JNICALL J_MAKE_METHOD(Remote_jniPruneRefs)(JNIEnv *env, jclass obj, jlong remotePtr);
+
+    /** int git_remote_push(git_remote *remote, const git_strarray *refspecs, const git_push_options *opts); */
+    JNIEXPORT jint JNICALL J_MAKE_METHOD(Remote_jniPush)(JNIEnv *env, jclass obj, jlong remotePtr, jobjectArray refspecs, jlong optsPtr);
+
+    /** const char * git_remote_pushurl(const git_remote *remote); */
+    JNIEXPORT jstring JNICALL J_MAKE_METHOD(Remote_jniPushurl)(JNIEnv *env, jclass obj, jlong remotePtr);
+
+    /** size_t git_remote_refspec_count(const git_remote *remote); */
+    JNIEXPORT jint JNICALL J_MAKE_METHOD(Remote_jniRefspecCount)(JNIEnv *env, jclass obj, jlong remotePtr);
+
+    /** int git_remote_rename(git_strarray *problems, git_repository *repo, const char *name, const char *new_name); */
+    JNIEXPORT jint JNICALL J_MAKE_METHOD(Remote_jniRename)(JNIEnv *env, jclass obj, jobject problems, jlong repoPtr, jstring name, jstring new_name);
+
+    /** int git_remote_set_autotag(git_repository *repo, const char *remote, git_remote_autotag_option_t value); */
+    JNIEXPORT jint JNICALL J_MAKE_METHOD(Remote_jniSetAutotag)(JNIEnv *env, jclass obj, jlong repoPtr, jstring remote, jint value);
+
+    /** int git_remote_set_pushurl(git_repository *repo, const char *remote, const char *url); */
+    JNIEXPORT jint JNICALL J_MAKE_METHOD(Remote_jniSetPushurl)(JNIEnv *env, jclass obj, jlong repoPtr, jstring remote, jstring url);
+
+    /** int git_remote_set_url(git_repository *repo, const char *remote, const char *url); */
+    JNIEXPORT jint JNICALL J_MAKE_METHOD(Remote_jniSetUrl)(JNIEnv *env, jclass obj, jlong repoPtr, jstring remote, jstring url);
+
+    /** const git_transfer_progress * git_remote_stats(git_remote *remote); */
+    JNIEXPORT jlong JNICALL J_MAKE_METHOD(Remote_jniStats)(JNIEnv *env, jclass obj, jlong remotePtr);
+
+    /** void git_remote_stop(git_remote *remote); */
+    JNIEXPORT void JNICALL J_MAKE_METHOD(Remote_jniStop)(JNIEnv *env, jclass obj, jlong remotePtr);
+
+    /** int git_remote_update_tips(git_remote *remote, const git_remote_callbacks *callbacks, int update_fetchhead, git_remote_autotag_option_t download_tags, const char *reflog_message); */
+    JNIEXPORT jint JNICALL J_MAKE_METHOD(Remote_jniUpdateTips)(JNIEnv *env, jclass obj, jlong remotePtr, jlong callbacksPtr, jint update_fetchhead, jint downloadTags, jstring reflog_message);
+
+    /** int git_remote_upload(git_remote *remote, const git_strarray *refspecs, const git_push_options *opts); */
+    JNIEXPORT jint JNICALL J_MAKE_METHOD(Remote_jniUpload)(JNIEnv *env, jclass obj, jlong remotePtr, jobjectArray refspecs, jlong optsPtr);
+
+    /** const char * git_remote_url(const git_remote *remote); */
+    JNIEXPORT jstring JNICALL J_MAKE_METHOD(Remote_jniUrl)(JNIEnv *env, jclass obj, jlong remotePtr);
+
+#ifdef __cplusplus
+}
+#endif
+#endif
