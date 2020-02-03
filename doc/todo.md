@@ -15,9 +15,9 @@
 - [x] Revwalk
 - [x] Submodule
 - [x] Worktree
-- [ ] Note
+- [x] Note
 - [x] Tag
-- [ ] Status
+- [x] Status
 
 
 ## API polishing
