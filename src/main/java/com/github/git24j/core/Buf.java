@@ -37,4 +37,9 @@ public class Buf {
         }
         return Optional.of(ptr.substring(0, size));
     }
+
+    @Override
+    public String toString() {
+        return getString().orElse("");
+    }
 }
