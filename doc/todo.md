@@ -13,8 +13,8 @@
 - [x] Rebase (no test)
 - [x] Remote
 - [x] Revwalk
-- [ ] Submodule
-- [ ] Worktree
+- [x] Submodule
+- [x] Worktree
 - [ ] Note
 - [x] Tag
 - [ ] Status
