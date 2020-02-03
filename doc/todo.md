@@ -17,7 +17,7 @@
 - [x] Worktree
 - [x] Note
 - [x] Tag
-- [ ] Status
+- [x] Status
 
 
 ## API polishing
