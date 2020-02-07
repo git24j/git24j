@@ -35,6 +35,10 @@ clean_wrapper:
 
 rebuild_wrapper: | clean_wrapper build_wrapper
 
+lint: 
+	$(CURDIR)/scripts/lint.sh download
+	$(CURDIR)/scripts/lint.sh diff
+	
 test: | build_wrapper
 	mvn test
 

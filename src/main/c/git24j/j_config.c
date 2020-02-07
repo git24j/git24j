@@ -78,7 +78,6 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Config_jniOpenDefault)(JNIEnv *env, jclass 
     git_config *c_out;
     int r = git_config_open_default(&c_out);
     (*env)->CallVoidMethod(env, out, jniConstants->midAtomicLongSet, (long)c_out);
-    git_config_free(c_out);
     return r;
 }
 
@@ -88,7 +87,6 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Config_jniNew)(JNIEnv *env, jclass obj, job
     git_config *c_out;
     int r = git_config_new(&c_out);
     (*env)->CallVoidMethod(env, out, jniConstants->midAtomicLongSet, (long)c_out);
-    git_config_free(c_out);
     return r;
 }
 
@@ -108,7 +106,6 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Config_jniOpenOndisk)(JNIEnv *env, jclass o
     char *c_path = j_copy_of_jstring(env, path, true);
     int r = git_config_open_ondisk(&c_out, c_path);
     (*env)->CallVoidMethod(env, out, jniConstants->midAtomicLongSet, (long)c_out);
-    git_config_free(c_out);
     free(c_path);
     return r;
 }
@@ -119,7 +116,6 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Config_jniOpenLevel)(JNIEnv *env, jclass ob
     git_config *c_out;
     int r = git_config_open_level(&c_out, (git_config *)parentPtr, (git_config_level_t)level);
     (*env)->CallVoidMethod(env, out, jniConstants->midAtomicLongSet, (long)c_out);
-    git_config_free(c_out);
     return r;
 }
 
@@ -129,7 +125,6 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Config_jniOpenGlobal)(JNIEnv *env, jclass o
     git_config *c_out;
     int r = git_config_open_global(&c_out, (git_config *)configPtr);
     (*env)->CallVoidMethod(env, out, jniConstants->midAtomicLongSet, (long)c_out);
-    git_config_free(c_out);
     return r;
 }
 
@@ -139,7 +134,6 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Config_jniSnapshot)(JNIEnv *env, jclass obj
     git_config *c_out;
     int r = git_config_snapshot(&c_out, (git_config *)configPtr);
     (*env)->CallVoidMethod(env, out, jniConstants->midAtomicLongSet, (long)c_out);
-    git_config_free(c_out);
     return r;
 }
 

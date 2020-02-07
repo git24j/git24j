@@ -1,13 +1,14 @@
 package com.github.git24j.core;
 
+import static com.github.git24j.core.GitException.ErrorCode;
+
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
-
-import static com.github.git24j.core.GitException.ErrorCode;
 
 public class Reference {
     final AtomicLong _rawPtr = new AtomicLong();
@@ -582,7 +583,7 @@ public class Reference {
     public Oid targetPeel() {
         Oid oid = new Oid();
         jniTargetPeel(oid, this.getRawPointer());
-        return oid.getId() == null ? null : oid;
+        return oid.isEmpty() ? null : oid;
     }
 
     /**
@@ -908,5 +909,10 @@ public class Reference {
         if (o == null || getClass() != o.getClass()) return false;
         Reference reference = (Reference) o;
         return Reference.cmp(reference, this) == 0;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(_rawPtr);
     }
 }

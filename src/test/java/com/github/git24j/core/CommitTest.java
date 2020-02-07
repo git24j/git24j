@@ -1,12 +1,11 @@
 package com.github.git24j.core;
 
+import java.time.Instant;
+import java.util.Collections;
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
-
-import java.time.Instant;
-import java.util.Collections;
 
 public class CommitTest extends TestBase {
     private final String MASTER_HASH = "476f0c95825ef4479cab580b71f8b85f9dea4ee4";

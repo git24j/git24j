@@ -103,7 +103,7 @@ public class Merge {
     static native int jniFile(
             AtomicLong out, long acestorPtr, long oursPtr, long theirsPtr, long optsPtr);
 
-    public class FileResult extends CAutoReleasable {
+    public static class FileResult extends CAutoReleasable {
 
         protected FileResult(boolean isWeak, long rawPtr) {
             super(isWeak, rawPtr);

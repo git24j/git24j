@@ -88,7 +88,7 @@ public class Branch {
 
         @Override
         protected void finalize() throws Throwable {
-            if (_ptr.get() > 0 ){
+            if (_ptr.get() > 0) {
                 jniIteratorFree(_ptr.get());
             }
             super.finalize();
@@ -97,9 +97,8 @@ public class Branch {
          * Create an iterator which loops over the requested branches.
          *
          * @param repo Repository where to find the branches.
-         * @param flag Filtering flags for the branch listing. Valid values are GIT_BRANCH_LOCAL, GIT_BRANCH_REMOTE
-         * or GIT_BRANCH_ALL.
-         *
+         * @param flag Filtering flags for the branch listing. Valid values are GIT_BRANCH_LOCAL,
+         *     GIT_BRANCH_REMOTE or GIT_BRANCH_ALL.
          * @return the iterator
          * @throws GitException git errors
          */
@@ -154,7 +153,8 @@ public class Branch {
      */
     public static Reference move(Reference branch, String branchName, boolean force) {
         Reference outRef = new Reference(0);
-        Error.throwIfNeeded(jniMove(outRef._rawPtr, branch.getRawPointer(), branchName, force ? 0 : 1));
+        Error.throwIfNeeded(
+                jniMove(outRef._rawPtr, branch.getRawPointer(), branchName, force ? 0 : 1));
         return outRef;
     }
 
@@ -212,16 +212,13 @@ public class Branch {
 
     static native int jniName(AtomicReference<String> outStr, long refPtr);
 
-
     /**
      * Get the branch name
      *
-     * Given a reference object, this will check that it really is a branch (ie.
-     * it lives under "refs/heads/" or "refs/remotes/"), and return the branch part
-     * of it.
+     * <p>Given a reference object, this will check that it really is a branch (ie. it lives under
+     * "refs/heads/" or "refs/remotes/"), and return the branch part of it.
      *
      * @param branch A reference object, ideally pointing to a branch
-     *
      * @return reference name.
      * @throws GitException git errors
      */
@@ -238,13 +235,11 @@ public class Branch {
     /**
      * Get the upstream of a branch
      *
-     * Given a reference, this will return a new reference object corresponding
-     * to its remote tracking branch. The reference must be a local branch.
+     * <p>Given a reference, this will return a new reference object corresponding to its remote
+     * tracking branch. The reference must be a local branch.
      *
      * @param branch Current underlying reference of the branch.
-     *
-     * @return the retrieved reference, or null when no remote tracking
-     *         reference exists
+     * @return the retrieved reference, or null when no remote tracking reference exists
      * @throws GitException
      */
     public static Reference upstream(Reference branch) {
@@ -265,17 +260,14 @@ public class Branch {
     /**
      * Set a branch's upstream branch
      *
-     * This will update the configuration to set the branch named `name` as the upstream of `branch`.
-     * Pass a NULL name to unset the upstream information.
+     * <p>This will update the configuration to set the branch named `name` as the upstream of
+     * `branch`. Pass a NULL name to unset the upstream information.
      *
-     * @note the actual tracking reference must have been already created for the
-     * operation to succeed.
-     *
+     * @note the actual tracking reference must have been already created for the operation to
+     *     succeed.
      * @param branch the branch to configure
      * @param upstreamName remote-tracking or local branch to set as upstream.
-     *
-     * @return 0 on success; GIT_ENOTFOUND if there's no branch named `branch_name`
-     *         or an error code
+     * @return 0 on success; GIT_ENOTFOUND if there's no branch named `branch_name` or an error code
      */
     public static void setUpstream(Reference branch, String upstreamName) {
         if (branch == null) {
@@ -289,13 +281,12 @@ public class Branch {
     /**
      * Get the upstream name of a branch
      *
-     * Given a local branch, this will return its remote-tracking branch information,
-     * as a full reference name, ie. "feature/nice" would become
-     * "refs/remote/origin/feature/nice", depending on that branch's configuration.
+     * <p>Given a local branch, this will return its remote-tracking branch information, as a full
+     * reference name, ie. "feature/nice" would become "refs/remote/origin/feature/nice", depending
+     * on that branch's configuration.
      *
      * @param repo the repository where the branches live.
      * @param refname reference name of the local branch.
-     *
      * @return remote branch name or null remote tracking reference exists.
      * @throws GitException git errors
      */
@@ -314,7 +305,6 @@ public class Branch {
      * Determine if HEAD points to the given branch
      *
      * @param branch A reference to a local branch.
-     *
      * @return true if HEAD points at the branch, false if it isn't
      * @throws GitException git errors
      */
@@ -331,11 +321,10 @@ public class Branch {
     /**
      * Determine if any HEAD points to the current branch
      *
-     * This will iterate over all known linked repositories (usually in the form of
-     * worktrees) and report whether any HEAD is pointing at the current branch.
+     * <p>This will iterate over all known linked repositories (usually in the form of worktrees)
+     * and report whether any HEAD is pointing at the current branch.
      *
      * @param branch A reference to a local branch.
-     *
      * @return true if branch is checked out, 0 if it isn't,
      * @throws GitException git error
      */
@@ -349,14 +338,12 @@ public class Branch {
     /**
      * Find the remote name of a remote-tracking branch
      *
-     * This will return the name of the remote whose fetch refspec is matching
-     * the given branch. E.g. given a branch "refs/remotes/test/master", it will
-     * extract the "test" part. If refspecs from multiple remotes match,
-     * the function will return GIT_EAMBIGUOUS.
+     * <p>This will return the name of the remote whose fetch refspec is matching the given branch.
+     * E.g. given a branch "refs/remotes/test/master", it will extract the "test" part. If refspecs
+     * from multiple remotes match, the function will return GIT_EAMBIGUOUS.
      *
      * @param repo The repository where the branch lives.
      * @param canonicalBranchName complete name of the remote tracking branch.
-     *
      * @return remote name or null when no matching remote was found,
      * @throws GitException git errors
      */
@@ -378,8 +365,8 @@ public class Branch {
     /**
      * Retrieve the upstream remote of a local branch
      *
-     * This will return the currently configured "branch.*.remote" for a given
-     * branch. This branch must be local.
+     * <p>This will return the currently configured "branch.*.remote" for a given branch. This
+     * branch must be local.
      *
      * @param repo the repository in which to look
      * @param refName the full name of the branch

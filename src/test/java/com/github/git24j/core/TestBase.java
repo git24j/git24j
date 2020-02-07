@@ -1,8 +1,5 @@
 package com.github.git24j.core;
 
-import org.apache.commons.io.IOUtils;
-import org.junit.rules.TemporaryFolder;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -14,6 +11,8 @@ import java.util.Enumeration;
 import java.util.Optional;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
+import org.apache.commons.io.IOUtils;
+import org.junit.rules.TemporaryFolder;
 
 public class TestBase {
     private static final String RESOURCE_ROOT = "";

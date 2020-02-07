@@ -1,11 +1,10 @@
 package com.github.git24j.core;
 
+import java.util.EnumSet;
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
-
-import java.util.EnumSet;
 
 public class RevparseTest extends TestBase {
     @Rule public TemporaryFolder folder = new TemporaryFolder();

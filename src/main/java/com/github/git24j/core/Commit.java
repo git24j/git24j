@@ -1,11 +1,11 @@
 package com.github.git24j.core;
 
+import static com.github.git24j.core.GitException.ErrorCode.ENOTFOUND;
+
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
-
-import static com.github.git24j.core.GitException.ErrorCode.ENOTFOUND;
 
 public class Commit extends GitObject {
     Commit(long rawPointer) {
@@ -458,6 +458,7 @@ public class Commit extends GitObject {
         Error.throwIfNeeded(e);
         return outOid;
     }
+
     static native int jniCreateBuffer(
             Buf outBuf,
             long repoPtr,
@@ -520,19 +521,18 @@ public class Commit extends GitObject {
     /**
      * Create a commit object from the given buffer and signature
      *
-     * Given the unsigned commit object's contents, its signature and the
-     * header field in which to store the signature, attach the signature
-     * to the commit and write it into the given repository.
+     * <p>Given the unsigned commit object's contents, its signature and the header field in which
+     * to store the signature, attach the signature to the commit and write it into the given
+     * repository.
      *
      * @param commitContent the content of the unsigned commit object
-     * @param signature the signature to add to the commit. Leave `NULL`
-     * to create a commit without adding a signature field.
-     * @param signatureField which header field should contain this
-     * signature. Leave `NULL` for the default of "gpgsig"
+     * @param signature the signature to add to the commit. Leave `NULL` to create a commit without
+     *     adding a signature field.
+     * @param signatureField which header field should contain this signature. Leave `NULL` for the
+     *     default of "gpgsig"
      * @return the resulting commit id
      * @throws GitException git errors
      */
-
     public static Oid createWithSignature(
             Repository repo, String commitContent, String signature, String signatureField) {
         Oid outOid = new Oid();

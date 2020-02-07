@@ -1,14 +1,13 @@
 package com.github.git24j.core;
 
-import org.junit.Test;
-
-import java.util.EnumSet;
-
 import static com.github.git24j.core.IBitEnumTest.Example.EIGHT;
 import static com.github.git24j.core.IBitEnumTest.Example.FOUR;
 import static com.github.git24j.core.IBitEnumTest.Example.ONE;
 import static com.github.git24j.core.IBitEnumTest.Example.TWO;
 import static org.junit.Assert.assertEquals;
+
+import java.util.EnumSet;
+import org.junit.Test;
 
 public class IBitEnumTest {
 

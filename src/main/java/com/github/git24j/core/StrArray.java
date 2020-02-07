@@ -4,11 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-/**
- * Simple Wrapper around {@code ArrayList} to provide jni interactions
- */
+/** Simple Wrapper around {@code ArrayList} to provide jni interactions */
 class StrArray {
     private List<String> _array = new ArrayList<>();
+
     void add(String val) {
         _array.add(val);
     }

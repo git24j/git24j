@@ -1,5 +1,7 @@
 package com.github.git24j.core;
 
+import static com.github.git24j.core.GitException.ErrorCode.ENOTFOUND;
+
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Optional;
@@ -18,7 +20,7 @@ public class Config extends CAutoCloseable {
         jniForeachMatch(getRawPointer(), regexp, entryPtr -> foreachCb.accept(new Entry(entryPtr)));
     }
 
-    public class Entry {
+    public static class Entry {
         private AtomicLong _rawPtr = new AtomicLong();
 
         public Entry(long ptr) {
@@ -41,23 +43,6 @@ public class Config extends CAutoCloseable {
     private interface CallbackJ {
         int accept(long entryPtr);
     }
-    /**
-     * Locate the path to the global configuration file
-     *
-     * @return path where global configuration is stored.
-     */
-    public static Optional<Path> findGlobal() {
-        Buf buf = new Buf();
-        int e = jniFindGlobal(buf);
-        if (e == GitException.ErrorCode.ENOTFOUND.getCode()) {
-            return Optional.empty();
-        }
-        Error.throwIfNeeded(e);
-        if (buf.getSize() == 0 || buf.getPtr() == null) {
-            return Optional.empty();
-        }
-        return Optional.of(Paths.get(buf.toString()));
-    }
 
     @Override
     public void close() {
@@ -66,16 +51,10 @@ public class Config extends CAutoCloseable {
         }
     }
 
-    /**
-     * Get the value of a string config variable.
-     *
-     * @param name the variable's name
-     * @return value of a string config variable
-     */
-    public Optional<String> getString(String name) {
-        Buf buf = new Buf();
-        Error.throwIfNeeded(jniGetStringBuf(buf, getRawPointer(), name));
-        return buf.getString();
+    @Override
+    protected void finalize() throws Throwable {
+        close();
+        super.finalize();
     }
 
     /** void git_config_entry_free(git_config_entry *entry); */
@@ -83,6 +62,24 @@ public class Config extends CAutoCloseable {
 
     /** int git_config_find_global(git_buf *out); */
     static native int jniFindGlobal(Buf out);
+
+    /**
+     * Locate the path to the global configuration file
+     *
+     * @return path where global configuration is stored.
+     */
+    public static Optional<Path> findGlobal() {
+        Buf buf = new Buf();
+        int e = jniFindGlobal(buf);
+        if (e == ENOTFOUND.getCode()) {
+            return Optional.empty();
+        }
+        Error.throwIfNeeded(e);
+        if (buf.getSize() == 0 || buf.getPtr() == null) {
+            return Optional.empty();
+        }
+        return Optional.of(Paths.get(buf.toString()));
+    }
 
     /** int git_config_find_xdg(git_buf *out); */
     static native int jniFindXdg(Buf out);
@@ -104,7 +101,7 @@ public class Config extends CAutoCloseable {
     public static Optional<Path> findXdg() {
         Buf buf = new Buf();
         int e = jniFindXdg(buf);
-        if (e == GitException.ErrorCode.ENOTFOUND.getCode()) {
+        if (e == ENOTFOUND.getCode()) {
             return Optional.empty();
         }
         Error.throwIfNeeded(e);
@@ -128,7 +125,7 @@ public class Config extends CAutoCloseable {
     public static Optional<Path> findSystem() {
         Buf buf = new Buf();
         int e = jniFindSystem(buf);
-        if (e == GitException.ErrorCode.ENOTFOUND.getCode()) {
+        if (e == ENOTFOUND.getCode()) {
             return Optional.empty();
         }
         Error.throwIfNeeded(e);
@@ -152,7 +149,7 @@ public class Config extends CAutoCloseable {
     public static Optional<Path> findProgramdata() {
         Buf buf = new Buf();
         int e = jniFindProgramdata(buf);
-        if (e == GitException.ErrorCode.ENOTFOUND.getCode()) {
+        if (e == ENOTFOUND.getCode()) {
             return Optional.empty();
         }
         Error.throwIfNeeded(e);
@@ -196,26 +193,25 @@ public class Config extends CAutoCloseable {
         /** XDG compatible configuration file; typically ~/.config/git/config */
         XDG(3),
 
-        /** User-specific configuration file (also called Global configuration
-         * file); typically ~/.gitconfig
+        /**
+         * User-specific configuration file (also called Global configuration file); typically
+         * ~/.gitconfig
          */
         GLOBAL(4),
 
-        /** Repository specific configuration file; $WORK_DIR/.git/config on
-         * non-bare repos
-         */
+        /** Repository specific configuration file; $WORK_DIR/.git/config on non-bare repos */
         LOCAL(5),
 
-        /** Application specific configuration file; freely defined by applications
-         */
+        /** Application specific configuration file; freely defined by applications */
         APP(6),
 
-        /** Represents the highest level available config file (i.e. the most
-         * specific config file available that actually is loaded)
+        /**
+         * Represents the highest level available config file (i.e. the most specific config file
+         * available that actually is loaded)
          */
         HIGHEST(-1),
         ;
-        private final int _code ;
+        private final int _code;
 
         ConfigLevel(int code) {
             _code = code;
@@ -224,35 +220,53 @@ public class Config extends CAutoCloseable {
     /**
      * Add an on-disk config file instance to an existing config
      *
-     * The on-disk file pointed at by `path` will be opened and
-     * parsed; it's expected to be a native Git config file following
-     * the default Git config syntax (see man git-config).
+     * <p>The on-disk file pointed at by `path` will be opened and parsed; it's expected to be a
+     * native Git config file following the default Git config syntax (see man git-config).
      *
-     * If the file does not exist, the file will still be added and it
-     * will be created the first time we write to it.
+     * <p>If the file does not exist, the file will still be added and it will be created the first
+     * time we write to it.
      *
-     * Note that the configuration object will free the file
-     * automatically.
+     * <p>Note that the configuration object will free the file automatically.
      *
-     * Further queries on this config object will access each
-     * of the config file instances in order (instances with
-     * a higher priority level will be accessed first).
+     * <p>Further queries on this config object will access each of the config file instances in
+     * order (instances with a higher priority level will be accessed first).
      *
      * @param path path to the configuration file to add
      * @param level the priority level of the backend
      * @param force replace config file at the given priority level
-     * @param repo optional repository to allow parsing of
-     *  conditional includes
-     * @return 0 on success, GIT_EEXISTS when adding more than one file
-     *  for a given priority level (and force_replace set to 0),
-     *  GIT_ENOTFOUND when the file doesn't exist or error code
+     * @param repo optional repository to allow parsing of conditional includes
+     * @throws GitException 0 on success, GIT_EEXISTS when adding more than one file for a given
+     *     priority level (and force_replace set to 0), GIT_ENOTFOUND when the file doesn't exist or
+     *     error code
      */
     public void addFileOndisk(Path path, ConfigLevel level, Repository repo, boolean force) {
-
+        Error.throwIfNeeded(
+                jniAddFileOndisk(
+                        getRawPointer(),
+                        path.toString(),
+                        level._code,
+                        repo == null ? 0 : repo.getRawPointer(),
+                        force ? 1 : 0));
     }
 
     /** int git_config_open_ondisk(git_config **out, const char *path); */
     static native int jniOpenOndisk(AtomicLong out, String path);
+
+    /**
+     * Create a new config instance containing a single on-disk file
+     *
+     * <p>This method is a simple utility wrapper for the following sequence of calls: -
+     * git_config_new - git_config_add_file_ondisk
+     *
+     * @param path Path to the on-disk file to open
+     * @return the configuration instance opened
+     * @throws GitException git errors
+     */
+    public static Config openOndisk(Path path) {
+        Config cfg = new Config(0);
+        Error.throwIfNeeded(jniOpenOndisk(cfg._rawPtr, path.toString()));
+        return cfg;
+    }
 
     /**
      * int git_config_open_level(git_config **out, const git_config *parent, git_config_level_t
@@ -260,11 +274,64 @@ public class Config extends CAutoCloseable {
      */
     static native int jniOpenLevel(AtomicLong out, long parent, int level);
 
+    /**
+     * Build a single-level focused config object from a multi-level one.
+     *
+     * <p>The returned config object can be used to perform get/set/delete operations on a single
+     * specific level.
+     *
+     * <p>Getting several times the same level from the same parent multi-level config will return
+     * different config instances, but containing the same config_file instance.
+     *
+     * @param parent Multi-level config to search for the given level
+     * @param level Configuration level to search for
+     * @return The configuration instance opened or null if the passed level cannot be found in the
+     *     multi-level parent config
+     * @throws GitException git errors
+     */
+    public static Config openLevel(ConfigLevel level, Config parent) {
+        Config cfg = new Config(0);
+        int e = jniOpenLevel(cfg._rawPtr, parent.getRawPointer(), level._code);
+        if (ENOTFOUND.getCode() == e) {
+            return null;
+        }
+        Error.throwIfNeeded(e);
+        return cfg;
+    }
+
     /** int git_config_open_global(git_config **out, git_config *config); */
     static native int jniOpenGlobal(AtomicLong out, long config);
 
+    public static Config openGlobal(Config config) {
+        Config cfg = new Config(0);
+        int e = jniOpenGlobal(cfg._rawPtr, config.getRawPointer());
+        if (ENOTFOUND.getCode() == e) {
+            return null;
+        }
+        Error.throwIfNeeded(e);
+        return cfg;
+    }
+
     /** int git_config_snapshot(git_config **out, git_config *config); */
     static native int jniSnapshot(AtomicLong out, long config);
+
+    /**
+     * Create a snapshot of the configuration
+     *
+     * <p>Create a snapshot of the current state of a configuration, which allows you to look into a
+     * consistent view of the configuration for looking up complex values (e.g. a remote,
+     * submodule).
+     *
+     * <p>The string returned when querying such a config object is valid until it is freed.
+     *
+     * @return configuration to snapshot
+     * @throws GitException git errors
+     */
+    public Config snapshot() {
+        Config cfg = new Config(0);
+        Error.throwIfNeeded(jniSnapshot(cfg._rawPtr, getRawPointer()));
+        return cfg;
+    }
 
     /** void git_config_free(git_config *cfg); */
     static native void jniFree(long cfg);
@@ -283,15 +350,72 @@ public class Config extends CAutoCloseable {
     /** int git_config_get_bool(int *out, const git_config *cfg, const char *name); */
     static native int jniGetBool(AtomicInteger out, long cfg, String name);
 
+    /**
+     * Get the value of a boolean config variable.
+     *
+     * <p>All config files will be looked into, in the order of their defined level. A higher level
+     * means a higher priority. The first occurrence of the variable will be returned here.
+     *
+     * @param name the variable's name
+     * @return bool value of name or empty if not found
+     * @throws GitException git errors
+     */
+    public Optional<Boolean> getBool(String name) {
+        AtomicInteger out = new AtomicInteger();
+        int e = jniGetBool(out, getRawPointer(), name);
+        if (e == ENOTFOUND.getCode()) {
+            return Optional.empty();
+        }
+        Error.throwIfNeeded(e);
+        return Optional.of(out.get() != 0);
+    }
+
     /** int git_config_get_path(git_buf *out, const git_config *cfg, const char *name); */
     static native int jniGetPath(Buf out, long cfg, String name);
 
     /** int git_config_get_string(const char **out, const git_config *cfg, const char *name); */
     static native int jniGetString(AtomicReference<String> out, long cfg, String name);
 
+    /**
+     * Get the value of a string config variable.
+     *
+     * @param name the variable's name
+     * @return value of a string config variable
+     */
+    public Optional<String> getString(String name) {
+        AtomicReference<String> out = new AtomicReference<>();
+        int e = jniGetString(out, getRawPointer(), name);
+        if (ENOTFOUND.getCode() == e) {
+            return Optional.empty();
+        }
+        Error.throwIfNeeded(e);
+        return Optional.ofNullable(out.get());
+    }
+
     /** int git_config_get_string_buf(git_buf *out, const git_config *cfg, const char *name); */
     static native int jniGetStringBuf(Buf out, long cfg, String name);
 
+    /**
+     * Get the value of a string config variable.
+     *
+     * <p>The value of the config will be copied into the buffer.
+     *
+     * <p>All config files will be looked into, in the order of their defined level. A higher level
+     * means a higher priority. The first occurrence of the variable will be returned here.
+     *
+     * @param name the variable's name
+     * @return value of string config variable
+     * @throws GitException git errors
+     */
+    public Optional<Buf> getStringBuf(String name) {
+        Buf outBuf = new Buf();
+        int e = jniGetStringBuf(outBuf, getRawPointer(), name);
+        if (ENOTFOUND.getCode() == e) {
+            return Optional.empty();
+        }
+        Error.throwIfNeeded(e);
+        return Optional.of(outBuf);
+    }
     /**
      * int git_config_get_multivar_foreach(const git_config *cfg, const char *name, const char
      * *regexp, git_config_foreach_cb callback, void *payload);

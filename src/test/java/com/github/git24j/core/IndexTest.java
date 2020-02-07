@@ -1,10 +1,8 @@
 package com.github.git24j.core;
 
-import org.apache.commons.io.FileUtils;
-import org.junit.Assert;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
+import static com.github.git24j.core.GitObject.Type.TREE;
+import static com.github.git24j.core.Index.Capability.IGNORE_CASE;
+import static com.github.git24j.core.Index.Capability.NO_SYMLINKS;
 
 import java.io.File;
 import java.io.IOException;
@@ -16,10 +14,11 @@ import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
-
-import static com.github.git24j.core.GitObject.Type.TREE;
-import static com.github.git24j.core.Index.Capability.IGNORE_CASE;
-import static com.github.git24j.core.Index.Capability.NO_SYMLINKS;
+import org.apache.commons.io.FileUtils;
+import org.junit.Assert;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 
 public class IndexTest extends TestBase {
     @Rule public TemporaryFolder folder = new TemporaryFolder();

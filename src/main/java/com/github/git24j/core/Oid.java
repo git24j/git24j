@@ -65,12 +65,16 @@ public class Oid {
         return getEffectiveSize() < RAWSZ;
     }
 
-    public byte[] getId() {
+    byte[] getId() {
         return id;
     }
 
-    public void setId(byte[] id) {
+    void setId(byte[] id) {
         this.id = id;
+    }
+
+    boolean isEmpty() {
+        return id == null || eSize == 0;
     }
 
     @Override

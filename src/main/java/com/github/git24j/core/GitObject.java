@@ -17,6 +17,7 @@ public class GitObject {
         _rawPtr.set(rawPointer);
         _isWeak = weak;
     }
+
     static native void jniFree(long objPtr);
 
     static native int jniType(long objPtr);
@@ -79,7 +80,13 @@ public class GitObject {
     public static GitObject lookup(Repository repository, Oid oid, Type type) {
         AtomicLong outObj = new AtomicLong();
         if (oid.isShortId()) {
-            Error.throwIfNeeded(jniLookupPrefix(outObj, repository.getRawPointer(), oid, oid.getEffectiveSize(), type.value));
+            Error.throwIfNeeded(
+                    jniLookupPrefix(
+                            outObj,
+                            repository.getRawPointer(),
+                            oid,
+                            oid.getEffectiveSize(),
+                            type.value));
         } else {
             Error.throwIfNeeded(jniLookup(outObj, repository.getRawPointer(), oid, type.value));
         }
@@ -87,8 +94,8 @@ public class GitObject {
     }
 
     /**
-     * Lookup a reference to one of the objects in a repository, given a prefix of its
-     * identifier (short id).
+     * Lookup a reference to one of the objects in a repository, given a prefix of its identifier
+     * (short id).
      *
      * @param repository the repository to look up the object
      * @param oid a short identifier for the object

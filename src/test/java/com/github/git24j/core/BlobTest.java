@@ -1,11 +1,10 @@
 package com.github.git24j.core;
 
+import java.nio.charset.StandardCharsets;
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
-
-import java.nio.charset.StandardCharsets;
 
 public class BlobTest extends TestBase {
     private static final String MASTER_HASH = "476f0c95825ef4479cab580b71f8b85f9dea4ee4";
