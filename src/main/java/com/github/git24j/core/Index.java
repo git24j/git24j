@@ -1,12 +1,12 @@
 package com.github.git24j.core;
 
+import static com.github.git24j.core.GitException.ErrorCode.ITEROVER;
+
 import java.util.EnumSet;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.BiConsumer;
-
-import static com.github.git24j.core.GitException.ErrorCode.ITEROVER;
 
 public class Index implements AutoCloseable {
     final AtomicLong _rawPtr = new AtomicLong();
@@ -706,23 +706,32 @@ public class Index implements AutoCloseable {
         return jniHasConflicts(getRawPointer()) == 1;
     }
 
-    /** int git_index_conflict_iterator_new(git_index_conflict_iterator **iterator_out, git_index *index); */
-    // JNIEXPORT jint JNICALL J_MAKE_METHOD(Index_jniConflictIteratorNew)(JNIEnv *env, jclass obj, jobject outIterPtr, jlong indexPtr);
+    /**
+     * int git_index_conflict_iterator_new(git_index_conflict_iterator **iterator_out, git_index
+     * *index);
+     */
+    // JNIEXPORT jint JNICALL J_MAKE_METHOD(Index_jniConflictIteratorNew)(JNIEnv *env, jclass obj,
+    // jobject outIterPtr, jlong indexPtr);
     static native int jniConflictIteratorNew(AtomicLong outIter, long indexPtr);
-    /** int git_index_conflict_next(const git_index_entry **ancestor_out, const git_index_entry **our_out, const git_index_entry **their_out, git_index_conflict_iterator *iterator); */
-    // JNIEXPORT jint JNICALL J_MAKE_METHOD(Index_jniConflictNext)(JNIEnv *env, jclass obj, jobject ancestorOut, jobject ourOut, jobject theirOut, jlong iterPtr);
-    static native int jniConflictNext(AtomicLong ancestorOut, AtomicLong ourOut, AtomicLong theirOut, long iterPtr);
+    /**
+     * int git_index_conflict_next(const git_index_entry **ancestor_out, const git_index_entry
+     * **our_out, const git_index_entry **their_out, git_index_conflict_iterator *iterator);
+     */
+    // JNIEXPORT jint JNICALL J_MAKE_METHOD(Index_jniConflictNext)(JNIEnv *env, jclass obj, jobject
+    // ancestorOut, jobject ourOut, jobject theirOut, jlong iterPtr);
+    static native int jniConflictNext(
+            AtomicLong ancestorOut, AtomicLong ourOut, AtomicLong theirOut, long iterPtr);
     /** void git_index_conflict_iterator_free(git_index_conflict_iterator *iterator); */
-    // JNIEXPORT void JNICALL J_MAKE_METHOD(Index_jniConflictIteratorFree)(JNIEnv *env, jclass obj, jlong iterPtr);
+    // JNIEXPORT void JNICALL J_MAKE_METHOD(Index_jniConflictIteratorFree)(JNIEnv *env, jclass obj,
+    // jlong iterPtr);
     static native void jniConflictIteratorFree(long iterPtr);
-
 
     public static class ConflictIterator {
         AtomicLong _ptr = new AtomicLong();
 
         @Override
         protected void finalize() throws Throwable {
-            if (_ptr.get() > 0)  {
+            if (_ptr.get() > 0) {
                 jniConflictIteratorFree(_ptr.get());
             }
             super.finalize();
@@ -730,7 +739,12 @@ public class Index implements AutoCloseable {
 
         public Conflict next() {
             Conflict conflict = new Conflict();
-            int e = jniConflictNext(conflict.ancestor._ptr, conflict.our._ptr, conflict.their._ptr, _ptr.get());
+            int e =
+                    jniConflictNext(
+                            conflict.ancestor._ptr,
+                            conflict.our._ptr,
+                            conflict.their._ptr,
+                            _ptr.get());
             if (e == ITEROVER.getCode()) {
                 return null;
             }
@@ -739,14 +753,10 @@ public class Index implements AutoCloseable {
         }
     }
 
-    /**
-     * @return an iterator that can loops over iterator
-     */
+    /** @return an iterator that can loops over iterator */
     public ConflictIterator conflictIteratorNew() {
         ConflictIterator iterator = new ConflictIterator();
         Error.throwIfNeeded(jniConflictIteratorNew(iterator._ptr, getRawPointer()));
         return iterator;
     }
-
-
 }

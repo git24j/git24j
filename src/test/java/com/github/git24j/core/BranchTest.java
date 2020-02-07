@@ -1,13 +1,12 @@
 package com.github.git24j.core;
 
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
-
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
 
 public class BranchTest extends TestBase {
     private final String MASTER_HASH = "476f0c95825ef4479cab580b71f8b85f9dea4ee4";
@@ -18,7 +17,12 @@ public class BranchTest extends TestBase {
     @Test
     public void create() {
         try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {
-            Reference ref = Branch.create(testRepo, "test_branch", Commit.lookup(testRepo, Oid.of(MASTER_HASH)), false);
+            Reference ref =
+                    Branch.create(
+                            testRepo,
+                            "test_branch",
+                            Commit.lookup(testRepo, Oid.of(MASTER_HASH)),
+                            false);
             Assert.assertEquals(MASTER_HASH, ref.target().toString());
         }
     }
@@ -84,7 +88,7 @@ public class BranchTest extends TestBase {
         }
     }
 
-    /**TODO: test set upstream*/
+    /** TODO: test set upstream */
     @Test
     public void upstream() {
         try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {

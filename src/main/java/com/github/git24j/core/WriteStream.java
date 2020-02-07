@@ -14,7 +14,7 @@ public class WriteStream extends CAutoCloseable {
 
     @Override
     public void close() {
-        if (_rawPtr.get() > 0 ){
+        if (_rawPtr.get() > 0) {
             long ptr = _rawPtr.getAndSet(0);
             jniClose(ptr);
             jniFree(ptr);
@@ -26,7 +26,7 @@ public class WriteStream extends CAutoCloseable {
     }
 
     public void free() {
-        if (_rawPtr.get() > 0){
+        if (_rawPtr.get() > 0) {
             jniFree(_rawPtr.getAndSet(0));
         }
     }

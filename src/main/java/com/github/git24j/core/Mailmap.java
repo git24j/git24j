@@ -26,11 +26,12 @@ public class Mailmap {
         return _rawPtr.get();
     }
 
-    static native int jniAddEntry(long mmPtr, String realName, String realEmail, String replaceName, String replaceEmail);
+    static native int jniAddEntry(
+            long mmPtr, String realName, String realEmail, String replaceName, String replaceEmail);
 
     /**
-     * Add a single entry to the given mailmap object. If the entry already exists,
-     * it will be replaced with the new entry.
+     * Add a single entry to the given mailmap object. If the entry already exists, it will be
+     * replaced with the new entry.
      *
      * @param realName the real name to use, or NULL
      * @param realEmail the real email to use, or NULL
@@ -38,11 +39,11 @@ public class Mailmap {
      * @param replaceEmail the email to replace
      * @throws GitException git errors
      */
-
-    public void addEntry(String realName, String realEmail, String replaceName, String replaceEmail) {
-        Error.throwIfNeeded(jniAddEntry(getRawPointer(), realName, realEmail, replaceName, replaceEmail));
+    public void addEntry(
+            String realName, String realEmail, String replaceName, String replaceEmail) {
+        Error.throwIfNeeded(
+                jniAddEntry(getRawPointer(), realName, realEmail, replaceName, replaceEmail));
     }
-
 
     static native int jniFromBuffer(AtomicLong outPtr, String buf);
 
@@ -53,7 +54,6 @@ public class Mailmap {
      * @return Mailmap instance
      * @throws GitException git error
      */
-
     public static Mailmap fromBuffer(String buf) {
         Mailmap mm = new Mailmap(0);
         jniFromBuffer(mm._rawPtr, buf);
@@ -63,14 +63,13 @@ public class Mailmap {
     static native int jniFromRepository(AtomicLong outPtr, long repoPtr);
 
     /**
-     * Create a new mailmap instance from a repository, loading mailmap files based
-     * on the repository's configuration.
+     * Create a new mailmap instance from a repository, loading mailmap files based on the
+     * repository's configuration.
      *
-     * Mailmaps are loaded in the following order:
-     *  1. '.mailmap' in the root of the repository's working directory, if present.
-     *  2. The blob object identified by the 'mailmap.blob' config entry, if set.
-     * 	   [NOTE: 'mailmap.blob' defaults to 'HEAD:.mailmap' in bare repositories]
-     *  3. The path in the 'mailmap.file' config entry, if set.
+     * <p>Mailmaps are loaded in the following order: 1. '.mailmap' in the root of the repository's
+     * working directory, if present. 2. The blob object identified by the 'mailmap.blob' config
+     * entry, if set. [NOTE: 'mailmap.blob' defaults to 'HEAD:.mailmap' in bare repositories] 3. The
+     * path in the 'mailmap.file' config entry, if set.
      *
      * @param repo repository to load mailmap information from
      * @return Mailmap instance
@@ -82,19 +81,28 @@ public class Mailmap {
         return new Mailmap(outPtr.get());
     }
 
-    static native int jniResolve(AtomicReference<String> outRealName, AtomicReference<String> outRealEmail, long mmPtr, String name, String email);
+    static native int jniResolve(
+            AtomicReference<String> outRealName,
+            AtomicReference<String> outRealEmail,
+            long mmPtr,
+            String name,
+            String email);
 
     /**
      * Resolve a name and email to the corresponding real name and email.
      *
-     * @param outRealName placeholder to store the real name,  must not be null, can be empty.
-     * @param outRealEmail placeholder to store the real email,  must not be null, can be empty.
+     * @param outRealName placeholder to store the real name, must not be null, can be empty.
+     * @param outRealEmail placeholder to store the real email, must not be null, can be empty.
      * @param name the name to look up
      * @param email the email to look up
      * @throws GitException git errors
      */
-    public void resolve(AtomicReference<String> outRealName, AtomicReference<String> outRealEmail, String name, String email) {
-       Error.throwIfNeeded(jniResolve(outRealName, outRealEmail, getRawPointer(), name, email));
+    public void resolve(
+            AtomicReference<String> outRealName,
+            AtomicReference<String> outRealEmail,
+            String name,
+            String email) {
+        Error.throwIfNeeded(jniResolve(outRealName, outRealEmail, getRawPointer(), name, email));
     }
 
     /**
@@ -102,7 +110,8 @@ public class Mailmap {
      *
      * @param name the name to look up, must not be null, can be empty.
      * @param email the email to look up, , must not be null, can be empty.
-     * @return an entry whose key is the resolved name (aka real name) and value is the resolve email.
+     * @return an entry whose key is the resolved name (aka real name) and value is the resolve
+     *     email.
      * @throws GitException git errors
      */
     public Map.Entry<String, String> resolve(String name, String email) {
@@ -126,5 +135,4 @@ public class Mailmap {
         Error.throwIfNeeded(jniResolveSignature(outSig, getRawPointer(), sig));
         return outSig;
     }
-
 }

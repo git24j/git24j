@@ -1,13 +1,12 @@
 package com.github.git24j.core;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 public class TagTest extends TestBase {
     @Rule public TemporaryFolder folder = new TemporaryFolder();
@@ -53,10 +52,12 @@ public class TagTest extends TestBase {
     public void foreach() {
         try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {
             Map<String, String> tags = new HashMap<>();
-            Tag.foreach(testRepo, (name, oid) -> {
-                tags.put(name, oid);
-                return 0;
-            });
+            Tag.foreach(
+                    testRepo,
+                    (name, oid) -> {
+                        tags.put(name, oid);
+                        return 0;
+                    });
             Assert.assertEquals(tags.get("refs/tags/v0.1"), TAG_V01_SHA);
         }
     }

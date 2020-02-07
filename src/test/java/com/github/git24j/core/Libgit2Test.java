@@ -1,11 +1,10 @@
 package com.github.git24j.core;
 
+import java.util.EnumSet;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
-
-import java.util.EnumSet;
 
 public class Libgit2Test {
     @BeforeClass

@@ -1,13 +1,13 @@
 package com.github.git24j.core;
 
+import static com.github.git24j.core.GitException.ErrorCode.ENOTFOUND;
+
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
-
-import static com.github.git24j.core.GitException.ErrorCode.ENOTFOUND;
 
 /** Memory representation of a set of config files */
 public class Config extends CAutoCloseable {
@@ -20,7 +20,7 @@ public class Config extends CAutoCloseable {
         jniForeachMatch(getRawPointer(), regexp, entryPtr -> foreachCb.accept(new Entry(entryPtr)));
     }
 
-    public class Entry {
+    public static class Entry {
         private AtomicLong _rawPtr = new AtomicLong();
 
         public Entry(long ptr) {
@@ -43,23 +43,6 @@ public class Config extends CAutoCloseable {
     private interface CallbackJ {
         int accept(long entryPtr);
     }
-    /**
-     * Locate the path to the global configuration file
-     *
-     * @return path where global configuration is stored.
-     */
-    public static Optional<Path> findGlobal() {
-        Buf buf = new Buf();
-        int e = jniFindGlobal(buf);
-        if (e == ENOTFOUND.getCode()) {
-            return Optional.empty();
-        }
-        Error.throwIfNeeded(e);
-        if (buf.getSize() == 0 || buf.getPtr() == null) {
-            return Optional.empty();
-        }
-        return Optional.of(Paths.get(buf.toString()));
-    }
 
     @Override
     public void close() {
@@ -79,6 +62,24 @@ public class Config extends CAutoCloseable {
 
     /** int git_config_find_global(git_buf *out); */
     static native int jniFindGlobal(Buf out);
+
+    /**
+     * Locate the path to the global configuration file
+     *
+     * @return path where global configuration is stored.
+     */
+    public static Optional<Path> findGlobal() {
+        Buf buf = new Buf();
+        int e = jniFindGlobal(buf);
+        if (e == ENOTFOUND.getCode()) {
+            return Optional.empty();
+        }
+        Error.throwIfNeeded(e);
+        if (buf.getSize() == 0 || buf.getPtr() == null) {
+            return Optional.empty();
+        }
+        return Optional.of(Paths.get(buf.toString()));
+    }
 
     /** int git_config_find_xdg(git_buf *out); */
     static native int jniFindXdg(Buf out);
@@ -317,14 +318,13 @@ public class Config extends CAutoCloseable {
     /**
      * Create a snapshot of the configuration
      *
-     * Create a snapshot of the current state of a configuration, which
-     * allows you to look into a consistent view of the configuration for
-     * looking up complex values (e.g. a remote, submodule).
+     * <p>Create a snapshot of the current state of a configuration, which allows you to look into a
+     * consistent view of the configuration for looking up complex values (e.g. a remote,
+     * submodule).
      *
-     * The string returned when querying such a config object is valid
-     * until it is freed.
+     * <p>The string returned when querying such a config object is valid until it is freed.
      *
-     * @return  configuration to snapshot
+     * @return configuration to snapshot
      * @throws GitException git errors
      */
     public Config snapshot() {

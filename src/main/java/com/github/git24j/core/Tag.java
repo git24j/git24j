@@ -236,59 +236,51 @@ public class Tag extends GitObject {
     /**
      * Delete an existing tag reference.
      *
-     * The tag name will be checked for validity.
-     * See `git_tag_create()` for rules about valid names.
+     * <p>The tag name will be checked for validity. See `git_tag_create()` for rules about valid
+     * names.
      *
      * @param repo Repository where lives the tag
-     *
-     * @param tagName Name of the tag to be deleted;
-     * this name is validated for consistency.
-     *
+     * @param tagName Name of the tag to be deleted; this name is validated for consistency.
      * @throws GitException GIT_EINVALIDSPEC or other git errors
      */
     public static void delete(Repository repo, String tagName) {
         Error.throwIfNeeded(jniDelete(repo.getRawPointer(), tagName));
     }
-    static native int jniList(List<String> tagNames, long repoPtr);
 
+    static native int jniList(List<String> tagNames, long repoPtr);
 
     /**
      * Fill a list with all the tags in the Repository
      *
-     * The string array will be filled with the names of the
-     * matching tags; these values are owned by the user and
-     * should be free'd manually when no longer needed, using
+     * <p>The string array will be filled with the names of the matching tags; these values are
+     * owned by the user and should be free'd manually when no longer needed, using
      * `git_strarray_free`.
      *
      * @param repo Repository where to find the tags
      * @return List of tag names
      * @throws GitException git errors
      */
-
     public static List<String> list(Repository repo) {
         List<String> tagNames = new ArrayList<>();
         Error.throwIfNeeded(jniList(tagNames, repo.getRawPointer()));
         return tagNames;
     }
+
     static native int jniListMatch(List<String> tagNames, String pattern, long repoPtr);
 
     /**
-     * Fill a list with all the tags in the Repository
-     * which name match a defined pattern
+     * Fill a list with all the tags in the Repository which name match a defined pattern
      *
-     * If an empty pattern is provided, all the tags
-     * will be returned.
+     * <p>If an empty pattern is provided, all the tags will be returned.
      *
-     * The string array will be filled with the names of the
-     * matching tags; these values are owned by the user and
-     * should be free'd manually when no longer needed, using
+     * <p>The string array will be filled with the names of the matching tags; these values are
+     * owned by the user and should be free'd manually when no longer needed, using
      * `git_strarray_free`.
      *
      * @param pattern Standard fnmatch pattern
      * @param repo Repository where to find the tags
      * @return a list of tag names that matches the given pattern
      */
-
     public static List<String> listMatch(String pattern, Repository repo) {
         List<String> tagNames = new ArrayList<>();
         Error.throwIfNeeded(jniListMatch(tagNames, pattern, repo.getRawPointer()));

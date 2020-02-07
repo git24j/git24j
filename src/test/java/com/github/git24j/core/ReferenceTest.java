@@ -1,13 +1,12 @@
 package com.github.git24j.core;
 
+import java.util.ArrayList;
+import java.util.EnumSet;
+import java.util.List;
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
-
-import java.util.ArrayList;
-import java.util.EnumSet;
-import java.util.List;
 
 public class ReferenceTest extends TestBase {
     private static final String REF_NAME_DEV = "refs/heads/feature/dev";
@@ -388,8 +387,7 @@ public class ReferenceTest extends TestBase {
      * useful case.
      */
     @Test
-    public void peel() {
-    }
+    public void peel() {}
 
     @Test
     public void isValidName() {

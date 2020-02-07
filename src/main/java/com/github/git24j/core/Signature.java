@@ -23,7 +23,7 @@ public class Signature {
                         .atOffset(ZoneOffset.ofHoursMinutes(0, offsetMin));
     }
 
-    Signature() { }
+    Signature() {}
 
     public String getName() {
         return name;
@@ -38,9 +38,7 @@ public class Signature {
         return when;
     }
 
-    /**
-     * @return get epoc second of {@code when}
-     */
+    /** @return get epoc second of {@code when} */
     public long getWhenEpocSecond() {
         return when.toEpochSecond();
     }

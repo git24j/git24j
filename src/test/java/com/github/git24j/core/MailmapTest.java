@@ -1,12 +1,11 @@
 package com.github.git24j.core;
 
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
-
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicReference;
 
 public class MailmapTest extends TestBase {
 

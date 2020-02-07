@@ -9,6 +9,19 @@
     <groupId>com.github.git24j</groupId>
     <artifactId>git24j</artifactId>
     <version>1.0-SNAPSHOT</version>
+
+    <reporting>
+        <plugins>
+            <!-- https://spotbugs.github.io/ -->
+            <!-- https://spotbugs.github.io/spotbugs-maven-plugin/usage.html -->
+            <plugin>
+                <groupId>com.github.spotbugs</groupId>
+                <artifactId>spotbugs-maven-plugin</artifactId>
+                <version>3.1.11</version>
+            </plugin>
+        </plugins>
+    </reporting>
+
     <build>
         <plugins>
             <plugin>
@@ -31,7 +44,7 @@
                 <version>3.0.0-M4</version>
                 <configuration>
                     <excludes>
-<!--                        <exclude>**/MailmapTest.java</exclude>-->
+                        <!-- <exclude>**/MailmapTest.java</exclude>-->
                     </excludes>
                 </configuration>
             </plugin>
@@ -58,11 +71,10 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.jetbrains</groupId>
-            <artifactId>annotations</artifactId>
-            <version>16.0.1</version>
+            <groupId>javax.annotation</groupId>
+            <artifactId>javax.annotation-api</artifactId>
+            <version>1.2</version>
         </dependency>
-
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
