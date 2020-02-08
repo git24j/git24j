@@ -22,4 +22,15 @@ public abstract class CAutoReleasable {
         }
         super.finalize();
     }
+
+    long getRawPointer() {
+        long ptr = _rawPtr.get();
+        if (_isWeak) {
+            return ptr;
+        }
+        if (ptr == 0) {
+            throw new IllegalStateException("Underlying c object has been released");
+        }
+        return ptr;
+    }
 }

@@ -115,17 +115,32 @@ int j_git_diff_line_cb(const git_diff_delta *delta, const git_diff_hunk *hunk, c
 
 /** -------- Wrapper Body ---------- */
 /** int git_diff_init_options(git_diff_options *opts, unsigned int version); */
-JNIEXPORT jint JNICALL J_MAKE_METHOD(Diff_jniInitOptions)(JNIEnv *env, jclass obj, jlong optsPtr, jint version)
+JNIEXPORT jint JNICALL J_MAKE_METHOD(Diff_jniInitOptions)(JNIEnv *env, jclass obj, jobject outOpts, jint version)
 {
-    int r = git_diff_init_options((git_diff_options *)optsPtr, version);
+    git_diff_options *opts = (git_diff_options *)malloc(sizeof(git_diff_options));
+    int r = git_diff_init_options(opts, version);
+    (*env)->CallVoidMethod(env, outOpts, jniConstants->midAtomicLongSet, (long)opts);
     return r;
 }
 
-/** int git_diff_find_init_options(git_diff_find_options *opts, unsigned int version); */
-JNIEXPORT jint JNICALL J_MAKE_METHOD(Diff_jniFindInitOptions)(JNIEnv *env, jclass obj, jlong optsPtr, jint version)
+/** free git_diff_options */
+JNIEXPORT void JNICALL J_MAKE_METHOD(Diff_jniFreeOptions)(JNIEnv *env, jclass obj, jlong optsPtr)
 {
-    int r = git_diff_find_init_options((git_diff_find_options *)optsPtr, version);
+    free((git_diff_options *)optsPtr);
+}
+
+/** int git_diff_find_init_options(git_diff_find_options *opts, unsigned int version); */
+JNIEXPORT jint JNICALL J_MAKE_METHOD(Diff_jniFindInitOptions)(JNIEnv *env, jclass obj, jobject outFindOpts, jint version)
+{
+    git_diff_find_options *opts = (git_diff_find_options *)malloc(sizeof(git_diff_find_options));
+    int r = git_diff_find_init_options(opts, version);
+    (*env)->CallVoidMethod(env, outFindOpts, jniConstants->midAtomicLongSet, (long)opts);
     return r;
+}
+
+JNIEXPORT void JNICALL J_MAKE_METHOD(Diff_jniFreeFindOptions)(JNIEnv *env, jclass obj, jlong findOptsPtr)
+{
+    free((git_diff_find_options *)findOptsPtr);
 }
 
 /** void git_diff_free(git_diff *diff); */
