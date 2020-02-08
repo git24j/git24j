@@ -11,10 +11,15 @@ extern "C"
 
     /** -------- Signature of the header ---------- */
     /** int git_diff_init_options(git_diff_options *opts, unsigned int version); */
-    JNIEXPORT jint JNICALL J_MAKE_METHOD(Diff_jniInitOptions)(JNIEnv *env, jclass obj, jlong optsPtr, jint version);
+    JNIEXPORT jint JNICALL J_MAKE_METHOD(Diff_jniInitOptions)(JNIEnv *env, jclass obj, jobject outOpts, jint version);
+
+    /** free git_diff_options */
+    JNIEXPORT void JNICALL J_MAKE_METHOD(Diff_jniFreeOptions)(JNIEnv *env, jclass obj, jlong optsPtr);
 
     /** int git_diff_find_init_options(git_diff_find_options *opts, unsigned int version); */
-    JNIEXPORT jint JNICALL J_MAKE_METHOD(Diff_jniFindInitOptions)(JNIEnv *env, jclass obj, jlong optsPtr, jint version);
+    JNIEXPORT jint JNICALL J_MAKE_METHOD(Diff_jniFindInitOptions)(JNIEnv *env, jclass obj, jobject outFindOpts, jint version);
+
+    JNIEXPORT void JNICALL J_MAKE_METHOD(Diff_jniFreeFindOptions)(JNIEnv *env, jclass obj, jlong findOptsPtr);
 
     /** void git_diff_free(git_diff *diff); */
     JNIEXPORT void JNICALL J_MAKE_METHOD(Diff_jniFree)(JNIEnv *env, jclass obj, jlong diffPtr);
