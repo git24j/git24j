@@ -6,9 +6,9 @@
 - [x] Reference
 - [x] Commit
 - [x] Branch
-- [x] Config (no test)
+- [x] Config
 - [x] Index
-- [x] Diff (no test)
+- [x] Diff
 - [x] Merge (no test)
 - [x] Rebase (no test)
 - [x] Remote
@@ -18,6 +18,7 @@
 - [x] Note
 - [x] Tag
 - [x] Status
+- [ ] Patch
 
 
 ## API polishing
