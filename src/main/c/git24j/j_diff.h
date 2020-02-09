@@ -111,8 +111,19 @@ extern "C"
     /** int git_diff_format_email_init_options(git_diff_format_email_options *opts, unsigned int version); */
     JNIEXPORT jint JNICALL J_MAKE_METHOD(Diff_jniFormatEmailInitOptions)(JNIEnv *env, jclass obj, jlong optsPtr, jint version);
 
+    /** new and init git_diff_format_email_options */
+    JNIEXPORT jint JNICALL J_MAKE_METHOD(Diff_jniFormatEmailNewOptions)(JNIEnv *env, jclass obj, jlong optsPtr, jobject outPtr, jint version);
+
+    /** free git_diff_format_email_options *opts. */
+    JNIEXPORT void JNICALL J_MAKE_METHOD(Diff_jniFormatEmailOptionsFree)(JNIEnv *env, jclass obj, jlong optsPtr);
+
     /** int git_diff_patchid_init_options(git_diff_patchid_options *opts, unsigned int version); */
     JNIEXPORT jint JNICALL J_MAKE_METHOD(Diff_jniPatchidInitOptions)(JNIEnv *env, jclass obj, jlong optsPtr, jint version);
+
+    /** new git_diff_patchid_options*/
+    JNIEXPORT jint JNICALL J_MAKE_METHOD(Diff_jniPatchidOptionsNew)(JNIEnv *env, jclass obj, jobject outPtr, jint version);
+    /** free git_diff_patchid_options */
+    JNIEXPORT jint JNICALL J_MAKE_METHOD(Diff_jniPatchidOptionsFree)(JNIEnv *env, jclass obj, jlong optsPtr);
 
     /** int git_diff_patchid(git_oid *out, git_diff *diff, git_diff_patchid_options *opts); */
     JNIEXPORT jint JNICALL J_MAKE_METHOD(Diff_jniPatchid)(JNIEnv *env, jclass obj, jobject out, jlong diffPtr, jlong optsPtr);

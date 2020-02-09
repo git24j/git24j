@@ -324,7 +324,18 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Diff_jniBlobToBuffer)(JNIEnv *env, jclass o
 }
 
 /** int git_diff_buffers(const void *old_buffer, size_t old_len, const char *old_as_path, const void *new_buffer, size_t new_len, const char *new_as_path, const git_diff_options *options, git_diff_file_cb file_cb, git_diff_binary_cb binary_cb, git_diff_hunk_cb hunk_cb, git_diff_line_cb line_cb, void *payload); */
-JNIEXPORT jint JNICALL J_MAKE_METHOD(Diff_jniBuffers)(JNIEnv *env, jclass obj, jbyteArray oldBuffer, jint oldLen, jstring old_as_path, jbyteArray newBuffer, jint newLen, jstring new_as_path, jlong optionsPtr, jobject fileCb, jobject binaryCb, jobject hunkCb, jobject lineCb)
+JNIEXPORT jint JNICALL J_MAKE_METHOD(Diff_jniBuffers)(JNIEnv *env, jclass obj,
+                                                      jbyteArray oldBuffer,
+                                                      jint oldLen,
+                                                      jstring old_as_path,
+                                                      jbyteArray newBuffer,
+                                                      jint newLen,
+                                                      jstring new_as_path,
+                                                      jlong optionsPtr,
+                                                      jobject fileCb,
+                                                      jobject binaryCb,
+                                                      jobject hunkCb,
+                                                      jobject lineCb)
 {
     int old_buffer_len;
     unsigned char *c_old_buffer = j_unsigned_chars_from_java(env, oldBuffer, &old_buffer_len);
@@ -423,6 +434,14 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Diff_jniCommitAsEmail)(JNIEnv *env, jclass 
     git_buf_dispose(&c_out);
     return r;
 }
+/** new and init git_diff_format_email_options */
+JNIEXPORT jint JNICALL J_MAKE_METHOD(Diff_jniFormatEmailNewOptions)(JNIEnv *env, jclass obj, jlong optsPtr, jobject outPtr, jint version)
+{
+    git_diff_format_email_options *out = (git_diff_format_email_options *)malloc(sizeof(git_diff_format_email_options));
+    int r = git_diff_format_email_init_options(out, version);
+    (*env)->CallVoidMethod(env, outPtr, jniConstants->midAtomicLongSet, (long)out);
+    return r;
+}
 
 /** int git_diff_format_email_init_options(git_diff_format_email_options *opts, unsigned int version); */
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Diff_jniFormatEmailInitOptions)(JNIEnv *env, jclass obj, jlong optsPtr, jint version)
@@ -431,11 +450,30 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Diff_jniFormatEmailInitOptions)(JNIEnv *env
     return r;
 }
 
+/** free git_diff_format_email_options *opts. */
+JNIEXPORT void JNICALL J_MAKE_METHOD(Diff_jniFormatEmailOptionsFree)(JNIEnv *env, jclass obj, jlong optsPtr)
+{
+    free((git_diff_format_email_options *)optsPtr);
+}
+
 /** int git_diff_patchid_init_options(git_diff_patchid_options *opts, unsigned int version); */
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Diff_jniPatchidInitOptions)(JNIEnv *env, jclass obj, jlong optsPtr, jint version)
 {
     int r = git_diff_patchid_init_options((git_diff_patchid_options *)optsPtr, version);
     return r;
+}
+/** new git_diff_patchid_options*/
+JNIEXPORT jint JNICALL J_MAKE_METHOD(Diff_jniPatchidOptionsNew)(JNIEnv *env, jclass obj, jobject outPtr, jint version)
+{
+    git_diff_patchid_options *opts = (git_diff_patchid_options *)malloc(sizeof(git_diff_patchid_options));
+    int r = git_diff_patchid_init_options(opts, version);
+    (*env)->CallVoidMethod(env, outPtr, jniConstants->midAtomicLongSet, (long)opts);
+    return r;
+}
+/** free git_diff_patchid_options */
+JNIEXPORT jint JNICALL J_MAKE_METHOD(Diff_jniPatchidOptionsFree)(JNIEnv *env, jclass obj, jlong optsPtr)
+{
+    free((git_diff_patchid_options *)optsPtr);
 }
 
 /** int git_diff_patchid(git_oid *out, git_diff *diff, git_diff_patchid_options *opts); */
