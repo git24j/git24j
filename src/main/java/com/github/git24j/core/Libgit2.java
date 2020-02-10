@@ -9,6 +9,8 @@ public class Libgit2 {
 
     static native Version version();
 
+    static native void jniShadowFree(long ptr);
+
     static native int features();
     // TODO: git_libgit2_opts
     /// static native int opts();
@@ -17,4 +19,6 @@ public class Libgit2 {
     public static EnumSet<GitFeature> featuresSet() {
         return GitFeature.valuesOf(features());
     }
+
+
 }

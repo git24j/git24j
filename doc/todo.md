@@ -6,9 +6,9 @@
 - [x] Reference
 - [x] Commit
 - [x] Branch
-- [x] Config (no test)
+- [x] Config
 - [x] Index
-- [x] Diff (no test)
+- [x] Diff
 - [x] Merge (no test)
 - [x] Rebase (no test)
 - [x] Remote
@@ -18,6 +18,8 @@
 - [x] Note
 - [x] Tag
 - [x] Status
+- [ ] Patch
+- [ ] Checkout
 
 
 ## API polishing
@@ -47,3 +49,4 @@
 - [ ] Replace `assert` with better alternatives (many build system disables assert by default).
 - [ ] Rename `consumer` in callbacks to `callback`
 - [ ] Buf is a stupid idea, replace it with plain String or a POJO
+- [ ] Unify all enums

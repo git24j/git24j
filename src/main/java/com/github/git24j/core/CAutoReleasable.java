@@ -1,5 +1,6 @@
 package com.github.git24j.core;
 
+import javax.annotation.Nullable;
 import java.util.concurrent.atomic.AtomicLong;
 
 /** Base class that auto release native pointers */
@@ -32,5 +33,9 @@ public abstract class CAutoReleasable {
             throw new IllegalStateException("Underlying c object has been released");
         }
         return ptr;
+    }
+
+    static long rawPtr(@Nullable CAutoReleasable obj) {
+        return obj == null ? 0 : obj.getRawPointer();
     }
 }

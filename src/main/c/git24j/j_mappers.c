@@ -185,6 +185,21 @@ void j_git_oid_from_java(JNIEnv *env, jobject oid, git_oid *c_oid)
     (*env)->DeleteLocalRef(env, clz);
 }
 
+void j_git_oidarray_to_java(JNIEnv *env, jobject outOidArr, const git_oidarray *c_arr)
+{
+    assert(c_arr && outOidArr && "null input or receiver is not allowed in j_git_oidarray_to_java ");
+    jclass clz = (*env)->GetObjectClass(env, outOidArr);
+    assert(clz && "OidArray class not found");
+    jmethodID setter = (*env)->GetMethodID(env, clz, "add", "([B)V");
+    for (size_t i = 0; i < c_arr->count; i++)
+    {
+        jbyteArray raw = j_byte_array_from_c(env, c_arr->ids[i].id, GIT_OID_RAWSZ);
+        (*env)->CallVoidMethod(env, outOidArr, setter, raw);
+        (*env)->DeleteLocalRef(env, raw);
+    }
+    (*env)->DeleteLocalRef(env, clz);
+}
+
 /** Call `obj.method(val)` to set a java object value. */
 void j_call_setter_long(JNIEnv *env, jclass clz, jobject obj, const char *method, jlong val)
 {
