@@ -71,6 +71,9 @@ extern "C"
     /** Copy value of java Oid to git_oid struct in c. */
     void j_git_oid_from_java(JNIEnv *env, jobject oid, git_oid *c_oid);
 
+    /** copy gitarray values to java OidArray */
+    void j_git_oidarray_to_java(JNIEnv *env, jobject outOidArr, const git_oidarray *c_arr);
+
     /**
      * call `String obj.getXXX()` and get the result string. 
      * Note: User must free the returned string.

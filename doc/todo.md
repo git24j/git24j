@@ -19,6 +19,7 @@
 - [x] Tag
 - [x] Status
 - [ ] Patch
+- [ ] Checkout
 
 
 ## API polishing
@@ -48,3 +49,4 @@
 - [ ] Replace `assert` with better alternatives (many build system disables assert by default).
 - [ ] Rename `consumer` in callbacks to `callback`
 - [ ] Buf is a stupid idea, replace it with plain String or a POJO
+- [ ] Unify all enums

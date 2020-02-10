@@ -14,6 +14,19 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Merge_jniFileInitInput)(JNIEnv *env, jclass
     return r;
 }
 
+JNIEXPORT jint JNICALL J_MAKE_METHOD(Merge_jniFileInputNew)(JNIEnv *env, jclass obj, jobject outOpts, jint version)
+{
+    git_merge_file_input *opts = (git_merge_file_input *)malloc(sizeof(git_merge_file_input));
+    int r = git_merge_file_init_input(opts, version);
+    (*env)->CallVoidMethod(env, outOpts, jniConstants->midAtomicLongSet, (long)opts);
+    return r;
+}
+
+JNIEXPORT void JNICALL J_MAKE_METHOD(Merge_jniFileInputFree)(JNIEnv *env, jclass obj, jlong optsPtr)
+{
+    free((git_merge_file_input *)optsPtr);
+}
+
 /** int git_merge_file_init_options(git_merge_file_options *opts, unsigned int version); */
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Merge_jniFileInitOptions)(JNIEnv *env, jclass obj, jlong optsPtr, jint version)
 {
@@ -21,11 +34,35 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Merge_jniFileInitOptions)(JNIEnv *env, jcla
     return r;
 }
 
+JNIEXPORT jint JNICALL J_MAKE_METHOD(Merge_jniFileOptionsNew)(JNIEnv *env, jclass obj, jobject outOpts, jint version)
+{
+    git_merge_file_options *opts = (git_merge_file_options *)malloc(sizeof(git_merge_file_options));
+    int r = git_merge_file_init_options((git_merge_file_options *)opts, version);
+    (*env)->CallVoidMethod(env, outOpts, jniConstants->midAtomicLongSet, (long)opts);
+    return r;
+}
+JNIEXPORT void JNICALL J_MAKE_METHOD(Merge_jniFileOptionsFree)(JNIEnv *env, jclass obj, jlong optsPtr)
+{
+    free((git_merge_file_options *)optsPtr);
+}
+
 /** int git_merge_init_options(git_merge_options *opts, unsigned int version); */
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Merge_jniInitOptions)(JNIEnv *env, jclass obj, jlong optsPtr, jint version)
 {
     int r = git_merge_init_options((git_merge_options *)optsPtr, version);
     return r;
+}
+
+JNIEXPORT jint JNICALL J_MAKE_METHOD(Merge_jniOptionsNew)(JNIEnv *env, jclass obj, jobject outOpts, jint version)
+{
+    git_merge_options *opts = (git_merge_options *)malloc(sizeof(git_merge_options));
+    int r = git_merge_init_options((git_merge_options *)opts, version);
+    (*env)->CallVoidMethod(env, outOpts, jniConstants->midAtomicLongSet, (long)opts);
+    return r;
+}
+JNIEXPORT void JNICALL J_MAKE_METHOD(Merge_jniOptionsFree)(JNIEnv *env, jclass obj, jlong opts)
+{
+    free((git_merge_options *)opts);
 }
 
 /** int git_merge_base(git_oid *out, git_repository *repo, const git_oid *one, const git_oid *two); */
@@ -42,13 +79,16 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Merge_jniBase)(JNIEnv *env, jclass obj, job
 }
 
 /** int git_merge_bases(git_oidarray *out, git_repository *repo, const git_oid *one, const git_oid *two); */
-JNIEXPORT jint JNICALL J_MAKE_METHOD(Merge_jniBases)(JNIEnv *env, jclass obj, jlong outPtr, jlong repoPtr, jobject one, jobject two)
+JNIEXPORT jint JNICALL J_MAKE_METHOD(Merge_jniBases)(JNIEnv *env, jclass obj, jobject outOids, jlong repoPtr, jobject one, jobject two)
 {
     git_oid c_one;
     j_git_oid_from_java(env, one, &c_one);
     git_oid c_two;
     j_git_oid_from_java(env, two, &c_two);
-    int r = git_merge_bases((git_oidarray *)outPtr, (git_repository *)repoPtr, &c_one, &c_two);
+    git_oidarray c_arr = {NULL, 0};
+    int r = git_merge_bases(&c_arr, (git_repository *)repoPtr, &c_one, &c_two);
+    j_git_oidarray_to_java(env, outOids, &c_arr);
+    git_oidarray_free(&c_arr);
     return r;
 }
 
@@ -144,18 +184,8 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Merge_jniBasesMany)(JNIEnv *env, jclass obj
     }
     git_oidarray c_out;
     int r = git_merge_bases_many(&c_out, (git_repository *)repoPtr, arrayLen, input_array);
+    j_git_oidarray_to_java(env, outOids, &c_out);
     git_oidarray_free(&c_out);
-    jclass clz = (*env)->GetObjectClass(env, outOids);
-    assert(clz && "class of outOids is not found");
-    jmethodID midSetter = (*env)->GetMethodID(env, clz, "add", "([B])V");
-    assert(midSetter && "outOids should have a method called `add`");
-    for (size_t i = 0; i < c_out.count; i++)
-    {
-        jbyteArray raw = j_byte_array_from_c(env, c_out.ids[i].id, GIT_OID_RAWSZ);
-        (*env)->CallVoidMethod(env, outOids, midSetter, raw);
-        (*env)->DeleteLocalRef(env, raw);
-    }
-    (*env)->DeleteLocalRef(env, clz);
     free(input_array);
     return r;
 }
@@ -224,7 +254,7 @@ JNIEXPORT void JNICALL J_MAKE_METHOD(Merge_jniFileResultFree)(JNIEnv *env, jclas
 }
 
 /** int git_merge_create(git_repository *repo, const git_annotated_commit **their_heads, size_t their_heads_len, const git_merge_options *merge_opts, const git_checkout_options *checkout_opts); */
-JNIEXPORT jint JNICALL J_MAKE_METHOD(Merge_jniCreate)(JNIEnv *env, jclass obj, jlong repoPtr, jlongArray theirHeads, jlong mergeOptsPtr, jlong checkoutOpts)
+JNIEXPORT jint JNICALL J_MAKE_METHOD(Merge_jniMerge)(JNIEnv *env, jclass obj, jlong repoPtr, jlongArray theirHeads, jlong mergeOptsPtr, jlong checkoutOpts)
 {
     jsize arrayLen = (*env)->GetArrayLength(env, theirHeads);
     jlong *elements = (*env)->GetLongArrayElements(env, theirHeads, 0);
