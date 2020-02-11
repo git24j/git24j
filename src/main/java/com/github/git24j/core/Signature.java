@@ -5,17 +5,28 @@ import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.Objects;
 
-public class Signature {
+public class Signature extends CAutoReleasable {
+    protected Signature(boolean isWeak, long rawPtr) {
+        super(isWeak, rawPtr);
+    }
+
+    @Override
+    protected void freeOnce(long cPtr) {
+        // FIXME: not implemented yet
+    }
+
     private String name = "";
     private String email = "";
     private OffsetDateTime when = OffsetDateTime.now();
 
     public Signature(String name, String email) {
+        super(true, 0);
         this.name = name;
         this.email = email;
     }
 
     public Signature(String name, String email, long whenEpocSec, int offsetMin) {
+        super(true, 0);
         this.name = name;
         this.email = email;
         this.when =
@@ -23,7 +34,9 @@ public class Signature {
                         .atOffset(ZoneOffset.ofHoursMinutes(0, offsetMin));
     }
 
-    Signature() {}
+    Signature() {
+        super(true, 0);
+    }
 
     public String getName() {
         return name;
