@@ -30,5 +30,26 @@ public interface IBitEnum {
         return EnumSet.copyOf(matched);
     }
 
+    /**
+     * Get enum item from int value
+     *
+     * @param bit bit value
+     * @param clz class to parse
+     * @param <T>
+     * @return enum item
+     */
+    static <T extends Enum<T> & IBitEnum> T valueOf(int bit, Class<T> clz) {
+        for (T x : clz.getEnumConstants()) {
+            int b = x.getBit();
+            if ((b < 0 && bit > 0) || (b > 0 && bit < 0)) {
+                continue;
+            }
+            if ((b & bit) != 0) {
+                return x;
+            }
+        }
+        return null;
+    }
+
     int getBit();
 }

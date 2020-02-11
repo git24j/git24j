@@ -73,6 +73,7 @@ public class Merge {
             this.bit = bit;
         }
 
+        @Override
         public int getBit() {
             return bit;
         }
@@ -277,6 +278,27 @@ public class Merge {
         }
     }
 
+    /**
+     * POJO contains analysis result from {@code Merge::analysis} and {@code Merge::analysisForRef}
+     */
+    public static class AnalysisPair {
+        private final AnalysisT analysis;
+        private final PreferenceT preference;
+
+        public AnalysisPair(AnalysisT analysis, PreferenceT preference) {
+            this.analysis = analysis;
+            this.preference = preference;
+        }
+
+        public AnalysisT getAnalysis() {
+            return analysis;
+        }
+
+        public PreferenceT getPreference() {
+            return preference;
+        }
+    }
+
     /** int git_merge_file_init_input(git_merge_file_input *opts, unsigned int version); */
     static native int jniFileInitInput(long opts, int version);
 
@@ -351,10 +373,9 @@ public class Merge {
     }
 
     /**
-     * int git_merge_trees(git_index **out, git_repository *repo, const git_tree *ancestor_tree,
+     * int git_merge_trees( git_index **out, git_repository *repo, const git_tree *ancestor_tree,
      * const git_tree *our_tree, const git_tree *their_tree, const git_merge_options *opts);
      */
-    // TODO
     static native int jniTrees(
             AtomicLong out,
             long repoPtr,
@@ -364,18 +385,81 @@ public class Merge {
             long opts);
 
     /**
+     * Merge two trees, producing a `git_index` that reflects the result of the merge. The index may
+     * be written as-is to the working directory or checked out. If the index is to be converted to
+     * a tree, the caller should resolve any conflicts that arose as part of the merge.
+     *
+     * <p>The returned index must be freed explicitly with `git_index_free`.
+     *
+     * @param repo repository that contains the given trees
+     * @param ancestorTree the common ancestor between the trees (or null if none)
+     * @param ourTree the tree that reflects the destination tree
+     * @param theirTree the tree to merge in to `our_tree`
+     * @param opts the merge tree options (or null for defaults)
+     * @return index of the merge
+     * @throws GitException git errors
+     */
+    @Nonnull
+    public static Index trees(
+            @Nonnull Repository repo,
+            @Nullable Tree ancestorTree,
+            @Nullable Tree ourTree,
+            @Nullable Tree theirTree,
+            @Nullable Options opts) {
+        Index out = new Index();
+        Error.throwIfNeeded(
+                jniTrees(
+                        out._rawPtr,
+                        repo.getRawPointer(),
+                        ancestorTree == null ? 0 : ancestorTree.getRawPointer(),
+                        ourTree == null ? 0 : ourTree.getRawPointer(),
+                        theirTree == null ? 0 : theirTree.getRawPointer(),
+                        opts == null ? 0 : opts.getRawPointer()));
+        return out;
+    }
+
+    /**
      * int git_merge_commits(git_index **out, git_repository *repo, const git_commit *our_commit,
      * const git_commit *their_commit, const git_merge_options *opts);
      */
-    // TODO
     static native int jniCommits(
             AtomicLong out, long repoPtr, long ourCommit, long theirCommit, long opts);
+
     /**
-     * int git_merge_analysis(git_merge_analysis_t *analysis_out, git_merge_preference_t
+     * Merge two commits, producing a `git_index` that reflects the result of the merge. The index
+     * may be written as-is to the working directory or checked out. If the index is to be converted
+     * to a tree, the caller should resolve any conflicts that arose as part of the merge.
+     *
+     * <p>The returned index must be freed explicitly with `git_index_free`.
+     *
+     * @param repo repository that contains the given trees
+     * @param ourCommit the commit that reflects the destination tree
+     * @param theirCommit the commit to merge in to `our_commit`
+     * @param opts the merge tree options (or null for defaults)
+     * @return index reflecting the merge result
+     * @throws GitException git errors
+     */
+    @Nonnull
+    public static Index commits(
+            @Nonnull Repository repo,
+            @Nullable Commit ourCommit,
+            @Nullable Commit theirCommit,
+            @Nullable Options opts) {
+        Index out = new Index();
+        Error.throwIfNeeded(
+                jniCommits(
+                        out._rawPtr,
+                        repo.getRawPointer(),
+                        ourCommit == null ? 0 : ourCommit.getRawPointer(),
+                        theirCommit == null ? 0 : theirCommit.getRawPointer(),
+                        opts == null ? 0 : opts.getRawPointer()));
+        return out;
+    }
+    /**
+     * int git_merge_analysis( git_merge_analysis_t *analysis_out, git_merge_preference_t
      * *preference_out, git_repository *repo, const git_annotated_commit **their_heads, size_t
      * their_heads_len);
      */
-    // TODO
     static native int jniAnalysis(
             AtomicInteger analysisOut,
             AtomicInteger preferenceOut,
@@ -383,17 +467,69 @@ public class Merge {
             long[] theirHeads);
 
     /**
+     * Analyzes the given branch(es) and determines the opportunities for merging them into the HEAD
+     * of the repository.
+     *
+     * @param repo the repository to merge
+     * @param theirHeads the heads to merge into
+     * @return out analysis
+     * @throws GitException git errors
+     */
+    @Nonnull
+    public static AnalysisPair analysis(
+            @Nonnull Repository repo, @Nonnull List<AnnotatedCommit> theirHeads) {
+        AtomicInteger outAnalysis = new AtomicInteger();
+        AtomicInteger outPreference = new AtomicInteger();
+        Error.throwIfNeeded(
+                jniAnalysis(
+                        outAnalysis,
+                        outPreference,
+                        repo.getRawPointer(),
+                        theirHeads.stream().mapToLong(AnnotatedCommit::getRawPointer).toArray()));
+        return new AnalysisPair(
+                IBitEnum.valueOf(outAnalysis.get(), AnalysisT.class),
+                IBitEnum.valueOf(outPreference.get(), PreferenceT.class));
+    }
+
+    /**
      * int git_merge_analysis_for_ref(git_merge_analysis_t *analysis_out, git_merge_preference_t
      * *preference_out, git_repository *repo, git_reference *our_ref, const git_annotated_commit
      * **their_heads, size_t their_heads_len);
      */
-    // TODO
     static native int jniAnalysisForRef(
             AtomicInteger analysisOut,
             AtomicInteger preferenceOut,
             long repoPtr,
             long ourRefPtr,
             long[] theirHeads);
+    /**
+     * Analyzes the given branch(es) and determines the opportunities for merging them into a
+     * reference.
+     *
+     * @param repo the repository to merge
+     * @param ourRef the reference to perform the analysis from
+     * @param theirHeads the heads to merge into
+     * @return analysis out
+     * @throws GitException git errors
+     */
+    @Nonnull
+    public static AnalysisPair analysisForRef(
+            @Nonnull Repository repo,
+            @Nullable Reference ourRef,
+            @Nonnull List<AnnotatedCommit> theirHeads) {
+        AtomicInteger outAnalysis = new AtomicInteger();
+        AtomicInteger outPreference = new AtomicInteger();
+        Error.throwIfNeeded(
+                jniAnalysisForRef(
+                        outAnalysis,
+                        outPreference,
+                        repo.getRawPointer(),
+                        ourRef == null ? 0 : ourRef.getRawPointer(),
+                        theirHeads.stream().mapToLong(AnnotatedCommit::getRawPointer).toArray()));
+        return new AnalysisPair(
+                IBitEnum.valueOf(outAnalysis.get(), AnalysisT.class),
+                IBitEnum.valueOf(outPreference.get(), PreferenceT.class));
+    }
 
     /**
      * int git_merge_base_many(git_oid *out, git_repository *repo, size_t length, const git_oid []
@@ -475,7 +611,6 @@ public class Merge {
      * git_merge_file_input *ours, const git_merge_file_input *theirs, const git_merge_file_options
      * *opts);
      */
-    // TODO
     static native int jniFile(
             AtomicLong out, long ancestorPtr, long oursPtr, long theirsPtr, long optsPtr);
 
