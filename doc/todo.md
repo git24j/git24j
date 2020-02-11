@@ -20,6 +20,7 @@
 - [x] Status
 - [ ] Patch
 - [ ] Checkout
+- [ ] Signature
 
 
 ## API polishing
