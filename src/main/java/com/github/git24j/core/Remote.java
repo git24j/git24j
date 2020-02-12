@@ -1,20 +1,136 @@
 package com.github.git24j.core;
 
+import javax.annotation.Nonnull;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 
-public class Remote {
+public class Remote extends CAutoReleasable {
+    protected Remote(boolean isWeak, long rawPtr) {
+        super(isWeak, rawPtr);
+    }
+
+    @Override
+    protected void freeOnce(long cPtr) {
+        jniFree(cPtr);
+    }
+
+    public enum AutotagOptionT implements IBitEnum {
+        /** Use the setting from the configuration. */
+        UNSPECIFIED(0),
+        /** Ask the server for tags pointing to objects we're already downloading. */
+        AUTO(1),
+        /** Don't ask for any tags beyond the refspecs. */
+        NONE(2),
+        /** Ask for the all the tags. */
+        ALL(3);
+        private final int bit;
+
+        AutotagOptionT(int bit) {
+            this.bit = bit;
+        }
+
+        @Override
+        public int getBit() {
+            return bit;
+        }
+    }
+
+    /** Remote creation options flags */
+    public enum CreateFlags implements IBitEnum {
+        /** Ignore the repository apply.insteadOf configuration */
+        SKIP_INSTEADOF(1 << 0),
+
+        /** Don't build a fetchspec from the name if none is set */
+        SKIP_DEFAULT_FETCHSPEC(1 << 1);
+        private final int bit;
+
+        CreateFlags(int bit) {
+            this.bit = bit;
+        }
+
+        @Override
+        public int getBit() {
+            return bit;
+        }
+    }
+
+    public static class CreateOptions extends CAutoReleasable {
+        protected CreateOptions(boolean isWeak, long rawPtr) {
+            super(isWeak, rawPtr);
+        }
+
+        @Override
+        protected void freeOnce(long cPtr) {
+            Libgit2.jniShadowFree(cPtr);
+        }
+
+        @Nonnull
+        public CreateOptions create(int version) {
+            CreateOptions opts = new CreateOptions(false, 0);
+            Error.throwIfNeeded(jniCreateOptionsNew(opts._rawPtr, version));
+            return opts;
+        }
+    }
     // no matching type found for 'const git_remote_head ***out'
     /** int git_remote_ls(const git_remote_head ***out, size_t *size, git_remote *remote); */
     /** -------- Jni Signature ---------- */
     /** int git_remote_add_fetch(git_repository *repo, const char *remote, const char *refspec); */
     static native int jniAddFetch(long repoPtr, String remote, String refspec);
 
+    /**
+     * Add a fetch refspec to the remote's configuration
+     *
+     * <p>Add the given refspec to the fetch list in the configuration. No loaded remote instances
+     * will be affected.
+     *
+     * @param repo the repository in which to change the configuration
+     * @param remote the name of the remote to change
+     * @param refspec the new fetch refspec
+     * @throws GitException GIT_EINVALIDSPEC if refspec is invalid or an error value
+     */
+    public static void addFetch(
+            @Nonnull Repository repo, @Nonnull String remote, @Nonnull String refspec) {
+        Error.throwIfNeeded(jniAddFetch(repo.getRawPointer(), remote, refspec));
+    }
+
     /** int git_remote_add_push(git_repository *repo, const char *remote, const char *refspec); */
     static native int jniAddPush(long repoPtr, String remote, String refspec);
 
+    /**
+     * Add a push refspec to the remote's configuration
+     *
+     * <p>Add the given refspec to the push list in the configuration. No loaded remote instances
+     * will be affected.
+     *
+     * @param repo the repository in which to change the configuration
+     * @param remote the name of the remote to change
+     * @param refspec the new push refspec
+     * @throws GitException GIT_EINVALIDSPEC if refspec is invalid or an error value
+     */
+    public void addPush(@Nonnull Repository repo, @Nonnull String remote, @Nonnull String refspec) {
+        Error.throwIfNeeded(jniAddPush(repo.getRawPointer(), remote, refspec));
+    }
+
     /** git_remote_autotag_option_t git_remote_autotag(const git_remote *remote); */
     static native int jniAutotag(long remote);
+
+    /**
+     * Retrieve the tag auto-follow setting
+     *
+     * @return the auto-follow setting
+     * @throws GitException if auto tag settings is not recognizable.
+     */
+    @Nonnull
+    AutotagOptionT autotag() {
+        int t = jniAutotag(getRawPointer());
+        AutotagOptionT ret = IBitEnum.valueOf(t, AutotagOptionT.class);
+        if (ret == null) {
+            throw new GitException(
+                    GitException.ErrorClass.CONFIG,
+                    "remote autotag(" + t + ") is not recognizable");
+        }
+        return ret;
+    }
 
     /**
      * int git_remote_connect(git_remote *remote, git_direction direction, const
@@ -23,6 +139,10 @@ public class Remote {
      */
     static native int jniConnect(
             long remote, int direction, long callbacks, long proxyOpts, String[] customHeaders);
+
+    public void connect(boolean isFetch, long callback, long proxyOpts, List<String> customHeads) {
+        // FIXME
+    }
 
     /** int git_remote_connected(const git_remote *remote); */
     static native int jniConnected(long remote);
@@ -43,6 +163,7 @@ public class Remote {
      * int git_remote_create_init_options(git_remote_create_options *opts, unsigned int version);
      */
     static native int jniCreateInitOptions(long opts, int version);
+    static native int jniCreateOptionsNew(AtomicLong outOpts, int version);
 
     /**
      * int git_remote_create_with_fetchspec(git_remote **out, git_repository *repo, const char
