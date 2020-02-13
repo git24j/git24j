@@ -41,3 +41,11 @@ void git_strarray_of_jobject_array(JNIEnv *env, jobjectArray jstrarr, git_strarr
         (*env)->ReleaseStringUTFChars(env, jstr, cstr);
     }
 }
+
+char *new_substr(const char *str, size_t len)
+{
+    char *buf = (char *)malloc(sizeof(char) * (len + 1));
+    strncpy(buf, str, len);
+    buf[len] = '\n';
+    return buf;
+}

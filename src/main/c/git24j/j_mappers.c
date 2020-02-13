@@ -138,6 +138,18 @@ jbyteArray j_byte_array_from_c(JNIEnv *env, const unsigned char *buf, int len)
     return array;
 }
 
+/** create a long[] to hold raw pointers. */
+jlongArray j_long_array_from_pointers(JNIEnv *env, const void **ptrs, size_t n)
+{
+    if (ptrs == NULL || n == 0)
+    {
+        return NULL;
+    }
+    jlongArray array = (*env)->NewLongArray(env, n);
+    (*env)->SetLongArrayRegion(env, array, 0, n, (const long *)ptrs);
+    return array;
+}
+
 /** create c unsigned char array from jni jbyteArray. */
 unsigned char *j_unsigned_chars_from_java(JNIEnv *env, jbyteArray array, int *out_len)
 {
@@ -164,6 +176,17 @@ void j_git_oid_to_java(JNIEnv *env, const git_oid *c_oid, jobject oid)
     j_call_setter_byte_array(env, clz, oid, "setId", raw);
     (*env)->DeleteLocalRef(env, raw);
     (*env)->DeleteLocalRef(env, clz);
+}
+
+/** create byte[] that can be accessed directly by java. */
+jbyteArray j_git_oid_to_bytearray(JNIEnv *env, const git_oid *c_oid)
+{
+    if (c_oid == NULL)
+    {
+        return NULL;
+    }
+
+    return j_byte_array_from_c(env, c_oid->id, GIT_OID_RAWSZ);
 }
 
 /** Copy value of java Oid to git_oid struct in c. */

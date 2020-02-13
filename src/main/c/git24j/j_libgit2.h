@@ -8,6 +8,7 @@
 extern "C"
 {
 #endif
+    jclass j_find_and_hold_clz(JNIEnv *env, const char *descriptor);
 
     extern j_constants_t *jniConstants;
 

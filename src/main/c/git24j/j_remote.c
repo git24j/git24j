@@ -4,6 +4,177 @@
 #include "j_util.h"
 #include <assert.h>
 #include <git2.h>
+#include <string.h>
+extern j_constants_t *jniConstants;
+
+int j_git_transport_message_cb(const char *str, int len, void *payload)
+{
+    j_cb_payload *j_payload = (j_cb_payload *)payload;
+    JNIEnv *env = j_payload->env;
+    jobject consumer = j_payload->consumer;
+    assert(consumer && "consumer must not be null");
+    char *buf = new_substr(str, len);
+    jstring message = (*env)->NewStringUTF(env, buf);
+    int r = (*env)->CallIntMethod(env, consumer, jniConstants->remote.midTransportMessage, message);
+    (*env)->DeleteLocalRef(env, message);
+    free(buf);
+    return r;
+}
+
+/**
+ * Signature of a function which acquires a credential object.
+ *
+ * @param cred The newly created credential object.
+ * @param url The resource for which we are demanding a credential.
+ * @param username_from_url The username that was embedded in a "user\@host"
+ *                          remote url, or NULL if not included.
+ * @param allowed_types A bitmask stating which cred types are OK to return.
+ * @param payload The payload provided when specifying this callback.
+ * @return 0 for success, < 0 to indicate an error, > 0 to indicate
+ *       no credential was acquired
+ */
+int j_git_cred_acquire_cb(git_cred **cred, const char *url, const char *username_from_url, unsigned int allowed_types, void *payload)
+{
+    j_cb_payload *j_payload = (j_cb_payload *)payload;
+    JNIEnv *env = j_payload->env;
+    jobject consumer = j_payload->consumer;
+    assert(consumer && "consumer must not be null");
+    jstring jniUrl = (*env)->NewStringUTF(env, url);
+    jstring usernameFromUrl = (*env)->NewStringUTF(env, username_from_url);
+    long ptr = (*env)->CallLongMethod(env, consumer, jniConstants->remote.midAcquireCred, jniUrl, usernameFromUrl, allowed_types);
+    int r;
+    if (ptr >= 0)
+    {
+        *cred = (git_cred *)ptr;
+        /*
+        ptr > 0 => success
+        ptr == 0 => no credential was accquired
+        */
+        r = (ptr == 0) ? 1 : 0;
+    }
+    else
+    {
+        r = (int)ptr;
+    }
+
+    (*env)->DeleteLocalRef(env, jniUrl);
+    (*env)->DeleteLocalRef(env, usernameFromUrl);
+    return r;
+}
+
+/**
+ * If cert verification fails, this will be called to let the
+ * user make the final decision of whether to allow the
+ * connection to proceed. Returns 0 to allow the connection
+ * or a negative value to indicate an error.
+ */
+int j_git_transport_certificate_check_cb(git_cert *cert, int valid, const char *host, void *payload)
+{
+    j_cb_payload *j_payload = (j_cb_payload *)payload;
+    JNIEnv *env = j_payload->env;
+    jobject consumer = j_payload->consumer;
+    assert(consumer && "consumer must not be null");
+    jstring jHost = (*env)->NewStringUTF(env, host);
+    int r = (*env)->CallIntMethod(env, consumer, jniConstants->remote.midTransportCertificateCheck, (long)cert, valid, jHost);
+    (*env)->DeleteLocalRef(env, jHost);
+    return r;
+}
+
+int j_git_transfer_progress_cb(const git_transfer_progress *stats, void *payload)
+{
+    j_cb_payload *j_payload = (j_cb_payload *)payload;
+    JNIEnv *env = j_payload->env;
+    jobject consumer = j_payload->consumer;
+    assert(consumer && "consumer must not be null");
+    int r = (*env)->CallIntMethod(env, consumer, jniConstants->remote.midTransferProgress, (long)stats);
+    return r;
+}
+
+int j_git_remote_update_tips_cb(const char *refname, const git_oid *a, const git_oid *b, void *payload)
+{
+    j_cb_payload *j_payload = (j_cb_payload *)payload;
+    JNIEnv *env = j_payload->env;
+    jobject consumer = j_payload->consumer;
+    assert(consumer && "consumer must not be null");
+    jstring jRefname = (*env)->NewStringUTF(env, refname);
+    jbyteArray ja = j_git_oid_to_bytearray(env, a);
+    jbyteArray jb = j_git_oid_to_bytearray(env, b);
+    int r = (*env)->CallIntMethod(env, consumer, jniConstants->remote.midUpdateTips, jRefname, ja, jb);
+    (*env)->DeleteLocalRef(env, ja);
+    (*env)->DeleteLocalRef(env, jb);
+    (*env)->DeleteLocalRef(env, jRefname);
+    return r;
+}
+
+int j_git_packbuilder_progress_cb(int stage, uint32_t current, uint32_t total, void *payload)
+{
+    j_cb_payload *j_payload = (j_cb_payload *)payload;
+    JNIEnv *env = j_payload->env;
+    jobject consumer = j_payload->consumer;
+    assert(consumer && "consumer must not be null");
+    int r = (*env)->CallIntMethod(env, consumer, jniConstants->remote.midPackProgress, stage, current, total);
+    return r;
+}
+
+int j_git_push_transfer_progress_cb(unsigned int current, unsigned int total, size_t bytes, void *payload)
+{
+    j_cb_payload *j_payload = (j_cb_payload *)payload;
+    JNIEnv *env = j_payload->env;
+    jobject consumer = j_payload->consumer;
+    assert(consumer && "consumer must not be null");
+    return (*env)->CallIntMethod(env, consumer, jniConstants->remote.midPushTransferProgress, (jlong)current, (jlong)total, (jint)bytes);
+}
+
+int j_git_push_update_reference_cb(const char *refname, const char *status, void *payload)
+{
+    j_cb_payload *j_payload = (j_cb_payload *)payload;
+    JNIEnv *env = j_payload->env;
+    jobject consumer = j_payload->consumer;
+    assert(consumer && "consumer must not be null");
+    jstring jRefname = (*env)->NewStringUTF(env, refname);
+    jstring jStatus = (*env)->NewStringUTF(env, status);
+    int r = (*env)->CallIntMethod(env, consumer, jniConstants->remote.midPushUpdateReference, jRefname, jStatus);
+    (*env)->DeleteLocalRef(env, jRefname);
+    (*env)->DeleteLocalRef(env, jStatus);
+    return r;
+}
+
+int j_git_push_negotiation_cb(const git_push_update **updates, size_t len, void *payload)
+{
+    j_cb_payload *j_payload = (j_cb_payload *)payload;
+    JNIEnv *env = j_payload->env;
+    jobject consumer = j_payload->consumer;
+    assert(consumer && "consumer must not be null");
+    jlongArray jUpdates = j_long_array_from_pointers(env, (const void **)updates, len);
+    int r = (*env)->CallIntMethod(env, consumer, jniConstants->remote.midPushNegotiation, jUpdates);
+    (*env)->DeleteLocalRef(env, jUpdates);
+    return r;
+}
+
+/**
+ * According to remote.c:
+ * <pre>
+ *  if (!t && transport &&
+ *		(error = transport(&t, remote, payload)) < 0)
+ *		return error;
+ * </pre>
+ * 
+ * git_transport_cb returns <0 for error
+ */
+int j_git_transport_cb(git_transport **out, git_remote *owner, void *payload)
+{
+    j_cb_payload *j_payload = (j_cb_payload *)payload;
+    JNIEnv *env = j_payload->env;
+    jobject consumer = j_payload->consumer;
+    assert(consumer && "consumer must not be null");
+    long res = (*env)->CallIntMethod(env, consumer, jniConstants->remote.midTransport, (long)owner);
+    if (res > 0)
+    {
+        *out = (git_transport *)res;
+        return 0;
+    }
+    return res;
+}
 
 // no matching type found for 'const git_remote_head ***out'
 /** int git_remote_ls(const git_remote_head ***out, size_t *size, git_remote *remote); */
@@ -232,6 +403,63 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Remote_jniInitCallbacks)(JNIEnv *env, jclas
 {
     int r = git_remote_init_callbacks((git_remote_callbacks *)optsPtr, version);
     return r;
+}
+
+JNIEXPORT jint JNICALL J_MAKE_METHOD(Remote_jniCallbacksNew)(JNIEnv *env, jclass obj, jobject outCb, jint version)
+{
+    git_remote_callbacks *cb = (git_remote_callbacks *)malloc(sizeof(git_remote_callbacks));
+    int r = git_remote_init_callbacks((git_remote_callbacks *)cb, version);
+    (*env)->CallVoidMethod(env, outCb, jniConstants->midAtomicLongSet, (long)cb);
+    return r;
+}
+
+JNIEXPORT void JNICALL J_MAKE_METHOD(Remote_jniCallbacksSetTransportMessageCb)(JNIEnv *env, jclass obj, jlong cbPtr)
+{
+    ((git_remote_callbacks *)cbPtr)->sideband_progress = j_git_transport_message_cb;
+}
+
+JNIEXPORT void JNICALL J_MAKE_METHOD(Remote_jniCallbacksSetCredAcquireCb)(JNIEnv *env, jclass obj, jlong cbPtr)
+{
+    ((git_remote_callbacks *)cbPtr)->credentials = j_git_cred_acquire_cb;
+}
+JNIEXPORT void JNICALL J_MAKE_METHOD(Remote_jniCallbacksSetTransportCertificateCheckCb)(JNIEnv *env, jclass obj, jlong cbPtr)
+{
+    ((git_remote_callbacks *)cbPtr)->certificate_check = j_git_transport_certificate_check_cb;
+}
+
+JNIEXPORT void JNICALL J_MAKE_METHOD(Remote_jniCallbacksSetTransferProgressCb)(JNIEnv *env, jclass obj, jlong cbPtr)
+{
+    ((git_remote_callbacks *)cbPtr)->transfer_progress = j_git_transfer_progress_cb;
+}
+
+JNIEXPORT void JNICALL J_MAKE_METHOD(Remote_jniCallbacksSetUpdateTipsCb)(JNIEnv *env, jclass obj, jlong cbPtr)
+{
+    ((git_remote_callbacks *)cbPtr)->update_tips = j_git_remote_update_tips_cb;
+}
+
+JNIEXPORT void JNICALL J_MAKE_METHOD(Remote_jniCallbacksSetPackProgressCb)(JNIEnv *env, jclass obj, jlong cbPtr)
+{
+    ((git_remote_callbacks *)cbPtr)->pack_progress = j_git_packbuilder_progress_cb;
+}
+
+JNIEXPORT void JNICALL J_MAKE_METHOD(Remote_jniCallbacksSetPushTransferProgressCb)(JNIEnv *env, jclass obj, jlong cbPtr)
+{
+    ((git_remote_callbacks *)cbPtr)->transfer_progress = j_git_transfer_progress_cb;
+}
+
+JNIEXPORT void JNICALL J_MAKE_METHOD(Remote_jniCallbacksSetUpdateReferenceCb)(JNIEnv *env, jclass obj, jlong cbPtr)
+{
+    ((git_remote_callbacks *)cbPtr)->push_update_reference = j_git_push_update_reference_cb;
+}
+
+JNIEXPORT void JNICALL J_MAKE_METHOD(Remote_jniCallbacksSetPushNegotiationCb)(JNIEnv *env, jclass obj, jlong cbPtr)
+{
+    ((git_remote_callbacks *)cbPtr)->push_negotiation = j_git_push_negotiation_cb;
+}
+
+JNIEXPORT void JNICALL J_MAKE_METHOD(Remote_jniCallbacksSetTransportCb)(JNIEnv *env, jclass obj, jlong cbPtr)
+{
+    ((git_remote_callbacks *)cbPtr)->transport = j_git_transport_cb;
 }
 
 /** int git_remote_is_valid_name(const char *remote_name); */

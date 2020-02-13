@@ -1,8 +1,11 @@
 package com.github.git24j.core;
 
 import javax.annotation.Nonnull;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.Collectors;
 
 public class Remote extends CAutoReleasable {
     protected Remote(boolean isWeak, long rawPtr) {
@@ -33,6 +36,16 @@ public class Remote extends CAutoReleasable {
         public int getBit() {
             return bit;
         }
+    }
+    /**
+     * Direction of the connection.
+     *
+     * <p>We need this because we need to know whether we should call git-upload-pack or
+     * git-receive-pack on the remote end when get_refs gets called.
+     */
+    public enum Direction {
+        FETCH,
+        PUSH;
     }
 
     /** Remote creation options flags */
@@ -65,10 +78,324 @@ public class Remote extends CAutoReleasable {
         }
 
         @Nonnull
-        public CreateOptions create(int version) {
+        public static CreateOptions create(int version) {
             CreateOptions opts = new CreateOptions(false, 0);
             Error.throwIfNeeded(jniCreateOptionsNew(opts._rawPtr, version));
             return opts;
+        }
+    }
+
+    public static class PushUpdate extends CAutoReleasable {
+        protected PushUpdate(boolean isWeak, long rawPtr) {
+            super(isWeak, rawPtr);
+        }
+
+        @Override
+        protected void freeOnce(long cPtr) {
+            Libgit2.jniShadowFree(cPtr);
+        }
+    }
+
+    @FunctionalInterface
+    public interface CredAcquireCb {
+        /**
+         * Signature of a function which acquires a credential object.
+         *
+         * @param url The resource for which we are demanding a credential.
+         * @param usernameFromUrl The username that was embedded in a "user\@host" remote url, or
+         *     NULL if not included.
+         * @param allowedTypes A bitmask stating which cred types are OK to return.
+         * @return Credential or empty
+         */
+        Optional<Cred> acquire(String url, String usernameFromUrl, int allowedTypes);
+    }
+
+    @FunctionalInterface
+    public interface TransportMessageCb {
+        /**
+         * Type for messages delivered by the transport. Return a negative value to cancel the
+         * network operation.
+         *
+         * @param message The message from the transport
+         */
+        int accept(String message);
+    }
+
+    @FunctionalInterface
+    public interface TransportCertificateCheckCb {
+        /**
+         * Callback for the user's custom certificate checks.
+         *
+         * @param cert The host certificate
+         * @param valid Whether the libgit2 checks (OpenSSL or WinHTTP) think this certificate is
+         *     valid
+         * @param host Hostname of the host libgit2 connected to
+         * @return 0 to proceed with the connection, < 0 to fail the connection or > 0 to indicate
+         *     that the callback refused to act and that the existing validity determination should
+         *     be honored
+         */
+        int accept(Cert cert, boolean valid, String host);
+    }
+
+    @FunctionalInterface
+    public interface TransferProgressCb {
+        /**
+         * Type for progress callbacks during indexing. Return a value less than zero to cancel the
+         * transfer.
+         *
+         * @param stats Structure containing information about the state of the transfer
+         */
+        int accept(TransferProgress stats);
+    }
+
+    @FunctionalInterface
+    public interface UpdateTipsCb {
+        /** Callback when a reference is updated locally */
+        int accept(String refname, Oid a, Oid b);
+    }
+
+    @FunctionalInterface
+    public interface PackProgressCb {
+        /** Packbuilder progress notification function */
+        int accept(int stage, long current, long total);
+    }
+
+    @FunctionalInterface
+    public interface PushTransferProgressCb {
+        /** Push network progress notification function */
+        int accept(long current, long total, int bytes);
+    }
+
+    @FunctionalInterface
+    public interface UpdateReferenceCb {
+        /**
+         * Callback used to inform of the update status from the remote.
+         *
+         * <p>Called for each updated reference on push. If `status` is not `NULL`, the update was
+         * rejected by the remote server and `status` contains the reason given.
+         *
+         * @param refname refname specifying to the remote ref
+         * @param status status message sent from the remote
+         * @return 0 on success, other value indicates an error
+         */
+        int accept(String refname, String status);
+    }
+
+    @FunctionalInterface
+    public interface PushNegotiationCb {
+        /**
+         * Callback used to inform of upcoming updates.
+         *
+         * @param updates an array containing the updates which will be sent as commands to the
+         *     destination.
+         */
+        int accept(List<PushUpdate> updates);
+    }
+
+    @FunctionalInterface
+    public interface TransportCb {
+        /**
+         * Callback that can create the transport to use for this operation. Leave empty to
+         * auto-detect.
+         */
+        Optional<Transport> accept(@Nonnull Remote owner);
+    }
+
+    static native void jniCallbacksSetTransportMessageCb(long cbPtr);
+
+    static native void jniCallbacksSetCredAcquireCb(long cbPtr);
+
+    static native void jniCallbacksSetTransportCertificateCheckCb(long cbPtr);
+
+    static native void jniCallbacksSetTransferProgressCb(long cbPtr);
+
+    static native void jniCallbacksSetUpdateTipsCb(long cbPtr);
+
+    static native void jniCallbacksSetPackProgressCb(long cbPtr);
+
+    static native void jniCallbacksSetPushTransferProgressCb(long cbPtr);
+
+    static native void jniCallbacksSetUpdateReferenceCb(long cbPtr);
+
+    static native void jniCallbacksSetPushNegotiationCb(long cbPtr);
+
+    static native void jniCallbacksSetTransportCb(long cbPtr);
+
+    public static final class Callbacks extends CAutoReleasable {
+        private CredAcquireCb _credAcquireCb;
+        private TransportMessageCb _transportMsg;
+        private TransportCertificateCheckCb _certificateCheckCb;
+        private TransferProgressCb _transferProgressCb;
+        private UpdateTipsCb _updateTipsCb;
+        private PackProgressCb _packProgressCb;
+        private PushTransferProgressCb _pushTransferProgressCb;
+        private UpdateReferenceCb _updateReferenceCb;
+        private PushNegotiationCb _pushNegotiationCb;
+        private TransportCb _transportCb;
+
+        public void setCredAcquireCb(CredAcquireCb credAcquireCb) {
+            jniCallbacksSetCredAcquireCb(getRawPointer());
+            _credAcquireCb = credAcquireCb;
+        }
+
+        public void setTransportMsg(TransportMessageCb transportMsg) {
+            jniCallbacksSetTransportMessageCb(getRawPointer());
+            _transportMsg = transportMsg;
+        }
+
+        public void setCertificateCheckCb(TransportCertificateCheckCb certificateCheckCb) {
+            jniCallbacksSetTransportCertificateCheckCb(getRawPointer());
+            _certificateCheckCb = certificateCheckCb;
+        }
+
+        public void setTransferProgressCb(TransferProgressCb transferProgressCb) {
+            jniCallbacksSetTransferProgressCb(getRawPointer());
+            _transferProgressCb = transferProgressCb;
+        }
+
+        public void setUpdateTipsCb(UpdateTipsCb updateTipsCb) {
+            jniCallbacksSetUpdateTipsCb(getRawPointer());
+            _updateTipsCb = updateTipsCb;
+        }
+
+        public void setPackProgressCb(PackProgressCb packProgressCb) {
+            jniCallbacksSetPackProgressCb(getRawPointer());
+            _packProgressCb = packProgressCb;
+        }
+
+        public void setPushTransferProgressCb(PushTransferProgressCb pushTransferProgressCb) {
+            jniCallbacksSetPushTransferProgressCb(getRawPointer());
+            _pushTransferProgressCb = pushTransferProgressCb;
+        }
+
+        public void setUpdateReferenceCb(UpdateReferenceCb updateReferenceCb) {
+            jniCallbacksSetUpdateReferenceCb(getRawPointer());
+            _updateReferenceCb = updateReferenceCb;
+        }
+
+        public void setPushNegotiationCb(PushNegotiationCb pushNegotiationCb) {
+            jniCallbacksSetPushNegotiationCb(getRawPointer());
+            _pushNegotiationCb = pushNegotiationCb;
+        }
+
+        public void setTransportCb(TransportCb transportCb) {
+            jniCallbacksSetTransportCb(getRawPointer());
+            _transportCb = transportCb;
+        }
+
+        protected Callbacks(boolean isWeak, long rawPtr) {
+            super(isWeak, rawPtr);
+        }
+
+        @Override
+        protected void freeOnce(long cPtr) {
+            Libgit2.jniShadowFree(cPtr);
+        }
+
+        @Nonnull
+        public static Callbacks create(int version) {
+            Callbacks cb = new Callbacks(false, 0);
+            Error.throwIfNeeded(jniCallbacksNew(cb._rawPtr, version));
+            return cb;
+        }
+
+        /**
+         * Get the credential and return its c pointer.
+         *
+         * @return 0 if no credential was acquired, > 0 if credentials acquired successfully < 0
+         *     indicate an error
+         */
+        long acquireCred(String url, String usernameFromUrl, int allowedTypes) {
+            if (_credAcquireCb != null) {
+                return _credAcquireCb
+                        .acquire(url, usernameFromUrl, allowedTypes)
+                        .map(CAutoReleasable::getRawPointer)
+                        .orElse(0L);
+            }
+            return 0;
+        }
+
+        int transportMessage(String message) {
+            if (_transportMsg != null) {
+                return _transportMsg.accept(message);
+            }
+            return 0;
+        }
+
+        int transportMessageCheck(long certPtr, int valid, String host) {
+            if (_certificateCheckCb != null) {
+                return _certificateCheckCb.accept(new Cert(true, 0), valid == 1, host);
+            }
+            return 0;
+        }
+
+        int transferProgress(long progressPtr) {
+            if (_transferProgressCb != null) {
+                return _transferProgressCb.accept(new TransferProgress(true, progressPtr));
+            }
+            return 0;
+        }
+
+        int updateTips(String refname, byte[] ida, byte[] idb) {
+            if (_updateTipsCb != null) {
+                return _updateTipsCb.accept(refname, Oid.of(ida), Oid.of(idb));
+            }
+            return 0;
+        }
+
+        int packProgress(int stage, long current, long total) {
+            if (_packProgressCb != null) {
+                return _packProgressCb.accept(stage, current, total);
+            }
+            return 0;
+        }
+
+        int pushTransferProgress(long current, long total, int bytes) {
+            if (_pushTransferProgressCb != null) {
+                return _pushTransferProgressCb.accept(current, total, bytes);
+            }
+            return 0;
+        }
+
+        int pushUpdateReference(String refname, String status) {
+            if (_updateReferenceCb != null) {
+                return _updateReferenceCb.accept(refname, status);
+            }
+            return 0;
+        }
+
+        int pushNegotiation(long[] updates) {
+            if (_pushNegotiationCb != null) {
+                return _pushNegotiationCb.accept(
+                        Arrays.stream(updates)
+                                .mapToObj(p -> new PushUpdate(true, p))
+                                .collect(Collectors.toList()));
+            }
+            return 0;
+        }
+
+        /**
+         * According to remote.c:
+         *
+         * <pre>
+         *     if (!t && transport && (error = transport(&t, remote, payload)) < 0)
+         * 		return error;
+         * </pre>
+         *
+         * We would like to return < 0 values for error > 0 values for valid pointer 0 as not able
+         * to allocate.
+         *
+         * @param ownerPtr
+         * @return <0 for error,
+         */
+        long transport(long ownerPtr) {
+            if (_transportCb != null) {
+                return _transportCb
+                        .accept(new Remote(true, ownerPtr))
+                        .map(CAutoReleasable::getRawPointer)
+                        .orElse(0L);
+            }
+            return 0L;
         }
     }
     // no matching type found for 'const git_remote_head ***out'
@@ -133,14 +460,22 @@ public class Remote extends CAutoReleasable {
     }
 
     /**
-     * int git_remote_connect(git_remote *remote, git_direction direction, const
-     * git_remote_callbacks *callbacks, const git_proxy_options *proxy_opts, const git_strarray
-     * *custom_headers);
+     *
+     *
+     * <pre>
+     * int git_remote_connect(
+     *     git_remote *remote,
+     *     git_direction direction,
+     *     const git_remote_callbacks *callbacks,
+     *     const git_proxy_options *proxy_opts,
+     *     const git_strarray *custom_headers);
+     * </pre>
      */
     static native int jniConnect(
             long remote, int direction, long callbacks, long proxyOpts, String[] customHeaders);
 
-    public void connect(boolean isFetch, long callback, long proxyOpts, List<String> customHeads) {
+    public void connect(
+            Direction direction, long callback, long proxyOpts, List<String> customHeads) {
         // FIXME
     }
 
@@ -163,6 +498,7 @@ public class Remote extends CAutoReleasable {
      * int git_remote_create_init_options(git_remote_create_options *opts, unsigned int version);
      */
     static native int jniCreateInitOptions(long opts, int version);
+
     static native int jniCreateOptionsNew(AtomicLong outOpts, int version);
 
     /**
@@ -216,6 +552,8 @@ public class Remote extends CAutoReleasable {
 
     /** int git_remote_init_callbacks(git_remote_callbacks *opts, unsigned int version); */
     static native int jniInitCallbacks(long opts, int version);
+
+    static native int jniCallbacksNew(AtomicLong outCb, int version);
 
     /** int git_remote_is_valid_name(const char *remote_name); */
     static native int jniIsValidName(String remoteName);
