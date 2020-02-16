@@ -21,6 +21,9 @@ extern "C"
      */
     void git_strarray_of_jobject_array(JNIEnv *env, jobjectArray jstrarr, git_strarray *out);
 
+    /** Make a copy of sub string, returned destination, returned string must be freed by the caller */
+    char *new_substr(const char *str, size_t len);
+
 #ifdef __cplusplus
 }
 #endif

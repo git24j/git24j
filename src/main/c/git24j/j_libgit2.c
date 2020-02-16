@@ -5,7 +5,7 @@
 #include <jni.h>
 #include <stdio.h>
 
-jclass __find_and_hold_clz(JNIEnv *env, const char *descriptor)
+jclass j_find_and_hold_clz(JNIEnv *env, const char *descriptor)
 {
     jclass clz = (*env)->FindClass(env, descriptor);
     assert(clz && "class not found");
@@ -18,10 +18,10 @@ void git24j_init(JNIEnv *env)
 {
     assert(env && "cannot initiate git24j without jvm");
     jniConstants = (j_constants_t *)malloc(sizeof(j_constants_t));
-    jniConstants->clzAtomicInt = __find_and_hold_clz(env, "Ljava/util/concurrent/atomic/AtomicInteger;");
-    jniConstants->clzAtomicLong = __find_and_hold_clz(env, "Ljava/util/concurrent/atomic/AtomicLong;");
-    jniConstants->clzAtomicReference = __find_and_hold_clz(env, "Ljava/util/concurrent/atomic/AtomicReference;");
-    jniConstants->clzList = __find_and_hold_clz(env, "Ljava/util/List;");
+    jniConstants->clzAtomicInt = j_find_and_hold_clz(env, "Ljava/util/concurrent/atomic/AtomicInteger;");
+    jniConstants->clzAtomicLong = j_find_and_hold_clz(env, "Ljava/util/concurrent/atomic/AtomicLong;");
+    jniConstants->clzAtomicReference = j_find_and_hold_clz(env, "Ljava/util/concurrent/atomic/AtomicReference;");
+    jniConstants->clzList = j_find_and_hold_clz(env, "Ljava/util/List;");
     assert(jniConstants->clzAtomicInt && "AtomicInteger class not found");
     assert(jniConstants->clzAtomicLong && "AtomicLong class not found");
     assert(jniConstants->clzAtomicReference && "AtomicReference class not found");
@@ -30,6 +30,21 @@ void git24j_init(JNIEnv *env)
     jniConstants->midAtomicLongSet = (*env)->GetMethodID(env, jniConstants->clzAtomicLong, "set", "(J)V");
     jniConstants->midAtomicReferenceSet = (*env)->GetMethodID(env, jniConstants->clzAtomicReference, "set", "(Ljava/lang/Object;)V");
     jniConstants->midListGetI = (*env)->GetMethodID(env, jniConstants->clzList, "get", "(I)Ljava/lang/Object;");
+    /* Remote constants */
+    jclass clz = j_find_and_hold_clz(env, J_CLZ_PREFIX "Remote$Callbacks");
+    assert(clz && "Remote.Callbacks class not found");
+    jniConstants->remote.clzCallbacks = clz;
+    jniConstants->remote.midAcquireCred = (*env)->GetMethodID(env, clz, "acquireCred", "(Ljava/lang/String;Ljava/lang/String;I)J");
+    jniConstants->remote.midTransportMessage = (*env)->GetMethodID(env, clz, "transportMessage", "(Ljava/lang/String;)I");
+    jniConstants->remote.midTransportCertificateCheck = (*env)->GetMethodID(env, clz, "transportMessageCheck", "(JILjava/lang/String;)I");
+    jniConstants->remote.midTransferProgress = (*env)->GetMethodID(env, clz, "transferProgress", "(J)I");
+    jniConstants->remote.midUpdateTips = (*env)->GetMethodID(env, clz, "updateTips", "(Ljava/lang/String;[B[B)I");
+    jniConstants->remote.midPackProgress = (*env)->GetMethodID(env, clz, "packProgress", "(IJJ)I");
+    jniConstants->remote.midPushTransferProgress = (*env)->GetMethodID(env, clz, "pushTransferProgress", "(JJI)I");
+    jniConstants->remote.midPushUpdateReference = (*env)->GetMethodID(env, clz, "pushUpdateReference", "(Ljava/lang/String;Ljava/lang/String;)I");
+    jniConstants->remote.midPushNegotiation = (*env)->GetMethodID(env, clz, "pushNegotiation", "([J)I");
+    // return <0 for error, > 0 to return new transport, 0 is no-op
+    jniConstants->remote.midTransport = (*env)->GetMethodID(env, clz, "transport", "(J)J");
 }
 
 void git24j_shutdown(JNIEnv *env)
@@ -39,6 +54,7 @@ void git24j_shutdown(JNIEnv *env)
     (*env)->DeleteGlobalRef(env, jniConstants->clzAtomicLong);
     (*env)->DeleteGlobalRef(env, jniConstants->clzAtomicReference);
     (*env)->DeleteGlobalRef(env, jniConstants->clzList);
+    (*env)->DeleteGlobalRef(env, jniConstants->remote.clzCallbacks);
     free(jniConstants);
 }
 

@@ -18,9 +18,11 @@
 - [x] Note
 - [x] Tag
 - [x] Status
+- [ ] Cred
 - [ ] Patch
 - [ ] Checkout
 - [ ] Signature
+
 
 
 ## API polishing

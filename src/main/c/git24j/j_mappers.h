@@ -17,6 +17,21 @@ extern "C"
 
     typedef struct
     {
+        jclass clzCallbacks;
+        jmethodID midTransportMessage;
+        jmethodID midAcquireCred;
+        jmethodID midTransportCertificateCheck;
+        jmethodID midTransferProgress;
+        jmethodID midUpdateTips;
+        jmethodID midPackProgress;
+        jmethodID midPushTransferProgress;
+        jmethodID midPushUpdateReference;
+        jmethodID midPushNegotiation;
+        jmethodID midTransport;
+    } j_remote_constants;
+
+    typedef struct
+    {
         jclass clzAtomicInt;
         jclass clzAtomicLong;
         jclass clzAtomicReference;
@@ -26,6 +41,7 @@ extern "C"
         jmethodID midAtomicLongSet;
         jmethodID midAtomicReferenceSet;
         jmethodID midListGetI;
+        j_remote_constants remote;
     } j_constants_t;
 
     /** commonly used constants. */
@@ -56,6 +72,9 @@ extern "C"
      * */
     jbyteArray j_byte_array_from_c(JNIEnv *env, const unsigned char *buf, int len);
 
+    /** create a long[] to hold raw pointers. */
+    jlongArray j_long_array_from_pointers(JNIEnv *env, const void **ptrs, size_t n);
+
     /** 
      * Copy jni jbyteArray to unsigned char array. 
      * @param array jni array from which content is copied.
@@ -73,6 +92,9 @@ extern "C"
 
     /** copy gitarray values to java OidArray */
     void j_git_oidarray_to_java(JNIEnv *env, jobject outOidArr, const git_oidarray *c_arr);
+
+    /** create byte[] that can be accessed directly by java. */
+    jbyteArray j_git_oid_to_bytearray(JNIEnv *env, const git_oid *c_oid);
 
     /**
      * call `String obj.getXXX()` and get the result string. 
