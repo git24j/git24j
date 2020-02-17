@@ -10,7 +10,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class Init {
 
     // TODD: change me
-    private static final String CUSTOM_LIB_PATH_PROP = "com.github.shijinglu.lg24j.library_path";
+    private static final String CUSTOM_LIB_PATH_PROP = "com.github.git24j.lg24j.library_path";
     private static final String JAVA_LIB_PATH_PROP = "java.library.path";
     private static final String DEFAULT_LIB_PATH = "target";
     private static AtomicBoolean _loaded = new AtomicBoolean(false);

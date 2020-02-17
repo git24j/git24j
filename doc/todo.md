@@ -10,13 +10,13 @@
 - [x] Index
 - [x] Diff
 - [x] Merge (no test)
-- [x] Rebase (no test)
+- [x] Rebase
 - [x] Remote
-- [x] Revwalk
-- [x] Submodule
-- [x] Worktree
-- [x] Note
-- [x] Tag
+- [x] Revwalk  (lack of public interface)
+- [x] Submodule  (lack of public interface)
+- [x] Worktree  (lack of public interface)
+- [x] Note (lack of public interface)
+- [x] Tag 
 - [x] Status
 - [ ] Cred
 - [ ] Patch
@@ -25,12 +25,12 @@
 - [ ] Refspec
 
 
-
 ## API polishing
 - [ ] Make sure APIs have consistent behavior, for example, return null object vs. throwing `ENOTFOUND` error.
 - [ ] Annotate nullabilities
 - [ ] Return Optionals instead of nullable entities
 - [ ] Many APIs can also be part of `Repository`, for example `Commit.lookup(Repository repo)` can be `repo.lookupCommit(...)`
+- [ ] Formalize class and enum naming, move some java inner classes to separate class files. Names of classes and enums should follow `git_classname_methodname` convention. 
 
 ## Administrative
 - [x] Basic make/build/test framework
