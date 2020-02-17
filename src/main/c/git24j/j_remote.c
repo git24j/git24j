@@ -630,3 +630,11 @@ JNIEXPORT jstring JNICALL J_MAKE_METHOD(Remote_jniUrl)(JNIEnv *env, jclass obj, 
     const char *r = git_remote_url((git_remote *)remotePtr);
     return (*env)->NewStringUTF(env, r);
 }
+
+JNIEXPORT jint JNICALL J_MAKE_METHOD(Remote_jniFetchOptionsNew)(JNIEnv *env, jclass obj, jobject outPtr, jint version)
+{
+    git_fetch_options *opts = (git_fetch_options *)malloc(sizeof(git_fetch_options));
+    int r = git_fetch_init_options(opts, version);
+    (*env)->CallVoidMethod(env, outPtr, jniConstants->midAtomicLongSet, (long)opts);
+    return r;
+}

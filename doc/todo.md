@@ -22,6 +22,7 @@
 - [ ] Patch
 - [ ] Checkout
 - [ ] Signature
+- [ ] Refspec
 
 
 
