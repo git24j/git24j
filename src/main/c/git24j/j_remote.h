@@ -150,6 +150,8 @@ extern "C"
     /** const char * git_remote_url(const git_remote *remote); */
     JNIEXPORT jstring JNICALL J_MAKE_METHOD(Remote_jniUrl)(JNIEnv *env, jclass obj, jlong remotePtr);
 
+    JNIEXPORT jint JNICALL J_MAKE_METHOD(Remote_jniFetchOptionsNew)(JNIEnv *env, jclass obj, jobject outPtr, jint version);
+
 #ifdef __cplusplus
 }
 #endif
