@@ -23,7 +23,10 @@ int j_git_diff_file_cb(const git_diff_delta *delta, float progress, void *payloa
     j_diff_callback_payload *j_payload = (j_diff_callback_payload *)payload;
     JNIEnv *env = j_payload->env;
     jobject consumer = j_payload->fileCb;
-    assert(consumer && "consumer must not be null");
+    if (consumer == NULL)
+    {
+        return 0;
+    }
     jclass jclz = (*env)->GetObjectClass(env, consumer);
     assert(jclz && "jni error: could not resolve consumer class");
     /** int accept(long diffDeltaPtr, float progress) */
@@ -50,7 +53,10 @@ int j_git_diff_binary_cb(const git_diff_delta *delta, const git_diff_binary *bin
     j_diff_callback_payload *j_payload = (j_diff_callback_payload *)payload;
     JNIEnv *env = j_payload->env;
     jobject consumer = j_payload->binaryCb;
-    assert(consumer && "consumer must not be null");
+    if (consumer == NULL)
+    {
+        return 0;
+    }
     jclass jclz = (*env)->GetObjectClass(env, consumer);
     assert(jclz && "jni error: could not resolve consumer class");
     /** int accept(long diffDeltaPtr, long binaryPtr) */
@@ -76,7 +82,10 @@ int j_git_diff_hunk_cb(const git_diff_delta *delta, const git_diff_hunk *hunk, v
     j_diff_callback_payload *j_payload = (j_diff_callback_payload *)payload;
     JNIEnv *env = j_payload->env;
     jobject consumer = j_payload->hunkCb;
-    assert(consumer && "consumer must not be null");
+    if (consumer == NULL)
+    {
+        return 0;
+    }
     jclass jclz = (*env)->GetObjectClass(env, consumer);
     assert(jclz && "jni error: could not resolve consumer class");
     /** int accept(long diffDeltaPtr, long binaryPtr) */
@@ -92,7 +101,11 @@ int j_git_diff_line_cb(const git_diff_delta *delta, const git_diff_hunk *hunk, c
     j_diff_callback_payload *j_payload = (j_diff_callback_payload *)payload;
     JNIEnv *env = j_payload->env;
     jobject consumer = j_payload->lineCb;
-    assert(consumer && "consumer must not be null");
+    if (consumer == NULL)
+    {
+        return 0;
+    }
+
     jclass jclz = (*env)->GetObjectClass(env, consumer);
     assert(jclz && "jni error: could not resolve consumer class");
     /** int accept(long diffDeltaPtr, long binaryPtr) */
@@ -249,7 +262,13 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Diff_jniForeach)(JNIEnv *env, jclass obj, j
     payload.binaryCb = binaryCb;
     payload.hunkCb = hunkCb;
     payload.lineCb = lineCb;
-    int r = git_diff_foreach((git_diff *)diffPtr, j_git_diff_file_cb, j_git_diff_binary_cb, j_git_diff_hunk_cb, j_git_diff_line_cb, &payload);
+    int r = git_diff_foreach(
+        (git_diff *)diffPtr,
+        fileCb == NULL ? NULL : j_git_diff_file_cb,
+        binaryCb == NULL ? NULL : j_git_diff_binary_cb,
+        hunkCb == NULL ? NULL : j_git_diff_hunk_cb,
+        lineCb == NULL ? NULL : j_git_diff_line_cb,
+        &payload);
     return r;
 }
 
@@ -265,7 +284,11 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Diff_jniPrint)(JNIEnv *env, jclass obj, jlo
 {
     j_diff_callback_payload payload = {env};
     payload.lineCb = printCb;
-    int r = git_diff_print((git_diff *)diffPtr, format, j_git_diff_line_cb, &payload);
+    int r = git_diff_print(
+        (git_diff *)diffPtr,
+        format,
+        printCb == NULL ? NULL : j_git_diff_line_cb,
+        &payload);
     return r;
 }
 
@@ -280,7 +303,18 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Diff_jniToBuf)(JNIEnv *env, jclass obj, job
 }
 
 /** int git_diff_blobs(const git_blob *old_blob, const char *old_as_path, const git_blob *new_blob, const char *new_as_path, const git_diff_options *options, git_diff_file_cb file_cb, git_diff_binary_cb binary_cb, git_diff_hunk_cb hunk_cb, git_diff_line_cb line_cb, void *payload); */
-JNIEXPORT jint JNICALL J_MAKE_METHOD(Diff_jniBlobs)(JNIEnv *env, jclass obj, jlong oldBlobPtr, jstring old_as_path, jlong newBlobPtr, jstring new_as_path, jlong optionsPtr, jobject fileCb, jobject binaryCb, jobject hunkCb, jobject lineCb)
+JNIEXPORT jint JNICALL J_MAKE_METHOD(Diff_jniBlobs)(
+    JNIEnv *env,
+    jclass obj,
+    jlong oldBlobPtr,
+    jstring old_as_path,
+    jlong newBlobPtr,
+    jstring new_as_path,
+    jlong optionsPtr,
+    jobject fileCb,
+    jobject binaryCb,
+    jobject hunkCb,
+    jobject lineCb)
 {
     char *c_old_as_path = j_copy_of_jstring(env, old_as_path, true);
     char *c_new_as_path = j_copy_of_jstring(env, new_as_path, true);
@@ -289,14 +323,36 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Diff_jniBlobs)(JNIEnv *env, jclass obj, jlo
     payload.binaryCb = binaryCb;
     payload.hunkCb = hunkCb;
     payload.lineCb = lineCb;
-    int r = git_diff_blobs((git_blob *)oldBlobPtr, c_old_as_path, (git_blob *)newBlobPtr, c_new_as_path, (git_diff_options *)optionsPtr, j_git_diff_file_cb, j_git_diff_binary_cb, j_git_diff_hunk_cb, j_git_diff_line_cb, &payload);
+    int r = git_diff_blobs(
+        (git_blob *)oldBlobPtr,
+        c_old_as_path,
+        (git_blob *)newBlobPtr,
+        c_new_as_path,
+        (git_diff_options *)optionsPtr,
+        fileCb == NULL ? NULL : j_git_diff_file_cb,
+        binaryCb == NULL ? NULL : j_git_diff_binary_cb,
+        hunkCb == NULL ? NULL : j_git_diff_hunk_cb,
+        lineCb == NULL ? NULL : j_git_diff_line_cb,
+        &payload);
     free(c_old_as_path);
     free(c_new_as_path);
     return r;
 }
 
 /** int git_diff_blob_to_buffer(const git_blob *old_blob, const char *old_as_path, const char *buffer, size_t buffer_len, const char *buffer_as_path, const git_diff_options *options, git_diff_file_cb file_cb, git_diff_binary_cb binary_cb, git_diff_hunk_cb hunk_cb, git_diff_line_cb line_cb, void *payload); */
-JNIEXPORT jint JNICALL J_MAKE_METHOD(Diff_jniBlobToBuffer)(JNIEnv *env, jclass obj, jlong oldBlobPtr, jstring old_as_path, jstring buffer, jint bufferLen, jstring buffer_as_path, jlong optionsPtr, jobject fileCb, jobject binaryCb, jobject hunkCb, jobject lineCb)
+JNIEXPORT jint JNICALL J_MAKE_METHOD(Diff_jniBlobToBuffer)(
+    JNIEnv *env,
+    jclass obj,
+    jlong oldBlobPtr,
+    jstring old_as_path,
+    jstring buffer,
+    jint bufferLen,
+    jstring buffer_as_path,
+    jlong optionsPtr,
+    jobject fileCb,
+    jobject binaryCb,
+    jobject hunkCb,
+    jobject lineCb)
 {
     char *c_old_as_path = j_copy_of_jstring(env, old_as_path, true);
     char *c_buffer = j_copy_of_jstring(env, buffer, true);
@@ -306,7 +362,18 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Diff_jniBlobToBuffer)(JNIEnv *env, jclass o
     payload.binaryCb = binaryCb;
     payload.hunkCb = hunkCb;
     payload.lineCb = lineCb;
-    int r = git_diff_blob_to_buffer((git_blob *)oldBlobPtr, c_old_as_path, c_buffer, bufferLen, c_buffer_as_path, (git_diff_options *)optionsPtr, j_git_diff_file_cb, j_git_diff_binary_cb, j_git_diff_hunk_cb, j_git_diff_line_cb, &payload);
+    int r = git_diff_blob_to_buffer(
+        (git_blob *)oldBlobPtr,
+        c_old_as_path,
+        c_buffer,
+        bufferLen,
+        c_buffer_as_path,
+        (git_diff_options *)optionsPtr,
+        fileCb == NULL ? NULL : j_git_diff_file_cb,
+        binaryCb == NULL ? NULL : j_git_diff_binary_cb,
+        hunkCb == NULL ? NULL : j_git_diff_hunk_cb,
+        lineCb == NULL ? NULL : j_git_diff_line_cb,
+        &payload);
     free(c_old_as_path);
     free(c_buffer);
     free(c_buffer_as_path);
@@ -338,7 +405,19 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Diff_jniBuffers)(JNIEnv *env, jclass obj,
     payload.binaryCb = binaryCb;
     payload.hunkCb = hunkCb;
     payload.lineCb = lineCb;
-    int r = git_diff_buffers((void *)c_old_buffer, oldLen, c_old_as_path, (void *)c_new_buffer, newLen, c_new_as_path, (git_diff_options *)optionsPtr, j_git_diff_file_cb, j_git_diff_binary_cb, j_git_diff_hunk_cb, j_git_diff_line_cb, &payload);
+    int r = git_diff_buffers(
+        (void *)c_old_buffer,
+        oldLen,
+        c_old_as_path,
+        (void *)c_new_buffer,
+        newLen,
+        c_new_as_path,
+        (git_diff_options *)optionsPtr,
+        fileCb == NULL ? NULL : j_git_diff_file_cb,
+        binaryCb == NULL ? NULL : j_git_diff_binary_cb,
+        hunkCb == NULL ? NULL : j_git_diff_hunk_cb,
+        lineCb == NULL ? NULL : j_git_diff_line_cb,
+        &payload);
     (*env)->ReleaseByteArrayElements(env, oldBuffer, (jbyte *)c_old_buffer, 0);
     free(c_old_as_path);
     (*env)->ReleaseByteArrayElements(env, newBuffer, (jbyte *)c_new_buffer, 0);

@@ -7,7 +7,8 @@ public class Buf {
     private int asize;
     private int size;
 
-    public String getPtr() {
+    /** Get internal buffer, generally only the substr up to size is meaningful. */
+    String getPtr() {
         return ptr;
     }
 
