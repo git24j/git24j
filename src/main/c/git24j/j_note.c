@@ -4,9 +4,41 @@
 #include "j_util.h"
 #include <assert.h>
 #include <git2.h>
+extern j_constants_t *jniConstants;
 
 // no matching type found for 'git_note_foreach_cb note_cb'
 /** int git_note_foreach(git_repository *repo, const char *notes_ref, git_note_foreach_cb note_cb, void *payload); */
+int j_git_note_foreach_cb(const git_oid *blob_id, const git_oid *annotated_object_id, void *payload)
+{
+    j_cb_payload *j_payload = (j_cb_payload *)payload;
+    JNIEnv *env = j_payload->env;
+    jobject consumer = j_payload->consumer;
+    if (consumer == NULL)
+    {
+        return 0;
+    }
+    jclass jclz = (*env)->GetObjectClass(env, consumer);
+    assert(jclz && "jni error: could not resolve consumer class");
+    /** int accept(byte[] blobId, byte[] annotatedObjectId) */
+    jmethodID accept = (*env)->GetMethodID(env, jclz, "accept", "([B[B)I");
+    assert(accept && "jni error: could not resolve method consumer method");
+    jbyteArray blobId = j_git_oid_to_bytearray(env, blob_id);
+    jbyteArray annoObjId = j_git_oid_to_bytearray(env, annotated_object_id);
+    int r = (*env)->CallIntMethod(env, consumer, accept, blobId, annoObjId);
+    (*env)->DeleteLocalRef(env, annoObjId);
+    (*env)->DeleteLocalRef(env, blobId);
+    (*env)->DeleteLocalRef(env, jclz);
+    return r;
+}
+
+JNIEXPORT jint JNICALL J_MAKE_METHOD(Note_jniForeach)(JNIEnv *env, jclass obj, jlong repoPtr, jstring notesRef, jobject foreachCb)
+{
+    j_cb_payload payload = {env, foreachCb};
+    char *notes_ref = j_copy_of_jstring(env, notesRef, false);
+    int r = git_note_foreach((git_repository *)repoPtr, notes_ref, foreachCb == NULL ? NULL : j_git_note_foreach_cb, &payload);
+    free(notes_ref);
+    return r;
+}
 /** -------- Wrapper Body ---------- */
 /** int git_note_iterator_new(git_note_iterator **out, git_repository *repo, const char *notes_ref); */
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Note_jniIteratorNew)(JNIEnv *env, jclass obj, jobject out, jlong repoPtr, jstring notes_ref)

@@ -57,3 +57,4 @@
 - [ ] Formalize CAutoReleaseable vs CAutoClosable
 - [x] Unify behavior of git objects, aka {@code Commit}, {@code Tag}, {@code Tree} or {@code Blob} 
 - [x] Make sure git objects are free-ed with `git_object_free`, make sure they all 
+- [ ] *All callbacks should immediately return if consumer is null*
