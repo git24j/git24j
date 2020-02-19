@@ -1,5 +1,7 @@
 package com.github.git24j.core;
 
+import javax.annotation.CheckForNull;
+import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
@@ -30,15 +32,7 @@ public interface IBitEnum {
         return EnumSet.copyOf(matched);
     }
 
-    /**
-     * Get enum item from int value
-     *
-     * @param bit bit value
-     * @param clz class to parse
-     * @param <T>
-     * @return enum item
-     */
-    static <T extends Enum<T> & IBitEnum> T valueOf(int bit, Class<T> clz) {
+    static <T extends Enum<T> & IBitEnum> T valueOf(int bit, Class<T> clz, T defaultVal) {
         for (T x : clz.getEnumConstants()) {
             int b = x.getBit();
             if ((b < 0 && bit > 0) || (b > 0 && bit < 0)) {
@@ -48,7 +42,20 @@ public interface IBitEnum {
                 return x;
             }
         }
-        return null;
+        return defaultVal;
+    }
+
+    /**
+     * Get enum item from int value
+     *
+     * @param bit bit value
+     * @param clz class to parse
+     * @param <T>
+     * @return enum item
+     */
+    @CheckForNull
+    static <T extends Enum<T> & IBitEnum> T valueOf(int bit, Class<T> clz) {
+        return IBitEnum.valueOf(bit, clz, null);
     }
 
     int getBit();

@@ -19,6 +19,11 @@ class Internals {
         int accept(long ptr1, long ptr2, long ptr3);
     }
 
+    @FunctionalInterface
+    interface BArrCallback {
+        int accept(byte[] rawid);
+    }
+
     /** Class to hold */
     static class OidArray {
         private final List<Oid> _oids = new ArrayList<>();

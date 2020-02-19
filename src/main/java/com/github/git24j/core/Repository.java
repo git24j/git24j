@@ -9,7 +9,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 public class Repository implements AutoCloseable {
     /** C Pointer. */
-    private final AtomicLong _rawPtr = new AtomicLong();
+    final AtomicLong _rawPtr = new AtomicLong();
 
     Repository(long rawPtr) {
         _rawPtr.set(rawPtr);

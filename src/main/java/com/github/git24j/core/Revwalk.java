@@ -5,6 +5,7 @@ import javax.annotation.Nonnull;
 import java.util.concurrent.atomic.AtomicLong;
 
 import static com.github.git24j.core.GitException.ErrorCode.ITEROVER;
+import static com.github.git24j.core.Internals.BArrCallback;
 
 public class Revwalk extends CAutoReleasable {
     protected Revwalk(boolean isWeak, long rawPtr) {
@@ -16,16 +17,23 @@ public class Revwalk extends CAutoReleasable {
         jniFree(cPtr);
     }
 
-    // no matching type found for 'git_revwalk_hide_cb hide_cb'
     /**
-     * int git_revwalk_add_hide_cb(git_revwalk *walk, git_revwalk_hide_cb hide_cb, void *payload);
+     * This is a callback function that user can provide to hide a commit and its parents. If the
+     * callback function returns non-zero value, then this commit and its parents will be hidden.
      */
+    @FunctionalInterface
+    public interface HideCb {
+        int accept(Oid oid);
+    }
+
     /** -------- Jni Signature ---------- */
     /** void git_revwalk_free(git_revwalk *walk); */
     static native void jniFree(long walk);
 
     /** int git_revwalk_hide(git_revwalk *walk, const git_oid *commit_id); */
     static native int jniHide(long walk, Oid commitId);
+
+    static native int jniHideWithCb(long walk, Oid commitId, BArrCallback hideCb);
 
     /**
      * Mark a commit (and its ancestors) uninteresting for the output.
@@ -42,8 +50,27 @@ public class Revwalk extends CAutoReleasable {
         Error.throwIfNeeded(jniHide(getRawPointer(), commitId));
     }
 
+    /**
+     * Mark a commit (and its ancestors) uninteresting for the output.
+     *
+     * <p>The given id must belong to a committish on the walked repository.
+     *
+     * <p>The resolved commit and all its parents will be hidden from the output on the revision
+     * walk.
+     *
+     * @param commitId the oid of commit that will be ignored during the traversal
+     * @param callback callback function to hide the commit and its parents
+     * @throws GitException git errors
+     */
+    public void hide(@Nonnull Oid commitId, @Nonnull HideCb callback) {
+        Error.throwIfNeeded(
+                jniHideWithCb(getRawPointer(), commitId, raw -> callback.accept(Oid.of(raw))));
+    }
+
     /** int git_revwalk_hide_glob(git_revwalk *walk, const char *glob); */
     static native int jniHideGlob(long walk, String glob);
+
+    static native int jniHideGlobWithCb(long walk, String glob, BArrCallback callback);
 
     /**
      * Hide matching references.
@@ -63,8 +90,30 @@ public class Revwalk extends CAutoReleasable {
         Error.throwIfNeeded(jniHideGlob(getRawPointer(), glob));
     }
 
+    /**
+     * Hide matching references.
+     *
+     * <p>The OIDs pointed to by the references that match the given glob pattern and their
+     * ancestors will be hidden from the output on the revision walk.
+     *
+     * <p>A leading 'refs/' is implied if not present as well as a trailing '/\*' if the glob lacks
+     * '?', '\*' or '['.
+     *
+     * <p>Any references matching this glob which do not point to a committish will be ignored.
+     *
+     * @param glob the glob pattern references should match
+     * @param callback callback function to hide the commit and its parents
+     * @throws GitException git errors
+     */
+    public void hideGlob(@Nonnull String glob, @Nonnull HideCb callback) {
+        Error.throwIfNeeded(
+                jniHideGlobWithCb(getRawPointer(), glob, raw -> callback.accept(Oid.of(raw))));
+    }
+
     /** int git_revwalk_hide_head(git_revwalk *walk); */
     static native int jniHideHead(long walk);
+
+    static native int jniHideHeadWithCb(long walk, BArrCallback callback);
 
     /**
      * Hide the repository's HEAD
@@ -75,8 +124,21 @@ public class Revwalk extends CAutoReleasable {
         Error.throwIfNeeded(jniHideHead(getRawPointer()));
     }
 
+    /**
+     * Hide the repository's HEAD
+     *
+     * @param callback callback function to hide the commit and its parents
+     * @throws GitException git errors
+     */
+    public void hideHead(@Nonnull HideCb callback) {
+        Error.throwIfNeeded(
+                jniHideHeadWithCb(getRawPointer(), raw -> callback.accept(Oid.of(raw))));
+    }
+
     /** int git_revwalk_hide_ref(git_revwalk *walk, const char *refname); */
     static native int jniHideRef(long walk, String refname);
+
+    static native int jniHideRefWithCb(long walk, String refname, BArrCallback callback);
 
     /**
      * Push the OID pointed to by a reference
@@ -88,6 +150,20 @@ public class Revwalk extends CAutoReleasable {
      */
     public void hideRef(@Nonnull String refname) {
         Error.throwIfNeeded(jniHideRef(getRawPointer(), refname));
+    }
+
+    /**
+     * Push the OID pointed to by a reference
+     *
+     * <p>The reference must point to a committish.
+     *
+     * @param refname the reference to push
+     * @param callback callback function to hide the commit and its parents
+     * @throws GitException git errors
+     */
+    public void hideRef(@Nonnull String refname, @Nonnull HideCb callback) {
+        Error.throwIfNeeded(
+                jniHideRefWithCb(getRawPointer(), refname, raw -> callback.accept(Oid.of(raw))));
     }
 
     /** int git_revwalk_new(git_revwalk **out, git_repository *repo); */
@@ -286,4 +362,9 @@ public class Revwalk extends CAutoReleasable {
     public void sorting(@Nonnull SortT sortMode) {
         jniSorting(getRawPointer(), sortMode.getBit());
     }
+
+    /**
+     * int git_revwalk_add_hide_cb(git_revwalk *walk, git_revwalk_hide_cb hide_cb, void *payload);
+     */
+    static native int jniAddHideCb(long walk, BArrCallback hideCb);
 }

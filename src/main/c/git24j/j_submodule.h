@@ -1,4 +1,6 @@
 #include "j_common.h"
+#include "j_mappers.h"
+#include <assert.h>
 #include <git2.h>
 #include <jni.h>
 
@@ -8,6 +10,23 @@
 extern "C"
 {
 #endif
+
+    int j_git_submodule_cb(git_submodule *sm, const char *name, void *payload)
+    {
+        j_cb_payload *j_payload = (j_cb_payload *)payload;
+        JNIEnv *env = j_payload->env;
+        jobject consumer = j_payload->consumer;
+        if (consumer == NULL)
+            return 0;
+        jclass jclz = (*env)->GetObjectClass(env, consumer);
+        assert(jclz && "jni error: could not resolve consumer class");
+        jmethodID accept = (*env)->GetMethodID(env, jclz, "accept", "(JLjava/lang/String;)I");
+        assert(accept && "jni error: could not resolve method consumer method");
+        jstring jName = (*env)->NewStringUTF(env, name);
+        int r = (*env)->CallIntMethod(env, consumer, accept, (jlong)sm, jName);
+        (*env)->DeleteLocalRef(env, jName);
+        return r;
+    }
 
     // no matching type found for 'git_submodule_cb callback'
     /** int git_submodule_foreach(git_repository *repo, git_submodule_cb callback, void *payload); */
@@ -95,6 +114,7 @@ extern "C"
 
     /** int git_submodule_update_init_options(git_submodule_update_options *opts, unsigned int version); */
     JNIEXPORT jint JNICALL J_MAKE_METHOD(Submodule_jniUpdateInitOptions)(JNIEnv *env, jclass obj, jlong optsPtr, jint version);
+    JNIEXPORT jint JNICALL J_MAKE_METHOD(Submodule_jniUpdateOptionsNew)(JNIEnv *env, jclass obj, jobject outOpt, jint version);
 
     /** git_submodule_update_t git_submodule_update_strategy(git_submodule *submodule); */
     JNIEXPORT jint JNICALL J_MAKE_METHOD(Submodule_jniUpdateStrategy)(JNIEnv *env, jclass obj, jlong submodulePtr);
@@ -103,7 +123,7 @@ extern "C"
     JNIEXPORT jstring JNICALL J_MAKE_METHOD(Submodule_jniUrl)(JNIEnv *env, jclass obj, jlong submodulePtr);
 
     /** const git_oid * git_submodule_wd_id(git_submodule *submodule); */
-    JNIEXPORT void JNICALL J_MAKE_METHOD(Submodule_jniWdId)(JNIEnv *env, jclass obj, jlong submodulePtr, jobject outOid);
+    JNIEXPORT jbyteArray JNICALL J_MAKE_METHOD(Submodule_jniWdId)(JNIEnv *env, jclass obj, jlong submodulePtr);
 
 #ifdef __cplusplus
 }
