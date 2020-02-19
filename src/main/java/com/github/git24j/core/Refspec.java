@@ -6,7 +6,5 @@ public class Refspec extends CAutoReleasable {
     }
 
     @Override
-    protected void freeOnce(long cPtr) {
-
-    }
+    protected void freeOnce(long cPtr) {}
 }

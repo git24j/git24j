@@ -1,6 +1,7 @@
 package com.github.git24j.core;
 
 import java.util.concurrent.atomic.AtomicLong;
+import javax.annotation.Nonnull;
 
 /**
  * An annotated commit contains information about how it was looked up, which may be useful for
@@ -9,10 +10,17 @@ import java.util.concurrent.atomic.AtomicLong;
  * to use the most specific function (eg `git_annotated_commit_from_ref`) instead of this one when
  * that data is known.
  */
-public class AnnotatedCommit extends CAutoCloseable {
-    AnnotatedCommit(long rawPointer) {
-        super(rawPointer);
+public class AnnotatedCommit extends CAutoReleasable {
+    protected AnnotatedCommit(boolean isWeak, long rawPtr) {
+        super(isWeak, rawPtr);
     }
+
+    @Override
+    protected void freeOnce(long cPtr) {
+        jniFree(cPtr);
+    }
+
+    static native String jniFree(long acPtr);
 
     static native int jniFromRef(AtomicLong outAc, long repoPtr, long refPtr);
 
@@ -25,9 +33,9 @@ public class AnnotatedCommit extends CAutoCloseable {
      * @throws GitException git error
      */
     public static AnnotatedCommit fromRef(Repository repo, Reference ref) {
-        AtomicLong outAc = new AtomicLong();
-        Error.throwIfNeeded(jniFromRef(outAc, repo.getRawPointer(), ref.getRawPointer()));
-        return new AnnotatedCommit(outAc.get());
+        AnnotatedCommit commit = new AnnotatedCommit(false, 0);
+        Error.throwIfNeeded(jniFromRef(commit._rawPtr, repo.getRawPointer(), ref.getRawPointer()));
+        return commit;
     }
 
     static native int jniFromFetchHead(
@@ -43,12 +51,16 @@ public class AnnotatedCommit extends CAutoCloseable {
      * @return {@link AnnotatedCommit}
      * @throws GitException git error
      */
+    @Nonnull
     public static AnnotatedCommit fromFetchHead(
-            Repository repo, String branchName, String remoteUrl, Oid oid) {
-        AtomicLong outAc = new AtomicLong();
+            @Nonnull Repository repo,
+            @Nonnull String branchName,
+            @Nonnull String remoteUrl,
+            @Nonnull Oid oid) {
+        AnnotatedCommit commit = new AnnotatedCommit(false, 0);
         Error.throwIfNeeded(
-                jniFromFetchHead(outAc, repo.getRawPointer(), branchName, remoteUrl, oid));
-        return new AnnotatedCommit(outAc.get());
+                jniFromFetchHead(commit._rawPtr, repo.getRawPointer(), branchName, remoteUrl, oid));
+        return commit;
     }
 
     static native int jniLookup(AtomicLong outAc, long repoPtr, Oid oid);
@@ -60,38 +72,46 @@ public class AnnotatedCommit extends CAutoCloseable {
      * @param oid
      * @return
      */
-    public static AnnotatedCommit lookup(Repository repo, Oid oid) {
-        AtomicLong outAc = new AtomicLong();
-        Error.throwIfNeeded(jniLookup(outAc, repo.getRawPointer(), oid));
-        return new AnnotatedCommit(outAc.get());
+    @Nonnull
+    public static AnnotatedCommit lookup(@Nonnull Repository repo, @Nonnull Oid oid) {
+        AnnotatedCommit commit = new AnnotatedCommit(false, 0);
+        Error.throwIfNeeded(jniLookup(commit._rawPtr, repo.getRawPointer(), oid));
+        return commit;
     }
 
     static native int jniFromRevspec(AtomicLong outAc, long repoPtr, String revspec);
 
-    public static AnnotatedCommit fromRevspec(Repository repo, String revspec) {
-        AtomicLong outAc = new AtomicLong();
-        Error.throwIfNeeded(jniFromRevspec(outAc, repo.getRawPointer(), revspec));
-        return new AnnotatedCommit(outAc.get());
+    /**
+     * Creates a `git_annotated_comit` from a revision string.
+     *
+     * <p>See `man gitrevisions`, or
+     * http://git-scm.com/docs/git-rev-parse.html#_specifying_revisions for information on the
+     * syntax accepted.
+     *
+     * @param repo repository that contains the given commit
+     * @param revspec the extended sha syntax string to use to lookup the commit
+     * @return annotated commit
+     * @throws GitException git errors
+     */
+    @Nonnull
+    public static AnnotatedCommit fromRevspec(@Nonnull Repository repo, @Nonnull String revspec) {
+        AnnotatedCommit commit = new AnnotatedCommit(false, 0);
+        Error.throwIfNeeded(jniFromRevspec(commit._rawPtr, repo.getRawPointer(), revspec));
+        return commit;
     }
 
-    static native void jniId(Oid outId, long acPtr);
+    static native byte[] jniId(long acPtr);
+
+    /** @return the commit ID that the given `git_annotated_commit` refers to. */
+    @Nonnull
+    public Oid id() {
+        return Oid.of(jniId(getRawPointer()));
+    }
 
     static native String jniRef(long acPtr);
 
-    static native String jniFree(long acPtr);
-
-    public Oid id() {
-        Oid oid = new Oid();
-        jniId(oid, getRawPointer());
-        return oid;
-    }
-
+    @Nonnull
     public String ref() {
         return jniRef(getRawPointer());
-    }
-
-    @Override
-    public void close() {
-        jniFree(_rawPtr.getAndSet(0));
     }
 }

@@ -2,7 +2,10 @@ package com.github.git24j.core;
 
 import java.util.concurrent.atomic.AtomicLong;
 
-/** Base bridge that manages raw c pointer. */
+/**
+ * Base bridge that manages raw c pointer, use this when resources carried in an object are shorter
+ * than the object itself
+ */
 public abstract class CAutoCloseable implements AutoCloseable {
     /** C Pointer. */
     protected final AtomicLong _rawPtr = new AtomicLong();
@@ -24,5 +27,14 @@ public abstract class CAutoCloseable implements AutoCloseable {
                     "Object has invalid memory address, likely it has been closed.");
         }
         return ptr;
+    }
+    /** Call this to actual release the resources */
+    protected abstract void releaseOnce(long cPtr);
+
+    @Override
+    public void close() {
+        if (_rawPtr.get() > 0) {
+            releaseOnce(_rawPtr.getAndSet(0));
+        }
     }
 }

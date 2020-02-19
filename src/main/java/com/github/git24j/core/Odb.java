@@ -6,7 +6,8 @@ public class Odb extends CAutoCloseable {
     }
 
     @Override
-    public void close() {
-        // TODO: implement this
+    protected void releaseOnce(long cPtr) {
+        // FIXME: add jniFree here
+        // Libgit2.jniShadowFree(cPtr);
     }
 }

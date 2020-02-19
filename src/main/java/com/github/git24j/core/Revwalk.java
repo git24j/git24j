@@ -1,11 +1,11 @@
 package com.github.git24j.core;
 
-import javax.annotation.CheckForNull;
-import javax.annotation.Nonnull;
-import java.util.concurrent.atomic.AtomicLong;
-
 import static com.github.git24j.core.GitException.ErrorCode.ITEROVER;
 import static com.github.git24j.core.Internals.BArrCallback;
+
+import java.util.concurrent.atomic.AtomicLong;
+import javax.annotation.CheckForNull;
+import javax.annotation.Nonnull;
 
 public class Revwalk extends CAutoReleasable {
     protected Revwalk(boolean isWeak, long rawPtr) {

@@ -18,6 +18,7 @@
 - [x] Note (lack of public interface)
 - [x] Tag 
 - [x] Status
+- [ ] Odb (prioritize)
 - [ ] Cred
 - [ ] Patch
 - [ ] Checkout
@@ -40,7 +41,6 @@
 - [ ] publish to jitpack.io or github
 - [ ] publish to maven central
 - [ ] replace most (if not all) FindObjectClass with using global classes
-- [ ] bump libgit2 to use HEAD
 
 
 ## Future
@@ -54,3 +54,6 @@
 - [ ] Rename `consumer` in callbacks to `callback`
 - [ ] Buf is a stupid idea, replace it with plain String or a POJO
 - [ ] Unify all enums
+- [ ] Formalize CAutoReleaseable vs CAutoClosable
+- [x] Unify behavior of git objects, aka {@code Commit}, {@code Tag}, {@code Tree} or {@code Blob} 
+- [x] Make sure git objects are free-ed with `git_object_free`, make sure they all 
