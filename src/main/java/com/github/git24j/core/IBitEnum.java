@@ -1,10 +1,9 @@
 package com.github.git24j.core;
 
-import javax.annotation.CheckForNull;
-import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
+import javax.annotation.CheckForNull;
 
 public interface IBitEnum {
     static <T extends Enum<T> & IBitEnum> int bitOrAll(EnumSet<T> enums) {

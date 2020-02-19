@@ -1,8 +1,7 @@
 package com.github.git24j.core;
 
-import javax.annotation.CheckForNull;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import static com.github.git24j.core.GitException.ErrorCode.ENOTFOUND;
+
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -10,8 +9,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
-
-import static com.github.git24j.core.GitException.ErrorCode.ENOTFOUND;
+import javax.annotation.CheckForNull;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 public class Remote extends CAutoReleasable {
     protected Remote(boolean isWeak, long rawPtr) {

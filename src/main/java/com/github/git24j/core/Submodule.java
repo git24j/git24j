@@ -1,8 +1,7 @@
 package com.github.git24j.core;
 
-import javax.annotation.CheckForNull;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import static com.github.git24j.core.GitException.ErrorCode.ENOTFOUND;
+
 import java.net.URI;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -10,8 +9,9 @@ import java.util.EnumSet;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
-
-import static com.github.git24j.core.GitException.ErrorCode.ENOTFOUND;
+import javax.annotation.CheckForNull;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 public class Submodule extends CAutoReleasable {
     protected Submodule(boolean isWeak, long rawPtr) {

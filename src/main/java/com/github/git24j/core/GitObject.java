@@ -3,19 +3,20 @@ package com.github.git24j.core;
 import java.util.concurrent.atomic.AtomicLong;
 
 /** Generic git object: {@code Commit}, {@code Tag}, {@code Tree} or {@code Blob} */
-public class GitObject {
+public class GitObject extends CAutoReleasable {
     // weak referenced git_object won't be free-ed in the finalizer
-    private final boolean _isWeak;
-    protected final AtomicLong _rawPtr = new AtomicLong();
 
     protected GitObject(long rawPointer) {
-        _rawPtr.set(rawPointer);
-        _isWeak = false;
+        super(false, rawPointer);
     }
 
-    protected GitObject(long rawPointer, boolean weak) {
-        _rawPtr.set(rawPointer);
-        _isWeak = weak;
+    protected GitObject(boolean weak, long rawPointer) {
+        super(weak, rawPointer);
+    }
+
+    @Override
+    protected void freeOnce(long cPtr) {
+        jniFree(cPtr);
     }
 
     static native void jniFree(long objPtr);
@@ -109,29 +110,6 @@ public class GitObject {
         Error.throwIfNeeded(
                 jniLookupPrefix(outObj, repository.getRawPointer(), oid, len, type.value));
         return GitObject.create(outObj.get(), type);
-    }
-
-    /**
-     * Get raw pointer of the repo.
-     *
-     * @return pointer value in long
-     * @throws IllegalStateException if repository has already been closed.
-     */
-    long getRawPointer() {
-        long ptr = _rawPtr.get();
-        if (ptr == 0) {
-            throw new IllegalStateException(
-                    "Object has invalid memory address, likely it has been closed.");
-        }
-        return ptr;
-    }
-
-    @Override
-    protected void finalize() throws Throwable {
-        if (_rawPtr.get() > 0 && !_isWeak) {
-            jniFree(_rawPtr.getAndSet(0));
-        }
-        super.finalize();
     }
 
     /** TODO: change to type() Get the object type of an object. */

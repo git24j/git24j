@@ -19,6 +19,4 @@ public class Libgit2 {
     public static EnumSet<GitFeature> featuresSet() {
         return GitFeature.valuesOf(features());
     }
-
-
 }

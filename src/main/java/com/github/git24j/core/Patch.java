@@ -1,9 +1,9 @@
 package com.github.git24j.core;
 
+import static com.github.git24j.core.Internals.*;
+
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
-
-import static com.github.git24j.core.Internals.*;
 
 public class Patch {
     /**

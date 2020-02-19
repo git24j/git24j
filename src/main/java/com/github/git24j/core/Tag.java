@@ -321,7 +321,7 @@ public class Tag extends GitObject {
      * @throws GitException git errors
      */
     public GitObject peel() {
-        GitObject target = new GitObject(0, true);
+        GitObject target = new GitObject(true, 0);
         Error.throwIfNeeded(jniPeel(target._rawPtr, getRawPointer()));
         return target;
     }

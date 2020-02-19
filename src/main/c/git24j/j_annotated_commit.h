@@ -18,7 +18,7 @@ extern "C"
     /** int git_annotated_commit_from_revspec(git_annotated_commit **out, git_repository *repo, const char *revspec); */
     JNIEXPORT jint JNICALL J_MAKE_METHOD(AnnotatedCommit_jniFromRevspec)(JNIEnv *env, jclass obj, jobject outAc, long repoPtr, jstring revspec);
     /** const git_oid * git_annotated_commit_id(const git_annotated_commit *commit); */
-    JNIEXPORT void JNICALL J_MAKE_METHOD(AnnotatedCommit_jniId)(JNIEnv *env, jclass obj, jobject jOid, jlong acPtr);
+    JNIEXPORT jbyteArray JNICALL J_MAKE_METHOD(AnnotatedCommit_jniId)(JNIEnv *env, jclass obj, jlong acPtr);
     /** const char * git_annotated_commit_ref(const git_annotated_commit *commit); */
     JNIEXPORT jstring JNICALL J_MAKE_METHOD(AnnotatedCommit_jniRef)(JNIEnv *env, jclass obj, jlong acPtr);
     /** void git_annotated_commit_free(git_annotated_commit *commit); */

@@ -268,9 +268,5 @@ JNIEXPORT jstring JNICALL J_MAKE_METHOD(Submodule_jniUrl)(JNIEnv *env, jclass ob
 JNIEXPORT jbyteArray JNICALL J_MAKE_METHOD(Submodule_jniWdId)(JNIEnv *env, jclass obj, jlong submodulePtr)
 {
     const git_oid *c_oid = git_submodule_wd_id((git_submodule *)submodulePtr);
-    if (c_oid == NULL)
-    {
-        return NULL;
-    }
     return j_git_oid_to_bytearray(env, c_oid);
 }

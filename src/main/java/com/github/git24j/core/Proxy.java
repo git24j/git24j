@@ -1,11 +1,12 @@
 package com.github.git24j.core;
 
-import javax.annotation.Nonnull;
 import java.util.concurrent.atomic.AtomicLong;
+import javax.annotation.Nonnull;
 
 public class Proxy {
     public static class Options extends CAutoReleasable {
         public static final int CURRENT_VERSION = 1;
+
         protected Options(boolean isWeak, long rawPtr) {
             super(isWeak, rawPtr);
         }

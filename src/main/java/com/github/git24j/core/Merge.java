@@ -684,7 +684,7 @@ public class Merge {
         Error.throwIfNeeded(
                 jniMerge(
                         repo.getRawPointer(),
-                        theirHeads.stream().mapToLong(CAutoCloseable::getRawPointer).toArray(),
+                        theirHeads.stream().mapToLong(CAutoReleasable::getRawPointer).toArray(),
                         CAutoReleasable.rawPtr(mergeOpts),
                         CAutoReleasable.rawPtr(checkoutOpts)));
     }

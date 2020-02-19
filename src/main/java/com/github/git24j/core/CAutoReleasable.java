@@ -1,9 +1,13 @@
 package com.github.git24j.core;
 
-import javax.annotation.Nullable;
 import java.util.concurrent.atomic.AtomicLong;
+import javax.annotation.Nullable;
 
-/** Base class that auto release native pointers */
+/**
+ * Base class that auto release native pointers, use this when the pointer carried in an object has
+ * the same life cycle as the object. Note: If the pointer is weakly referenced, the finalizer won't
+ * try to free the pointer.
+ */
 public abstract class CAutoReleasable {
     protected final AtomicLong _rawPtr = new AtomicLong();
     protected final boolean _isWeak;

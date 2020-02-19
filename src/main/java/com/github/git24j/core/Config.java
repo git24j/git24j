@@ -11,6 +11,10 @@ import java.util.concurrent.atomic.AtomicReference;
 
 /** Memory representation of a set of config files */
 public class Config extends CAutoCloseable {
+    @Override
+    protected void releaseOnce(long cPtr) {
+        jniFree(cPtr);
+    }
 
     public Config(long rawPointer) {
         super(rawPointer);
@@ -42,13 +46,6 @@ public class Config extends CAutoCloseable {
     @FunctionalInterface
     private interface CallbackJ {
         int accept(long entryPtr);
-    }
-
-    @Override
-    public void close() {
-        if (_rawPtr.get() > 0) {
-            jniFree(_rawPtr.getAndSet(0));
-        }
     }
 
     @Override

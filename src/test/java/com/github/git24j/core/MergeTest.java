@@ -1,9 +1,9 @@
 package com.github.git24j.core;
 
+import static org.junit.Assert.*;
+
 import org.junit.Rule;
 import org.junit.rules.TemporaryFolder;
-
-import static org.junit.Assert.*;
 
 public class MergeTest extends TestBase {
     // git rev-parse HEAD^{tree}
@@ -11,8 +11,5 @@ public class MergeTest extends TestBase {
     // git rev-parse "feature/dev^{tree}"
     private static final String DEV_TREE = "3b597d284bc12d61638124054b19889587127208";
 
-    @Rule
-    public TemporaryFolder folder = new TemporaryFolder();
-
-
+    @Rule public TemporaryFolder folder = new TemporaryFolder();
 }
