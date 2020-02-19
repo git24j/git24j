@@ -8,6 +8,10 @@ public class Note {
      * int git_note_foreach(git_repository *repo, const char *notes_ref, git_note_foreach_cb
      * note_cb, void *payload);
      */
+    @FunctionalInterface
+    interface ForeachCb {
+        int accept(Oid blobId, Oid annotatedObjectId);
+    }
     /** -------- Jni Signature ---------- */
     /**
      * int git_note_iterator_new(git_note_iterator **out, git_repository *repo, const char

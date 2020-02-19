@@ -12,7 +12,11 @@ int j_git_transport_message_cb(const char *str, int len, void *payload)
     j_cb_payload *j_payload = (j_cb_payload *)payload;
     JNIEnv *env = j_payload->env;
     jobject consumer = j_payload->consumer;
-    assert(consumer && "consumer must not be null");
+    if (consumer == NULL)
+    {
+        return 0;
+    }
+
     char *buf = new_substr(str, len);
     jstring message = (*env)->NewStringUTF(env, buf);
     int r = (*env)->CallIntMethod(env, consumer, jniConstants->remote.midTransportMessage, message);
@@ -38,6 +42,11 @@ int j_git_cred_acquire_cb(git_cred **cred, const char *url, const char *username
     j_cb_payload *j_payload = (j_cb_payload *)payload;
     JNIEnv *env = j_payload->env;
     jobject consumer = j_payload->consumer;
+    if (consumer == NULL)
+    {
+        return 0;
+    }
+
     assert(consumer && "consumer must not be null");
     jstring jniUrl = (*env)->NewStringUTF(env, url);
     jstring usernameFromUrl = (*env)->NewStringUTF(env, username_from_url);
@@ -73,7 +82,10 @@ int j_git_transport_certificate_check_cb(git_cert *cert, int valid, const char *
     j_cb_payload *j_payload = (j_cb_payload *)payload;
     JNIEnv *env = j_payload->env;
     jobject consumer = j_payload->consumer;
-    assert(consumer && "consumer must not be null");
+    if (consumer == NULL)
+    {
+        return 0;
+    }
     jstring jHost = (*env)->NewStringUTF(env, host);
     int r = (*env)->CallIntMethod(env, consumer, jniConstants->remote.midTransportCertificateCheck, (long)cert, valid, jHost);
     (*env)->DeleteLocalRef(env, jHost);
@@ -85,7 +97,10 @@ int j_git_transfer_progress_cb(const git_transfer_progress *stats, void *payload
     j_cb_payload *j_payload = (j_cb_payload *)payload;
     JNIEnv *env = j_payload->env;
     jobject consumer = j_payload->consumer;
-    assert(consumer && "consumer must not be null");
+    if (consumer == NULL)
+    {
+        return 0;
+    }
     int r = (*env)->CallIntMethod(env, consumer, jniConstants->remote.midTransferProgress, (long)stats);
     return r;
 }
@@ -95,7 +110,10 @@ int j_git_remote_update_tips_cb(const char *refname, const git_oid *a, const git
     j_cb_payload *j_payload = (j_cb_payload *)payload;
     JNIEnv *env = j_payload->env;
     jobject consumer = j_payload->consumer;
-    assert(consumer && "consumer must not be null");
+    if (consumer == NULL)
+    {
+        return 0;
+    }
     jstring jRefname = (*env)->NewStringUTF(env, refname);
     jbyteArray ja = j_git_oid_to_bytearray(env, a);
     jbyteArray jb = j_git_oid_to_bytearray(env, b);
@@ -111,7 +129,10 @@ int j_git_packbuilder_progress_cb(int stage, uint32_t current, uint32_t total, v
     j_cb_payload *j_payload = (j_cb_payload *)payload;
     JNIEnv *env = j_payload->env;
     jobject consumer = j_payload->consumer;
-    assert(consumer && "consumer must not be null");
+    if (consumer == NULL)
+    {
+        return 0;
+    }
     int r = (*env)->CallIntMethod(env, consumer, jniConstants->remote.midPackProgress, stage, current, total);
     return r;
 }
@@ -121,7 +142,10 @@ int j_git_push_transfer_progress_cb(unsigned int current, unsigned int total, si
     j_cb_payload *j_payload = (j_cb_payload *)payload;
     JNIEnv *env = j_payload->env;
     jobject consumer = j_payload->consumer;
-    assert(consumer && "consumer must not be null");
+    if (consumer == NULL)
+    {
+        return 0;
+    }
     return (*env)->CallIntMethod(env, consumer, jniConstants->remote.midPushTransferProgress, (jlong)current, (jlong)total, (jint)bytes);
 }
 
@@ -130,7 +154,10 @@ int j_git_push_update_reference_cb(const char *refname, const char *status, void
     j_cb_payload *j_payload = (j_cb_payload *)payload;
     JNIEnv *env = j_payload->env;
     jobject consumer = j_payload->consumer;
-    assert(consumer && "consumer must not be null");
+    if (consumer == NULL)
+    {
+        return 0;
+    }
     jstring jRefname = (*env)->NewStringUTF(env, refname);
     jstring jStatus = (*env)->NewStringUTF(env, status);
     int r = (*env)->CallIntMethod(env, consumer, jniConstants->remote.midPushUpdateReference, jRefname, jStatus);
@@ -144,7 +171,10 @@ int j_git_push_negotiation_cb(const git_push_update **updates, size_t len, void 
     j_cb_payload *j_payload = (j_cb_payload *)payload;
     JNIEnv *env = j_payload->env;
     jobject consumer = j_payload->consumer;
-    assert(consumer && "consumer must not be null");
+    if (consumer == NULL)
+    {
+        return 0;
+    }
     jlongArray jUpdates = j_long_array_from_pointers(env, (const void **)updates, len);
     int r = (*env)->CallIntMethod(env, consumer, jniConstants->remote.midPushNegotiation, jUpdates);
     (*env)->DeleteLocalRef(env, jUpdates);

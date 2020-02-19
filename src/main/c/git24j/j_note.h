@@ -12,6 +12,7 @@ extern "C"
     /** int git_note_foreach_cb(const git_oid *blob_id, const git_oid *annotated_object_id, void *payload); */
     // no matching type found for 'git_note_foreach_cb note_cb'
     /** int git_note_foreach(git_repository *repo, const char *notes_ref, git_note_foreach_cb note_cb, void *payload); */
+    JNIEXPORT jint JNICALL J_MAKE_METHOD(Note_jniForeach)(JNIEnv *env, jclass obj, jlong repoPtr, jstring notesRef, jobject foreachCb);
     /** -------- Signature of the header ---------- */
     /** int git_note_iterator_new(git_note_iterator **out, git_repository *repo, const char *notes_ref); */
     JNIEXPORT jint JNICALL J_MAKE_METHOD(Note_jniIteratorNew)(JNIEnv *env, jclass obj, jobject out, jlong repoPtr, jstring notes_ref);
