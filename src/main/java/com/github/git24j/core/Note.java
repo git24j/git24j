@@ -1,6 +1,8 @@
 package com.github.git24j.core;
 
 import java.util.concurrent.atomic.AtomicLong;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 public class Note {
     // no matching type found for 'git_note_foreach_cb note_cb'
@@ -12,6 +14,27 @@ public class Note {
     interface ForeachCb {
         int accept(Oid blobId, Oid annotatedObjectId);
     }
+
+    public static class Iterator extends CAutoReleasable {
+        protected Iterator(boolean isWeak, long rawPtr) {
+            super(isWeak, rawPtr);
+        }
+
+        @Override
+        protected void freeOnce(long cPtr) {
+            jniIteratorFree(cPtr);
+        }
+    }
+
+    public static class Entry {
+        private final Oid oid;
+        private final Oid annotatedId;
+
+        public Entry(Oid oid, Oid annotatedId) {
+            this.oid = oid;
+            this.annotatedId = annotatedId;
+        }
+    }
     /** -------- Jni Signature ---------- */
     /**
      * int git_note_iterator_new(git_note_iterator **out, git_repository *repo, const char
@@ -19,8 +42,42 @@ public class Note {
      */
     static native int jniIteratorNew(AtomicLong out, long repoPtr, String notesRef);
 
+    /**
+     * Creates a new iterator for notes
+     *
+     * <p>The iterator must be freed manually by the user.
+     *
+     * @param repo repository where to look up the note
+     * @param notesRef canonical name of the reference to use (optional); defaults to
+     *     "refs/notes/commits"
+     * @return iterator
+     * @throws GitException git errors
+     */
+    @Nonnull
+    public Iterator iteratorNew(@Nonnull Repository repo, @Nullable String notesRef) {
+        Iterator out = new Iterator(false, 0);
+        Error.throwIfNeeded(jniIteratorNew(out._rawPtr, repo.getRawPointer(), notesRef));
+        return out;
+    }
+
     /** int git_note_commit_iterator_new(git_note_iterator **out, git_commit *notes_commit); */
     static native int jniCommitIteratorNew(AtomicLong out, long notesCommit);
+
+    /**
+     * Creates a new iterator for notes from a commit
+     *
+     * <p>The iterator must be freed manually by the user.
+     *
+     * @param notesCommit a pointer to the notes commit object
+     * @return iterator
+     * @throws GitException git errors
+     */
+    @Nonnull
+    public Iterator commitIteratorNew(@Nonnull Commit notesCommit) {
+        Iterator out = new Iterator(false, 0);
+        Error.throwIfNeeded(jniCommitIteratorNew(out._rawPtr, notesCommit.getRawPointer()));
+        return out;
+    }
 
     /** void git_note_iterator_free(git_note_iterator *it); */
     static native void jniIteratorFree(long it);
