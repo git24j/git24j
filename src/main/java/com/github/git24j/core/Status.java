@@ -1,9 +1,153 @@
 package com.github.git24j.core;
 
+import javax.annotation.Nonnull;
+import java.nio.file.Path;
+import java.util.EnumSet;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
 public class Status {
+
+    /**
+     * Status flags for a single file.
+     *
+     * <p>A combination of these values will be returned to indicate the status of a file. Status
+     * compares the working directory, the index, and the current HEAD of the repository. The
+     * `GIT_STATUS_INDEX` set of flags represents the status of file in the index relative to the
+     * HEAD, and the `GIT_STATUS_WT` set of flags represent the status of the file in the working
+     * directory relative to the index.
+     */
+    public enum StatusT implements IBitEnum {
+        CURRENT0(0),
+
+        INDEX_NEW(1 << 0),
+        INDEX_MODIFIED(1 << 1),
+        INDEX_DELETED(1 << 2),
+        INDEX_RENAMED(1 << 3),
+        INDEX_TYPECHANGE(1 << 4),
+
+        WT_NEW(1 << 7),
+        WT_MODIFIED(1 << 8),
+        WT_DELETED(1 << 9),
+        WT_TYPECHANGE(1 << 10),
+        WT_RENAMED(1 << 11),
+        WT_UNREADABLE(1 << 12),
+
+        IGNORED(1 << 14),
+        CONFLICTED(1 << 15),
+        ;
+        private final int _bit;
+
+        StatusT(int bit) {
+            _bit = bit;
+        }
+
+        @Override
+        public int getBit() {
+            return 0;
+        }
+    }
+
+    /**
+     * Flags to control status callbacks
+     *
+     * <pre>
+     * - GIT_STATUS_OPT_INCLUDE_UNTRACKED says that callbacks should be made
+     *   on untracked files.  These will only be made if the workdir files are
+     *   included in the status "show" option.
+     * - GIT_STATUS_OPT_INCLUDE_IGNORED says that ignored files get callbacks.
+     *   Again, these callbacks will only be made if the workdir files are
+     *   included in the status "show" option.
+     * - GIT_STATUS_OPT_INCLUDE_UNMODIFIED indicates that callback should be
+     *   made even on unmodified files.
+     * - GIT_STATUS_OPT_EXCLUDE_SUBMODULES indicates that submodules should be
+     *   skipped.  This only applies if there are no pending typechanges to
+     *   the submodule (either from or to another type).
+     * - GIT_STATUS_OPT_RECURSE_UNTRACKED_DIRS indicates that all files in
+     *   untracked directories should be included.  Normally if an entire
+     *   directory is new, then just the top-level directory is included (with
+     *   a trailing slash on the entry name).  This flag says to include all
+     *   of the individual files in the directory instead.
+     * - GIT_STATUS_OPT_DISABLE_PATHSPEC_MATCH indicates that the given path
+     *   should be treated as a literal path, and not as a pathspec pattern.
+     * - GIT_STATUS_OPT_RECURSE_IGNORED_DIRS indicates that the contents of
+     *   ignored directories should be included in the status.  This is like
+     *   doing `git ls-files -o -i --exclude-standard` with core git.
+     * - GIT_STATUS_OPT_RENAMES_HEAD_TO_INDEX indicates that rename detection
+     *   should be processed between the head and the index and enables
+     *   the GIT_STATUS_INDEX_RENAMED as a possible status flag.
+     * - GIT_STATUS_OPT_RENAMES_INDEX_TO_WORKDIR indicates that rename
+     *   detection should be run between the index and the working directory
+     *   and enabled GIT_STATUS_WT_RENAMED as a possible status flag.
+     * - GIT_STATUS_OPT_SORT_CASE_SENSITIVELY overrides the native case
+     *   sensitivity for the file system and forces the output to be in
+     *   case-sensitive order
+     * - GIT_STATUS_OPT_SORT_CASE_INSENSITIVELY overrides the native case
+     *   sensitivity for the file system and forces the output to be in
+     *   case-insensitive order
+     * - GIT_STATUS_OPT_RENAMES_FROM_REWRITES indicates that rename detection
+     *   should include rewritten files
+     * - GIT_STATUS_OPT_NO_REFRESH bypasses the default status behavior of
+     *   doing a "soft" index reload (i.e. reloading the index data if the
+     *   file on disk has been modified outside libgit2).
+     * - GIT_STATUS_OPT_UPDATE_INDEX tells libgit2 to refresh the stat cache
+     *   in the index for files that are unchanged but have out of date stat
+     *   information in the index.  It will result in less work being done on
+     *   subsequent calls to get status.  This is mutually exclusive with the
+     *   NO_REFRESH option.
+     * </pre>
+     *
+     * Calling `git_status_foreach()` is like calling the extended version with:
+     * GIT_STATUS_OPT_INCLUDE_IGNORED, GIT_STATUS_OPT_INCLUDE_UNTRACKED, and
+     * GIT_STATUS_OPT_RECURSE_UNTRACKED_DIRS. Those options are bundled together as
+     * `GIT_STATUS_OPT_DEFAULTS` if you want them as a baseline.
+     */
+    public enum OptT implements IBitEnum {
+        OPT_INCLUDE_UNTRACKED(1 << 0),
+        OPT_INCLUDE_IGNORED(1 << 1),
+        OPT_INCLUDE_UNMODIFIED(1 << 2),
+        OPT_EXCLUDE_SUBMODULES(1 << 3),
+        OPT_RECURSE_UNTRACKED_DIRS(1 << 4),
+        OPT_DISABLE_PATHSPEC_MATCH(1 << 5),
+        OPT_RECURSE_IGNORED_DIRS(1 << 6),
+        OPT_RENAMES_HEAD_TO_INDEX(1 << 7),
+        OPT_RENAMES_INDEX_TO_WORKDIR(1 << 8),
+        OPT_SORT_CASE_SENSITIVELY(1 << 9),
+        OPT_SORT_CASE_INSENSITIVELY(1 << 10),
+        OPT_RENAMES_FROM_REWRITES(1 << 11),
+        OPT_NO_REFRESH(1 << 12),
+        OPT_UPDATE_INDEX(1 << 13),
+        OPT_INCLUDE_UNREADABLE(1 << 14),
+        OPT_INCLUDE_UNREADABLE_AS_UNTRACKED(1 << 15),
+        ;
+        private final int _bit;
+
+        OptT(int bit) {
+            _bit = bit;
+        }
+
+        @Override
+        public int getBit() {
+            return 0;
+        }
+    }
+    public static class Options extends CAutoReleasable {
+        public static final int CURRENT_VERSION = 1;
+        protected Options(boolean isWeak, long rawPtr) {
+            super(isWeak, rawPtr);
+        }
+
+        @Override
+        protected void freeOnce(long cPtr) {
+            Libgit2.jniShadowFree(cPtr);
+        }
+
+        public static Options create(int version) {
+            Options out = new Options(false, 0);
+            Error.throwIfNeeded(jniOptionsNew(out._rawPtr, version));
+            return out;
+        }
+    }
     // no matching type found for 'git_status_cb callback'
     /* int git_status_foreach(git_repository *repo, git_status_cb callback, void *payload); */
     // no matching type found for 'git_status_cb callback'
@@ -11,12 +155,48 @@ public class Status {
      * int git_status_foreach_ext(git_repository *repo, const git_status_options *opts,
      * git_status_cb callback, void *payload);
      */
+
     /* -------- Jni Signature ---------- */
     /** int git_status_init_options(git_status_options *opts, unsigned int version); */
     static native int jniInitOptions(long opts, int version);
+    static native int jniOptionsNew(AtomicLong outOpts, int version);
 
     /** int git_status_file(unsigned int *status_flags, git_repository *repo, const char *path); */
     static native int jniFile(AtomicInteger statusFlags, long repoPtr, String path);
+
+
+    /**
+     * Get file status for a single file.
+     *
+     * This tries to get status for the filename that you give.  If no files
+     * match that name (in either the HEAD, index, or working directory), this
+     * returns GIT_ENOTFOUND.
+     *
+     * If the name matches multiple files (for example, if the `path` names a
+     * directory or if running on a case- insensitive filesystem and yet the
+     * HEAD has two entries that both match the path), then this returns
+     * GIT_EAMBIGUOUS because it cannot give correct results.
+     *
+     * This does not do any sort of rename detection.  Renames require a set of
+     * targets and because of the path filtering, there is not enough
+     * information to check renames correctly.  To check file status with rename
+     * detection, there is no choice but to do a full `git_status_list_new` and
+     * scan through looking for the path that you are interested in.
+     *
+     * @return  combination of StatusT values for file
+     * @param repo A repository object
+     * @param path The exact path to retrieve status for relative to the
+     * repository working directory
+     * @return
+     * @throws GitException GIT_ENOTFOUND if the file is not found in the HEAD,
+     *      index, and work tree, GIT_EAMBIGUOUS if `path` matches multiple files
+     *      or if it refers to a folder, or other errors.
+     */
+    public EnumSet<StatusT> file(@Nonnull Repository repo, @Nonnull Path path) {
+        AtomicInteger out = new AtomicInteger();
+        Error.throwIfNeeded(jniFile(out, repo.getRawPointer(), path.toString()));
+        return IBitEnum.parse(out.get(), StatusT.class);
+    }
 
     /**
      * int git_status_list_new(git_status_list **out, git_repository *repo, const git_status_options

@@ -42,7 +42,7 @@ extern "C"
     JNIEXPORT jstring JNICALL J_MAKE_METHOD(Note_jniMessage)(JNIEnv *env, jclass obj, jlong notePtr);
 
     /** const git_oid * git_note_id(const git_note *note); */
-    JNIEXPORT void JNICALL J_MAKE_METHOD(Note_jniId)(JNIEnv *env, jclass obj, jlong notePtr, jobject outOid);
+    JNIEXPORT jbyteArray JNICALL J_MAKE_METHOD(Note_jniId)(JNIEnv *env, jclass obj, jlong notePtr);
 
     /** int git_note_create(git_oid *out, git_repository *repo, const char *notes_ref, const git_signature *author, const git_signature *committer, const git_oid *oid, const char *note, int force); */
     JNIEXPORT jint JNICALL J_MAKE_METHOD(Note_jniCreate)(JNIEnv *env, jclass obj, jobject out, jlong repoPtr, jstring notes_ref, jlong authorPtr, jlong committerPtr, jobject oid, jstring note, jint force);

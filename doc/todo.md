@@ -16,7 +16,7 @@
 - [x] Submodule  (lack of public interface)
 - [x] Worktree  (lack of public interface)
 - [x] Note (lack of public interface)
-- [x] Tag 
+- [x] Tag (tested)
 - [x] Status
 - [ ] Odb (prioritize)
 - [ ] Cred
@@ -58,3 +58,4 @@
 - [x] Unify behavior of git objects, aka {@code Commit}, {@code Tag}, {@code Tree} or {@code Blob} 
 - [x] Make sure git objects are free-ed with `git_object_free`, make sure they all 
 - [ ] *All callbacks should immediately return if consumer is null*
+- [ ] Check all `data_structure **out pattern`, code gen may broken in this case, especially pattern like `jniAbcNew`

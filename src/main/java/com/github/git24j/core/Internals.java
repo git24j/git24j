@@ -26,7 +26,7 @@ class Internals {
 
     @FunctionalInterface
     interface BArrBarrCallback {
-        int accept(byte[] id1, byte id2);
+        int accept(byte[] id1, byte[] id2);
     }
 
     /** Class to hold */
