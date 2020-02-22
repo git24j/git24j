@@ -1,6 +1,7 @@
 package com.github.git24j.core;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.nio.file.Path;
 import java.util.EnumSet;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -146,6 +147,44 @@ public class Status {
             Options out = new Options(false, 0);
             Error.throwIfNeeded(jniOptionsNew(out._rawPtr, version));
             return out;
+        }
+    }
+
+
+    public static class StatusList extends CAutoReleasable {
+        protected StatusList(boolean isWeak, long rawPtr) {
+            super(isWeak, rawPtr);
+        }
+
+        @Override
+        protected void freeOnce(long cPtr) {
+            jniListFree(cPtr);
+        }
+
+        /**
+         * Gather file status information and populate the `git_status_list`.
+         *
+         * Note that if a `pathspec` is given in the `git_status_options` to filter
+         * the status, then the results from rename detection (if you enable it) may
+         * not be accurate.  To do rename detection properly, this must be called
+         * with no `pathspec` so that all files can be considered.
+         *
+         * @param out Pointer to store the status results in
+         * @param repo Repository object
+         * @param opts Status options structure
+         * @return 0 on success or error code
+         */
+
+        @Nonnull
+        public static StatusList create(@Nonnull Repository repo, @Nullable Options opts) {
+            StatusList out = new StatusList(false, 0);
+            Error.throwIfNeeded(jniListNew(out._rawPtr, repo.getRawPointer(), opts == null ? 0 : opts.getRawPointer()));
+            return out;
+        }
+
+
+        public int entryCount() {
+            return jniListEntrycount(getRawPointer());
         }
     }
     // no matching type found for 'git_status_cb callback'
