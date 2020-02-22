@@ -15,6 +15,7 @@ extern "C"
     /** -------- Signature of the header ---------- */
     /** int git_status_init_options(git_status_options *opts, unsigned int version); */
     JNIEXPORT jint JNICALL J_MAKE_METHOD(Status_jniInitOptions)(JNIEnv *env, jclass obj, jlong optsPtr, jint version);
+    JNIEXPORT jint JNICALL J_MAKE_METHOD(Status_jniOptionsNew)(JNIEnv *env, jclass obj, jobject outOpts, jint version);
 
     /** int git_status_file(unsigned int *status_flags, git_repository *repo, const char *path); */
     JNIEXPORT jint JNICALL J_MAKE_METHOD(Status_jniFile)(JNIEnv *env, jclass obj, jobject statusFlags, jlong repoPtr, jstring path);

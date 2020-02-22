@@ -47,7 +47,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Note_jniIteratorNew)(JNIEnv *env, jclass ob
     char *c_notes_ref = j_copy_of_jstring(env, notes_ref, true);
     int r = git_note_iterator_new(&c_out, (git_repository *)repoPtr, c_notes_ref);
     (*env)->CallVoidMethod(env, out, jniConstants->midAtomicLongSet, (long)c_out);
-    git_note_iterator_free(c_out);
+    /* git_note_iterator_free(c_out); */
     free(c_notes_ref);
     return r;
 }
@@ -58,7 +58,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Note_jniCommitIteratorNew)(JNIEnv *env, jcl
     git_note_iterator *c_out;
     int r = git_note_commit_iterator_new(&c_out, (git_commit *)notesCommitPtr);
     (*env)->CallVoidMethod(env, out, jniConstants->midAtomicLongSet, (long)c_out);
-    git_note_iterator_free(c_out);
+    /* git_note_iterator_free(c_out); */
     return r;
 }
 
@@ -88,7 +88,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Note_jniRead)(JNIEnv *env, jclass obj, jobj
     j_git_oid_from_java(env, oid, &c_oid);
     int r = git_note_read(&c_out, (git_repository *)repoPtr, c_notes_ref, &c_oid);
     (*env)->CallVoidMethod(env, out, jniConstants->midAtomicLongSet, (long)c_out);
-    git_note_free(c_out);
+    /* git_note_free(c_out); */
     free(c_notes_ref);
     return r;
 }
@@ -101,7 +101,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Note_jniCommitRead)(JNIEnv *env, jclass obj
     j_git_oid_from_java(env, oid, &c_oid);
     int r = git_note_commit_read(&c_out, (git_repository *)repoPtr, (git_commit *)notesCommitPtr, &c_oid);
     (*env)->CallVoidMethod(env, out, jniConstants->midAtomicLongSet, (long)c_out);
-    git_note_free(c_out);
+    /* git_note_free(c_out); */
     return r;
 }
 
@@ -127,10 +127,10 @@ JNIEXPORT jstring JNICALL J_MAKE_METHOD(Note_jniMessage)(JNIEnv *env, jclass obj
 }
 
 /** const git_oid * git_note_id(const git_note *note); */
-JNIEXPORT void JNICALL J_MAKE_METHOD(Note_jniId)(JNIEnv *env, jclass obj, jlong notePtr, jobject outOid)
+JNIEXPORT jbyteArray JNICALL J_MAKE_METHOD(Note_jniId)(JNIEnv *env, jclass obj, jlong notePtr)
 {
     const git_oid *c_oid = git_note_id((git_note *)notePtr);
-    j_git_oid_to_java(env, c_oid, outOid);
+    return j_git_oid_to_bytearray(env, c_oid);
 }
 
 /** int git_note_create(git_oid *out, git_repository *repo, const char *notes_ref, const git_signature *author, const git_signature *committer, const git_oid *oid, const char *note, int force); */
