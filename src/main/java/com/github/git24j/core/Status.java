@@ -1,5 +1,6 @@
 package com.github.git24j.core;
 
+import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.nio.file.Path;
@@ -132,8 +133,10 @@ public class Status {
             return 0;
         }
     }
+
     public static class Options extends CAutoReleasable {
         public static final int CURRENT_VERSION = 1;
+
         protected Options(boolean isWeak, long rawPtr) {
             super(isWeak, rawPtr);
         }
@@ -150,7 +153,6 @@ public class Status {
         }
     }
 
-
     public static class StatusList extends CAutoReleasable {
         protected StatusList(boolean isWeak, long rawPtr) {
             super(isWeak, rawPtr);
@@ -164,27 +166,64 @@ public class Status {
         /**
          * Gather file status information and populate the `git_status_list`.
          *
-         * Note that if a `pathspec` is given in the `git_status_options` to filter
-         * the status, then the results from rename detection (if you enable it) may
-         * not be accurate.  To do rename detection properly, this must be called
-         * with no `pathspec` so that all files can be considered.
+         * <p>Note that if a `pathspec` is given in the `git_status_options` to filter the status,
+         * then the results from rename detection (if you enable it) may not be accurate. To do
+         * rename detection properly, this must be called with no `pathspec` so that all files can
+         * be considered.
          *
-         * @param out Pointer to store the status results in
          * @param repo Repository object
          * @param opts Status options structure
          * @return 0 on success or error code
          */
-
         @Nonnull
         public static StatusList create(@Nonnull Repository repo, @Nullable Options opts) {
             StatusList out = new StatusList(false, 0);
-            Error.throwIfNeeded(jniListNew(out._rawPtr, repo.getRawPointer(), opts == null ? 0 : opts.getRawPointer()));
+            Error.throwIfNeeded(
+                    jniListNew(
+                            out._rawPtr,
+                            repo.getRawPointer(),
+                            opts == null ? 0 : opts.getRawPointer()));
             return out;
         }
 
-
+        /**
+         * Gets the count of status entries in this list.
+         *
+         * If there are no changes in status (at least according the options given
+         * when the status list was created), this can return 0.
+         *
+         * @return the number of status entries
+         */
         public int entryCount() {
             return jniListEntrycount(getRawPointer());
+        }
+
+        /**
+         * Get an Entry to one of the entries in the status list.
+         *
+         * The entry is not modifiable and should not be freed.
+         *
+         * @param idx Position of the entry
+         * @return Pointer to the entry; NULL if out of bounds
+         */
+        @CheckForNull
+        public Entry byIndex(int idx) {
+            long ptr = jniByindex(getRawPointer(), idx);
+            if (ptr == 0) {
+                return null;
+            }
+            return new Entry(ptr);
+        }
+    }
+
+    public static class Entry extends CAutoReleasable {
+        protected Entry(long rawPtr) {
+            super(true, rawPtr);
+        }
+
+        @Override
+        protected void freeOnce(long cPtr) {
+            throw new RuntimeException("Entries are owned by StatusList and should not be freed");
         }
     }
     // no matching type found for 'git_status_cb callback'
@@ -198,38 +237,34 @@ public class Status {
     /* -------- Jni Signature ---------- */
     /** int git_status_init_options(git_status_options *opts, unsigned int version); */
     static native int jniInitOptions(long opts, int version);
+
     static native int jniOptionsNew(AtomicLong outOpts, int version);
 
     /** int git_status_file(unsigned int *status_flags, git_repository *repo, const char *path); */
     static native int jniFile(AtomicInteger statusFlags, long repoPtr, String path);
 
-
     /**
      * Get file status for a single file.
      *
-     * This tries to get status for the filename that you give.  If no files
-     * match that name (in either the HEAD, index, or working directory), this
-     * returns GIT_ENOTFOUND.
+     * <p>This tries to get status for the filename that you give. If no files match that name (in
+     * either the HEAD, index, or working directory), this returns GIT_ENOTFOUND.
      *
-     * If the name matches multiple files (for example, if the `path` names a
-     * directory or if running on a case- insensitive filesystem and yet the
-     * HEAD has two entries that both match the path), then this returns
-     * GIT_EAMBIGUOUS because it cannot give correct results.
+     * <p>If the name matches multiple files (for example, if the `path` names a directory or if
+     * running on a case- insensitive filesystem and yet the HEAD has two entries that both match
+     * the path), then this returns GIT_EAMBIGUOUS because it cannot give correct results.
      *
-     * This does not do any sort of rename detection.  Renames require a set of
-     * targets and because of the path filtering, there is not enough
-     * information to check renames correctly.  To check file status with rename
-     * detection, there is no choice but to do a full `git_status_list_new` and
-     * scan through looking for the path that you are interested in.
+     * <p>This does not do any sort of rename detection. Renames require a set of targets and
+     * because of the path filtering, there is not enough information to check renames correctly. To
+     * check file status with rename detection, there is no choice but to do a full
+     * `git_status_list_new` and scan through looking for the path that you are interested in.
      *
-     * @return  combination of StatusT values for file
      * @param repo A repository object
-     * @param path The exact path to retrieve status for relative to the
-     * repository working directory
-     * @return
-     * @throws GitException GIT_ENOTFOUND if the file is not found in the HEAD,
-     *      index, and work tree, GIT_EAMBIGUOUS if `path` matches multiple files
-     *      or if it refers to a folder, or other errors.
+     * @param path The exact path to retrieve status for relative to the repository working
+     *     directory
+     * @return combination of StatusT values for file
+     * @throws GitException GIT_ENOTFOUND if the file is not found in the HEAD, index, and work
+     *     tree, GIT_EAMBIGUOUS if `path` matches multiple files or if it refers to a folder, or
+     *     other errors.
      */
     public EnumSet<StatusT> file(@Nonnull Repository repo, @Nonnull Path path) {
         AtomicInteger out = new AtomicInteger();
@@ -254,4 +289,26 @@ public class Status {
 
     /** int git_status_should_ignore(int *ignored, git_repository *repo, const char *path); */
     static native int jniShouldIgnore(AtomicInteger ignored, long repoPtr, String path);
+
+    /**
+     * Test if the ignore rules apply to a given file.
+     *
+     * This function checks the ignore rules to see if they would apply to the
+     * given file.  This indicates if the file would be ignored regardless of
+     * whether the file is already in the index or committed to the repository.
+     *
+     * One way to think of this is if you were to do "git add ." on the
+     * directory containing the file, would it be added or not?
+     *
+     * @param repo A repository object
+     * @param path The file to check ignores for, rooted at the repo's workdir.
+     * @return false if the file is not ignored, true if it is
+     * @throws GitException error if ignore rules could not be processed for the file (regardless
+     *         of whether it exists or not)
+     */
+    public static boolean shouldIgnore(@Nonnull Repository repo, @Nonnull String path) {
+        AtomicInteger out = new AtomicInteger();
+        Error.throwIfNeeded(jniShouldIgnore(out, repo.getRawPointer(), path));
+        return out.get() == 1;
+    }
 }

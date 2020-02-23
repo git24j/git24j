@@ -146,7 +146,7 @@ jlongArray j_long_array_from_pointers(JNIEnv *env, const void **ptrs, size_t n)
         return NULL;
     }
     jlongArray array = (*env)->NewLongArray(env, n);
-    (*env)->SetLongArrayRegion(env, array, 0, n, (const long *)ptrs);
+    (*env)->SetLongArrayRegion(env, array, 0, n, (const jlong *)ptrs);
     return array;
 }
 
