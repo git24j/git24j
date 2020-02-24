@@ -6,6 +6,18 @@
 #include <assert.h>
 #include <git2.h>
 
+extern j_constants_t *jniConstants;
+
+/** int git_patch_from_diff(git_patch **out, git_diff *diff, size_t idx); */
+JNIEXPORT jint JNICALL J_MAKE_METHOD(Patch_jniFromDiff)(JNIEnv *env, jclass obj, jobject out, jlong diffPtr, jint idx)
+{
+    git_patch *c_out;
+    int r = git_patch_from_diff(&c_out, (git_diff *)diffPtr, idx);
+    (*env)->CallVoidMethod(env, out, jniConstants->midAtomicLongSet, (long)c_out);
+    // git_patch_free(c_out);
+    return r;
+}
+
 /** int git_patch_from_blobs(git_patch **out, const git_blob *old_blob, const char *old_as_path, const git_blob *new_blob, const char *new_as_path, const git_diff_options *opts); */
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Patch_jniFromBlobs)(JNIEnv *env, jclass obj, jobject out, jlong oldBlobPtr, jstring old_as_path, jlong newBlobPtr, jstring new_as_path, jlong optsPtr)
 {
@@ -14,7 +26,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Patch_jniFromBlobs)(JNIEnv *env, jclass obj
     char *c_new_as_path = j_copy_of_jstring(env, new_as_path, true);
     int r = git_patch_from_blobs(&c_out, (git_blob *)oldBlobPtr, c_old_as_path, (git_blob *)newBlobPtr, c_new_as_path, (git_diff_options *)optsPtr);
     (*env)->CallVoidMethod(env, out, jniConstants->midAtomicLongSet, (long)c_out);
-    git_patch_free(c_out);
+    // git_patch_free(c_out);
     free(c_old_as_path);
     free(c_new_as_path);
     return r;
@@ -30,7 +42,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Patch_jniFromBlobAndBuffer)(JNIEnv *env, jc
     char *c_buffer_as_path = j_copy_of_jstring(env, buffer_as_path, true);
     int r = git_patch_from_blob_and_buffer(&c_out, (git_blob *)oldBlobPtr, c_old_as_path, (void *)c_buffer, bufferLen, c_buffer_as_path, (git_diff_options *)optsPtr);
     (*env)->CallVoidMethod(env, out, jniConstants->midAtomicLongSet, (long)c_out);
-    git_patch_free(c_out);
+    // git_patch_free(c_out);
     free(c_old_as_path);
     (*env)->ReleaseByteArrayElements(env, buffer, (jbyte *)c_buffer, 0);
     free(c_buffer_as_path);
@@ -49,11 +61,44 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Patch_jniFromBuffers)(JNIEnv *env, jclass o
     char *c_new_as_path = j_copy_of_jstring(env, new_as_path, true);
     int r = git_patch_from_buffers(&c_out, (void *)c_old_buffer, oldLen, c_old_as_path, (void *)c_new_buffer, newLen, c_new_as_path, (git_diff_options *)optsPtr);
     (*env)->CallVoidMethod(env, out, jniConstants->midAtomicLongSet, (long)c_out);
-    git_patch_free(c_out);
+    // git_patch_free(c_out);
     (*env)->ReleaseByteArrayElements(env, oldBuffer, (jbyte *)c_old_buffer, 0);
     free(c_old_as_path);
     (*env)->ReleaseByteArrayElements(env, newBuffer, (jbyte *)c_new_buffer, 0);
     free(c_new_as_path);
+    return r;
+}
+
+/** void git_patch_free(git_patch *patch); */
+JNIEXPORT void JNICALL J_MAKE_METHOD(Patch_jniFree)(JNIEnv *env, jclass obj, jlong patchPtr)
+{
+    git_patch_free((git_patch *)patchPtr);
+}
+
+/** const git_diff_delta * git_patch_get_delta(const git_patch *patch); */
+JNIEXPORT jlong JNICALL J_MAKE_METHOD(Patch_jniGetDelta)(JNIEnv *env, jclass obj, jlong patchPtr)
+{
+    const git_diff_delta *r = git_patch_get_delta((git_patch *)patchPtr);
+    return (jlong)r;
+}
+
+/** size_t git_patch_num_hunks(const git_patch *patch); */
+JNIEXPORT jint JNICALL J_MAKE_METHOD(Patch_jniNumHunks)(JNIEnv *env, jclass obj, jlong patchPtr)
+{
+    size_t r = git_patch_num_hunks((git_patch *)patchPtr);
+    return (jint)r;
+}
+
+/** int git_patch_line_stats(size_t *total_context, size_t *total_additions, size_t *total_deletions, const git_patch *patch); */
+JNIEXPORT jint JNICALL J_MAKE_METHOD(Patch_jniLineStats)(JNIEnv *env, jclass obj, jobject totalContext, jobject totalAdditions, jobject totalDeletions, jlong patchPtr)
+{
+    size_t c_total_context;
+    size_t c_total_additions;
+    size_t c_total_deletions;
+    int r = git_patch_line_stats(&c_total_context, &c_total_additions, &c_total_deletions, (git_patch *)patchPtr);
+    (*env)->CallVoidMethod(env, totalContext, jniConstants->midAtomicIntSet, c_total_context);
+    (*env)->CallVoidMethod(env, totalAdditions, jniConstants->midAtomicIntSet, c_total_additions);
+    (*env)->CallVoidMethod(env, totalDeletions, jniConstants->midAtomicIntSet, c_total_deletions);
     return r;
 }
 
@@ -68,12 +113,25 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Patch_jniGetHunk)(JNIEnv *env, jclass obj, 
     return r;
 }
 
+/** int git_patch_num_lines_in_hunk(const git_patch *patch, size_t hunk_idx); */
+JNIEXPORT jint JNICALL J_MAKE_METHOD(Patch_jniNumLinesInHunk)(JNIEnv *env, jclass obj, jlong patchPtr, jint hunkIdx)
+{
+    int r = git_patch_num_lines_in_hunk((git_patch *)patchPtr, hunkIdx);
+    return r;
+}
+
 /** int git_patch_get_line_in_hunk(const git_diff_line **out, git_patch *patch, size_t hunk_idx, size_t line_of_hunk); */
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Patch_jniGetLineInHunk)(JNIEnv *env, jclass obj, jobject out, jlong patchPtr, jint hunkIdx, jint lineOfHunk)
 {
     const git_diff_line *c_out;
     int r = git_patch_get_line_in_hunk(&c_out, (git_patch *)patchPtr, hunkIdx, lineOfHunk);
     (*env)->CallVoidMethod(env, out, jniConstants->midAtomicLongSet, (long)c_out);
+    return r;
+}
+/** size_t git_patch_size(git_patch *patch, int include_context, int include_hunk_headers, int include_file_headers); */
+JNIEXPORT jint JNICALL J_MAKE_METHOD(Patch_jniSize)(JNIEnv *env, jclass obj, jlong patchPtr, jint include_context, jint include_hunk_headers, jint include_file_headers)
+{
+    size_t r = git_patch_size((git_patch *)patchPtr, include_context, include_hunk_headers, include_file_headers);
     return r;
 }
 
@@ -83,5 +141,15 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Patch_jniPrint)(JNIEnv *env, jclass obj, jl
     j_diff_callback_payload payload = {env};
     payload.lineCb = printCb;
     int r = git_patch_print((git_patch *)patchPtr, j_git_diff_line_cb, &payload);
+    return r;
+}
+
+/** int git_patch_to_buf(git_buf *out, git_patch *patch); */
+JNIEXPORT jint JNICALL J_MAKE_METHOD(Patch_jniToBuf)(JNIEnv *env, jclass obj, jobject out, jlong patchPtr)
+{
+    git_buf c_out = {0};
+    int r = git_patch_to_buf(&c_out, (git_patch *)patchPtr);
+    j_git_buf_to_java(env, &c_out, out);
+    git_buf_dispose(&c_out);
     return r;
 }

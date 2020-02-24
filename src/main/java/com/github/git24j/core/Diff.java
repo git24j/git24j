@@ -1,14 +1,14 @@
 package com.github.git24j.core;
 
-import static com.github.git24j.core.Internals.JFCallback;
-import static com.github.git24j.core.Internals.JJCallback;
-import static com.github.git24j.core.Internals.JJJCallback;
-
-import java.nio.file.Path;
-import java.util.concurrent.atomic.AtomicLong;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.nio.file.Path;
+import java.util.concurrent.atomic.AtomicLong;
+
+import static com.github.git24j.core.Internals.JFCallback;
+import static com.github.git24j.core.Internals.JJCallback;
+import static com.github.git24j.core.Internals.JJJCallback;
 
 public class Diff extends CAutoReleasable {
     AtomicLong _rawPtr = new AtomicLong();
@@ -355,11 +355,22 @@ public class Diff extends CAutoReleasable {
          * @param rawPtr c pointer
          */
         protected Delta(long rawPtr) {
-            super(false, rawPtr);
+            super(true, rawPtr);
+        }
+
+        @CheckForNull
+        static Delta of(long rawPtr) {
+            if (rawPtr == 0) {
+                return null;
+            }
+            return new Delta(rawPtr);
         }
 
         @Override
-        protected void freeOnce(long cPtr) {}
+        protected void freeOnce(long cPtr) {
+            throw new IllegalStateException(
+                    "Diff.Delta is owned by Diff and should not be released manually");
+        }
     }
 
     /**
@@ -372,11 +383,22 @@ public class Diff extends CAutoReleasable {
      */
     public static class Binary extends CAutoReleasable {
         protected Binary(long rawPtr) {
-            super(false, rawPtr);
+            super(true, rawPtr);
         }
 
         @Override
-        protected void freeOnce(long cPtr) {}
+        protected void freeOnce(long cPtr) {
+            throw new IllegalStateException(
+                    "Diff.Binary is owned by Diff and should not be released manually");
+        }
+
+        @CheckForNull
+        static Binary of(long rawPtr) {
+            if (rawPtr == 0) {
+                return null;
+            }
+            return new Binary(rawPtr);
+        }
     }
     /**
      * Structure describing a hunk of a diff.
@@ -388,11 +410,21 @@ public class Diff extends CAutoReleasable {
      */
     public static class Hunk extends CAutoReleasable {
         protected Hunk(long rawPtr) {
-            super(false, rawPtr);
+            super(true, rawPtr);
         }
 
         @Override
-        protected void freeOnce(long cPtr) {}
+        protected void freeOnce(long cPtr) {
+            throw new IllegalStateException(
+                    "Diff.Hunk is owned by Diff and should not be released manually");
+        }
+        @CheckForNull
+        static Hunk of(long rawPtr) {
+            if (rawPtr == 0) {
+                return null;
+            }
+            return new Hunk(rawPtr);
+        }
     }
 
     /**
@@ -407,11 +439,21 @@ public class Diff extends CAutoReleasable {
      */
     public static class Line extends CAutoReleasable {
         protected Line(long rawPtr) {
-            super(false, rawPtr);
+            super(true, rawPtr);
         }
 
         @Override
-        protected void freeOnce(long cPtr) {}
+        protected void freeOnce(long cPtr) {
+            throw new IllegalStateException(
+                    "Diff.Line is owned by Diff and should not be released manually");
+        }
+        @CheckForNull
+        static Line of(long rawPtr) {
+            if (rawPtr == 0) {
+                return null;
+            }
+            return new Line(rawPtr);
+        }
     }
 
     /** Possible output formats for diff data */

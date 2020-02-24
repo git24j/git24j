@@ -24,6 +24,7 @@
 - [ ] Checkout
 - [ ] Signature
 - [ ] Refspec
+- [ ] Blame
 
 
 ## API polishing
