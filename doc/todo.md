@@ -20,8 +20,8 @@
 - [x] Status
 - [ ] Odb (prioritize)
 - [ ] Cred
-- [ ] Patch
-- [ ] Checkout
+- [x] Patch
+- [x] Checkout
 - [ ] Signature
 - [ ] Refspec
 - [ ] Blame

@@ -1,0 +1,7 @@
+int git_checkout_init_options(git_checkout_options *opts, unsigned int version);
+int git_checkout_head(git_repository *repo, const git_checkout_options *opts);
+int git_checkout_index(git_repository *repo, git_index *index, const git_checkout_options *opts);
+int git_checkout_tree(git_repository *repo, const git_object *treeish, const git_checkout_options *opts);
+int git_checkout_notify_cb(git_checkout_notify_t why, const char *path, const git_diff_file *baseline, const git_diff_file *target, const git_diff_file *workdir, void *payload);
+void git_checkout_progress_cb(const char *path, size_t completed_steps, size_t total_steps, void *payload);
+void git_checkout_perfdata_cb(const git_checkout_perfdata *perfdata, void *payload);

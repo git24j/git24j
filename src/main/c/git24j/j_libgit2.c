@@ -43,8 +43,14 @@ void git24j_init(JNIEnv *env)
     jniConstants->remote.midPushTransferProgress = (*env)->GetMethodID(env, clz, "pushTransferProgress", "(JJI)I");
     jniConstants->remote.midPushUpdateReference = (*env)->GetMethodID(env, clz, "pushUpdateReference", "(Ljava/lang/String;Ljava/lang/String;)I");
     jniConstants->remote.midPushNegotiation = (*env)->GetMethodID(env, clz, "pushNegotiation", "([J)I");
-    // return <0 for error, > 0 to return new transport, 0 is no-op
     jniConstants->remote.midTransport = (*env)->GetMethodID(env, clz, "transport", "(J)J");
+    /* java/util/List<?> */
+
+    clz = j_find_and_hold_clz(env, "java/util/List");
+    assert(clz && "List class not found");
+    jniConstants->list.midAdd = (*env)->GetMethodID(env, clz, "add", "(Ljava/lang/Object;)z");
+    jniConstants->list.midGet = (*env)->GetMethodID(env, clz, "get", "(I)Ljava/lang/Object;");
+    jniConstants->list.midSize = (*env)->GetMethodID(env, clz, "size", "()I");
 }
 
 void git24j_shutdown(JNIEnv *env)

@@ -311,6 +311,20 @@ void j_strarray_to_java_list(JNIEnv *env, git_strarray *src, jobject strList)
     (*env)->DeleteLocalRef(env, clz);
 }
 
+/**Copy values from String[] to git_strarray*/
+void j_strarray_from_java(JNIEnv *env, git_strarray *out, jobjectArray strArr)
+{
+    assert(out && "receiving git_strarray must not be null");
+    jsize len = (*env)->GetArrayLength(env, strArr);
+    git_strarray_free(out);
+    out->strings = (char **)malloc(sizeof(char *) * len);
+    for (jsize i = 0; i < len; i++)
+    {
+        jobject si = (*env)->GetObjectArrayElement(env, strArr, i);
+        out->strings[i] = j_copy_of_jstring(env, (jstring)si, true);
+    }
+}
+
 /** Copy values from git_signature to git24j.Signature. */
 void j_signature_to_java(JNIEnv *env, const git_signature *c_sig, jobject sig)
 {

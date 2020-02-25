@@ -418,12 +418,29 @@ public class Diff extends CAutoReleasable {
             throw new IllegalStateException(
                     "Diff.Hunk is owned by Diff and should not be released manually");
         }
+
         @CheckForNull
         static Hunk of(long rawPtr) {
             if (rawPtr == 0) {
                 return null;
             }
             return new Hunk(rawPtr);
+        }
+    }
+
+    public static class File extends CAutoReleasable {
+        protected File(boolean isWeak, long rawPtr) {
+            super(isWeak, rawPtr);
+        }
+
+        @Override
+        protected void freeOnce(long cPtr) {
+            Libgit2.jniShadowFree(cPtr);
+        }
+
+        @CheckForNull
+        static File ofWeak(long ptr) {
+            return ptr == 0 ? null : new File(true, ptr);
         }
     }
 
@@ -447,6 +464,7 @@ public class Diff extends CAutoReleasable {
             throw new IllegalStateException(
                     "Diff.Line is owned by Diff and should not be released manually");
         }
+
         @CheckForNull
         static Line of(long rawPtr) {
             if (rawPtr == 0) {

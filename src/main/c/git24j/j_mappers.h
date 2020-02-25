@@ -32,6 +32,14 @@ extern "C"
 
     typedef struct
     {
+        jclass clzList;
+        jmethodID midGet;
+        jmethodID midSize;
+        jmethodID midAdd;
+    } j_list;
+
+    typedef struct
+    {
         jclass clzAtomicInt;
         jclass clzAtomicLong;
         jclass clzAtomicReference;
@@ -42,6 +50,7 @@ extern "C"
         jmethodID midAtomicReferenceSet;
         jmethodID midListGetI;
         j_remote_constants remote;
+        j_list list;
     } j_constants_t;
 
     /** commonly used constants. */
@@ -137,6 +146,9 @@ extern "C"
 
     /** Copy values from git_strarray to java::List<String> */
     void j_strarray_to_java_list(JNIEnv *env, git_strarray *src, jobject strList);
+
+    /**Copy values from String[] to git_strarray*/
+    void j_strarray_from_java(JNIEnv *env, git_strarray *out, jobjectArray strArr);
 
     /** Copy values from git_signature to git24j.Signature. */
     void j_signature_to_java(JNIEnv *env, const git_signature *c_sig, jobject sig);
