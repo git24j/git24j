@@ -1,5 +1,6 @@
 package com.github.git24j.core;
 
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicLong;
 import javax.annotation.Nullable;
 
@@ -39,7 +40,28 @@ public abstract class CAutoReleasable {
         return ptr;
     }
 
+    boolean isNull() {
+        return _rawPtr.get() == 0;
+    }
+
     static long rawPtr(@Nullable CAutoReleasable obj) {
         return obj == null ? 0 : obj.getRawPointer();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        CAutoReleasable that = (CAutoReleasable) o;
+        return Objects.equals(_rawPtr, that._rawPtr);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(_rawPtr);
     }
 }

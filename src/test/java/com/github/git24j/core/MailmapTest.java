@@ -1,6 +1,7 @@
 package com.github.git24j.core;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 import org.junit.Assert;
 import org.junit.Rule;
@@ -46,13 +47,10 @@ public class MailmapTest extends TestBase {
     public void resolveSignature() {
         try (Repository testRepo = TestRepo.MAILMAP.tempRepo(folder)) {
             Mailmap mm = Mailmap.fromRepository(testRepo);
-            Signature sig = new Signature();
-            sig.setName("nick1");
-            sig.setEmail("bugs@company.xx");
-            sig.setWhen(1577320750, -240, '+');
-            Signature outSig = mm.resolveSignature(sig);
-            Assert.assertEquals("Some Dude", outSig.getName());
-            Assert.assertEquals("some@dude.xx", outSig.getEmail());
+            Signature sig = new Signature("nick1", "bugs@company.xx", 1577320750L, -240);
+            Optional<Signature> outSig = mm.resolveSignature(sig);
+            Assert.assertEquals("Some Dude", outSig.map(Signature::getName).orElse(""));
+            Assert.assertEquals("some@dude.xx", outSig.map(Signature::getEmail).orElse(""));
         }
     }
 }

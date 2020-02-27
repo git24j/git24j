@@ -4,75 +4,165 @@ import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.Objects;
+import java.util.Optional;
+import java.util.concurrent.atomic.AtomicLong;
+import javax.annotation.Nonnull;
 
 public class Signature extends CAutoReleasable {
     protected Signature(boolean isWeak, long rawPtr) {
         super(isWeak, rawPtr);
     }
+    /**
+     * Create a new action signature.
+     *
+     * <p>Note: angle brackets ('<' and '>') characters are not allowed to be used in either the
+     * `name` or the `email` parameter.
+     *
+     * @param name name of the person
+     * @param email email of the person
+     * @param time time (in seconds from epoch) when the action happened
+     * @throws GitException git errors
+     */
+    public Signature(@Nonnull String name, @Nonnull String email, @Nonnull OffsetDateTime time) {
+        super(false, 0);
+        Error.throwIfNeeded(
+                jniNew(
+                        _rawPtr,
+                        name,
+                        email,
+                        time.toEpochSecond(),
+                        time.getOffset().getTotalSeconds() / 60));
+    }
+
+    public Signature(
+            @Nonnull String name, @Nonnull String email, long epocSecs, int offsetMinutes) {
+        super(false, 0);
+        Error.throwIfNeeded(jniNew(_rawPtr, name, email, epocSecs, offsetMinutes));
+    }
 
     @Override
     protected void freeOnce(long cPtr) {
-        // FIXME: not implemented yet
+        jniFree(cPtr);
     }
 
-    private String name = "";
-    private String email = "";
-    private OffsetDateTime when = OffsetDateTime.now();
+    /** -------- Jni Signature ---------- */
+    /**
+     * int git_signature_new(git_signature **out, const char *name, const char *email, git_time_t
+     * time, int offset);
+     */
+    static native int jniNew(AtomicLong out, String name, String email, long time, int offset);
 
-    public Signature(String name, String email) {
-        super(true, 0);
-        this.name = name;
-        this.email = email;
+    /** int git_signature_now(git_signature **out, const char *name, const char *email); */
+    static native int jniNow(AtomicLong out, String name, String email);
+
+    /**
+     * Create a new action signature with a timestamp of 'now'.
+     *
+     * <p>Call `git_signature_free()` to free the data.
+     *
+     * @return out new signature
+     * @param name name of the person
+     * @param email email of the person
+     * @throws GitException git errors
+     */
+    @Nonnull
+    public static Signature now(@Nonnull String name, @Nonnull String email) {
+        Signature out = new Signature(false, 0);
+        Error.throwIfNeeded(jniNow(out._rawPtr, name, email));
+        if (out.isNull()) {
+            throw new NullPointerException("Failed to create Signature");
+        }
+        return out;
     }
 
-    public Signature(String name, String email, long whenEpocSec, int offsetMin) {
-        super(true, 0);
-        this.name = name;
-        this.email = email;
-        this.when =
-                Instant.ofEpochSecond(whenEpocSec)
-                        .atOffset(ZoneOffset.ofHoursMinutes(0, offsetMin));
+    /** int git_signature_default(git_signature **out, git_repository *repo); */
+    static native int jniDefault(AtomicLong out, long repoPtr);
+
+    /**
+     * Create a new action signature with default user and now timestamp.
+     *
+     * <p>This looks up the user.name and user.email from the configuration and uses the current
+     * time as the timestamp, and creates a new signature based on that information. It will return
+     * GIT_ENOTFOUND if either the user.name or user.email are not set.
+     *
+     * @return new signature or empty if config is missing
+     * @param repo repository pointer
+     * @throws GitException git errors
+     */
+    @Nonnull
+    public static Optional<Signature> getDefault(@Nonnull Repository repo) {
+        Signature sig = new Signature(false, 0);
+        int e = jniDefault(sig._rawPtr, repo.getRawPointer());
+        if (e == GitException.ErrorCode.ENOTFOUND.getCode()) {
+            return Optional.empty();
+        }
+        Error.throwIfNeeded(e);
+        return sig.isNull() ? Optional.empty() : Optional.of(sig);
     }
 
-    Signature() {
-        super(true, 0);
+    /** int git_signature_from_buffer(git_signature **out, const char *buf); */
+    static native int jniFromBuffer(AtomicLong out, String buf);
+
+    /**
+     * Create a new signature by parsing the given buffer, which is expected to be in the format
+     * "Real Name <email> timestamp tzoffset", where `timestamp` is the number of seconds since the
+     * Unix epoch and `tzoffset` is the timezone offset in `hhmm` format (note the lack of a colon
+     * separator).
+     *
+     * @return out new signature
+     * @param buf signature string
+     * @throws GitException git errors
+     */
+    @Nonnull
+    public static Signature fromBuffer(@Nonnull String buf) {
+        Signature out = new Signature(false, 0);
+        Error.throwIfNeeded(jniFromBuffer(out._rawPtr, buf));
+        return out;
     }
 
+    /** int git_signature_dup(git_signature **dest, const git_signature *sig); */
+    static native int jniDup(AtomicLong dest, long sig);
+
+    /**
+     * Create a copy of an existing signature. All internal strings are also duplicated.
+     *
+     * <p>Call `git_signature_free()` to free the data.
+     *
+     * @param sig signature to duplicate
+     * @return copy of the signature
+     * @throws GitException git error
+     */
+    public static Signature dup(@Nonnull Signature sig) {
+        Signature out = new Signature(false, 0);
+        Error.throwIfNeeded(jniDup(out._rawPtr, sig.getRawPointer()));
+        return out;
+    }
+
+    /** void git_signature_free(git_signature *sig); */
+    static native void jniFree(long sig);
+
+    static native String jniGetName(long sigPtr);
+
+    static native String jniGetEmail(long sigPtr);
+
+    static native long jniGetEpocSeconds(long sigPtr);
+
+    static native int jniGetOffsetMinutes(long sigPtr);
+
+    @Nonnull
     public String getName() {
-        return name;
+        return jniGetName(getRawPointer());
     }
 
+    @Nonnull
     public String getEmail() {
-        return email;
+        return jniGetEmail(getRawPointer());
     }
 
+    @Nonnull
     public OffsetDateTime getWhen() {
-        // when.getOffset().getTotalSeconds()
-        return when;
-    }
-
-    /** @return get epoc second of {@code when} */
-    public long getWhenEpocSecond() {
-        return when.toEpochSecond();
-    }
-
-    /** @return get offset of when in minutes. */
-    public int getWhenOffsetMinutes() {
-        return when.getOffset().getTotalSeconds() / 60;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    // TODO: figure out how to deal with sign
-    public void setWhen(long whenEpocSec, int offsetMinutes, char sign) {
-        ZoneOffset offset = ZoneOffset.ofTotalSeconds(offsetMinutes * 60);
-        this.when = Instant.ofEpochSecond(whenEpocSec).atOffset(offset);
+        ZoneOffset offset = ZoneOffset.ofTotalSeconds(jniGetOffsetMinutes(getRawPointer()) * 60);
+        return Instant.ofEpochSecond(jniGetEpocSeconds(getRawPointer())).atOffset(offset);
     }
 
     @Override
@@ -80,13 +170,13 @@ public class Signature extends CAutoReleasable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Signature signature = (Signature) o;
-        return Objects.equals(name, signature.name)
-                && Objects.equals(email, signature.email)
-                && Objects.equals(when, signature.when);
+        return Objects.equals(getName(), signature.getName())
+                && Objects.equals(getEmail(), signature.getEmail())
+                && Objects.equals(getWhen(), signature.getWhen());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, email, when);
+        return Objects.hash(getName(), getEmail(), getWhen());
     }
 }

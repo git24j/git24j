@@ -132,7 +132,7 @@ public class CommitTest extends TestBase {
     public void committerWithMailmap() {
         try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {
             Commit commit = Commit.lookup(testRepo, MASTER_OID);
-            Signature sig = commit.committerWithMailmap(null);
+            Signature sig = commit.committerWithMailmap(null).orElseThrow(RuntimeException::new);
             Assert.assertNotNull(sig.getName());
             Assert.assertNotNull(sig.getEmail());
             Assert.assertNotNull(sig.getWhen());
@@ -143,7 +143,7 @@ public class CommitTest extends TestBase {
     public void authorWithMailmap() {
         try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {
             Commit commit = Commit.lookup(testRepo, MASTER_OID);
-            Signature sig = commit.authorWithMailmap(null);
+            Signature sig = commit.authorWithMailmap(null).orElseThrow(RuntimeException::new);
             Assert.assertNotNull(sig.getName());
             Assert.assertNotNull(sig.getEmail());
             Assert.assertNotNull(sig.getWhen());
@@ -234,8 +234,8 @@ public class CommitTest extends TestBase {
                     Commit.create(
                             testRepo,
                             "NEW_HEAD",
-                            new Signature("tester", "test@ab.cc"),
-                            new Signature("admin", "admin@ab.cc"),
+                            Signature.now("tester", "test@ab.cc"),
+                            Signature.now("admin", "admin@ab.cc"),
                             null,
                             "some commit message",
                             masterTree,
@@ -266,8 +266,8 @@ public class CommitTest extends TestBase {
             Buf buf =
                     Commit.createBuffer(
                             testRepo,
-                            new Signature("tester", "test@ab.cc"),
-                            new Signature("admin", "admin@ab.cc"),
+                            Signature.now("tester", "test@ab.cc"),
+                            Signature.now("admin", "admin@ab.cc"),
                             null,
                             "some commit message",
                             masterTree,
@@ -298,8 +298,8 @@ public class CommitTest extends TestBase {
             Buf buf =
                     Commit.createBuffer(
                             testRepo,
-                            new Signature("tester", "test@ab.cc"),
-                            new Signature("admin", "admin@ab.cc"),
+                            Signature.now("tester", "test@ab.cc"),
+                            Signature.now("admin", "admin@ab.cc"),
                             null,
                             "some commit message",
                             masterTree,

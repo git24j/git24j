@@ -37,15 +37,15 @@ extern "C"
     JNIEXPORT jint JNICALL J_MAKE_METHOD(Commit_jniTimeOffset)(JNIEnv *env, jclass obj, jlong commitPtr);
 
     /**const git_signature * git_commit_committer(const git_commit *commit); */
-    JNIEXPORT void JNICALL J_MAKE_METHOD(Commit_jniCommitter)(JNIEnv *env, jclass obj, jlong commitPtr, jobject outSig);
+    JNIEXPORT jlong JNICALL J_MAKE_METHOD(Commit_jniCommitter)(JNIEnv *env, jclass obj, jlong commitPtr);
     /**const git_signature * git_commit_author(const git_commit *commit); */
-    JNIEXPORT void JNICALL J_MAKE_METHOD(Commit_jniAuthor)(JNIEnv *env, jclass obj, jlong commitPtr, jobject outSig);
+    JNIEXPORT jlong JNICALL J_MAKE_METHOD(Commit_jniAuthor)(JNIEnv *env, jclass obj, jlong commitPtr);
 
     /**int git_commit_committer_with_mailmap(git_signature **out, const git_commit *commit, const git_mailmap *mailmap); */
-    JNIEXPORT jint JNICALL J_MAKE_METHOD(Commit_jniCommitterWithMailmap)(JNIEnv *env, jclass obj, jobject outSig, jlong commitPtr, jlong mailmapPtr);
+    JNIEXPORT jint JNICALL J_MAKE_METHOD(Commit_jniCommitterWithMailmap)(JNIEnv *env, jclass obj, jobject out, jlong commitPtr, jlong mailmapPtr);
 
     /**int git_commit_author_with_mailmap(git_signature **out, const git_commit *commit, const git_mailmap *mailmap); */
-    JNIEXPORT jint JNICALL J_MAKE_METHOD(Commit_jniAuthorWithMailmap)(JNIEnv *env, jclass obj, jobject outSig, jlong commitPtr, jlong mailmapPtr);
+    JNIEXPORT jint JNICALL J_MAKE_METHOD(Commit_jniAuthorWithMailmap)(JNIEnv *env, jclass obj, jobject out, jlong commitPtr, jlong mailmapPtr);
 
     /**const char * git_commit_raw_header(const git_commit *commit); */
     JNIEXPORT jstring JNICALL J_MAKE_METHOD(Commit_jniRawHeader)(JNIEnv *env, jclass obj, jlong commitPtr);
@@ -91,8 +91,8 @@ extern "C"
                                                            jobject outOid,
                                                            jlong repoPtr,
                                                            jstring updateRef,
-                                                           jobject author,
-                                                           jobject committer,
+                                                           jlong author,
+                                                           jlong committer,
                                                            jstring msgEncoding,
                                                            jstring message,
                                                            jlong treePtr,
@@ -115,15 +115,17 @@ extern "C"
      *                      const char *message_encoding, 
      *                      const char *message, 
      *                      const git_tree *tree); */
+
     JNIEXPORT jint JNICALL J_MAKE_METHOD(Commit_jniAmend)(JNIEnv *env, jclass obj,
-                                                          jobject outOid,
-                                                          jlong commitToAmend,
-                                                          jstring updateRef,
-                                                          jobject author,
-                                                          jobject committer,
-                                                          jstring messageEncoding,
+                                                          jobject id,
+                                                          jlong commitToAmendPtr,
+                                                          jstring update_ref,
+                                                          jlong authorPtr,
+                                                          jlong committerPtr,
+                                                          jstring message_encoding,
                                                           jstring message,
                                                           jlong treePtr);
+
     /* int git_commit_create_buffer(git_buf *out,
      *                            git_repository *repo,
      *                            const git_signature *author,
@@ -134,14 +136,16 @@ extern "C"
      *                            size_t parent_count,
      *                            const git_commit *[] parents); */
     JNIEXPORT jint JNICALL J_MAKE_METHOD(Commit_jniCreateBuffer)(JNIEnv *env, jclass obj,
-                                                                 jobject outBuf,
+                                                                 jobject out,
                                                                  jlong repoPtr,
-                                                                 jobject author,
-                                                                 jobject committer,
-                                                                 jstring messageEncodeing,
+                                                                 jlong authorPtr,
+                                                                 jlong committerPtr,
+                                                                 jstring message_encoding,
                                                                  jstring message,
                                                                  jlong treePtr,
+                                                                 jint parentCount,
                                                                  jlongArray parents);
+
     /**int git_commit_create_with_signature(git_oid *out, 
      *                                      git_repository *repo,
      *                                      const char *commit_content,

@@ -27,8 +27,8 @@ extern "C"
     /** GIT_EXTERN(int) git_mailmap_resolve( const char **real_name, const char **real_email, const git_mailmap *mm, const char *name, const char *email); */
     JNIEXPORT jint JNICALL J_MAKE_METHOD(Mailmap_jniResolve)(JNIEnv *env, jclass obj, jobject outRealName, jobject outRealEmail, jlong mmPtr, jstring name, jstring email);
 
-    /** GIT_EXTERN(int) git_mailmap_resolve_signature(git_signature **out, const git_mailmap *mm, const git_signature *sig); */
-    JNIEXPORT jint JNICALL J_MAKE_METHOD(Mailmap_jniResolveSignature)(JNIEnv *env, jclass obj, jobject outSig, jlong mmPtr, jobject sig);
+    /** int git_mailmap_resolve_signature(git_signature **out, const git_mailmap *mm, const git_signature *sig); */
+    JNIEXPORT jint JNICALL J_MAKE_METHOD(Mailmap_jniResolveSignature)(JNIEnv *env, jclass obj, jobject out, jlong mmPtr, jlong sigPtr);
 
 #ifdef __cplusplus
 }

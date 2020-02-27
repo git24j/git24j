@@ -69,23 +69,11 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Mailmap_jniResolve)(JNIEnv *env, jclass obj
     return e;
 }
 
-/** GIT_EXTERN(int) git_mailmap_resolve_signature(git_signature **out, const git_mailmap *mm, const git_signature *sig); */
-JNIEXPORT jint JNICALL J_MAKE_METHOD(Mailmap_jniResolveSignature)(JNIEnv *env, jclass obj, jobject outSig, jlong mmPtr, jobject sig)
+/** int git_mailmap_resolve_signature(git_signature **out, const git_mailmap *mm, const git_signature *sig); */
+JNIEXPORT jint JNICALL J_MAKE_METHOD(Mailmap_jniResolveSignature)(JNIEnv *env, jclass obj, jobject out, jlong mmPtr, jlong sigPtr)
 {
-    git_signature *src_sig = NULL, *dest_sig = NULL;
-    int e = j_signature_from_java(env, sig, &src_sig);
-    if (e != 0)
-    {
-        goto free_and_return;
-    }
-    e = git_mailmap_resolve_signature(&dest_sig, (git_mailmap *)mmPtr, src_sig);
-    if (e != 0)
-    {
-        goto free_and_return;
-    }
-    j_signature_to_java(env, dest_sig, outSig);
-free_and_return:
-    git_signature_free(dest_sig);
-    git_signature_free(src_sig);
-    return 0;
+    git_signature *c_out;
+    int r = git_mailmap_resolve_signature(&c_out, (git_mailmap *)mmPtr, (git_signature *)sigPtr);
+    (*env)->CallVoidMethod(env, out, jniConstants->midAtomicLongSet, (long)c_out);
+    return r;
 }

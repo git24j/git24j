@@ -150,7 +150,7 @@ jlongArray j_long_array_from_pointers(JNIEnv *env, const void **ptrs, size_t n)
     return array;
 }
 
-/** create c unsigned char array from jni jbyteArray. */
+/** create c unsigned char array from jni jbyteArray. Caller must FREE the return pointer. */
 unsigned char *j_unsigned_chars_from_java(JNIEnv *env, jbyteArray array, int *out_len)
 {
     if (array == NULL)
@@ -170,12 +170,9 @@ unsigned char *j_unsigned_chars_from_java(JNIEnv *env, jbyteArray array, int *ou
 void j_git_oid_to_java(JNIEnv *env, const git_oid *c_oid, jobject oid)
 {
     assert(oid && "receiving object must not be null");
-    jclass clz = (*env)->GetObjectClass(env, oid);
-    assert(clz && "Oid class not found");
     jbyteArray raw = j_byte_array_from_c(env, c_oid->id, GIT_OID_RAWSZ);
-    j_call_setter_byte_array(env, clz, oid, "setId", raw);
+    (*env)->CallVoidMethod(env, oid, jniConstants->oid.midSetId, raw);
     (*env)->DeleteLocalRef(env, raw);
-    (*env)->DeleteLocalRef(env, clz);
 }
 
 /** create byte[] that can be accessed directly by java. */
@@ -196,16 +193,12 @@ void j_git_oid_from_java(JNIEnv *env, jobject oid, git_oid *c_oid)
     {
         return;
     }
-
-    jclass clz = (*env)->GetObjectClass(env, oid);
-    assert(clz && "Oid class not found");
-    jbyteArray jBytes = j_call_getter_byte_array(env, clz, oid, "getId");
+    jobjectArray jBytes = (*env)->CallObjectMethod(env, oid, jniConstants->oid.midGetId);
     int out_len;
     unsigned char *c_bytes = j_unsigned_chars_from_java(env, jBytes, &out_len);
     git_oid_fromraw(c_oid, c_bytes);
     free(c_bytes);
     (*env)->DeleteLocalRef(env, jBytes);
-    (*env)->DeleteLocalRef(env, clz);
 }
 
 void j_git_oidarray_to_java(JNIEnv *env, jobject outOidArr, const git_oidarray *c_arr)
@@ -326,7 +319,7 @@ void j_strarray_from_java(JNIEnv *env, git_strarray *out, jobjectArray strArr)
 }
 
 /** Copy values from git_signature to git24j.Signature. */
-void j_signature_to_java(JNIEnv *env, const git_signature *c_sig, jobject sig)
+void deprecated_signature_to_java(JNIEnv *env, const git_signature *c_sig, jobject sig)
 {
     assert(sig && "receiving object must not be null");
     jclass clz = (*env)->GetObjectClass(env, sig);
@@ -339,7 +332,7 @@ void j_signature_to_java(JNIEnv *env, const git_signature *c_sig, jobject sig)
 }
 
 /** Copy values from it24j.Signature to git_signature, `out_sig` should be free-ed later by `git_signature_free` */
-int j_signature_from_java(JNIEnv *env, jobject sig, git_signature **out_sig)
+int deprecated_signature_from_java(JNIEnv *env, jobject sig, git_signature **out_sig)
 {
     if (sig == NULL)
     {

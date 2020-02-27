@@ -40,6 +40,13 @@ extern "C"
 
     typedef struct
     {
+        jclass clzOid;
+        jmethodID midSetId;
+        jmethodID midGetId;
+    } j_oid_constants;
+
+    typedef struct
+    {
         jclass clzAtomicInt;
         jclass clzAtomicLong;
         jclass clzAtomicReference;
@@ -50,7 +57,7 @@ extern "C"
         jmethodID midAtomicReferenceSet;
         jmethodID midListGetI;
         j_remote_constants remote;
-        j_list list;
+        j_oid_constants oid;
     } j_constants_t;
 
     /** commonly used constants. */
@@ -151,10 +158,10 @@ extern "C"
     void j_strarray_from_java(JNIEnv *env, git_strarray *out, jobjectArray strArr);
 
     /** Copy values from git_signature to git24j.Signature. */
-    void j_signature_to_java(JNIEnv *env, const git_signature *c_sig, jobject sig);
+    void deprecated_signature_to_java(JNIEnv *env, const git_signature *c_sig, jobject sig);
 
     /** Copy values from it24j.Signature to git_signature */
-    int j_signature_from_java(JNIEnv *env, jobject sig, git_signature **out_sig);
+    int deprecated_signature_from_java(JNIEnv *env, jobject sig, git_signature **out_sig);
 
     /** pass a long value to java's AtomicLong */
     void j_atomic_long_set(JNIEnv *env, long val, jobject outAL);

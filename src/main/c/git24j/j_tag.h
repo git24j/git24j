@@ -27,14 +27,15 @@ extern "C"
     /** const char * git_tag_name(const git_tag *tag); */
     JNIEXPORT jstring JNICALL J_MAKE_METHOD(Tag_jniName)(JNIEnv *env, jclass obj, jlong tagPtr);
     /** const git_signature * git_tag_tagger(const git_tag *tag); */
-    JNIEXPORT void JNICALL J_MAKE_METHOD(Tag_jniTagger)(JNIEnv *env, jclass obj, jobject outSig, jlong tagPtr);
+    JNIEXPORT jlong JNICALL J_MAKE_METHOD(Tag_jniTagger)(JNIEnv *env, jclass obj, jlong tagPtr);
     /** const char * git_tag_message(const git_tag *tag); */
     JNIEXPORT jstring JNICALL J_MAKE_METHOD(Tag_jniMessage)(JNIEnv *env, jclass obj, jlong tagPtr);
 
     /** int git_tag_create(git_oid *oid, git_repository *repo, const char *tag_name, const git_object *target, const git_signature *tagger, const char *message, int force); */
-    JNIEXPORT jint JNICALL J_MAKE_METHOD(Tag_jniCreate)(JNIEnv *env, jclass obj, jobject oid, jlong repoPtr, jstring tagName, jlong targetPtr, jobject tagger, jstring message, jint force);
+    JNIEXPORT jint JNICALL J_MAKE_METHOD(Tag_jniCreate)(JNIEnv *env, jclass obj, jobject oid, jlong repoPtr, jstring tag_name, jlong targetPtr, jlong taggerPtr, jstring message, jint force);
+
     /** int git_tag_annotation_create(git_oid *oid, git_repository *repo, const char *tag_name, const git_object *target, const git_signature *tagger, const char *message); */
-    JNIEXPORT jint JNICALL J_MAKE_METHOD(Tag_jniAnnotationCreate)(JNIEnv *env, jclass obj, jobject oid, jlong repoPtr, jstring tagName, jlong targetPtr, jobject tagger, jstring message);
+    JNIEXPORT jint JNICALL J_MAKE_METHOD(Tag_jniAnnotationCreate)(JNIEnv *env, jclass obj, jobject oid, jlong repoPtr, jstring tag_name, jlong targetPtr, jlong taggerPtr, jstring message);
     /** int git_tag_create_from_buffer(git_oid *oid, git_repository *repo, const char *buffer, int force); */
     JNIEXPORT jint JNICALL J_MAKE_METHOD(Tag_jniCreateFromBuffer)(JNIEnv *env, jclass obj, jobject oid, jlong repoPtr, jstring buffer, jint force);
     /** int git_tag_create_lightweight(git_oid *oid, git_repository *repo, const char *tag_name, const git_object *target, int force); */

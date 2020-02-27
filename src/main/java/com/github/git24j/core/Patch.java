@@ -1,13 +1,13 @@
 package com.github.git24j.core;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import static com.github.git24j.core.GitException.ErrorCode.ENOTFOUND;
+import static com.github.git24j.core.Internals.JJJCallback;
+
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
-
-import static com.github.git24j.core.GitException.ErrorCode.ENOTFOUND;
-import static com.github.git24j.core.Internals.JJJCallback;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 public class Patch extends CAutoReleasable {
     protected Patch(boolean isWeak, long rawPtr) {

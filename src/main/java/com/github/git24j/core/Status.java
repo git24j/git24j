@@ -1,12 +1,12 @@
 package com.github.git24j.core;
 
-import javax.annotation.CheckForNull;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.nio.file.Path;
 import java.util.EnumSet;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
+import javax.annotation.CheckForNull;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 public class Status {
 
@@ -189,8 +189,8 @@ public class Status {
         /**
          * Gets the count of status entries in this list.
          *
-         * If there are no changes in status (at least according the options given
-         * when the status list was created), this can return 0.
+         * <p>If there are no changes in status (at least according the options given when the
+         * status list was created), this can return 0.
          *
          * @return the number of status entries
          */
@@ -201,7 +201,7 @@ public class Status {
         /**
          * Get an Entry to one of the entries in the status list.
          *
-         * The entry is not modifiable and should not be freed.
+         * <p>The entry is not modifiable and should not be freed.
          *
          * @param idx Position of the entry
          * @return Pointer to the entry; NULL if out of bounds
@@ -293,18 +293,18 @@ public class Status {
     /**
      * Test if the ignore rules apply to a given file.
      *
-     * This function checks the ignore rules to see if they would apply to the
-     * given file.  This indicates if the file would be ignored regardless of
-     * whether the file is already in the index or committed to the repository.
+     * <p>This function checks the ignore rules to see if they would apply to the given file. This
+     * indicates if the file would be ignored regardless of whether the file is already in the index
+     * or committed to the repository.
      *
-     * One way to think of this is if you were to do "git add ." on the
-     * directory containing the file, would it be added or not?
+     * <p>One way to think of this is if you were to do "git add ." on the directory containing the
+     * file, would it be added or not?
      *
      * @param repo A repository object
      * @param path The file to check ignores for, rooted at the repo's workdir.
      * @return false if the file is not ignored, true if it is
-     * @throws GitException error if ignore rules could not be processed for the file (regardless
-     *         of whether it exists or not)
+     * @throws GitException error if ignore rules could not be processed for the file (regardless of
+     *     whether it exists or not)
      */
     public static boolean shouldIgnore(@Nonnull Repository repo, @Nonnull String path) {
         AtomicInteger out = new AtomicInteger();

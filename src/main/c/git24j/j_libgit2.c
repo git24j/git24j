@@ -46,11 +46,18 @@ void git24j_init(JNIEnv *env)
     jniConstants->remote.midTransport = (*env)->GetMethodID(env, clz, "transport", "(J)J");
     /* java/util/List<?> */
 
-    clz = j_find_and_hold_clz(env, "java/util/List");
+    /* clz = j_find_and_hold_clz(env, "java/util/List");
     assert(clz && "List class not found");
     jniConstants->list.midAdd = (*env)->GetMethodID(env, clz, "add", "(Ljava/lang/Object;)z");
     jniConstants->list.midGet = (*env)->GetMethodID(env, clz, "get", "(I)Ljava/lang/Object;");
-    jniConstants->list.midSize = (*env)->GetMethodID(env, clz, "size", "()I");
+    jniConstants->list.midSize = (*env)->GetMethodID(env, clz, "size", "()I"); */
+
+    /* oid class and methods */
+    clz = j_find_and_hold_clz(env, J_CLZ_PREFIX "Oid");
+    assert(clz && "Oid class not found");
+    jniConstants->oid.clzOid = clz;
+    jniConstants->oid.midSetId = (*env)->GetMethodID(env, clz, "setId", "([B)V");
+    jniConstants->oid.midGetId = (*env)->GetMethodID(env, clz, "getId", "()[B");
 }
 
 void git24j_shutdown(JNIEnv *env)

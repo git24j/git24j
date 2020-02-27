@@ -71,10 +71,11 @@ JNIEXPORT jstring JNICALL J_MAKE_METHOD(Tag_jniName)(JNIEnv *env, jclass obj, jl
 }
 
 /** const git_signature * git_tag_tagger(const git_tag *tag); */
-JNIEXPORT void JNICALL J_MAKE_METHOD(Tag_jniTagger)(JNIEnv *env, jclass obj, jobject outSig, jlong tagPtr)
+// JNIEXPORT void JNICALL J_MAKE_METHOD(Tag_jniTagger)(JNIEnv *env, jclass obj, jobject outSig, jlong tagPtr)
+JNIEXPORT jlong JNICALL J_MAKE_METHOD(Tag_jniTagger)(JNIEnv *env, jclass obj, jlong tagPtr)
 {
     const git_signature *tagger = git_tag_tagger((const git_tag *)tagPtr);
-    j_signature_to_java(env, tagger, outSig);
+    return (jlong)tagger;
 }
 
 /** const char * git_tag_message(const git_tag *tag); */
@@ -85,47 +86,29 @@ JNIEXPORT jstring JNICALL J_MAKE_METHOD(Tag_jniMessage)(JNIEnv *env, jclass obj,
 }
 
 /** int git_tag_create(git_oid *oid, git_repository *repo, const char *tag_name, const git_object *target, const git_signature *tagger, const char *message, int force); */
-JNIEXPORT jint JNICALL J_MAKE_METHOD(Tag_jniCreate)(JNIEnv *env, jclass obj, jobject oid, jlong repoPtr, jstring tagName, jlong targetPtr, jobject tagger, jstring message, jint force)
+JNIEXPORT jint JNICALL J_MAKE_METHOD(Tag_jniCreate)(JNIEnv *env, jclass obj, jobject oid, jlong repoPtr, jstring tag_name, jlong targetPtr, jlong taggerPtr, jstring message, jint force)
 {
-    int e = 0;
-    git_signature *c_tagger = NULL;
-    e = j_signature_from_java(env, tagger, &c_tagger);
-    if (e != 0)
-    {
-        goto free_and_return;
-    }
-
     git_oid c_oid;
-    j_git_oid_from_java(env, oid, &c_oid);
-    char *tag_name = j_copy_of_jstring(env, message, true);
+    char *c_tag_name = j_copy_of_jstring(env, tag_name, true);
     char *c_message = j_copy_of_jstring(env, message, true);
-    e = git_tag_create(&c_oid, (git_repository *)repoPtr, tag_name, (const git_object *)targetPtr, c_tagger, c_message, force);
+    int r = git_tag_create(&c_oid, (git_repository *)repoPtr, c_tag_name, (git_object *)targetPtr, (git_signature *)taggerPtr, c_message, force);
+    j_git_oid_to_java(env, &c_oid, oid);
+    free(c_tag_name);
     free(c_message);
-    free(tag_name);
-free_and_return:
-    git_signature_free(c_tagger);
-    return e;
+    return r;
 }
+
 /** int git_tag_annotation_create(git_oid *oid, git_repository *repo, const char *tag_name, const git_object *target, const git_signature *tagger, const char *message); */
-JNIEXPORT jint JNICALL J_MAKE_METHOD(Tag_jniAnnotationCreate)(JNIEnv *env, jclass obj, jobject oid, jlong repoPtr, jstring tagName, jlong targetPtr, jobject tagger, jstring message)
+JNIEXPORT jint JNICALL J_MAKE_METHOD(Tag_jniAnnotationCreate)(JNIEnv *env, jclass obj, jobject oid, jlong repoPtr, jstring tag_name, jlong targetPtr, jlong taggerPtr, jstring message)
 {
-    int e;
-    git_signature *c_tagger = NULL;
-    e = j_signature_from_java(env, tagger, &c_tagger);
-    if (e != 0)
-    {
-        goto free_and_return;
-    }
     git_oid c_oid;
-    j_git_oid_from_java(env, oid, &c_oid);
-    char *tag_name = j_copy_of_jstring(env, tagName, c_tagger);
+    char *c_tag_name = j_copy_of_jstring(env, tag_name, true);
     char *c_message = j_copy_of_jstring(env, message, true);
-    e = git_tag_annotation_create(&c_oid, (git_repository *)repoPtr, tag_name, (git_object *)targetPtr, c_tagger, c_message);
-    free(tag_name);
+    int r = git_tag_annotation_create(&c_oid, (git_repository *)repoPtr, c_tag_name, (git_object *)targetPtr, (git_signature *)taggerPtr, c_message);
+    j_git_oid_to_java(env, &c_oid, oid);
+    free(c_tag_name);
     free(c_message);
-free_and_return:
-    git_signature_free(c_tagger);
-    return e;
+    return r;
 }
 
 /** int git_tag_create_from_buffer(git_oid *oid, git_repository *repo, const char *buffer, int force); */

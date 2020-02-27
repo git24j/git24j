@@ -1,9 +1,9 @@
 package com.github.git24j.core;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.EnumSet;
 import java.util.concurrent.atomic.AtomicLong;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 public class Checkout {
 
@@ -406,7 +406,9 @@ public class Checkout {
     static native void jniOptionsSetNotifyFlags(long opts, int flags);
 
     static native void jniOptionsSetNotifyCb(long optsPtr, Internals.ISJJJCallback notifyCb);
+
     static native void jniOptionsSetProcessCb(long optsPtr, ProcessCb processCb);
+
     static native void jniOptionsSetPerfdataCb(long optsPtr, PerfdataCb perfdataCb);
 
     /**

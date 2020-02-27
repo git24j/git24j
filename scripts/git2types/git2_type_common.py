@@ -60,7 +60,7 @@ class Git2TypeInt64(Git2Type):
         - (wrapper_after): ""
         - (jni param): "long value"
         """
-    PAT = re.compile(r"^(long|int64_t)\s+(?P<var_name>\w+)$")
+    PAT = re.compile(r"^(long|int64_t|git_time_t)\s+(?P<var_name>\w+)$")
     C_HEADER_PARAM_STR = "jlong {jni_var_name}"
     C_WRAPPER_BEFORE_STR = ""
     C_PARAM_STR = "{jni_var_name}"
@@ -145,7 +145,7 @@ class Git2TypeOutObject(Git2Type):
     C_PARAM_STR = "&c_{var_name}"
     C_WRAPPER_AFTER_STR = (
         "\t (*env)->CallVoidMethod(env, {jni_var_name}, jniConstants->midAtomicLongSet, (long)c_{var_name});\n"
-        "\t git_{obj_name}_free(c_{var_name});\n"
+        "\t /* git_{obj_name}_free(c_{var_name}); */ \n"
     )
     JNI_PARAM_STR = "AtomicLong {jni_var_name}"
 
