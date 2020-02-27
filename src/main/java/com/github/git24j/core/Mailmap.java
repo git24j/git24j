@@ -2,8 +2,10 @@ package com.github.git24j.core;
 
 import java.util.AbstractMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
+import javax.annotation.Nonnull;
 
 public class Mailmap {
     private final AtomicLong _rawPtr = new AtomicLong();
@@ -120,19 +122,23 @@ public class Mailmap {
         resolve(outRealName, outRealEmail, name, email);
         return new AbstractMap.SimpleImmutableEntry<>(outRealName.get(), outRealEmail.get());
     }
-
-    static native int jniResolveSignature(Signature outSig, long mmPtr, Signature sig);
+    /**
+     * int git_mailmap_resolve_signature(git_signature **out, const git_mailmap *mm, const
+     * git_signature *sig);
+     */
+    static native int jniResolveSignature(AtomicLong out, long mm, long sig);
 
     /**
      * Resolve a signature to use real names and emails with a mailmap.
      *
      * @param sig signature to resolve
-     * @return resolved signature
+     * @return resolved signature or empty if resolve failed.
      * @throws GitException git errors
      */
-    public Signature resolveSignature(Signature sig) {
-        Signature outSig = new Signature();
-        Error.throwIfNeeded(jniResolveSignature(outSig, getRawPointer(), sig));
-        return outSig;
+    public Optional<Signature> resolveSignature(@Nonnull Signature sig) {
+        Signature outSig = new Signature(false, 0);
+        Error.throwIfNeeded(
+                jniResolveSignature(outSig._rawPtr, getRawPointer(), sig.getRawPointer()));
+        return outSig.isNull() ? Optional.empty() : Optional.of(outSig);
     }
 }

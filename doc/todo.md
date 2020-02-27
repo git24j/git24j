@@ -20,8 +20,8 @@
 - [x] Status
 - [ ] Odb (prioritize)
 - [ ] Cred
-- [ ] Patch
-- [ ] Checkout
+- [x] Patch
+- [x] Checkout
 - [ ] Signature
 - [ ] Refspec
 - [ ] Blame
@@ -60,3 +60,5 @@
 - [x] Make sure git objects are free-ed with `git_object_free`, make sure they all 
 - [ ] *All callbacks should immediately return if consumer is null*
 - [ ] Check all `data_structure **out pattern`, code gen may broken in this case, especially pattern like `jniAbcNew`
+- [ ] Make sure `equals` and `hashcode` makes sense. Equality of simple structures should compare by fields instead of raw pointer
+- [ ] Change all `AtomicReference<String>` to use jniConstants

@@ -1,14 +1,14 @@
 package com.github.git24j.core;
 
-import javax.annotation.CheckForNull;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import java.nio.file.Path;
-import java.util.concurrent.atomic.AtomicLong;
-
 import static com.github.git24j.core.Internals.JFCallback;
 import static com.github.git24j.core.Internals.JJCallback;
 import static com.github.git24j.core.Internals.JJJCallback;
+
+import java.nio.file.Path;
+import java.util.concurrent.atomic.AtomicLong;
+import javax.annotation.CheckForNull;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 public class Diff extends CAutoReleasable {
     AtomicLong _rawPtr = new AtomicLong();
@@ -418,12 +418,29 @@ public class Diff extends CAutoReleasable {
             throw new IllegalStateException(
                     "Diff.Hunk is owned by Diff and should not be released manually");
         }
+
         @CheckForNull
         static Hunk of(long rawPtr) {
             if (rawPtr == 0) {
                 return null;
             }
             return new Hunk(rawPtr);
+        }
+    }
+
+    public static class File extends CAutoReleasable {
+        protected File(boolean isWeak, long rawPtr) {
+            super(isWeak, rawPtr);
+        }
+
+        @Override
+        protected void freeOnce(long cPtr) {
+            Libgit2.jniShadowFree(cPtr);
+        }
+
+        @CheckForNull
+        static File ofWeak(long ptr) {
+            return ptr == 0 ? null : new File(true, ptr);
         }
     }
 
@@ -447,6 +464,7 @@ public class Diff extends CAutoReleasable {
             throw new IllegalStateException(
                     "Diff.Line is owned by Diff and should not be released manually");
         }
+
         @CheckForNull
         static Line of(long rawPtr) {
             if (rawPtr == 0) {

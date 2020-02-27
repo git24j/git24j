@@ -29,6 +29,16 @@ class Internals {
         int accept(byte[] id1, byte[] id2);
     }
 
+    @FunctionalInterface
+    interface ISJJJCallback {
+        int accept(int flag, String str, long ptr1, long ptr2, long ptr3);
+    }
+
+    @FunctionalInterface
+    interface SIICallback {
+        int accept(String s, int i1, int i2);
+    }
+
     /** Class to hold */
     static class OidArray {
         private final List<Oid> _oids = new ArrayList<>();

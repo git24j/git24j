@@ -2,7 +2,9 @@ package com.github.git24j.core;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
+import javax.annotation.Nonnull;
 
 public class Tag extends GitObject {
     Tag(long rawPointer) {
@@ -70,13 +72,12 @@ public class Tag extends GitObject {
         return jniName(getRawPointer());
     }
 
-    static native void jniTagger(Signature outSig, long tagPtr);
+    static native long jniTagger(long tagPtr);
 
     /** @return Signature of the tagger */
-    public Signature tagger() {
-        Signature outSig = new Signature();
-        jniTagger(outSig, getRawPointer());
-        return outSig;
+    public Optional<Signature> tagger() {
+        long ptr = jniTagger(getRawPointer());
+        return ptr == 0 ? Optional.empty() : Optional.of(new Signature(true, ptr));
     }
 
     static native String jniMessage(long tagPtr);
@@ -98,8 +99,8 @@ public class Tag extends GitObject {
             Oid oid,
             long repoPtr,
             String tagName,
-            long targetPtr,
-            Signature tagger,
+            long target,
+            long tagger,
             String message,
             int force);
 
@@ -129,11 +130,11 @@ public class Tag extends GitObject {
      *     ODB
      */
     public static Oid create(
-            Repository repo,
-            String tagName,
-            GitObject target,
-            Signature tagger,
-            String message,
+            @Nonnull Repository repo,
+            @Nonnull String tagName,
+            @Nonnull GitObject target,
+            @Nonnull Signature tagger,
+            @Nonnull String message,
             boolean force) {
         Oid outOid = new Oid();
         int e =
@@ -142,7 +143,7 @@ public class Tag extends GitObject {
                         repo.getRawPointer(),
                         tagName,
                         target.getRawPointer(),
-                        tagger,
+                        tagger.getRawPointer(),
                         message,
                         force ? 1 : 0);
         Error.throwIfNeeded(e);
@@ -150,12 +151,7 @@ public class Tag extends GitObject {
     }
 
     static native int jniAnnotationCreate(
-            Oid oid,
-            long repoPtr,
-            String tagName,
-            long targetPtr,
-            Signature tagger,
-            String message);
+            Oid oid, long repoPtr, String tagName, long target, long tagger, String message);
 
     /**
      * Create a new tag in the object database pointing to a git_object
@@ -170,8 +166,13 @@ public class Tag extends GitObject {
      * @return oid to the newly created tag
      * @throws GitException 0 on success or an error code
      */
+    @Nonnull
     public static Oid annotationCreate(
-            Repository repo, String tagName, GitObject target, Signature tagger, String message) {
+            @Nonnull Repository repo,
+            @Nonnull String tagName,
+            @Nonnull GitObject target,
+            @Nonnull Signature tagger,
+            @Nonnull String message) {
         Oid outOid = new Oid();
         int e =
                 jniAnnotationCreate(
@@ -179,7 +180,7 @@ public class Tag extends GitObject {
                         repo.getRawPointer(),
                         tagName,
                         target.getRawPointer(),
-                        tagger,
+                        tagger.getRawPointer(),
                         message);
         Error.throwIfNeeded(e);
         return outOid;

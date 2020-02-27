@@ -6,6 +6,8 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 public class Commit extends GitObject {
     Commit(long rawPointer) {
@@ -132,33 +134,37 @@ public class Commit extends GitObject {
         return jniTimeOffset(getRawPointer());
     }
 
-    static native void jniCommitter(long commitPtr, Signature outSig);
+    static native long jniCommitter(long commitPtr);
 
     /**
      * Get the committer of a commit.
      *
      * @return the committer of a commit
      */
+    @Nonnull
     public Signature committer() {
-        Signature outSig = new Signature();
-        jniCommitter(getRawPointer(), outSig);
-        return outSig;
+        long ptr = jniCommitter(getRawPointer());
+        return new Signature(true, ptr);
     }
 
-    static native void jniAuthor(long commitPtr, Signature outSig);
+    static native long jniAuthor(long commitPtr);
 
     /**
      * Get the author of a commit.
      *
      * @return the author of a commit
      */
+    @Nonnull
     public Signature author() {
-        Signature outSig = new Signature();
-        jniAuthor(getRawPointer(), outSig);
-        return outSig;
+        long ptr = jniAuthor(getRawPointer());
+        return new Signature(true, ptr);
     }
 
-    static native int jniCommitterWithMailmap(Signature outSig, long commitPtr, long mailmapPtr);
+    /**
+     * int git_commit_committer_with_mailmap(git_signature **out, const git_commit *commit, const
+     * git_mailmap *mailmap);
+     */
+    static native int jniCommitterWithMailmap(AtomicLong out, long commit, long mailmap);
 
     /**
      * Get the committer of a commit, using the mailmap to map names and email addresses to
@@ -168,15 +174,22 @@ public class Commit extends GitObject {
      * @return signature that contains the committer identity
      * @throws GitException git errors
      */
-    public Signature committerWithMailmap(Mailmap mailmap) {
-        Signature outSig = new Signature();
+    @Nonnull
+    public Optional<Signature> committerWithMailmap(@Nullable Mailmap mailmap) {
+        Signature outSig = new Signature(false, 0);
         Error.throwIfNeeded(
                 jniCommitterWithMailmap(
-                        outSig, getRawPointer(), mailmap == null ? 0 : mailmap.getRawPointer()));
-        return outSig;
+                        outSig._rawPtr,
+                        getRawPointer(),
+                        mailmap == null ? 0 : mailmap.getRawPointer()));
+        return outSig.isNull() ? Optional.empty() : Optional.of(outSig);
     }
 
-    static native int jniAuthorWithMailmap(Signature outSig, long commitPtr, long mailmapPtr);
+    /**
+     * int git_commit_author_with_mailmap(git_signature **out, const git_commit *commit, const
+     * git_mailmap *mailmap);
+     */
+    static native int jniAuthorWithMailmap(AtomicLong out, long commit, long mailmap);
 
     /**
      * Get the author of a commit, using the mailmap to map names and email addresses to canonical
@@ -186,12 +199,15 @@ public class Commit extends GitObject {
      * @return signature that contains the author information
      * @throws GitException git errors
      */
-    public Signature authorWithMailmap(Mailmap mailmap) {
-        Signature outSig = new Signature();
+    @Nonnull
+    public Optional<Signature> authorWithMailmap(@Nullable Mailmap mailmap) {
+        Signature outSig = new Signature(false, 0);
         Error.throwIfNeeded(
                 jniAuthorWithMailmap(
-                        outSig, getRawPointer(), mailmap == null ? 0 : mailmap.getRawPointer()));
-        return outSig;
+                        outSig._rawPtr,
+                        getRawPointer(),
+                        mailmap == null ? 0 : mailmap.getRawPointer()));
+        return outSig.isNull() ? Optional.empty() : Optional.of(outSig);
     }
 
     static native String jniRawHeader(long commitPtr);
@@ -325,8 +341,8 @@ public class Commit extends GitObject {
             Oid outOid,
             long repoPtr,
             String updateRef,
-            Signature author,
-            Signature commiter,
+            long author,
+            long commiter,
             String msgEncoding,
             String message,
             long treePtr,
@@ -349,7 +365,7 @@ public class Commit extends GitObject {
      * > Merge branch 'feature/dev'
      * }</pre>
      *
-     * Therefor, to create a commit, all necessary must be provided.
+     * Therefore, to create a commit, all necessary must be provided.
      *
      * @param repo Repository where to store the commit
      * @param updateRef If not NULL, name of the reference that will be updated to point to this
@@ -372,14 +388,14 @@ public class Commit extends GitObject {
      *     the given reference will be updated to point to it
      */
     public static Oid create(
-            Repository repo,
-            String updateRef,
-            Signature author,
-            Signature committer,
-            String messageEncoding,
-            String message,
-            Tree tree,
-            List<Commit> parents) {
+            @Nonnull Repository repo,
+            @Nullable String updateRef,
+            @Nonnull Signature author,
+            @Nonnull Signature committer,
+            @Nullable String messageEncoding,
+            @Nonnull String message,
+            @Nonnull Tree tree,
+            @Nonnull List<Commit> parents) {
         Oid outOid = new Oid();
         long[] parentsArray =
                 parents.stream().map(Commit::getRawPointer).mapToLong(Long::longValue).toArray();
@@ -388,8 +404,8 @@ public class Commit extends GitObject {
                         outOid,
                         repo.getRawPointer(),
                         updateRef,
-                        author,
-                        committer,
+                        author.getRawPointer(),
+                        committer.getRawPointer(),
                         messageEncoding,
                         message,
                         tree.getRawPointer(),
@@ -402,8 +418,8 @@ public class Commit extends GitObject {
             Oid outOid,
             long commitToAmend,
             String updateRef,
-            Signature author,
-            Signature committer,
+            long author,
+            long committer,
             String messageEncoding,
             String message,
             long treePtr);
@@ -438,20 +454,20 @@ public class Commit extends GitObject {
      */
     public static Oid amend(
             Commit commitToAmend,
-            String updateRef,
-            Signature author,
-            Signature committer,
-            String messageEncoding,
-            String message,
-            Tree tree) {
+            @Nullable String updateRef,
+            @Nullable Signature author,
+            @Nullable Signature committer,
+            @Nullable String messageEncoding,
+            @Nullable String message,
+            @Nullable Tree tree) {
         Oid outOid = new Oid();
         int e =
                 jniAmend(
                         outOid,
                         commitToAmend.getRawPointer(),
                         updateRef,
-                        author,
-                        committer,
+                        author == null ? 0 : author.getRawPointer(),
+                        committer == null ? 0 : committer.getRawPointer(),
                         messageEncoding,
                         message,
                         tree == null ? 0 : tree.getRawPointer());
@@ -462,11 +478,12 @@ public class Commit extends GitObject {
     static native int jniCreateBuffer(
             Buf outBuf,
             long repoPtr,
-            Signature author,
-            Signature committer,
+            long author,
+            long committer,
             String messageEncoding,
             String message,
             long treePtr,
+            int parentCnt,
             long[] parents);
 
     /**
@@ -485,31 +502,34 @@ public class Commit extends GitObject {
      * @param tree An instance of a `git_tree` object that will be used as the tree for the commit.
      *     This tree object must also be owned by the given `repo`.
      * @param parents Array of `parent_count` pointers to `git_commit` objects that will be used as
-     *     the parents for this commit. This array may be NULL if `parent_count` is 0 (root commit).
-     *     All the given commits must be owned by the `repo`.
+     *     the parents for this commit. All the given commits must be owned by the `repo`.
      * @return the buffer into which to write the commit object content
      * @throws GitException git errors
      */
     public static Buf createBuffer(
-            Repository repo,
-            Signature author,
-            Signature committer,
-            String messageEncoding,
-            String message,
-            Tree tree,
-            List<Commit> parents) {
+            @Nonnull Repository repo,
+            @Nonnull Signature author,
+            @Nonnull Signature committer,
+            @Nullable String messageEncoding,
+            @Nonnull String message,
+            @Nonnull Tree tree,
+            @Nonnull List<Commit> parents) {
         Buf outBuf = new Buf();
         long[] parentsArray =
                 parents.stream().map(Commit::getRawPointer).mapToLong(Long::longValue).toArray();
+        System.out.printf(
+                "jni author.getName() = %s, addr = %s \n",
+                author.getName(), Long.toHexString(author.getRawPointer()));
         int e =
                 jniCreateBuffer(
                         outBuf,
                         repo.getRawPointer(),
-                        author,
-                        committer,
+                        author.getRawPointer(),
+                        committer.getRawPointer(),
                         messageEncoding,
                         message,
                         tree.getRawPointer(),
+                        parents.size(),
                         parentsArray);
         Error.throwIfNeeded(e);
         return outBuf;

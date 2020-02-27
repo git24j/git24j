@@ -29,7 +29,7 @@ public class TagTest extends TestBase {
         try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {
             Tag v01 = Tag.lookup(testRepo, Oid.of(TAG_V01_SHA));
             Assert.assertEquals("v0.1", v01.name());
-            Signature tagger = v01.tagger();
+            Signature tagger = v01.tagger().orElseThrow(RuntimeException::new);
             Assert.assertNotNull(tagger.getName());
             Assert.assertNotNull(tagger.getEmail());
             Assert.assertNotNull(v01.message());
