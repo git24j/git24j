@@ -22,7 +22,7 @@
 - [ ] Cred
 - [x] Patch
 - [x] Checkout
-- [ ] Signature
+- [x] Signature
 - [ ] Refspec
 - [ ] Blame
 
