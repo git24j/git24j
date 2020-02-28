@@ -80,7 +80,7 @@ public class Patch extends CAutoReleasable {
             @Nullable String oldAsPath,
             @Nullable Blob newBlob,
             @Nullable String newAsPath,
-            @Nullable Diff.Options opts) {
+            @Nullable DiffOptions opts) {
         Patch out = new Patch(false, 0);
         Error.throwIfNeeded(
                 jniFromBlobs(
@@ -141,7 +141,7 @@ public class Patch extends CAutoReleasable {
             @Nullable String oldAsPath,
             @Nullable byte[] buffer,
             @Nullable String bufferAsPath,
-            @Nullable Diff.Options opts) {
+            @Nullable DiffOptions opts) {
         Patch out = new Patch(false, 0);
         Error.throwIfNeeded(
                 jniFromBlobAndBuffer(
@@ -205,7 +205,7 @@ public class Patch extends CAutoReleasable {
             @Nullable String oldAsPath,
             @Nullable byte[] newBuffer,
             @Nullable String newAsPath,
-            @Nullable Diff.Options opts) {
+            @Nullable DiffOptions opts) {
         Patch out = new Patch(false, 0);
         Error.throwIfNeeded(
                 jniFromBuffers(

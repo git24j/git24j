@@ -6,7 +6,7 @@
 - [x] Reference
 - [x] Commit
 - [x] Branch
-- [x] Config
+- [x] Config (half done?)
 - [x] Index
 - [x] Diff
 - [x] Merge (no test)
