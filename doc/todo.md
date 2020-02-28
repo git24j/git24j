@@ -23,8 +23,8 @@
 - [x] Patch
 - [x] Checkout
 - [x] Signature
-- [ ] Refspec
-- [ ] Blame
+- [x] Refspec
+- [x] Blame
 
 
 ## API polishing
@@ -62,3 +62,5 @@
 - [ ] Check all `data_structure **out pattern`, code gen may broken in this case, especially pattern like `jniAbcNew`
 - [ ] Make sure `equals` and `hashcode` makes sense. Equality of simple structures should compare by fields instead of raw pointer
 - [ ] Change all `AtomicReference<String>` to use jniConstants
+- [ ] Change `CURRENT_VERSION` in Options structures to `VERSION`
+- [ ] Flattern nested class outside, `BlameHunk` is cognitively easier to use than `Blame.Hunk` 
