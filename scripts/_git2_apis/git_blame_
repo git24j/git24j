@@ -1,0 +1,7 @@
+int git_blame_init_options(git_blame_options *opts, unsigned int version);
+size_t git_blame_get_hunk_count(git_blame *blame);
+const git_blame_hunk * git_blame_get_hunk_byindex(git_blame *blame, size_t index);
+const git_blame_hunk * git_blame_get_hunk_byline(git_blame *blame, size_t lineno);
+int git_blame_file(git_blame **out, git_repository *repo, const char *path, git_blame_options *options);
+int git_blame_buffer(git_blame **out, git_blame *reference, const char *buffer, size_t buffer_len);
+void git_blame_free(git_blame *blame);
