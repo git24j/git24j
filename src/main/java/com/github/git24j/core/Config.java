@@ -180,40 +180,7 @@ public class Config extends CAutoCloseable {
      */
     static native int jniAddFileOndisk(long cfg, String path, int level, long repoPtr, int force);
 
-    public enum ConfigLevel {
-        /** System-wide on Windows, for compatibility with portable git */
-        PROGRAMDATA(1),
 
-        /** System-wide configuration file; /etc/gitconfig on Linux systems */
-        SYSTEM(2),
-
-        /** XDG compatible configuration file; typically ~/.config/git/config */
-        XDG(3),
-
-        /**
-         * User-specific configuration file (also called Global configuration file); typically
-         * ~/.gitconfig
-         */
-        GLOBAL(4),
-
-        /** Repository specific configuration file; $WORK_DIR/.git/config on non-bare repos */
-        LOCAL(5),
-
-        /** Application specific configuration file; freely defined by applications */
-        APP(6),
-
-        /**
-         * Represents the highest level available config file (i.e. the most specific config file
-         * available that actually is loaded)
-         */
-        HIGHEST(-1),
-        ;
-        private final int _code;
-
-        ConfigLevel(int code) {
-            _code = code;
-        }
-    }
     /**
      * Add an on-disk config file instance to an existing config
      *
@@ -241,7 +208,7 @@ public class Config extends CAutoCloseable {
                 jniAddFileOndisk(
                         getRawPointer(),
                         path.toString(),
-                        level._code,
+                        level.getBit(),
                         repo == null ? 0 : repo.getRawPointer(),
                         force ? 1 : 0));
     }
@@ -288,7 +255,7 @@ public class Config extends CAutoCloseable {
      */
     public static Config openLevel(ConfigLevel level, Config parent) {
         Config cfg = new Config(0);
-        int e = jniOpenLevel(cfg._rawPtr, parent.getRawPointer(), level._code);
+        int e = jniOpenLevel(cfg._rawPtr, parent.getRawPointer(), level.getBit());
         if (ENOTFOUND.getCode() == e) {
             return null;
         }
