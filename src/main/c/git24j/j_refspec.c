@@ -30,21 +30,21 @@ JNIEXPORT void JNICALL J_MAKE_METHOD(Refspec_jniFree)(JNIEnv *env, jclass obj, j
 JNIEXPORT jstring JNICALL J_MAKE_METHOD(Refspec_jniSrc)(JNIEnv *env, jclass obj, jlong refspecPtr)
 {
     const char *r = git_refspec_src((git_refspec *)refspecPtr);
-    return r;
+    return (*env)->NewStringUTF(env, r);
 }
 
 /** const char * git_refspec_dst(const git_refspec *refspec); */
 JNIEXPORT jstring JNICALL J_MAKE_METHOD(Refspec_jniDst)(JNIEnv *env, jclass obj, jlong refspecPtr)
 {
     const char *r = git_refspec_dst((git_refspec *)refspecPtr);
-    return r;
+    return (*env)->NewStringUTF(env, r);
 }
 
 /** const char * git_refspec_string(const git_refspec *refspec); */
 JNIEXPORT jstring JNICALL J_MAKE_METHOD(Refspec_jniString)(JNIEnv *env, jclass obj, jlong refspecPtr)
 {
     const char *r = git_refspec_string((git_refspec *)refspecPtr);
-    return r;
+    return (*env)->NewStringUTF(env, r);
 }
 
 /** int git_refspec_force(const git_refspec *refspec); */
@@ -55,7 +55,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Refspec_jniForce)(JNIEnv *env, jclass obj, 
 }
 
 /** git_direction git_refspec_direction(const git_refspec *spec); */
-JNIEXPORT JNICALL J_MAKE_METHOD(Refspec_jniDirection)(JNIEnv *env, jclass obj, jlong specPtr)
+JNIEXPORT JNICALL jint J_MAKE_METHOD(Refspec_jniDirection)(JNIEnv *env, jclass obj, jlong specPtr)
 {
     git_direction r = git_refspec_direction((git_refspec *)specPtr);
     return r;
