@@ -1,5 +1,7 @@
 package com.github.git24j.core;
 
+import static org.junit.Assert.*;
+
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
@@ -20,7 +22,7 @@ public class DiffTest extends TestBase {
             Tree dev = (Tree) Tree.lookup(testRepo, Oid.of(DEV_TREE), GitObject.Type.TREE);
             Diff diff =
                     Diff.treeToTree(
-                            testRepo, dev, head, DiffOptions.create(DiffOptions.CURRENT_VERSION));
+                            testRepo, dev, head, Diff.Options.create(Diff.Options.CURRENT_VERSION));
             Assert.assertNotNull(diff);
         }
     }

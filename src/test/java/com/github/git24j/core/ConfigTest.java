@@ -59,7 +59,7 @@ public class ConfigTest extends TestBase {
         File f = folder.newFile("ext.config");
         FileUtils.writeLines(f, CONFIG_LINES);
         try (Config cfg = Config.newConfig()) {
-            cfg.addFileOndisk(f.toPath(), ConfigLevel.LOCAL, null, false);
+            cfg.addFileOndisk(f.toPath(), Config.ConfigLevel.LOCAL, null, false);
             Assert.assertFalse(cfg.getBool("http.sslVerify").orElse(true));
         }
     }
@@ -78,7 +78,7 @@ public class ConfigTest extends TestBase {
         File f = folder.newFile("ext.config");
         FileUtils.writeLines(f, CONFIG_LINES);
         try (Config parent = Config.openOndisk(f.toPath())) {
-            Config.openLevel(ConfigLevel.LOCAL, parent);
+            Config.openLevel(Config.ConfigLevel.LOCAL, parent);
         }
     }
 }

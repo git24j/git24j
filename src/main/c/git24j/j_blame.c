@@ -27,14 +27,14 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Blame_jniGetHunkCount)(JNIEnv *env, jclass 
 JNIEXPORT jlong JNICALL J_MAKE_METHOD(Blame_jniGetHunkByindex)(JNIEnv *env, jclass obj, jlong blamePtr, jint index)
 {
     const git_blame_hunk *r = git_blame_get_hunk_byindex((git_blame *)blamePtr, index);
-    return r;
+    return (jlong)r;
 }
 
 /** const git_blame_hunk * git_blame_get_hunk_byline(git_blame *blame, size_t lineno); */
 JNIEXPORT jlong JNICALL J_MAKE_METHOD(Blame_jniGetHunkByline)(JNIEnv *env, jclass obj, jlong blamePtr, jint lineno)
 {
     const git_blame_hunk *r = git_blame_get_hunk_byline((git_blame *)blamePtr, lineno);
-    return r;
+    return (jlong)r;
 }
 
 /** int git_blame_file(git_blame **out, git_repository *repo, const char *path, git_blame_options *options); */

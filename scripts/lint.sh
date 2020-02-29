@@ -46,9 +46,18 @@ lint_diff() {
     popd
 }
 
+lint_changes() {
+    pushd $TOP
+    while IFS= read -r line; do
+        echo java -jar target/google-java-format.jar  -i -a $line;
+        java -jar target/google-java-format.jar  -i -a $line;
+    done < <(git status | grep '.java' | cut -d':' -f2)
+    popd
+}
+
 _info() {
     echo "Usage: "
-    echo "  lint [diff [num] | all | filename | download]"
+    echo "  lint [diff [num] | all | filename | download | changes]"
     echo ""
 }
 
@@ -58,6 +67,8 @@ elif [[ $1 == "diff" ]]; then
     lint_diff $2
 elif [[ $1 == "all" ]]; then
     lint_all
+elif [[ $1 == "changes" ]]; then
+    lint_changes
 elif [[ -f $1 ]]; then
     lint_file $1
 else
