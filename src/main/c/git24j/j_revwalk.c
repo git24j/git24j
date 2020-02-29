@@ -138,7 +138,6 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Revwalk_jniNew)(JNIEnv *env, jclass obj, jo
     git_revwalk *c_out;
     int r = git_revwalk_new(&c_out, (git_repository *)repoPtr);
     (*env)->CallVoidMethod(env, out, jniConstants->midAtomicLongSet, (long)c_out);
-    git_revwalk_free(c_out);
     return r;
 }
 
