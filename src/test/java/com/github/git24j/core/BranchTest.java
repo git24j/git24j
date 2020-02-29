@@ -41,7 +41,7 @@ public class BranchTest extends TestBase {
     @Test
     public void delete() {
         try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {
-            Reference ref = Branch.lookup(testRepo, "feature/dev", BranchType.LOCAL);
+            Reference ref = Branch.lookup(testRepo, "feature/dev", Branch.BranchType.LOCAL);
             Branch.delete(ref);
         }
     }
@@ -49,7 +49,7 @@ public class BranchTest extends TestBase {
     @Test
     public void lookup() {
         try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {
-            Reference ref = Branch.lookup(testRepo, "feature/dev", BranchType.LOCAL);
+            Reference ref = Branch.lookup(testRepo, "feature/dev", Branch.BranchType.LOCAL);
             Assert.assertNotNull(ref);
             Assert.assertEquals(FEATURE_DEV_HASH, ref.target().toString());
         }
@@ -58,8 +58,8 @@ public class BranchTest extends TestBase {
     @Test
     public void iter() {
         try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {
-            Branch.Iterator iter = Branch.Iterator.create(testRepo, BranchType.LOCAL);
-            Map.Entry<Reference, BranchType> entry = iter.next();
+            Branch.Iterator iter = Branch.Iterator.create(testRepo, Branch.BranchType.LOCAL);
+            Map.Entry<Reference, Branch.BranchType> entry = iter.next();
             Set<String> refsSet = new HashSet<>();
             while (entry != null) {
                 refsSet.add(entry.getKey().name());
@@ -73,7 +73,7 @@ public class BranchTest extends TestBase {
     @Test
     public void move() {
         try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {
-            Reference br0 = Branch.lookup(testRepo, "feature/dev", BranchType.LOCAL);
+            Reference br0 = Branch.lookup(testRepo, "feature/dev", Branch.BranchType.LOCAL);
             Reference br1 = Branch.move(br0, "feature_dev", true);
             Assert.assertEquals(FEATURE_DEV_HASH, br1.target().toString());
         }
@@ -82,7 +82,7 @@ public class BranchTest extends TestBase {
     @Test
     public void name() {
         try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {
-            Reference br0 = Branch.lookup(testRepo, "feature/dev", BranchType.LOCAL);
+            Reference br0 = Branch.lookup(testRepo, "feature/dev", Branch.BranchType.LOCAL);
             String name = Branch.name(br0);
             Assert.assertEquals("feature/dev", name);
         }
@@ -92,7 +92,7 @@ public class BranchTest extends TestBase {
     @Test
     public void upstream() {
         try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {
-            Reference br0 = Branch.lookup(testRepo, "feature/dev", BranchType.LOCAL);
+            Reference br0 = Branch.lookup(testRepo, "feature/dev", Branch.BranchType.LOCAL);
             Reference tracking = Branch.upstream(br0);
             Assert.assertNull(tracking);
         }
@@ -101,7 +101,7 @@ public class BranchTest extends TestBase {
     @Test
     public void upstreamName() {
         try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {
-            Reference br0 = Branch.lookup(testRepo, "feature/dev", BranchType.LOCAL);
+            Reference br0 = Branch.lookup(testRepo, "feature/dev", Branch.BranchType.LOCAL);
             String upstreamName = Branch.upstreamName(testRepo, "refs/heads/master");
             Assert.assertNull(upstreamName);
         }
@@ -110,7 +110,7 @@ public class BranchTest extends TestBase {
     @Test
     public void isHead() {
         try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {
-            Reference br0 = Branch.lookup(testRepo, "master", BranchType.LOCAL);
+            Reference br0 = Branch.lookup(testRepo, "master", Branch.BranchType.LOCAL);
             Assert.assertTrue(Branch.isHead(br0));
         }
     }
@@ -118,7 +118,7 @@ public class BranchTest extends TestBase {
     @Test
     public void isCheckedOut() {
         try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {
-            Reference br0 = Branch.lookup(testRepo, "master", BranchType.LOCAL);
+            Reference br0 = Branch.lookup(testRepo, "master", Branch.BranchType.LOCAL);
             Assert.assertTrue(Branch.isCheckedOut(br0));
         }
     }

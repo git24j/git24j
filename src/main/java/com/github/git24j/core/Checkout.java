@@ -1,19 +1,151 @@
 package com.github.git24j.core;
 
+import java.util.EnumSet;
 import java.util.concurrent.atomic.AtomicLong;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 public class Checkout {
 
+    /**
+     * Checkout options structure
+     *
+     * <p>Initialize with `GIT_CHECKOUT_OPTIONS_INIT`. Alternatively, you can use
+     * `git_checkout_init_options`.
+     */
+    public static class Options extends CAutoReleasable {
+        protected Options(boolean isWeak, long rawPtr) {
+            super(isWeak, rawPtr);
+        }
+
+        @Override
+        protected void freeOnce(long cPtr) {
+            Libgit2.jniShadowFree(cPtr);
+        }
+
+        @Nonnull
+        public Options create(int version) {
+            Options opts = new Options(false, 0);
+            Error.throwIfNeeded(jniOptionsNew(opts._rawPtr, version));
+            return opts;
+        }
+
+        public int getVersion() {
+            return jniOptionsGetVersion(getRawPointer());
+        }
+
+        public void setVersion(int ver) {
+            jniOptionsSetVersion(getRawPointer(), ver);
+        }
+
+        /** @return checkout strategy, default is SAFE */
+        @Nonnull
+        public EnumSet<StrategyT> getStrategy() {
+            return IBitEnum.parse(jniOptionsGetStrategy(getRawPointer()), StrategyT.class);
+        }
+
+        public void setStrategy(@Nonnull EnumSet<StrategyT> strategies) {
+            jniOptionsSetStrategy(getRawPointer(), IBitEnum.bitOrAll(strategies));
+        }
+
+        public boolean getDisableFilter() {
+            return jniOptionsGetDisableFilters(getRawPointer()) == 1;
+        }
+
+        /** don't apply filters like CRLF conversion */
+        public void setDisableFilter(boolean disableFilter) {
+            jniOptionsSetDisableFilters(getRawPointer(), disableFilter ? 1 : 0);
+        }
+
+        /** default is 0755 */
+        public int getDirMode() {
+            return jniOptionsGetDirMode(getRawPointer());
+        }
+
+        public void setDirMode(int mode) {
+            jniOptionsSetDirMode(getRawPointer(), mode);
+        }
+
+        /** default is 0644 or 0755 as dictated by blob */
+        public int getFileMode() {
+            return jniOptionsGetFileMode(getRawPointer());
+        }
+
+        public void setFileMode(int mode) {
+            jniOptionsSetFileMode(getRawPointer(), mode);
+        }
+
+        /** default is O_CREAT | O_TRUNC | O_WRONLY */
+        public int getOpenFlags() {
+            return jniOptionsGetFileOpenFlags(getRawPointer());
+        }
+
+        public void setOpenFlags(int flags) {
+            jniOptionsSetFileOpenFlags(getRawPointer(), flags);
+        }
+
+        /** see `git_checkout_notify_t` above */
+        public EnumSet<NotifyT> getNotifyFlags() {
+            return IBitEnum.parse(jniOptionsGetNotifyFlags(getRawPointer()), NotifyT.class);
+        }
+
+        public void setNotifyFlags(EnumSet<NotifyT> flags) {
+            jniOptionsSetNotifyFlags(getRawPointer(), IBitEnum.bitOrAll(flags));
+        }
+
+        public void setNotifyCb(@Nonnull NotifyCb callback) {
+            jniOptionsSetNotifyCb(
+                    getRawPointer(),
+                    (why, s, basePtr, targePtr, workdirPtr) ->
+                            callback.accept(
+                                    IBitEnum.valueOf(why, NotifyT.class),
+                                    s,
+                                    Diff.File.ofWeak(basePtr),
+                                    Diff.File.ofWeak(targePtr),
+                                    Diff.File.ofWeak(workdirPtr)));
+        }
+
+        public void setProcessCb(@Nonnull ProcessCb callback) {
+            jniOptionsSetProcessCb(getRawPointer(), callback);
+        }
+
+        public void setPerfdataCb(@Nonnull PerfdataCb callback) {
+            jniOptionsSetPerfdataCb(getRawPointer(), callback);
+        }
+
+        public void setPaths(@Nonnull String[] paths) {
+            jniOptionsSetPaths(getRawPointer(), paths);
+        }
+
+        public void setBaseline(@Nonnull Tree baseline) {
+            jniOptionsSetBaseline(getRawPointer(), baseline.getRawPointer());
+        }
+
+        public void setBaselineIndex(@Nonnull Index baselineIndex) {
+            jniOptionsSetBaselineIndex(getRawPointer(), baselineIndex.getRawPointer());
+        }
+
+        public void setTargetDirectory(@Nonnull String targetDirectory) {
+            jniOptionsSetTargetDirectory(getRawPointer(), targetDirectory);
+        }
+
+        public void setAncestorLabel(@Nonnull String ancestorLabel) {
+            jniOptionsSetAncestorLabel(getRawPointer(), ancestorLabel);
+        }
+
+        public void setOurLabel(@Nonnull String ourLabel) {
+            jniOptionsSetOurLabel(getRawPointer(), ourLabel);
+        }
+
+        public void setTheirLabel(@Nonnull String theirLabel) {
+            jniOptionsSetTheirLable(getRawPointer(), theirLabel);
+        }
+    }
+
     @FunctionalInterface
     public interface NotifyCb {
         int accept(
-                CheckoutNotifyT why,
-                String path,
-                Diff.File baseline,
-                Diff.File target,
-                Diff.File workdir);
+                NotifyT why, String path, Diff.File baseline, Diff.File target, Diff.File workdir);
     }
 
     @FunctionalInterface
@@ -26,6 +158,102 @@ public class Checkout {
         void accept(int mkdirCalls, int statCalls, int chmodCalls);
     }
 
+    public enum StrategyT implements IBitEnum {
+        /** default is a dry run, no actual updates */
+        NONE(0),
+
+        /** Allow safe updates that cannot overwrite uncommitted data */
+        SAFE(1 << 0),
+
+        /** Allow all updates to force working directory to look like index */
+        FORCE(1 << 1),
+
+        /** Allow checkout to recreate missing files */
+        RECREATE_MISSING(1 << 2),
+
+        /** Allow checkout to make safe updates even if conflicts are found */
+        ALLOW_CONFLICTS(1 << 4),
+
+        /** Remove untracked files not in index (that are not ignored) */
+        REMOVE_UNTRACKED(1 << 5),
+
+        /** Remove ignored files not in index */
+        REMOVE_IGNORED(1 << 6),
+
+        /** Only update existing files, don't create new ones */
+        UPDATE_ONLY(1 << 7),
+
+        /**
+         * Normally checkout updates index entries as it goes; this stops that. Implies
+         * `DONT_WRITE_INDEX`.
+         */
+        DONT_UPDATE_INDEX(1 << 8),
+
+        /** Don't refresh index/config/etc before doing checkout */
+        NO_REFRESH(1 << 9),
+
+        /** Allow checkout to skip unmerged files */
+        SKIP_UNMERGED(1 << 10),
+        /** For unmerged files, checkout stage 2 from index */
+        USE_OURS(1 << 11),
+        /** For unmerged files, checkout stage 3 from index */
+        USE_THEIRS(1 << 12),
+
+        /** Treat pathspec as simple list of exact match file paths */
+        DISABLE_PATHSPEC_MATCH(1 << 13),
+
+        /** Ignore directories in use, they will be left empty */
+        SKIP_LOCKED_DIRECTORIES(1 << 18),
+
+        /** Don't overwrite ignored files that exist in the checkout target */
+        DONT_OVERWRITE_IGNORED(1 << 19),
+
+        /** Write normal merge files for conflicts */
+        CONFLICT_STYLE_MERGE(1 << 20),
+
+        /** Include common ancestor data in diff3 format files for conflicts */
+        CONFLICT_STYLE_DIFF3(1 << 21),
+
+        /** Don't overwrite existing files or folders */
+        DONT_REMOVE_EXISTING(1 << 22),
+
+        /** Normally checkout writes the index upon completion; this prevents that. */
+        DONT_WRITE_INDEX(1 << 23),
+        /** Recursively checkout submodules with same options (NOT IMPLEMENTED) */
+        UPDATE_SUBMODULES(1 << 16),
+        /** Recursively checkout submodules if HEAD moved in super repo (NOT IMPLEMENTED) */
+        UPDATE_SUBMODULES_IF_CHANGED(1 << 17);
+        private final int _bit;
+
+        StrategyT(int bit) {
+            _bit = bit;
+        }
+
+        @Override
+        public int getBit() {
+            return _bit;
+        }
+    }
+
+    public enum NotifyT implements IBitEnum {
+        NONE(0),
+        CONFLICT(1 << 0),
+        DIRTY(1 << 1),
+        UPDATED(1 << 2),
+        UNTRACKED(1 << 3),
+        IGNORED(1 << 4),
+        ALL(0x0FFFF);
+        private final int _bit;
+
+        NotifyT(int bit) {
+            _bit = bit;
+        }
+
+        @Override
+        public int getBit() {
+            return _bit;
+        }
+    }
     // no matching type found for 'git_checkout_notify_t why'
     /**
      * int git_checkout_notify_cb(git_checkout_notify_t why, const char *path, const git_diff_file
@@ -56,7 +284,7 @@ public class Checkout {
      * @throws GitException GIT_EUNBORNBRANCH if HEAD points to a non existing branch non-zero value
      *     returned by `notify_cb`, or other error code < 0 (use git_error_last for error details)
      */
-    public static int head(@Nonnull Repository repo, @Nullable CheckoutOptions opts) {
+    public static int head(@Nonnull Repository repo, @Nullable Options opts) {
         int e = jniHead(repo.getRawPointer(), opts == null ? 0 : opts.getRawPointer());
         Error.throwIfNeeded(e);
         return e;
@@ -78,7 +306,7 @@ public class Checkout {
      * @throws GitException git errors
      */
     public static int index(
-            @Nonnull Repository repo, @Nullable Index index, @Nullable CheckoutOptions opts) {
+            @Nonnull Repository repo, @Nullable Index index, @Nullable Options opts) {
         int e =
                 jniIndex(
                         repo.getRawPointer(),
@@ -106,7 +334,7 @@ public class Checkout {
      * @throws GitException git errors
      */
     public static int tree(
-            @Nonnull Repository repo, @Nullable GitObject treeish, @Nullable CheckoutOptions opts) {
+            @Nonnull Repository repo, @Nullable GitObject treeish, @Nullable Options opts) {
         int e =
                 jniTree(
                         repo.getRawPointer(),

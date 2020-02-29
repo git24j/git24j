@@ -680,7 +680,7 @@ public class Merge {
             @Nonnull Repository repo,
             @Nonnull List<AnnotatedCommit> theirHeads,
             @Nullable Options mergeOpts,
-            @Nullable CheckoutOptions checkoutOpts) {
+            @Nullable Checkout.Options checkoutOpts) {
         Error.throwIfNeeded(
                 jniMerge(
                         repo.getRawPointer(),
