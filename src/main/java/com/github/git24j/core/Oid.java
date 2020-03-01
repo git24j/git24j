@@ -90,6 +90,15 @@ public class Oid {
         return eSize;
     }
 
+    /** Set effective size of the oid. */
+    void setEffectiveSize(int eSize) {
+        if (eSize > RAWSZ) {
+            throw new IllegalArgumentException(
+                    "effective size should smaller than " + RAWSZ + ", but " + eSize + " is given");
+        }
+        this.eSize = eSize;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {

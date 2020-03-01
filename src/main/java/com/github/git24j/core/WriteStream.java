@@ -1,7 +1,7 @@
 package com.github.git24j.core;
 
 public class WriteStream extends CAutoCloseable {
-    public WriteStream(long rawPointer) {
+    WriteStream(long rawPointer) {
         super(rawPointer);
     }
 
