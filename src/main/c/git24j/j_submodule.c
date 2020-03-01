@@ -23,7 +23,6 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Submodule_jniAddSetup)(JNIEnv *env, jclass 
     char *c_path = j_copy_of_jstring(env, path, true);
     int r = git_submodule_add_setup(&c_out, (git_repository *)repoPtr, c_url, c_path, use_gitlink);
     (*env)->CallVoidMethod(env, out, jniConstants->midAtomicLongSet, (long)c_out);
-    git_submodule_free(c_out);
     free(c_url);
     free(c_path);
     return r;
@@ -100,7 +99,6 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Submodule_jniLookup)(JNIEnv *env, jclass ob
     char *c_name = j_copy_of_jstring(env, name, true);
     int r = git_submodule_lookup(&c_out, (git_repository *)repoPtr, c_name);
     (*env)->CallVoidMethod(env, out, jniConstants->midAtomicLongSet, (long)c_out);
-    git_submodule_free(c_out);
     free(c_name);
     return r;
 }

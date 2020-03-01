@@ -42,7 +42,6 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Signature_jniDefault)(JNIEnv *env, jclass o
     git_signature *c_out;
     int r = git_signature_default(&c_out, (git_repository *)repoPtr);
     (*env)->CallVoidMethod(env, out, jniConstants->midAtomicLongSet, (long)c_out);
-    git_signature_free(c_out);
     return r;
 }
 
@@ -63,7 +62,6 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Signature_jniDup)(JNIEnv *env, jclass obj, 
     git_signature *c_dest;
     int r = git_signature_dup(&c_dest, (git_signature *)sigPtr);
     (*env)->CallVoidMethod(env, dest, jniConstants->midAtomicLongSet, (long)c_dest);
-    git_signature_free(c_dest);
     return r;
 }
 

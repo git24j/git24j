@@ -33,7 +33,6 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Rebase_jniInit)(JNIEnv *env, jclass obj, jo
     git_rebase *c_out;
     int r = git_rebase_init(&c_out, (git_repository *)repoPtr, (git_annotated_commit *)branchPtr, (git_annotated_commit *)upstreamPtr, (git_annotated_commit *)ontoPtr, (git_rebase_options *)optsPtr);
     (*env)->CallVoidMethod(env, out, jniConstants->midAtomicLongSet, (long)c_out);
-    git_rebase_free(c_out);
     return r;
 }
 
@@ -43,7 +42,6 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Rebase_jniOpen)(JNIEnv *env, jclass obj, jo
     git_rebase *c_out;
     int r = git_rebase_open(&c_out, (git_repository *)repoPtr, (git_rebase_options *)optsPtr);
     (*env)->CallVoidMethod(env, out, jniConstants->midAtomicLongSet, (long)c_out);
-    git_rebase_free(c_out);
     return r;
 }
 
@@ -74,7 +72,6 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Rebase_jniNext)(JNIEnv *env, jclass obj, jo
     git_rebase_operation *c_operation;
     int r = git_rebase_next(&c_operation, (git_rebase *)rebasePtr);
     (*env)->CallVoidMethod(env, operation, jniConstants->midAtomicLongSet, (long)c_operation);
-    free(c_operation);
     return r;
 }
 
@@ -84,7 +81,6 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Rebase_jniInmemoryIndex)(JNIEnv *env, jclas
     git_index *c_index;
     int r = git_rebase_inmemory_index(&c_index, (git_rebase *)rebasePtr);
     (*env)->CallVoidMethod(env, index, jniConstants->midAtomicLongSet, (long)c_index);
-    git_index_free(c_index);
     return r;
 }
 

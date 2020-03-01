@@ -150,7 +150,6 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Config_jniGetEntry)(JNIEnv *env, jclass obj
     char *c_name = j_copy_of_jstring(env, name, true);
     int r = git_config_get_entry(&c_out, (git_config *)cfgPtr, c_name);
     (*env)->CallVoidMethod(env, out, jniConstants->midAtomicLongSet, (long)c_out);
-    git_config_entry_free(c_out);
     free(c_name);
     return r;
 }
@@ -245,7 +244,6 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Config_jniMultivarIteratorNew)(JNIEnv *env,
     char *c_regexp = j_copy_of_jstring(env, regexp, true);
     int r = git_config_multivar_iterator_new(&c_out, (git_config *)cfgPtr, c_name, c_regexp);
     (*env)->CallVoidMethod(env, out, jniConstants->midAtomicLongSet, (long)c_out);
-    git_config_iterator_free(c_out);
     free(c_name);
     free(c_regexp);
     return r;
@@ -257,7 +255,6 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Config_jniNext)(JNIEnv *env, jclass obj, jo
     git_config_entry *c_entry;
     int r = git_config_next(&c_entry, (git_config_iterator *)iterPtr);
     (*env)->CallVoidMethod(env, entry, jniConstants->midAtomicLongSet, (long)c_entry);
-    git_config_entry_free(c_entry);
     return r;
 }
 
@@ -352,7 +349,6 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Config_jniIteratorNew)(JNIEnv *env, jclass 
     git_config_iterator *c_out;
     int r = git_config_iterator_new(&c_out, (git_config *)cfgPtr);
     (*env)->CallVoidMethod(env, out, jniConstants->midAtomicLongSet, (long)c_out);
-    git_config_iterator_free(c_out);
     return r;
 }
 
@@ -363,7 +359,6 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Config_jniIteratorGlobNew)(JNIEnv *env, jcl
     char *c_regexp = j_copy_of_jstring(env, regexp, true);
     int r = git_config_iterator_glob_new(&c_out, (git_config *)cfgPtr, c_regexp);
     (*env)->CallVoidMethod(env, out, jniConstants->midAtomicLongSet, (long)c_out);
-    git_config_iterator_free(c_out);
     free(c_regexp);
     return r;
 }
@@ -439,6 +434,5 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Config_jniLock)(JNIEnv *env, jclass obj, jo
     git_transaction *c_tx;
     int r = git_config_lock(&c_tx, (git_config *)cfgPtr);
     (*env)->CallVoidMethod(env, tx, jniConstants->midAtomicLongSet, (long)c_tx);
-    git_transaction_free(c_tx);
     return r;
 }
