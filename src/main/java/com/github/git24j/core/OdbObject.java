@@ -1,9 +1,10 @@
 package com.github.git24j.core;
 
+import javax.annotation.Nonnull;
 import java.util.Objects;
 
 public class OdbObject extends CAutoReleasable {
-    public enum Type implements IBitEnum{
+    public enum Type implements IBitEnum {
         /** < Object can be any of the following */
         ANY(-2),
         /** < Object is invalid. */
@@ -74,5 +75,43 @@ public class OdbObject extends CAutoReleasable {
     @Override
     protected void freeOnce(long cPtr) {
         Odb.jniObjectFree(cPtr);
+    }
+
+    /**
+     * Create a copy of the current odb object.
+     *
+     * @return duplicate of the {@code OdbObject}
+     * @throws GitException git errors
+     */
+    @Nonnull
+    public OdbObject dup() {
+        OdbObject out = new OdbObject(false, 0);
+        Error.throwIfNeeded(Odb.jniObjectDup(out._rawPtr, getRawPointer()));
+        return out;
+    }
+
+    /**
+     * Return the OID of an ODB object
+     *
+     * <p>This is the OID from which the object was read from
+     *
+     * @return the object
+     * @throws GitException failed to get id.
+     */
+    @Nonnull
+    public Oid id() {
+        Oid out = new Oid();
+        Odb.jniObjectId(getRawPointer(), out);
+        if (out.isEmpty()) {
+            throw new GitException(
+                    GitException.ErrorClass.ODB, "Could not get id of the given OdbObject");
+        }
+        return out;
+    }
+
+    /** @return the type of an ODB object */
+    @Nonnull
+    public Type type() {
+        return IBitEnum.valueOf(Odb.jniObjectType(getRawPointer()), Type.class, Type.ANY);
     }
 }

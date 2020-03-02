@@ -13,6 +13,7 @@ extern "C"
     /** int git_odb_foreach(git_odb *db, git_odb_foreach_cb cb, void *payload); */
     // no matching type found for 'char *buffer'
     /** int git_odb_stream_read(git_odb_stream *stream, char *buffer, size_t len); */
+    JNIEXPORT jint JNICALL J_MAKE_METHOD(Odb_jniStreamRead)(JNIEnv *env, jclass obj, jlong streamPtr, jbyteArray buffer, jint len);
     // no matching type found for 'git_transfer_progress_cb progress_cb'
     /** int git_odb_write_pack(git_odb_writepack **out, git_odb *db, git_transfer_progress_cb progress_cb, void *progress_payload); */
     /** -------- Signature of the header ---------- */
@@ -69,7 +70,7 @@ extern "C"
     JNIEXPORT void JNICALL J_MAKE_METHOD(Odb_jniStreamFree)(JNIEnv *env, jclass obj, jlong streamPtr);
 
     /** int git_odb_open_rstream(git_odb_stream **out, size_t *len, git_object_t *type, git_odb *db, const git_oid *oid); */
-    JNIEXPORT jint JNICALL J_MAKE_METHOD(Odb_jniOpenRstream)(JNIEnv *env, jclass obj, jobject out, jobject len, jlong typePtr, jlong dbPtr, jobject oid);
+    JNIEXPORT jint JNICALL J_MAKE_METHOD(Odb_jniOpenRstream)(JNIEnv *env, jclass obj, jobject out, jobject len, jobject outType, jlong dbPtr, jobject oid);
 
     /** int git_odb_hash(git_oid *out, const void *data, size_t len, git_object_t type); */
     JNIEXPORT jint JNICALL J_MAKE_METHOD(Odb_jniHash)(JNIEnv *env, jclass obj, jobject out, jbyteArray data, jint len, jint type);
@@ -84,7 +85,7 @@ extern "C"
     JNIEXPORT void JNICALL J_MAKE_METHOD(Odb_jniObjectFree)(JNIEnv *env, jclass obj, jlong objectPtr);
 
     /** const git_oid * git_odb_object_id(git_odb_object *object); */
-    JNIEXPORT jlong JNICALL J_MAKE_METHOD(Odb_jniObjectId)(JNIEnv *env, jclass obj, jlong objectPtr);
+    JNIEXPORT void JNICALL J_MAKE_METHOD(Odb_jniObjectId)(JNIEnv *env, jclass obj, jlong objectPtr, jobject outId);
 
     /** const void * git_odb_object_data(git_odb_object *object); */
     JNIEXPORT jlong JNICALL J_MAKE_METHOD(Odb_jniObjectData)(JNIEnv *env, jclass obj, jlong objectPtr);

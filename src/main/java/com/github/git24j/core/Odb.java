@@ -68,6 +68,7 @@ public class Odb extends CAutoCloseable {
     /** int git_odb_foreach(git_odb *db, git_odb_foreach_cb cb, void *payload); */
     // no matching type found for 'char *buffer'
     /** int git_odb_stream_read(git_odb_stream *stream, char *buffer, size_t len); */
+    static native int jniStreamRead(long streamPtr, byte[] buffer, int len);
     // no matching type found for 'git_transfer_progress_cb progress_cb'
     /**
      * int git_odb_write_pack(git_odb_writepack **out, git_odb *db, git_transfer_progress_cb
@@ -360,6 +361,64 @@ public class Odb extends CAutoCloseable {
         protected void releaseOnce(long cPtr) {
             jniStreamFree(cPtr);
         }
+
+        /**
+         * Write to an odb stream
+         *
+         * <p>This method will fail if the total number of received bytes exceeds the size declared
+         * with `git_odb_open_wstream()`
+         *
+         * @param buffer the data to write
+         * @throws GitException git errors
+         */
+        public void write(@Nonnull String buffer) {
+            Error.throwIfNeeded(jniStreamWrite(getRawPointer(), buffer, buffer.length()));
+        }
+
+        /**
+         * Finish writing to an odb stream
+         *
+         * <p>The object will take its final name and will be available to the odb.
+         *
+         * <p>This method will fail if the total number of received bytes differs from the size
+         * declared with `git_odb_open_wstream()`
+         *
+         * @return the resulting object's id
+         * @throws GitException git errors
+         */
+        public Oid finalizeWrite() {
+            Oid out = new Oid();
+            Error.throwIfNeeded(jniStreamFinalizeWrite(out, getRawPointer()));
+            return out;
+        }
+
+        /**
+         * Read from an odb stream
+         *
+         * <p>Most backends don't implement streaming reads
+         */
+        public void read(byte[] buffer) {
+            Error.throwIfNeeded(jniStreamRead(getRawPointer(), buffer, buffer.length));
+        }
+    }
+
+    public static class RStream extends Stream {
+        private final int _size;
+        private final OdbObject.Type _type;
+
+        protected RStream(long rawPointer, int size, OdbObject.Type type) {
+            super(rawPointer);
+            _size = size;
+            _type = type;
+        }
+
+        public int getSize() {
+            return _size;
+        }
+
+        public OdbObject.Type getType() {
+            return _type;
+        }
     }
 
     /**
@@ -368,7 +427,28 @@ public class Odb extends CAutoCloseable {
      */
     static native int jniOpenWstream(AtomicLong out, long db, int size, int type);
 
-    // public Stream openWstream(int size, )
+    /**
+     * Open a stream to write an object into the ODB
+     *
+     * <p>The type and final length of the object must be specified when opening the stream.
+     *
+     * <p>The returned stream will be of type `GIT_STREAM_WRONLY`, and it won't be effective until
+     * `git_odb_stream_finalize_write` is called and returns without an error
+     *
+     * <p>The stream must always be freed when done with `git_odb_stream_free` or will leak memory.
+     *
+     * @see Odb.Stream
+     * @return opened write stream
+     * @param size final size of the object that will be written
+     * @param type type of the object that will be written
+     * @throws GitException git errors
+     */
+    @Nonnull
+    public Stream openWstream(int size, @Nonnull GitObject.Type type) {
+        Stream ws = new Stream(0);
+        Error.throwIfNeeded(jniOpenWstream(ws._rawPtr, getRawPointer(), size, type.getCode()));
+        return ws;
+    }
 
     /** int git_odb_stream_write(git_odb_stream *stream, const char *buffer, size_t len); */
     static native int jniStreamWrite(long stream, String buffer, int len);
@@ -384,13 +464,76 @@ public class Odb extends CAutoCloseable {
      * const git_oid *oid);
      */
     static native int jniOpenRstream(
-            AtomicLong out, AtomicInteger len, long type, long db, Oid oid);
+            AtomicLong out, AtomicInteger len, AtomicInteger type, long db, Oid oid);
 
+    /**
+     * Open a stream to read an object from the ODB
+     *
+     * <p>Note that most backends do *not* support streaming reads because they store their objects
+     * as compressed/delta'ed blobs.
+     *
+     * <p>It's recommended to use `git_odb_read` instead, which is assured to work on all backends.
+     *
+     * <p>The returned stream will be of type `GIT_STREAM_RDONLY` and will have the following
+     * methods:
+     *
+     * <p>- stream->read: read `n` bytes from the stream - stream->free: free the stream
+     *
+     * <p>The stream must always be free'd or will leak memory.
+     *
+     * @see Odb.RStream
+     * @param oid oid of the object the stream will read from
+     * @return read stream
+     * @throws GitException git errors
+     */
+    @Nonnull
+    public RStream openRstream(@Nonnull Oid oid) {
+        AtomicLong out = new AtomicLong();
+        AtomicInteger outLen = new AtomicInteger();
+        AtomicInteger outType = new AtomicInteger();
+        Error.throwIfNeeded(jniOpenRstream(out, outLen, outType, getRawPointer(), oid));
+        return new RStream(
+                out.get(), outLen.get(), IBitEnum.valueOf(outType.get(), OdbObject.Type.class));
+    }
     /** int git_odb_hash(git_oid *out, const void *data, size_t len, git_object_t type); */
     static native int jniHash(Oid out, byte[] data, int len, int type);
+    /**
+     * Determine the object-ID (sha1 hash) of a data buffer
+     *
+     * <p>The resulting SHA-1 OID will be the identifier for the data buffer as if the data buffer
+     * it were to written to the ODB.
+     *
+     * @return the resulting object-ID.
+     * @param data data to hash
+     * @param type of the data to hash
+     * @throws GitException git errors
+     */
+    @Nonnull
+    public static Oid hash(@Nonnull byte[] data, @Nonnull GitObject.Type type) {
+        Oid oid = new Oid();
+        Error.throwIfNeeded(jniHash(oid, data, data.length, type.getCode()));
+        return oid;
+    }
 
     /** int git_odb_hashfile(git_oid *out, const char *path, git_object_t type); */
     static native int jniHashfile(Oid out, String path, int type);
+
+    /**
+     * Read a file from disk and fill a git_oid with the object id that the file would have if it
+     * were written to the Object Database as an object of the given type (w/o applying filters).
+     * Similar functionality to git.git's `git hash-object` without the `-w` flag, however, with the
+     * --no-filters flag. If you need filters, see git_repository_hashfile.
+     *
+     * @return resulting oid
+     * @param path file to read and determine object id for
+     * @param type the type of the object that will be hashed
+     * @throws GitException git errors
+     */
+    public static Oid hashfile(@Nonnull Path path, @Nonnull GitObject.Type type) {
+        Oid out = new Oid();
+        Error.throwIfNeeded(jniHashfile(out, path.toString(), type.getCode()));
+        return out;
+    }
 
     /** int git_odb_object_dup(git_odb_object **dest, git_odb_object *source); */
     static native int jniObjectDup(AtomicLong dest, long source);
@@ -399,7 +542,7 @@ public class Odb extends CAutoCloseable {
     static native void jniObjectFree(long object);
 
     /** const git_oid * git_odb_object_id(git_odb_object *object); */
-    static native long jniObjectId(long object);
+    static native long jniObjectId(long object, Oid outOid);
 
     /** const void * git_odb_object_data(git_odb_object *object); */
     static native long jniObjectData(long object);
@@ -413,14 +556,73 @@ public class Odb extends CAutoCloseable {
     /** int git_odb_add_backend(git_odb *odb, git_odb_backend *backend, int priority); */
     static native int jniAddBackend(long odb, long backend, int priority);
 
+    /**
+     * Add a custom backend to an existing Object DB
+     *
+     * <p>The backends are checked in relative ordering, based on the value of the `priority`
+     * parameter.
+     *
+     * <p>Read <sys/odb_backend.h> for more information.
+     *
+     * @param backend pointer to a git_odb_backend instance
+     * @param priority Value for ordering the backends queue
+     * @throws GitException 0 on success; error code otherwise
+     */
+    public void addBackend(@Nonnull OdbBackend backend, int priority) {
+        Error.throwIfNeeded(jniAddBackend(getRawPointer(), backend.getRawPointer(), priority));
+    }
+
     /** int git_odb_add_alternate(git_odb *odb, git_odb_backend *backend, int priority); */
     static native int jniAddAlternate(long odb, long backend, int priority);
+
+    /**
+     * Add a custom backend to an existing Object DB; this backend will work as an alternate.
+     *
+     * <p>Alternate backends are always checked for objects *after* all the main backends have been
+     * exhausted.
+     *
+     * <p>The backends are checked in relative ordering, based on the value of the `priority`
+     * parameter.
+     *
+     * <p>Writing is disabled on alternate backends.
+     *
+     * <p>Read <sys/odb_backend.h> for more information.
+     *
+     * @param backend pointer to a git_odb_backend instance
+     * @param priority Value for ordering the backends queue
+     * @throws GitException 0 on success; error code otherwise
+     */
+    public void addAlternate(@Nonnull OdbBackend backend, int priority) {
+        Error.throwIfNeeded(jniAddAlternate(getRawPointer(), backend.getRawPointer(), priority));
+    }
 
     /** size_t git_odb_num_backends(git_odb *odb); */
     static native int jniNumBackends(long odb);
 
+    /** @return the number of ODB backend objects */
+    public int numBackends() {
+        return jniNumBackends(getRawPointer());
+    }
+
     /** int git_odb_get_backend(git_odb_backend **out, git_odb *odb, size_t pos); */
     static native int jniGetBackend(AtomicLong out, long odb, int pos);
+
+    /**
+     * Lookup an ODB backend object by index
+     *
+     * @return ODB backend at pos or empty if pos is invalid.
+     * @param pos index into object database backend list
+     * @throws GitException git errors
+     */
+    public Optional<OdbBackend> getBackend(int pos) {
+        OdbBackend backend = new OdbBackend(false, 0);
+        int e = jniGetBackend(backend._rawPtr, getRawPointer(), pos);
+        if (e == ENOTFOUND.getCode()) {
+            return Optional.empty();
+        }
+        Error.throwIfNeeded(e);
+        return Optional.of(backend);
+    }
 
     /** int git_odb_backend_pack(git_odb_backend **out, const char *objects_dir); */
     static native int jniBackendPack(AtomicLong out, String objectsDir);
@@ -437,6 +639,51 @@ public class Odb extends CAutoCloseable {
             int dirMode,
             int fileMode);
 
+    /**
+     * Create a backend for loose objects
+     *
+     * @return the odb backend
+     * @param objectsDir the Git repository's objects directory
+     * @param compressionLevel zlib compression level to use
+     * @param doFsync whether to do an fsync() after writing
+     * @param dirMode permissions to use creating a directory or 0 for defaults
+     * @param fileMode permissions to use creating a file or 0 for defaults
+     * @throws GitException git errors
+     */
+    @Nonnull
+    public OdbBackend backendLoose(
+            @Nonnull Path objectsDir,
+            int compressionLevel,
+            boolean doFsync,
+            int dirMode,
+            int fileMode) {
+        OdbBackend out = new OdbBackend(false, 0);
+        Error.throwIfNeeded(
+                jniBackendLoose(
+                        out._rawPtr,
+                        objectsDir.toString(),
+                        compressionLevel,
+                        doFsync ? 1 : 0,
+                        dirMode,
+                        fileMode));
+        return out;
+    }
+
     /** int git_odb_backend_one_pack(git_odb_backend **out, const char *index_file); */
     static native int jniBackendOnePack(AtomicLong out, String indexFile);
+    /**
+     * Create a backend out of a single packfile
+     *
+     * <p>This can be useful for inspecting the contents of a single packfile.
+     *
+     * @return odb backend
+     * @param indexFile path to the packfile's .idx file
+     * @throws GitException git errors
+     */
+    @Nonnull
+    public OdbBackend backendOnePack(@Nonnull Path indexFile) {
+        OdbBackend out = new OdbBackend(false, 0);
+        Error.throwIfNeeded(jniBackendOnePack(out._rawPtr, indexFile.toString()));
+        return out;
+    }
 }
