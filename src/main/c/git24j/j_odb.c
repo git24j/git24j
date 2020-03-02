@@ -12,6 +12,14 @@ extern j_constants_t *jniConstants;
 /** int git_odb_foreach(git_odb *db, git_odb_foreach_cb cb, void *payload); */
 // no matching type found for 'char *buffer'
 /** int git_odb_stream_read(git_odb_stream *stream, char *buffer, size_t len); */
+JNIEXPORT jint JNICALL J_MAKE_METHOD(Odb_jniStreamRead)(JNIEnv *env, jclass obj, jlong streamPtr, jbyteArray buffer, jint len)
+{
+    char *c_buffer = (char *)malloc(sizeof(char) * len);
+    int e = git_odb_stream_read((git_odb_stream *)streamPtr, c_buffer, len);
+    (*env)->SetByteArrayRegion(env, buffer, 0, len, (jbyte *)c_buffer);
+    free(c_buffer);
+    return e;
+}
 // no matching type found for 'git_transfer_progress_cb progress_cb'
 /** int git_odb_write_pack(git_odb_writepack **out, git_odb *db, git_transfer_progress_cb progress_cb, void *progress_payload); */
 /** -------- Wrapper Body ---------- */
@@ -196,15 +204,17 @@ JNIEXPORT void JNICALL J_MAKE_METHOD(Odb_jniStreamFree)(JNIEnv *env, jclass obj,
 }
 
 /** int git_odb_open_rstream(git_odb_stream **out, size_t *len, git_object_t *type, git_odb *db, const git_oid *oid); */
-JNIEXPORT jint JNICALL J_MAKE_METHOD(Odb_jniOpenRstream)(JNIEnv *env, jclass obj, jobject out, jobject len, jlong typePtr, jlong dbPtr, jobject oid)
+JNIEXPORT jint JNICALL J_MAKE_METHOD(Odb_jniOpenRstream)(JNIEnv *env, jclass obj, jobject out, jobject len, jobject outType, jlong dbPtr, jobject oid)
 {
     git_odb_stream *c_out;
     size_t c_len;
     git_oid c_oid;
+    git_object_t c_type;
     j_git_oid_from_java(env, oid, &c_oid);
-    int r = git_odb_open_rstream(&c_out, &c_len, (git_object_t *)typePtr, (git_odb *)dbPtr, &c_oid);
+    int r = git_odb_open_rstream(&c_out, &c_len, &c_type, (git_odb *)dbPtr, &c_oid);
     (*env)->CallVoidMethod(env, out, jniConstants->midAtomicLongSet, (long)c_out);
     /* git_odb_stream_free(c_out); */
+    (*env)->CallVoidMethod(env, outType, jniConstants->midAtomicIntSet, c_type);
     (*env)->CallVoidMethod(env, len, jniConstants->midAtomicIntSet, c_len);
     return r;
 }
@@ -249,17 +259,17 @@ JNIEXPORT void JNICALL J_MAKE_METHOD(Odb_jniObjectFree)(JNIEnv *env, jclass obj,
 }
 
 /** const git_oid * git_odb_object_id(git_odb_object *object); */
-JNIEXPORT jlong JNICALL J_MAKE_METHOD(Odb_jniObjectId)(JNIEnv *env, jclass obj, jlong objectPtr)
+JNIEXPORT void JNICALL J_MAKE_METHOD(Odb_jniObjectId)(JNIEnv *env, jclass obj, jlong objectPtr, jobject outId)
 {
-    const git_oid *r = git_odb_object_id((git_odb_object *)objectPtr);
-    return r;
+    const git_oid *c_oid = git_odb_object_id((git_odb_object *)objectPtr);
+    j_git_oid_to_java(env, c_oid, outId);
 }
 
 /** const void * git_odb_object_data(git_odb_object *object); */
 JNIEXPORT jlong JNICALL J_MAKE_METHOD(Odb_jniObjectData)(JNIEnv *env, jclass obj, jlong objectPtr)
 {
     const void *r = git_odb_object_data((git_odb_object *)objectPtr);
-    return r;
+    return (jlong)r;
 }
 
 /** size_t git_odb_object_size(git_odb_object *object); */
