@@ -82,7 +82,7 @@ public class Branch {
     public static class Iterator {
         private final AtomicLong _ptr = new AtomicLong();
 
-        public Iterator(long rawPointer) {
+        Iterator(long rawPointer) {
             _ptr.set(rawPointer);
         }
 

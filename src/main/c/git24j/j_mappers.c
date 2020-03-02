@@ -175,6 +175,16 @@ void j_git_oid_to_java(JNIEnv *env, const git_oid *c_oid, jobject oid)
     (*env)->DeleteLocalRef(env, raw);
 }
 
+/** Copy git_oid bytes (all 20 bytes) to java and set effective size*/
+void j_git_short_id_to_java(JNIEnv *env, const git_oid *c_oid, jobject oid, int effectiveSize)
+{
+    assert(oid && "receiving object must not be null");
+    jbyteArray raw = j_byte_array_from_c(env, c_oid->id, GIT_OID_RAWSZ);
+    (*env)->CallVoidMethod(env, oid, jniConstants->oid.midSetId, raw);
+    (*env)->CallVoidMethod(env, oid, jniConstants->oid.midSetESize, effectiveSize);
+    (*env)->DeleteLocalRef(env, raw);
+}
+
 /** create byte[] that can be accessed directly by java. */
 jbyteArray j_git_oid_to_bytearray(JNIEnv *env, const git_oid *c_oid)
 {
@@ -193,6 +203,7 @@ void j_git_oid_from_java(JNIEnv *env, jobject oid, git_oid *c_oid)
     {
         return;
     }
+    assert(c_oid && "receiving oid must not be null");
     jobjectArray jBytes = (*env)->CallObjectMethod(env, oid, jniConstants->oid.midGetId);
     int out_len;
     unsigned char *c_bytes = j_unsigned_chars_from_java(env, jBytes, &out_len);

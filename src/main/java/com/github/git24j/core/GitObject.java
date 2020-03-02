@@ -199,7 +199,7 @@ public class GitObject extends CAutoReleasable {
         }
 
         /** Get associated value. */
-        public int getValue() {
+        public int getCode() {
             return value;
         }
     }

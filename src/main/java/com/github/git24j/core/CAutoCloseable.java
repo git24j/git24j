@@ -10,7 +10,7 @@ public abstract class CAutoCloseable implements AutoCloseable {
     /** C Pointer. */
     protected final AtomicLong _rawPtr = new AtomicLong();
 
-    public CAutoCloseable(long rawPointer) {
+    protected CAutoCloseable(long rawPointer) {
         _rawPtr.set(rawPointer);
     }
 
@@ -30,6 +30,10 @@ public abstract class CAutoCloseable implements AutoCloseable {
     }
     /** Call this to actual release the resources */
     protected abstract void releaseOnce(long cPtr);
+
+    protected boolean isNull() {
+        return _rawPtr.get() == 0;
+    }
 
     @Override
     public void close() {

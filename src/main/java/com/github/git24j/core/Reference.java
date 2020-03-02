@@ -13,7 +13,7 @@ import java.util.function.Function;
 public class Reference {
     final AtomicLong _rawPtr = new AtomicLong();
 
-    public Reference(long rawPointer) {
+    Reference(long rawPointer) {
         _rawPtr.set(rawPointer);
     }
 
@@ -892,7 +892,7 @@ public class Reference {
     public static class Iterator {
         private final AtomicLong _ptr = new AtomicLong();
 
-        public Iterator(long rawPointer) {
+        Iterator(long rawPointer) {
             _ptr.set(rawPointer);
         }
 

@@ -58,6 +58,8 @@ void git24j_init(JNIEnv *env)
     jniConstants->oid.clzOid = clz;
     jniConstants->oid.midSetId = (*env)->GetMethodID(env, clz, "setId", "([B)V");
     jniConstants->oid.midGetId = (*env)->GetMethodID(env, clz, "getId", "()[B");
+    jniConstants->oid.midGetESize = (*env)->GetMethodID(env, clz, "getEffectiveSize", "()I");
+    jniConstants->oid.midSetESize = (*env)->GetMethodID(env, clz, "setEffectiveSize", "(I)V");
 }
 
 void git24j_shutdown(JNIEnv *env)

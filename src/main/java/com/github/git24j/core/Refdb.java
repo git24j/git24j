@@ -1,7 +1,7 @@
 package com.github.git24j.core;
 
 public class Refdb extends CAutoCloseable {
-    public Refdb(long rawPointer) {
+    Refdb(long rawPointer) {
         super(rawPointer);
     }
 

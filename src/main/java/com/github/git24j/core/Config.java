@@ -16,7 +16,7 @@ public class Config extends CAutoCloseable {
         jniFree(cPtr);
     }
 
-    public Config(long rawPointer) {
+    Config(long rawPointer) {
         super(rawPointer);
     }
 
