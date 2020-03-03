@@ -20,7 +20,7 @@ public class Init {
      * not.
      *
      * <ul>
-     *   <li>paths defined in {@code com.github.shijinglu.lg24j.library_path}
+     *   <li>paths defined in {@code com.github.git24j.lg24j.library_path}
      *   <li>paths defined in {@code java.library.path}
      *   <li>hard coded path in ${project.dir}/target/${lib}/
      * </ul>

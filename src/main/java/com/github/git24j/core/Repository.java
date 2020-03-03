@@ -1,5 +1,6 @@
 package com.github.git24j.core;
 
+import javax.annotation.Nonnull;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.EnumSet;
@@ -129,11 +130,11 @@ public class Repository implements AutoCloseable {
      * @return repo just initialized.
      * @throws GitException git error.
      */
-    public static Repository init(String path, boolean isBare) {
-        AtomicLong out = new AtomicLong();
-        int error = jniInit(out, path, isBare ? 1 : 0);
-        Error.throwIfNeeded(error);
-        return new Repository(out.get());
+    @Nonnull
+    public static Repository init(@Nonnull Path path, boolean isBare) {
+        Repository repo = new Repository(0);
+        Error.throwIfNeeded(jniInit(repo._rawPtr, path.toString(), isBare ? 1 : 0));
+        return repo;
     }
 
     /**
