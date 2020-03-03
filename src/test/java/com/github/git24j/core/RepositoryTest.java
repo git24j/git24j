@@ -39,7 +39,7 @@ public class RepositoryTest extends TestBase {
     @Test
     public void init() {
         Path repoPath = folder.getRoot().toPath();
-        try (Repository repo = Repository.init(repoPath.toString(), false)) {
+        try (Repository repo = Repository.init(repoPath, false)) {
             Assert.assertTrue(repo.isEmpty());
             Assert.assertTrue(repo.headUnborn());
         }
