@@ -2,6 +2,7 @@ package com.github.git24j.core;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicLong;
 
 class Internals {
     @FunctionalInterface
@@ -37,6 +38,16 @@ class Internals {
     @FunctionalInterface
     interface SIICallback {
         int accept(String s, int i1, int i2);
+    }
+
+    @FunctionalInterface
+    interface ASICallback {
+        int accept(AtomicLong out, String str, int i);
+    }
+
+    @FunctionalInterface
+    interface ALSSCallback {
+        int accept(AtomicLong outRemote, long repoPtr, String name, String url);
     }
 
     /** Class to hold */

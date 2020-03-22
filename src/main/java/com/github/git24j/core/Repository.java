@@ -1,12 +1,13 @@
 package com.github.git24j.core;
 
-import javax.annotation.Nonnull;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.EnumSet;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
+import javax.annotation.CheckForNull;
+import javax.annotation.Nonnull;
 
 public class Repository implements AutoCloseable {
     /** C Pointer. */
@@ -387,15 +388,13 @@ public class Repository implements AutoCloseable {
      * Determines the status of a git repository - ie, whether an operation (merge, cherry-pick,
      * etc) is in progress.
      *
-     * @return The state of the repository
-     * @throws GitException if returned code is not a valid state.
+     * @return The state of the repository or null if returned state is not defined (this normally
+     *     should not happen, unless git24j lib is behind libgit2.)
      */
-    public State state() {
+    @CheckForNull
+    public StateT state() {
         int idx = jniState(getRawPointer());
-        if (idx >= 0 && idx < State.values().length) {
-            return State.values()[idx];
-        }
-        throw new GitException(-1, "Invalid state code: " + idx);
+        return IBitEnum.valueOf(idx, StateT.class);
     }
 
     /**
@@ -626,24 +625,97 @@ public class Repository implements AutoCloseable {
         }
     }
 
-    public enum State {
-        NONE,
-        MERGE,
-        REVERT,
-        SEQUENCE,
-        CHERRYPICK,
-        CHERRYPICK_SEQUENCE,
-        BISECT,
-        REBASE,
-        REBASE_INTERACTIVE,
-        REBASE_MERGE,
-        APPLY_MAILBOX,
-        APPLY_MAILBOX_OR_REBASE,
+    /**
+     * Repository state
+     *
+     * <p>These values represent possible states for the repository to be in, based on the current
+     * operation which is ongoing.
+     */
+    public enum StateT implements IBitEnum {
+        NONE(0),
+        MERGE(1),
+        REVERT(2),
+        SEQUENCE(3),
+        CHERRYPICK(4),
+        CHERRYPICK_SEQUENCE(5),
+        BISECT(6),
+        REBASE(7),
+        REBASE_INTERACTIVE(8),
+        REBASE_MERGE(9),
+        APPLY_MAILBOX(10),
+        APPLY_MAILBOX_OR_REBASE(11);
+        private final int _bit;
+
+        StateT(int bit) {
+            _bit = bit;
+        }
+
+        @Override
+        public int getBit() {
+            return 0;
+        }
+    }
+
+    public enum InitFlagT implements IBitEnum {
+        BARE(1 << 0),
+        NO_REINIT(1 << 1),
+        NO_DOTGIT_DIR(1 << 2),
+        MKDIR(1 << 3),
+        MKPATH(1 << 4),
+        EXTERNAL_TEMPLATE(1 << 5),
+        RELATIVE_GITLINK(1 << 6);
+        private final int _bit;
+
+        InitFlagT(int bit) {
+            _bit = bit;
+        }
+
+        @Override
+        public int getBit() {
+            return 0;
+        }
+    }
+
+    /**
+     * Mode options for `git_repository_init_ext`.
+     *
+     * <p>Set the mode field of the `git_repository_init_options` structure either to the custom
+     * mode that you would like, or to one of the following modes:
+     *
+     * <pre>
+     * * SHARED_UMASK - Use permissions configured by umask - the default.
+     * * SHARED_GROUP - Use "--shared=group" behavior, chmod'ing the new repo
+     *        to be group writable and "g+sx" for sticky group assignment.
+     * * SHARED_ALL - Use "--shared=all" behavior, adding world readability.
+     * * Anything else - Set to custom value.
+     * </pre>
+     */
+    public enum InitModeT implements IBitEnum {
+        /** Use permissions configured by umask - the default. */
+        SHARED_UMASK(0),
+        /**
+         * Use "--shared=group" behavior, chmod'ing the new repo to be group writable and "g+sx" for
+         * sticky group assignment.
+         */
+        SHARED_GROUP(0002775),
+        /** Use "--shared=all" behavior, adding world readability. */
+        SHARED_ALL(0002777),
+        ;
+        private final int _bit;
+
+        InitModeT(int bit) {
+            _bit = bit;
+        }
+
+        @Override
+        public int getBit() {
+            return _bit;
+        }
     }
 
     public static class InitOptions {
         public static final int VERSION = 1;
-        private int version;
+        private final int version;
         private int flags;
         private int mode;
         private String workdirPath;
@@ -652,26 +724,25 @@ public class Repository implements AutoCloseable {
         private String initialHead;
         private String originUrl;
 
-        public static InitOptions defaultOpts(int version) {
-            InitOptions options = new InitOptions();
-            jniInitOptionsInit(options, version);
-            return options;
+        public InitOptions(int version) {
+            this.version = version;
+        }
+
+        @Nonnull
+        public static InitOptions defaultOpts() {
+            return new InitOptions(VERSION);
         }
 
         public int getVersion() {
             return version;
         }
 
-        public void setVersion(int version) {
-            this.version = version;
-        }
-
         public int getFlags() {
             return flags;
         }
 
-        public void setFlags(int flags) {
-            this.flags = flags;
+        public void setFlags(EnumSet<InitFlagT> flags) {
+            this.flags = IBitEnum.bitOrAll(flags);
         }
 
         public int getMode() {
@@ -680,6 +751,10 @@ public class Repository implements AutoCloseable {
 
         public void setMode(int mode) {
             this.mode = mode;
+        }
+
+        public void setMode(InitModeT mode) {
+            this.mode = mode.getBit();
         }
 
         public String getWorkdirPath() {
