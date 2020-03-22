@@ -56,6 +56,8 @@ extern "C"
 
         jmethodID midAtomicIntSet;
         jmethodID midAtomicLongSet;
+        jmethodID midAtomicLongGet;
+        jmethodID midAtomicLongInit;
         jmethodID midAtomicReferenceSet;
         jmethodID midListGetI;
         j_remote_constants remote;

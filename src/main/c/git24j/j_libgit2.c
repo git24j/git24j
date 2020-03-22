@@ -28,6 +28,8 @@ void git24j_init(JNIEnv *env)
     assert(jniConstants->clzList && "List class not found");
     jniConstants->midAtomicIntSet = (*env)->GetMethodID(env, jniConstants->clzAtomicInt, "set", "(I)V");
     jniConstants->midAtomicLongSet = (*env)->GetMethodID(env, jniConstants->clzAtomicLong, "set", "(J)V");
+    jniConstants->midAtomicLongGet = (*env)->GetMethodID(env, jniConstants->clzAtomicLong, "get", "()J");
+    jniConstants->midAtomicLongInit = (*env)->GetMethodID(env, jniConstants->clzAtomicLong, "<init>", "()V");
     jniConstants->midAtomicReferenceSet = (*env)->GetMethodID(env, jniConstants->clzAtomicReference, "set", "(Ljava/lang/Object;)V");
     jniConstants->midListGetI = (*env)->GetMethodID(env, jniConstants->clzList, "get", "(I)Ljava/lang/Object;");
     /* Remote constants */

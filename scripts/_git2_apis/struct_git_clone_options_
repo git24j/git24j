@@ -1,0 +1,12 @@
+typedef struct git_clone_options {
+	unsigned int version;
+	git_checkout_options checkout_opts;
+	git_fetch_options fetch_opts;
+	int bare;
+	git_clone_local_t local;
+	const char* checkout_branch;
+	git_repository_create_cb repository_cb;
+	void *repository_cb_payload;
+	git_remote_create_cb remote_cb;
+	void *remote_cb_payload;
+} git_clone_options;

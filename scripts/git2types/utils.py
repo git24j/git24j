@@ -89,7 +89,7 @@ import re
 RAW_PAT = re.compile(
     r"\b(?P<type_name>byte|char|short|int|long|float|double)\b")
 STRING_PAT = re.compile(r"\b(?P<const>const)?\s*char\s*\*")
-INT_ISH_TYPE = re.compile(r"\b(?P<type_name>size_t)\b")
+INT_ISH_TYPE = re.compile(r"\b(?P<type_name>size_t|unsigned int|int32)\b")
 LONG_ISH_TYPE = re.compile(r"^(?P<const>const\s+)?\s*(?P<type_name>\w+)\s+\*")
 JNI_JAVA_TYPE_MAP = {
     'void': 'void',
@@ -188,6 +188,9 @@ GIT2_PARAM_PARSERS = [
 
 
 def get_jtype_raw(c_type: str) -> str:
+    """
+    basic c types to java types, e.g. 'long'-> 'jlong', 'void' -> 'void'
+    """
     s = c_type.strip()
     if 'void' == s:
         return 'void'
@@ -198,6 +201,9 @@ def get_jtype_raw(c_type: str) -> str:
 
 
 def get_jtype_string(c_type: str) -> str:
+    """
+    c string types (like 'char *') to jstring
+    """
     m = STRING_PAT.match(c_type)
     if not m:
         return ""
@@ -206,16 +212,36 @@ def get_jtype_string(c_type: str) -> str:
 
 def get_jtype_int(c_type: str) -> str:
     m = INT_ISH_TYPE.match(c_type)
-    if not m:
-        return ""
-    return 'jint'
+    if m:
+        return 'jint'
+    if c_type.endswith('_t'):
+        return 'jint'
+    return ""    
+
+
+LONG_ISH_WEAKREF_SET = {
+    'git_repository_create_cb',
+    'git_remote_create_cb',
+    'git_repository_create_cb',
+    'git_checkout_options',
+    'git_fetch_options',
+}
+
+
+def is_returnning_weak(c_type: str, jtype: str):
+    """ Check if returning weak ref of a C obj.
+    For example `git_checkout_options checkout_opts` is returning a weak
+    reference."""
+    return c_type in LONG_ISH_WEAKREF_SET and jtype == 'jlong'
 
 
 def get_jtype_long(c_type: str) -> str:
     m = LONG_ISH_TYPE.match(c_type)
-    if not m:
-        return ""
-    return 'jlong'
+    if m:
+        return 'jlong'
+    if c_type in LONG_ISH_WEAKREF_SET:
+        return 'jlong'
+    return ""
 
 
 def get_jtype(c_type: str) -> str:
@@ -226,7 +252,7 @@ def get_jtype(c_type: str) -> str:
     'void' -> 'void'
     """
     s = c_type.strip()
-    return get_jtype_raw(s) or get_jtype_string(s) or get_jtype_int(s) or get_jtype_long(s)
+    return get_jtype_raw(s) or get_jtype_string(s) or get_jtype_int(s) or get_jtype_long(s) or "unknown"
 
 
 def get_java_type(j_type: str) -> str:
@@ -309,3 +335,9 @@ def get_jni_param_list(param_list: List['Git2Type']) -> str:
     """
     params = [p.jni_param for p in param_list]
     return ', '.join([x for x in params if x])
+
+
+def get_return_type(ctype: str) -> str:
+    """
+    from:
+    """

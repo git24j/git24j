@@ -34,6 +34,7 @@ extern "C"
 
     /** int git_repository_init_options_init(git_repository_init_options *opts, unsigned int version); */
     JNIEXPORT jint JNICALL J_MAKE_METHOD(Repository_jniInitOptionsInit)(JNIEnv *env, jclass obj, jobject initOpts, jint version);
+    JNIEXPORT jint JNICALL J_MAKE_METHOD(Repository_jniInitOptionsNew)(JNIEnv *env, jclass obj, jobject outOpts, jint version);
 
     /** int git_repository_init_ext(git_repository **out, const char *repo_path, git_repository_init_options *opts); */
     JNIEXPORT jint JNICALL J_MAKE_METHOD(Repository_jniInitExt)(JNIEnv *env, jclass obj, jobject outRepo, jstring repoPath, jobject initOpts);

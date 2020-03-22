@@ -10,6 +10,8 @@
 #include <stdio.h>
 #include <string.h>
 
+extern j_constants_t *jniConstants;
+
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Repository_jniOpen)(JNIEnv *env, jclass obj, jobject ptrReceiver, jstring path)
 {
     git_repository *repo = NULL;
@@ -219,6 +221,14 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Repository_jniInitOptionsInit)(JNIEnv *env,
         init_options_copy_to_java(env, &init_opts, initOpts);
     }
     return error;
+}
+
+JNIEXPORT jint JNICALL J_MAKE_METHOD(Repository_jniInitOptionsNew)(JNIEnv *env, jclass obj, jobject outOpts, jint version)
+{
+    git_repository_init_options *c_opts = (git_repository_init_options *)malloc(sizeof(git_repository_init_options));
+    int e = git_repository_init_init_options(c_opts, version);
+    (*env)->CallVoidMethod(env, outOpts, jniConstants->midAtomicLongSet, (long)c_opts);
+    return e;
 }
 
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Repository_jniInitExt)(JNIEnv *env, jclass obj, jobject outRepo, jstring repoPath, jobject initOpts)
