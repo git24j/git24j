@@ -38,6 +38,8 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Clone_jniOptionsNew)(JNIEnv *env, jclass ob
 JNIEXPORT void JNICALL J_MAKE_METHOD(Clone_jniOptionsFree)(JNIEnv *env, jclass obj, jlong optionsPtr)
 {
     git_clone_options *opts = (git_clone_options *)optionsPtr;
+    opts->remote_cb = NULL;
+    opts->repository_cb = NULL;
     free(opts->remote_cb_payload);
     free(opts->repository_cb_payload);
 }

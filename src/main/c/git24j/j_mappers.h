@@ -67,6 +67,9 @@ extern "C"
     /** commonly used constants. */
     j_constants_t *jniConstants;
 
+    /** Retrieve env attached to the current thread. */
+    JNIEnv *getEnv(void);
+
     /**
      * Duplicate c string, returned string needs to be free-ed separately.
      * */
@@ -175,6 +178,7 @@ extern "C"
 
     /** FOR DEBUG: inspect object class */
     void __debug_inspect(JNIEnv *env, jobject obj);
+    void __debug_inspect2(JNIEnv *env, jobject obj, const char *message);
 #ifdef __cplusplus
 }
 #endif

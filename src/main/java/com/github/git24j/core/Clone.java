@@ -74,7 +74,7 @@ public class Clone {
         }
 
         @Nonnull
-        public static Options create() {
+        public static Options defaultOpts() {
             return create(VERSION);
         }
 

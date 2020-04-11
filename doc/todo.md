@@ -63,4 +63,5 @@
 - [ ] Make sure `equals` and `hashcode` makes sense. Equality of simple structures should compare by fields instead of raw pointer
 - [ ] Change all `AtomicReference<String>` to use jniConstants
 - [ ] Change `CURRENT_VERSION` in Options structures to `VERSION`
-
+- [ ] Every DeleteLocalRef after NewStringUTF(...) must perform a null check! 
+- [ ] Rewrite the callbacks

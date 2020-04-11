@@ -5,7 +5,7 @@ LIBGIT2_TARGET=$(CURDIR)/target/git2
 WRAPPER_SRC=${CURDIR}/src/main/c/git24j
 WRAPPER_TARGET=$(CURDIR)/target/git24j
 
-CMAKE_CONFIG=RelWithDebInfo
+CMAKE_CONFIG=Debug
 
 build_libgit2: $(LIBGIT2_SRC)/src
 	echo ${LIBGIT2_SRC}

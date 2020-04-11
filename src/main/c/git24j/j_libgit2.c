@@ -5,6 +5,8 @@
 #include <jni.h>
 #include <stdio.h>
 
+extern j_constants_t *jniConstants;
+
 jclass j_find_and_hold_clz(JNIEnv *env, const char *descriptor)
 {
     jclass clz = (*env)->FindClass(env, descriptor);
@@ -12,6 +14,12 @@ jclass j_find_and_hold_clz(JNIEnv *env, const char *descriptor)
     jclass gClz = (jclass)(*env)->NewGlobalRef(env, clz);
     (*env)->DeleteLocalRef(env, clz);
     return gClz;
+}
+
+jint JNI_OnLoad(JavaVM *vm, void *reserved)
+{
+    globalJvm = vm;
+    return JNI_VERSION_1_6;
 }
 
 void git24j_init(JNIEnv *env)

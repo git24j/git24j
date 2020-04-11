@@ -10,7 +10,7 @@ extern "C"
 #endif
     jclass j_find_and_hold_clz(JNIEnv *env, const char *descriptor);
 
-    extern j_constants_t *jniConstants;
+    JavaVM *globalJvm;
 
     JNIEXPORT void JNICALL J_MAKE_METHOD(Libgit2_init)(JNIEnv *, jclass);
 
