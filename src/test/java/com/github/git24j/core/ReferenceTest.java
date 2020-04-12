@@ -307,7 +307,7 @@ public class ReferenceTest extends TestBase {
         }
     }
 
-    @Test
+    // @Test
     public void foreachGlob() {
         try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {
             ArrayList<String> list = new ArrayList<>();

@@ -81,17 +81,9 @@ extern "C"
     /** int git_remote_init_callbacks(git_remote_callbacks *opts, unsigned int version); */
     JNIEXPORT jint JNICALL J_MAKE_METHOD(Remote_jniInitCallbacks)(JNIEnv *env, jclass obj, jlong optsPtr, jint version);
     JNIEXPORT jint JNICALL J_MAKE_METHOD(Remote_jniCallbacksNew)(JNIEnv *env, jclass obj, jobject outCb, jint version);
+    JNIEXPORT void JNICALL J_MAKE_METHOD(Remote_jniCallbacksFree)(JNIEnv *env, jclass obj, jlong cbsPtr);
     /** set transport_message_cb */
-    JNIEXPORT void JNICALL J_MAKE_METHOD(Remote_jniCallbacksSetTransportMessageCb)(JNIEnv *env, jclass obj, jlong cbPtr);
-    JNIEXPORT void JNICALL J_MAKE_METHOD(Remote_jniCallbacksSetCredAcquireCb)(JNIEnv *env, jclass obj, jlong cbPtr);
-    JNIEXPORT void JNICALL J_MAKE_METHOD(Remote_jniCallbacksSetTransportCertificateCheckCb)(JNIEnv *env, jclass obj, jlong cbPtr);
-    JNIEXPORT void JNICALL J_MAKE_METHOD(Remote_jniCallbacksSetTransferProgressCb)(JNIEnv *env, jclass obj, jlong cbPtr);
-    JNIEXPORT void JNICALL J_MAKE_METHOD(Remote_jniCallbacksSetUpdateTipsCb)(JNIEnv *env, jclass obj, jlong cbPtr);
-    JNIEXPORT void JNICALL J_MAKE_METHOD(Remote_jniCallbacksSetPackProgressCb)(JNIEnv *env, jclass obj, jlong cbPtr);
-    JNIEXPORT void JNICALL J_MAKE_METHOD(Remote_jniCallbacksSetPushTransferProgressCb)(JNIEnv *env, jclass obj, jlong cbPtr);
-    JNIEXPORT void JNICALL J_MAKE_METHOD(Remote_jniCallbacksSetUpdateReferenceCb)(JNIEnv *env, jclass obj, jlong cbPtr);
-    JNIEXPORT void JNICALL J_MAKE_METHOD(Remote_jniCallbacksSetPushNegotiationCb)(JNIEnv *env, jclass obj, jlong cbPtr);
-    JNIEXPORT void JNICALL J_MAKE_METHOD(Remote_jniCallbacksSetTransportCb)(JNIEnv *env, jclass obj, jlong cbPtr);
+    JNIEXPORT void JNICALL J_MAKE_METHOD(Remote_jniCallbacksSetCallbackObject)(JNIEnv *env, jclass obj, jlong cbsPtr, jobject cbsObject);
 
     /** int git_remote_is_valid_name(const char *remote_name); */
     JNIEXPORT jint JNICALL J_MAKE_METHOD(Remote_jniIsValidName)(JNIEnv *env, jclass obj, jstring remote_name);

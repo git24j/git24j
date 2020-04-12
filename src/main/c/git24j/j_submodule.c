@@ -5,8 +5,29 @@
 #include <assert.h>
 #include <git2.h>
 
+int j_git_submodule_cb(git_submodule *sm, const char *name, void *payload)
+{
+    assert(payload && "j_git_submodule_cb must be called with payload");
+    j_cb_payload *j_payload = (j_cb_payload *)payload;
+    JNIEnv *env = getEnv();
+    jstring jName = (*env)->NewStringUTF(env, name);
+    int r = (*env)->CallIntMethod(env, j_payload->callback, j_payload->mid, (jlong)sm, jName);
+    (*env)->DeleteLocalRef(env, jName);
+    return r;
+}
+
 // no matching type found for 'git_submodule_cb callback'
 /** int git_submodule_foreach(git_repository *repo, git_submodule_cb callback, void *payload); */
+JNIEXPORT jint JNICALL J_MAKE_METHOD(Submodule_jniForeach)(JNIEnv *env, jclass obj, jlong repoPtr, jobject foreachCb)
+{
+    assert(foreachCb && "Call Submodule::foreach with empty callback does not make any sense");
+    j_cb_payload payload = {0};
+    j_cb_payload_init(env, &payload, foreachCb, "(L" J_CLZ_PREFIX "Submodule$Callback;Ljava/lang/String)I");
+    int r = git_submodule_foreach((git_repository *)repoPtr, j_git_submodule_cb, &payload);
+    j_cb_payload_release(env, &payload);
+    return r;
+}
+
 /** -------- Wrapper Body ---------- */
 /** int git_submodule_add_finalize(git_submodule *submodule); */
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Submodule_jniAddFinalize)(JNIEnv *env, jclass obj, jlong submodulePtr)

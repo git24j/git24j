@@ -20,21 +20,15 @@ extern j_constants_t *jniConstants;
 
 int j_git_tag_foreach_cb(const char *name, git_oid *oid, void *payload)
 {
+    assert(payload && "j_git_tag_foreach_cb must be called with payload");
     j_cb_payload *j_payload = (j_cb_payload *)payload;
-    JNIEnv *env = j_payload->env;
-    jobject consumer = j_payload->consumer;
-    assert(consumer && "consumer must not be null");
-    jclass jclz = (*env)->GetObjectClass(env, consumer);
-    assert(jclz && "jni error: could not resolve consumer class");
-    jmethodID accept = (*env)->GetMethodID(env, jclz, "accept", "(Ljava/lang/String;Ljava/lang/String;)I");
-    assert(accept && "jni error: could not resolve method consumer method");
+    JNIEnv *env = getEnv();
     jstring jniName = (*env)->NewStringUTF(env, name);
     char *oid_s = git_oid_tostr_s(oid);
     jstring jniOidStr = (*env)->NewStringUTF(env, oid_s);
-    int r = (*env)->CallIntMethod(env, consumer, accept, jniName, jniOidStr);
+    int r = (*env)->CallIntMethod(env, j_payload->callback, j_payload->mid, jniName, jniOidStr);
     (*env)->DeleteLocalRef(env, jniName);
     (*env)->DeleteLocalRef(env, jniOidStr);
-    (*env)->DeleteLocalRef(env, jclz);
     return r;
 }
 
@@ -166,11 +160,15 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Tag_jniListMatch)(JNIEnv *env, jclass obj, 
     free(c_pattern);
     return r;
 }
+
 /** int git_tag_foreach(git_repository *repo, git_tag_foreach_cb callback, void *payload); */
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Tag_jniForeach)(JNIEnv *env, jclass obj, jlong repoPtr, jobject foreachCb)
 {
-    j_cb_payload payload = {env, foreachCb};
-    return git_tag_foreach((git_repository *)repoPtr, j_git_tag_foreach_cb, &payload);
+    j_cb_payload payload = {0};
+    j_cb_payload_init(env, &payload, foreachCb, "(Ljava/lang/String;Ljava/lang/String;)I");
+    int r = git_tag_foreach((git_repository *)repoPtr, j_git_tag_foreach_cb, &payload);
+    j_cb_payload_release(env, &payload);
+    return r;
 }
 
 /** int git_tag_peel(git_object **tag_target_out, const git_tag *tag); */

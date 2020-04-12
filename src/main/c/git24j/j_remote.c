@@ -9,17 +9,14 @@ extern j_constants_t *jniConstants;
 
 int j_git_transport_message_cb(const char *str, int len, void *payload)
 {
-    j_cb_payload *j_payload = (j_cb_payload *)payload;
-    JNIEnv *env = j_payload->env;
-    jobject consumer = j_payload->consumer;
-    if (consumer == NULL)
+    if (!payload)
     {
         return 0;
     }
-
+    JNIEnv *env = getEnv();
     char *buf = new_substr(str, len);
     jstring message = (*env)->NewStringUTF(env, buf);
-    int r = (*env)->CallIntMethod(env, consumer, jniConstants->remote.midTransportMessage, message);
+    int r = (*env)->CallIntMethod(env, (jobject)payload, jniConstants->remote.midTransportMessage, message);
     (*env)->DeleteLocalRef(env, message);
     free(buf);
     return r;
@@ -39,18 +36,15 @@ int j_git_transport_message_cb(const char *str, int len, void *payload)
  */
 int j_git_cred_acquire_cb(git_cred **cred, const char *url, const char *username_from_url, unsigned int allowed_types, void *payload)
 {
-    j_cb_payload *j_payload = (j_cb_payload *)payload;
-    JNIEnv *env = j_payload->env;
-    jobject consumer = j_payload->consumer;
-    if (consumer == NULL)
+    if (!payload)
     {
         return 0;
     }
+    JNIEnv *env = getEnv();
 
-    assert(consumer && "consumer must not be null");
     jstring jniUrl = (*env)->NewStringUTF(env, url);
     jstring usernameFromUrl = (*env)->NewStringUTF(env, username_from_url);
-    long ptr = (*env)->CallLongMethod(env, consumer, jniConstants->remote.midAcquireCred, jniUrl, usernameFromUrl, allowed_types);
+    long ptr = (*env)->CallLongMethod(env, (jobject)payload, jniConstants->remote.midAcquireCred, jniUrl, usernameFromUrl, allowed_types);
     int r;
     if (ptr >= 0)
     {
@@ -79,45 +73,39 @@ int j_git_cred_acquire_cb(git_cred **cred, const char *url, const char *username
  */
 int j_git_transport_certificate_check_cb(git_cert *cert, int valid, const char *host, void *payload)
 {
-    j_cb_payload *j_payload = (j_cb_payload *)payload;
-    JNIEnv *env = j_payload->env;
-    jobject consumer = j_payload->consumer;
-    if (consumer == NULL)
+    if (!payload)
     {
         return 0;
     }
+    JNIEnv *env = getEnv();
     jstring jHost = (*env)->NewStringUTF(env, host);
-    int r = (*env)->CallIntMethod(env, consumer, jniConstants->remote.midTransportCertificateCheck, (long)cert, valid, jHost);
+    int r = (*env)->CallIntMethod(env, (jobject)payload, jniConstants->remote.midTransportCertificateCheck, (long)cert, valid, jHost);
     (*env)->DeleteLocalRef(env, jHost);
     return r;
 }
 
 int j_git_transfer_progress_cb(const git_transfer_progress *stats, void *payload)
 {
-    j_cb_payload *j_payload = (j_cb_payload *)payload;
-    JNIEnv *env = j_payload->env;
-    jobject consumer = j_payload->consumer;
-    if (consumer == NULL)
+    if (!payload)
     {
         return 0;
     }
-    int r = (*env)->CallIntMethod(env, consumer, jniConstants->remote.midTransferProgress, (long)stats);
+    JNIEnv *env = getEnv();
+    int r = (*env)->CallIntMethod(env, (jobject)payload, jniConstants->remote.midTransferProgress, (long)stats);
     return r;
 }
 
 int j_git_remote_update_tips_cb(const char *refname, const git_oid *a, const git_oid *b, void *payload)
 {
-    j_cb_payload *j_payload = (j_cb_payload *)payload;
-    JNIEnv *env = j_payload->env;
-    jobject consumer = j_payload->consumer;
-    if (consumer == NULL)
+    if (!payload)
     {
         return 0;
     }
+    JNIEnv *env = getEnv();
     jstring jRefname = (*env)->NewStringUTF(env, refname);
     jbyteArray ja = j_git_oid_to_bytearray(env, a);
     jbyteArray jb = j_git_oid_to_bytearray(env, b);
-    int r = (*env)->CallIntMethod(env, consumer, jniConstants->remote.midUpdateTips, jRefname, ja, jb);
+    int r = (*env)->CallIntMethod(env, (jobject)payload, jniConstants->remote.midUpdateTips, jRefname, ja, jb);
     (*env)->DeleteLocalRef(env, ja);
     (*env)->DeleteLocalRef(env, jb);
     (*env)->DeleteLocalRef(env, jRefname);
@@ -126,41 +114,35 @@ int j_git_remote_update_tips_cb(const char *refname, const git_oid *a, const git
 
 int j_git_packbuilder_progress_cb(int stage, uint32_t current, uint32_t total, void *payload)
 {
-    j_cb_payload *j_payload = (j_cb_payload *)payload;
-    JNIEnv *env = j_payload->env;
-    jobject consumer = j_payload->consumer;
-    if (consumer == NULL)
+    if (!payload)
     {
         return 0;
     }
-    int r = (*env)->CallIntMethod(env, consumer, jniConstants->remote.midPackProgress, stage, current, total);
+    JNIEnv *env = getEnv();
+    int r = (*env)->CallIntMethod(env, (jobject)payload, jniConstants->remote.midPackProgress, stage, current, total);
     return r;
 }
 
 int j_git_push_transfer_progress_cb(unsigned int current, unsigned int total, size_t bytes, void *payload)
 {
-    j_cb_payload *j_payload = (j_cb_payload *)payload;
-    JNIEnv *env = j_payload->env;
-    jobject consumer = j_payload->consumer;
-    if (consumer == NULL)
+    if (!payload)
     {
         return 0;
     }
-    return (*env)->CallIntMethod(env, consumer, jniConstants->remote.midPushTransferProgress, (jlong)current, (jlong)total, (jint)bytes);
+    JNIEnv *env = getEnv();
+    return (*env)->CallIntMethod(env, (jobject)payload, jniConstants->remote.midPushTransferProgress, (jlong)current, (jlong)total, (jint)bytes);
 }
 
 int j_git_push_update_reference_cb(const char *refname, const char *status, void *payload)
 {
-    j_cb_payload *j_payload = (j_cb_payload *)payload;
-    JNIEnv *env = j_payload->env;
-    jobject consumer = j_payload->consumer;
-    if (consumer == NULL)
+    if (!payload)
     {
         return 0;
     }
+    JNIEnv *env = getEnv();
     jstring jRefname = (*env)->NewStringUTF(env, refname);
     jstring jStatus = (*env)->NewStringUTF(env, status);
-    int r = (*env)->CallIntMethod(env, consumer, jniConstants->remote.midPushUpdateReference, jRefname, jStatus);
+    int r = (*env)->CallIntMethod(env, (jobject)payload, jniConstants->remote.midPushUpdateReference, jRefname, jStatus);
     (*env)->DeleteLocalRef(env, jRefname);
     (*env)->DeleteLocalRef(env, jStatus);
     return r;
@@ -168,15 +150,13 @@ int j_git_push_update_reference_cb(const char *refname, const char *status, void
 
 int j_git_push_negotiation_cb(const git_push_update **updates, size_t len, void *payload)
 {
-    j_cb_payload *j_payload = (j_cb_payload *)payload;
-    JNIEnv *env = j_payload->env;
-    jobject consumer = j_payload->consumer;
-    if (consumer == NULL)
+    if (!payload)
     {
         return 0;
     }
+    JNIEnv *env = getEnv();
     jlongArray jUpdates = j_long_array_from_pointers(env, (const void **)updates, len);
-    int r = (*env)->CallIntMethod(env, consumer, jniConstants->remote.midPushNegotiation, jUpdates);
+    int r = (*env)->CallIntMethod(env, (jobject)payload, jniConstants->remote.midPushNegotiation, jUpdates);
     (*env)->DeleteLocalRef(env, jUpdates);
     return r;
 }
@@ -193,11 +173,12 @@ int j_git_push_negotiation_cb(const git_push_update **updates, size_t len, void 
  */
 int j_git_transport_cb(git_transport **out, git_remote *owner, void *payload)
 {
-    j_cb_payload *j_payload = (j_cb_payload *)payload;
-    JNIEnv *env = j_payload->env;
-    jobject consumer = j_payload->consumer;
-    assert(consumer && "consumer must not be null");
-    long res = (*env)->CallIntMethod(env, consumer, jniConstants->remote.midTransport, (long)owner);
+    if (!payload)
+    {
+        return 0;
+    }
+    JNIEnv *env = getEnv();
+    long res = (*env)->CallIntMethod(env, (jobject)payload, jniConstants->remote.midTransport, (long)owner);
     if (res > 0)
     {
         *out = (git_transport *)res;
@@ -437,53 +418,23 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Remote_jniCallbacksNew)(JNIEnv *env, jclass
     return r;
 }
 
-JNIEXPORT void JNICALL J_MAKE_METHOD(Remote_jniCallbacksSetTransportMessageCb)(JNIEnv *env, jclass obj, jlong cbPtr)
+JNIEXPORT void JNICALL J_MAKE_METHOD(Remote_jniCallbacksFree)(JNIEnv *env, jclass obj, jlong cbsPtr)
 {
-    ((git_remote_callbacks *)cbPtr)->sideband_progress = j_git_transport_message_cb;
+    git_remote_callbacks *c_ptr = (git_remote_callbacks *)cbsPtr;
+    if (c_ptr->payload != NULL)
+    {
+        (*env)->DeleteGlobalRef(env, (jobject)c_ptr->payload);
+    }
+    free(c_ptr);
 }
 
-JNIEXPORT void JNICALL J_MAKE_METHOD(Remote_jniCallbacksSetCredAcquireCb)(JNIEnv *env, jclass obj, jlong cbPtr)
+JNIEXPORT void JNICALL J_MAKE_METHOD(Remote_jniCallbacksSetCallbackObject)(JNIEnv *env, jclass obj, jlong cbsPtr, jobject cbsObject)
 {
-    ((git_remote_callbacks *)cbPtr)->credentials = j_git_cred_acquire_cb;
-}
-JNIEXPORT void JNICALL J_MAKE_METHOD(Remote_jniCallbacksSetTransportCertificateCheckCb)(JNIEnv *env, jclass obj, jlong cbPtr)
-{
-    ((git_remote_callbacks *)cbPtr)->certificate_check = j_git_transport_certificate_check_cb;
-}
-
-JNIEXPORT void JNICALL J_MAKE_METHOD(Remote_jniCallbacksSetTransferProgressCb)(JNIEnv *env, jclass obj, jlong cbPtr)
-{
-    ((git_remote_callbacks *)cbPtr)->transfer_progress = j_git_transfer_progress_cb;
-}
-
-JNIEXPORT void JNICALL J_MAKE_METHOD(Remote_jniCallbacksSetUpdateTipsCb)(JNIEnv *env, jclass obj, jlong cbPtr)
-{
-    ((git_remote_callbacks *)cbPtr)->update_tips = j_git_remote_update_tips_cb;
-}
-
-JNIEXPORT void JNICALL J_MAKE_METHOD(Remote_jniCallbacksSetPackProgressCb)(JNIEnv *env, jclass obj, jlong cbPtr)
-{
-    ((git_remote_callbacks *)cbPtr)->pack_progress = j_git_packbuilder_progress_cb;
-}
-
-JNIEXPORT void JNICALL J_MAKE_METHOD(Remote_jniCallbacksSetPushTransferProgressCb)(JNIEnv *env, jclass obj, jlong cbPtr)
-{
-    ((git_remote_callbacks *)cbPtr)->transfer_progress = j_git_transfer_progress_cb;
-}
-
-JNIEXPORT void JNICALL J_MAKE_METHOD(Remote_jniCallbacksSetUpdateReferenceCb)(JNIEnv *env, jclass obj, jlong cbPtr)
-{
-    ((git_remote_callbacks *)cbPtr)->push_update_reference = j_git_push_update_reference_cb;
-}
-
-JNIEXPORT void JNICALL J_MAKE_METHOD(Remote_jniCallbacksSetPushNegotiationCb)(JNIEnv *env, jclass obj, jlong cbPtr)
-{
-    ((git_remote_callbacks *)cbPtr)->push_negotiation = j_git_push_negotiation_cb;
-}
-
-JNIEXPORT void JNICALL J_MAKE_METHOD(Remote_jniCallbacksSetTransportCb)(JNIEnv *env, jclass obj, jlong cbPtr)
-{
-    ((git_remote_callbacks *)cbPtr)->transport = j_git_transport_cb;
+    git_remote_callbacks *c_ptr = (git_remote_callbacks *)cbsPtr;
+    if (c_ptr->payload == NULL)
+    {
+        c_ptr->payload = (*env)->NewGlobalRef(env, cbsObject);
+    }
 }
 
 /** int git_remote_is_valid_name(const char *remote_name); */

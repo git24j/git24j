@@ -22,6 +22,28 @@ JNIEnv *getEnv(void)
     return env;
 }
 
+/** initialize payload object: create global ref. */
+void j_cb_payload_init(JNIEnv *env, j_cb_payload *payload, jobject callback, const char *methodSig)
+{
+    assert(payload && callback && "cannot initialize empty payload or with empty callback");
+    jclass clz = (*env)->GetObjectClass(env, callback);
+    assert(clz && "failed to set callback: calss not found");
+    jmethodID mid = (*env)->GetMethodID(env, clz, "accept", methodSig);
+    assert(mid && "failed to set callback: method 'accept' not found");
+    payload->callback = (*env)->NewGlobalRef(env, callback);
+    payload->mid = mid;
+    (*env)->DeleteLocalRef(env, clz);
+}
+
+/** release payload object: delete global ref. This does not free payload itself. */
+void j_cb_payload_release(JNIEnv *env, j_cb_payload *payload)
+{
+    if (payload && payload->callback)
+    {
+        (*env)->DeleteGlobalRef(env, payload->callback);
+    }
+}
+
 char *j_strdup(const char *src)
 {
     char *copy = NULL;

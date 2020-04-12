@@ -17,33 +17,37 @@ const size_t MAX_REF_NAME_SIZE = 32768;
  *  */
 int j_git_reference_foreach_cb(git_reference *reference, void *payload)
 {
+    if (!payload)
+    {
+        return 0;
+    }
+
     j_cb_payload *j_payload = (j_cb_payload *)payload;
-    JNIEnv *env = j_payload->env;
-    jobject consumer = j_payload->consumer;
-    assert(consumer && "consumer must not be null");
-    jclass jclz = (*env)->GetObjectClass(env, consumer);
-    assert(jclz && "jni error: could not resolve consumer class");
-    jmethodID accept = (*env)->GetMethodID(env, jclz, "accept", "(J)I");
-    assert(accept && "jni error: could not resolve method consumer method");
-    int r = (*env)->CallIntMethod(env, consumer, accept, (long)reference);
-    (*env)->DeleteLocalRef(env, jclz);
+    jobject callback = j_payload->callback;
+    jmethodID mid = j_payload->mid;
+    if (!callback || !mid)
+    {
+        return 0;
+    }
+    JNIEnv *env = getEnv();
+    int r = (*env)->CallIntMethod(env, callback, mid, (long)reference);
     return r;
 }
 /**int git_reference_foreach_name_cb(const char *name, void *payload); */
 int j_git_reference_foreach_name_cb(const char *name, void *payload)
 {
+    if (!payload)
+    {
+        return 0;
+    }
+
     j_cb_payload *j_payload = (j_cb_payload *)payload;
-    JNIEnv *env = j_payload->env;
-    jobject consumer = j_payload->consumer;
-    assert(consumer && "consumer must not be null");
-    jclass jclz = (*env)->GetObjectClass(env, consumer);
-    assert(jclz && "jni error: could not resolve consumer class");
+    jobject callback = j_payload->callback;
+    jmethodID mid = j_payload->mid;
+    JNIEnv *env = getEnv();
     jstring j_name = (*env)->NewStringUTF(env, name);
-    jmethodID accept = (*env)->GetMethodID(env, jclz, "accept", "(Ljava/lang/String;)I");
-    assert(accept && "jni error: could not resolve method consumer method");
-    int r = (*env)->CallIntMethod(env, consumer, accept, j_name);
+    int r = (*env)->CallIntMethod(env, callback, mid, j_name);
     (*env)->DeleteLocalRef(env, j_name);
-    (*env)->DeleteLocalRef(env, jclz);
     return r;
 }
 
@@ -239,14 +243,21 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Reference_jniList)(JNIEnv *env, jclass obj,
 /**int git_reference_foreach(git_repository *repo, git_reference_foreach_cb callback, void *payload); */
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Reference_jniForeach)(JNIEnv *env, jclass obj, jlong repoPtr, jobject callback)
 {
-    j_cb_payload payload = {env, callback};
-    return git_reference_foreach((git_repository *)repoPtr, j_git_reference_foreach_cb, &payload);
+    assert(callback && "foreach callback must not be NULL");
+    j_cb_payload payload = {0};
+    j_cb_payload_init(env, &payload, callback, "(J)I");
+    int r = git_reference_foreach((git_repository *)repoPtr, j_git_reference_foreach_cb, &payload);
+    j_cb_payload_release(env, &payload);
+    return r;
 }
 /**int git_reference_foreach_name(git_repository *repo, git_reference_foreach_name_cb callback, void *payload); */
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Reference_jniForeachName)(JNIEnv *env, jclass obj, jlong repoPtr, jobject consumer)
 {
-    j_cb_payload payload = {env, consumer};
-    return git_reference_foreach_name((git_repository *)repoPtr, j_git_reference_foreach_name_cb, &payload);
+    j_cb_payload payload = {0};
+    j_cb_payload_init(env, &payload, consumer, "(Ljava/lang/String;)I");
+    int r = git_reference_foreach_name((git_repository *)repoPtr, j_git_reference_foreach_name_cb, &payload);
+    j_cb_payload_release(env, &payload);
+    return r;
 }
 /**int git_reference_dup(git_reference **dest, git_reference *source); */
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Reference_jniDup)(JNIEnv *env, jclass obj, jobject outDest, jlong sourcePtr)
@@ -316,10 +327,12 @@ JNIEXPORT void JNICALL J_MAKE_METHOD(Reference_jniIteratorFree)(JNIEnv *env, jcl
 /**int git_reference_foreach_glob(git_repository *repo, const char *glob, git_reference_foreach_name_cb callback, void *payload); */
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Reference_jniForeachGlob)(JNIEnv *env, jclass obj, jlong repoPtr, jstring glob, jobject callback)
 {
-    j_cb_payload payload = {env, callback};
+    j_cb_payload payload = {0};
+    j_cb_payload_init(env, &payload, callback, "(Ljava/lang/String;)I");
     char *c_glob = j_copy_of_jstring(env, glob, false);
     int e = git_reference_foreach_glob((git_repository *)repoPtr, c_glob, j_git_reference_foreach_name_cb, &payload);
     free(c_glob);
+    j_cb_payload_release(env, &payload);
     return e;
 }
 /**int git_reference_has_log(git_repository *repo, const char *refname); */

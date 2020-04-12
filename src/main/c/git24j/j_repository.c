@@ -397,56 +397,57 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Repository_jniStateCleanup)(JNIEnv *env, jc
 /**int git_repository_fetchhead_foreach_cb(const char *ref_name, const char *remote_url, const git_oid *oid, unsigned int is_merge, void *payload);*/
 int j_fetchhead_foreach_cb(const char *ref_name, const char *remote_url, const git_oid *oid, unsigned int is_merge, void *payload)
 {
+    assert(payload && "j_fetchhead_foreach_cb must be called with payload");
+    JNIEnv *env = getEnv();
     /* assert(payload && "jni callback cannot be null"); */
     j_cb_payload *j_payload = (j_cb_payload *)payload;
-    JNIEnv *env = j_payload->env;
-    jobject consumer = j_payload->consumer;
-    assert(consumer && "consumer must not be null");
-    jclass jclz = (*env)->GetObjectClass(env, consumer);
-    assert(jclz && "jni error: could not resolve consumer class");
-    /** int accetp(String remoteUrl, byte[] oid, int isMerge)*/
-    jmethodID accept = (*env)->GetMethodID(env, jclz, "accept", "(Ljava/lang/String;[BI)I");
-    assert(accept && "jni error: could not resolve method consumer method");
-
     jstring j_remoteUrl = (*env)->NewStringUTF(env, remote_url);
     jbyteArray j_oidBytes = j_byte_array_from_c(env, oid->id, GIT_OID_RAWSZ);
-    int r = (*env)->CallIntMethod(env, consumer, accept, j_remoteUrl, j_oidBytes, (jint)is_merge);
-
+    int r = (*env)->CallIntMethod(env, j_payload->callback, j_payload->mid, j_remoteUrl, j_oidBytes, (jint)is_merge);
     (*env)->DeleteLocalRef(env, j_remoteUrl);
     (*env)->DeleteLocalRef(env, j_oidBytes);
-    (*env)->DeleteLocalRef(env, jclz);
     return r;
 }
 
 int j_mergehead_foreach_cb(const git_oid *oid, void *payload)
 {
+    assert(payload && "j_mergehead_foreach_cb must be called with paylaod");
     j_cb_payload *j_payload = (j_cb_payload *)payload;
-    JNIEnv *env = j_payload->env;
-    jobject consumer = j_payload->consumer;
-    jclass jclz = (*env)->GetObjectClass(env, consumer);
-    assert(jclz && "jni error: could not resolve consumer class");
-    /** int accetp(String remoteUrl, byte[] oid, int isMerge)*/
-    jmethodID accept = (*env)->GetMethodID(env, jclz, "accept", "([B)I");
-    assert(accept && "jni error: could not resolve method consumer method");
+    JNIEnv *env = getEnv();
     jbyteArray bytes = j_byte_array_from_c(env, oid->id, GIT_OID_RAWSZ);
-    int r = (*env)->CallIntMethod(env, consumer, accept, bytes);
+    int r = (*env)->CallIntMethod(env, j_payload->callback, j_payload->mid, bytes);
     (*env)->DeleteLocalRef(env, bytes);
-    (*env)->DeleteLocalRef(env, jclz);
     return r;
 }
 
 /** int git_repository_fetchhead_foreach(git_repository *repo, git_repository_fetchhead_foreach_cb callback, void *payload); */
-JNIEXPORT jint JNICALL J_MAKE_METHOD(Repository_jniFetchheadForeach)(JNIEnv *env, jclass obj, jlong repoPtr, jobject consumer)
+JNIEXPORT jint JNICALL J_MAKE_METHOD(Repository_jniFetchheadForeach)(JNIEnv *env, jclass obj, jlong repoPtr, jobject callback)
 {
-    j_cb_payload j_payloads = {env, consumer};
-    return git_repository_fetchhead_foreach((git_repository *)repoPtr, j_fetchhead_foreach_cb, &j_payloads);
+    if (!callback)
+    {
+        return git_repository_fetchhead_foreach((git_repository *)repoPtr, NULL, NULL);
+    }
+
+    j_cb_payload payload = {0};
+    j_cb_payload_init(env, &payload, callback, "(Ljava/lang/String;[BI)I");
+    int r = git_repository_fetchhead_foreach((git_repository *)repoPtr, j_fetchhead_foreach_cb, &payload);
+    j_cb_payload_release(env, &payload);
+    return r;
 }
 
 /** int git_repository_mergehead_foreach(git_repository *repo, git_repository_mergehead_foreach_cb callback, void *payload); */
-JNIEXPORT jint JNICALL J_MAKE_METHOD(Repository_jniMergeheadForeach)(JNIEnv *env, jclass obj, jlong repoPtr, jobject consumer)
+JNIEXPORT jint JNICALL J_MAKE_METHOD(Repository_jniMergeheadForeach)(JNIEnv *env, jclass obj, jlong repoPtr, jobject callback)
 {
-    j_cb_payload payloads = {env, consumer};
-    return git_repository_mergehead_foreach((git_repository *)repoPtr, j_mergehead_foreach_cb, &payloads);
+    if (!callback)
+    {
+        return git_repository_mergehead_foreach((git_repository *)repoPtr, NULL, NULL);
+    }
+
+    j_cb_payload payload = {0};
+    j_cb_payload_init(env, &payload, callback, "([B)I");
+    int r = git_repository_mergehead_foreach((git_repository *)repoPtr, j_mergehead_foreach_cb, &payload);
+    j_cb_payload_release(env, &payload);
+    return r;
 }
 
 /** int git_repository_hashfile(git_oid *out, git_repository *repo, const char *path, git_object_t type, const char *as_path); */

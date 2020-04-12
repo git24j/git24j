@@ -7,29 +7,40 @@
 
 int j_git_revwalk_hide_cb(const git_oid *commit_id, void *payload)
 {
+    assert(payload && "j_git_revwalk_hide_cb must be called with payload");
     j_cb_payload *j_payload = (j_cb_payload *)payload;
-    JNIEnv *env = j_payload->env;
-    jobject consumer = j_payload->consumer;
-    if (consumer == NULL)
-    {
-        return 0;
-    }
-    jclass jclz = (*env)->GetObjectClass(env, consumer);
-    assert(jclz && "jni error: could not resolve consumer class");
-    /** int accept(byte[] rawId) */
-    jmethodID accept = (*env)->GetMethodID(env, jclz, "accept", "([B)I");
-    assert(accept && "jni error: could not resolve method consumer method");
+    JNIEnv *env = getEnv();
     jbyteArray commitId = j_git_oid_to_bytearray(env, commit_id);
-    int r = (*env)->CallIntMethod(env, consumer, accept, commitId);
-    (*env)->DeleteLocalRef(env, jclz);
+    int r = (*env)->CallIntMethod(env, j_payload->callback, j_payload->mid, commitId);
     (*env)->DeleteLocalRef(env, commitId);
     return r;
+}
+
+/**Hack, git_revwalk structure is invisible, let's expose at least some of it. */
+struct git_revwalk
+{
+    void *hide_cb_payload;
+};
+
+void _hide_cb_payload_free(JNIEnv *env, git_revwalk *walk)
+{
+    if (walk->hide_cb_payload)
+    {
+        j_cb_payload_release(env, (j_cb_payload *)walk->hide_cb_payload);
+        free(walk->hide_cb_payload);
+    }
 }
 
 /** int git_revwalk_add_hide_cb(git_revwalk *walk, git_revwalk_hide_cb hide_cb, void *payload); */
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Revwalk_jniAddHideCb)(JNIEnv *env, jclass obj, jlong walkPtr, jobject hideCb)
 {
-    j_cb_payload payload = {env, hideCb};
+    if (!hideCb)
+    {
+        _hide_cb_payload_free(env, (git_revwalk *)walkPtr);
+        return git_revwalk_add_hide_cb((git_revwalk *)walkPtr, NULL, NULL);
+    }
+    j_cb_payload *payload = (j_cb_payload *)malloc(sizeof(j_cb_payload));
+    j_cb_payload_init(env, payload, hideCb, "([B])I");
     return git_revwalk_add_hide_cb((git_revwalk *)walkPtr, j_git_revwalk_hide_cb, &payload);
 }
 
@@ -40,6 +51,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Revwalk_jniAddHideCb)(JNIEnv *env, jclass o
 JNIEXPORT void JNICALL J_MAKE_METHOD(Revwalk_jniFree)(JNIEnv *env, jclass obj, jlong walkPtr)
 {
     git_revwalk *walk = (struct git_revwalk *)walkPtr;
+    _hide_cb_payload_free(env, walk);
     git_revwalk_free(walk);
 }
 
@@ -52,20 +64,6 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Revwalk_jniHide)(JNIEnv *env, jclass obj, j
     return r;
 }
 
-JNIEXPORT jint JNICALL J_MAKE_METHOD(Revwalk_jniHideWithCb)(JNIEnv *env, jclass obj, jlong walkPtr, jobject commitId, jobject hideCb)
-{
-    int r;
-    j_cb_payload payload = {env, hideCb};
-    if (hideCb && (r = git_revwalk_add_hide_cb((git_revwalk *)walkPtr, j_git_revwalk_hide_cb, &payload)) != 0)
-        return r;
-    git_oid c_commit_id;
-    j_git_oid_from_java(env, commitId, &c_commit_id);
-    r = git_revwalk_hide((git_revwalk *)walkPtr, &c_commit_id);
-    if (hideCb)
-        git_revwalk_add_hide_cb((git_revwalk *)walkPtr, NULL, NULL);
-    return r;
-}
-
 /** int git_revwalk_hide_glob(git_revwalk *walk, const char *glob); */
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Revwalk_jniHideGlob)(JNIEnv *env, jclass obj, jlong walkPtr, jstring glob)
 {
@@ -74,37 +72,11 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Revwalk_jniHideGlob)(JNIEnv *env, jclass ob
     free(c_glob);
     return r;
 }
-JNIEXPORT jint JNICALL J_MAKE_METHOD(Revwalk_jniHideGlobWithCb)(JNIEnv *env, jclass obj, jlong walkPtr, jstring glob, jobject hideCb)
-{
-    int r;
-    j_cb_payload payload = {env, hideCb};
-    if (hideCb && (r = git_revwalk_add_hide_cb((git_revwalk *)walkPtr, j_git_revwalk_hide_cb, &payload)) != 0)
-        return r;
-    char *c_glob = j_copy_of_jstring(env, glob, true);
-    r = git_revwalk_hide_glob((git_revwalk *)walkPtr, c_glob);
-    free(c_glob);
-    if (hideCb)
-        git_revwalk_add_hide_cb((git_revwalk *)walkPtr, NULL, NULL);
-    return r;
-}
 
 /** int git_revwalk_hide_head(git_revwalk *walk); */
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Revwalk_jniHideHead)(JNIEnv *env, jclass obj, jlong walkPtr)
 {
     int r = git_revwalk_hide_head((git_revwalk *)walkPtr);
-    return r;
-}
-
-/** int git_revwalk_hide_head(git_revwalk *walk); */
-JNIEXPORT jint JNICALL J_MAKE_METHOD(Revwalk_jniHideHeadWithCb)(JNIEnv *env, jclass obj, jlong walkPtr, jobject hideCb)
-{
-    int r;
-    j_cb_payload payload = {env, hideCb};
-    if (hideCb && (r = git_revwalk_add_hide_cb((git_revwalk *)walkPtr, j_git_revwalk_hide_cb, &payload)) != 0)
-        return r;
-    r = git_revwalk_hide_head((git_revwalk *)walkPtr);
-    if (hideCb)
-        git_revwalk_add_hide_cb((git_revwalk *)walkPtr, NULL, NULL);
     return r;
 }
 
@@ -121,7 +93,8 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Revwalk_jniHideRef)(JNIEnv *env, jclass obj
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Revwalk_jniHideRefWithCb)(JNIEnv *env, jclass obj, jlong walkPtr, jstring refname, jobject hideCb)
 {
     int r;
-    j_cb_payload payload = {env, hideCb};
+    j_cb_payload payload = {0};
+    // j_cb_payload_init(env, &payload);
     if (hideCb && (r = git_revwalk_add_hide_cb((git_revwalk *)walkPtr, j_git_revwalk_hide_cb, &payload)) != 0)
         return r;
     char *c_refname = j_copy_of_jstring(env, refname, true);
