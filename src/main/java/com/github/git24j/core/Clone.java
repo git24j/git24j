@@ -2,7 +2,6 @@ package com.github.git24j.core;
 
 import java.nio.file.Path;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.concurrent.atomic.AtomicReference;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -17,12 +16,13 @@ public class Clone {
          * <p>Callers of git_clone my provide a function matching this signature to override the
          * repository creation and customization process during a clone operation.
          *
-         * @param outRepo the resulting repository
          * @param path path in which to create the repository
          * @param bare whether the repository is bare. This is the value from the clone options
-         * @return 0, or a negative value to indicate error
+         * @return created repository
+         * @throws GitException indicate error
          */
-        int accept(AtomicReference<Repository> outRepo, String path, boolean bare);
+        @Nonnull
+        Repository accept(@Nonnull String path, boolean bare) throws GitException;
     }
 
     interface RemoteCreateCb {
@@ -33,13 +33,15 @@ public class Clone {
          * <p>Callers of git_clone may provide a function matching this signature to override the
          * remote creation and customization process during a clone operation.
          *
-         * @param outRemote the resulting remote
          * @param repo the repository in which to create the remote
          * @param name the remote's name
          * @param url the remote's url
-         * @return 0, GIT_EINVALIDSPEC, GIT_EEXISTS or an error code
+         * @return resulting remote
+         * @throws GitException git errors like GIT_EINVALIDSPEC, GIT_EEXISTS
          */
-        int accept(AtomicReference<Remote> outRemote, Repository repo, String name, String url);
+        @Nonnull
+        Remote accept(@Nonnull Repository repo, @Nonnull String name, @Nonnull String url)
+                throws GitException;
     }
 
     public enum LocalT implements IBitEnum {
@@ -141,10 +143,13 @@ public class Clone {
             jniOptionsSetRepositoryCb(
                     getRawPointer(),
                     ((out, str, i) -> {
-                        AtomicReference<Repository> outRepo = new AtomicReference<>();
-                        int r = createCb.accept(outRepo, str, i == 1);
-                        out.set(outRepo.get().getRawPointer());
-                        return r;
+                        try {
+                            Repository repo = createCb.accept(str, i == 1);
+                            out.set(repo.getRawPointer());
+                        } catch (GitException e) {
+                            return e.getCode().getCode();
+                        }
+                        return 0;
                     }));
         }
 
@@ -157,13 +162,13 @@ public class Clone {
             jniOptionsSetRemoteCb(
                     getRawPointer(),
                     (out, repoPtr, name, url) -> {
-                        AtomicReference<Remote> outRemote = new AtomicReference<>();
-                        int r;
-                        try (Repository repo = new Repository(repoPtr)) {
-                            r = createCb.accept(outRemote, repo, name, url);
+                        try {
+                            Remote remote = createCb.accept(new Repository(repoPtr), name, url);
+                            out.set(remote.getRawPointer());
+                        } catch (GitException e) {
+                            return e.getCode().getCode();
                         }
-                        out.set(outRemote.get().getRawPointer());
-                        return r;
+                        return 0;
                     });
         }
     }

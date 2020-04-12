@@ -8,13 +8,16 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
-public class Repository implements AutoCloseable {
-    /** C Pointer. */
-    final AtomicLong _rawPtr = new AtomicLong();
+public class Repository extends CAutoCloseable {
+    @Override
+    protected void releaseOnce(long cPtr) {
+        jniFree(cPtr);
+    }
 
-    Repository(long rawPtr) {
-        _rawPtr.set(rawPtr);
+    public Repository(long rawPointer) {
+        super(rawPointer);
     }
 
     static native int jniOpen(AtomicLong outRepo, String path);
@@ -23,7 +26,7 @@ public class Repository implements AutoCloseable {
 
     static native int jniWrapOdb(AtomicLong outRepo, long odbPtr);
 
-    static native int jniDiscover(String startPath, int accessFs, String ceilingDirs);
+    static native int jniDiscover(Buf out, String startPath, int accessFs, String ceilingDirs);
 
     static native int jniOpenExt(AtomicLong outRepo, String path, int flags, String ceilingDirs);
 
@@ -114,9 +117,10 @@ public class Repository implements AutoCloseable {
      * @return the repo which that is opened
      * @throws GitException git error.
      */
-    public static Repository open(String path) {
+    @Nonnull
+    public static Repository open(@Nonnull Path path) {
         AtomicLong outRepo = new AtomicLong();
-        int error = jniOpen(outRepo, path);
+        int error = jniOpen(outRepo, path.toString());
         Error.throwIfNeeded(error);
         return new Repository(outRepo.get());
     }
@@ -146,10 +150,36 @@ public class Repository implements AutoCloseable {
      * @return Repo just created or reinitialized.
      * @throws GitException git error
      */
-    public static Repository initExt(String path, InitOptions initOpts) {
+    @Nonnull
+    public static Repository initExt(@Nonnull String path, @Nullable InitOptions initOpts) {
         AtomicLong out = new AtomicLong();
         Error.throwIfNeeded(jniInitExt(out, path, initOpts));
         return new Repository(out.get());
+    }
+
+    /**
+     * Look for a git repository and return its path if found. The lookup start from base_path and
+     * walk across parent directories if nothing has been found. The lookup ends when the first
+     * repository is found, or when reaching a directory referenced in ceiling_dirs or when the
+     * filesystem changes (in case across_fs is true).
+     *
+     * <p>The method will automatically detect if the repository is bare (if there is a repository).
+     *
+     * @param startPath The base path where the lookup starts.
+     * @param acrossFs If true, then the lookup will not stop when a filesystem device change is
+     *     detected while exploring parent directories.
+     * @param ceilingDirs A GIT_PATH_LIST_SEPARATOR separated list of absolute symbolic link free
+     *     paths. The lookup will stop when any of this paths is reached. Note that the lookup
+     *     always performs on start_path no matter start_path appears in ceiling_dirs ceiling_dirs
+     *     might be NULL (which is equivalent to an empty string)
+     * @return the found path or empty string
+     * @throws GitException git errors
+     */
+    public static Optional<String> discover(
+            @Nonnull Path startPath, boolean acrossFs, @Nullable String ceilingDirs) {
+        Buf outBuf = new Buf();
+        jniDiscover(outBuf, startPath.toString(), acrossFs ? 1 : 0, ceilingDirs);
+        return outBuf.getString();
     }
 
     /**
@@ -165,9 +195,11 @@ public class Repository implements AutoCloseable {
      *     see if a repo at this path could be opened.
      * @throws GitException git error.
      */
-    public static Repository openExt(String path, EnumSet<OpenFlag> flags, String ceilingDirs) {
+    @Nonnull
+    public static Repository openExt(
+            @Nonnull Path path, @Nullable EnumSet<OpenFlag> flags, @Nullable String ceilingDirs) {
         AtomicLong out = new AtomicLong();
-        int error = jniOpenExt(out, path, IBitEnum.bitOrAll(flags), ceilingDirs);
+        int error = jniOpenExt(out, path.toString(), IBitEnum.bitOrAll(flags), ceilingDirs);
         Error.throwIfNeeded(error);
         return new Repository(out.get());
     }
@@ -179,9 +211,10 @@ public class Repository implements AutoCloseable {
      * @return Pointer to the repo just opened.
      * @throws GitException git error.
      */
-    public static Repository openBare(String path) {
+    @Nonnull
+    public static Repository openBare(@Nonnull Path path) {
         AtomicLong out = new AtomicLong();
-        Error.throwIfNeeded(jniOpenBare(out, path));
+        Error.throwIfNeeded(jniOpenBare(out, path.toString()));
         return new Repository(out.get());
     }
 
@@ -190,6 +223,7 @@ public class Repository implements AutoCloseable {
      *
      * @return the path to the common dir.
      */
+    @Nonnull
     public String getPath() {
         return jniPath(getRawPointer());
     }
@@ -199,6 +233,7 @@ public class Repository implements AutoCloseable {
      *
      * @return the path to the working dir, if it exists
      */
+    @Nonnull
     public Path workdir() {
         String wd = jniWorkdir(getRawPointer());
         return Paths.get(wd);
@@ -451,6 +486,7 @@ public class Repository implements AutoCloseable {
      * @return pointer value in long
      * @throws IllegalStateException if Repository has been closed
      */
+    @Override
     long getRawPointer() {
         long ptr = _rawPtr.get();
         if (ptr == 0) {

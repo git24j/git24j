@@ -55,4 +55,71 @@ try (Repository repo = Clone.cloneRepo("http://github.com/abc/awesome", localPat
 ```
 see also [BasicOperationsTest.simpleClone](../src/test/java/com/github/git24j/core/BasicOperationsTest.java#37)
 
-### Clone with callbacks
+### Clone and monitor progress
+One can monitor clone progress by adding a callback to `Clone.Options`
+```
+Clone.Options opts = Clone.Options.defaultOpts();
+opts.getCheckoutOpts()
+                .setProgressCb((path, completedSteps, totalSteps) -> {
+                    progressTrack.put(path, completedSteps);
+                    System.out.printf("path=%s, step=%d, total steps=%d %n", path, completedSteps, totalSteps);
+                });
+```
+At runtime the output looks like:
+> path=null, step=0, total steps=6 
+> 
+> path=.gitignore, step=1, total steps=6 
+> 
+> path=README.md, step=2, total steps=6 
+> 
+> path=a, step=3, total steps=6 
+> 
+> path=b, step=4, total steps=6 
+> 
+> path=c, step=5, total steps=6 
+> 
+> path=d, step=6, total steps=6 
+
+see also [BasicOperationsTest.cloneWithProgressCallbak](../src/test/java/com/github/git24j/core/BasicOperationsTest.java#53)
+
+
+### Clone (Custom repo and remote)
+One can replace the default repository creation process of clone with a customized one. This is done by setting `Options.RepositoryCreateCb`
+
+```
+Clone.Options opts = Clone.Options.defaultOpts();
+opts.setRemoteCreateCb(((repo, name, url) -> Remote.create(repo, name, URI.create(url))));
+opts.setRepositoryCreateCb((path, bare) -> Repository.init(Paths.get(path), true));
+```
+
+see also [BasicOperationsTest.cloneWithRepositoryAndRemoteCallback](../src/test/java/com/github/git24j/core/BasicOperationsTest.java#76)
+
+
+### Open Repository
+To open a repository, one can use `Repository.open(...)`
+```
+try (Repository repo = Repository.open(repoPath)) {
+    // repo operations
+}
+```
+more examples [RepositoryTest.java](../src/test/java/com/github/git24j/core/ReferenceTest.java#17)
+
+### Open repository with options
+```
+# open without search
+Repository.openExt(repoPath, EnumSet.of(Repository.OpenFlag.NO_SEARCH), null)
+try (Repository repo2 = Repository.openExt(sub, null, "/tmp:/home:/usr"))
+```
+more details: [RepositoryTest.openExt](../src/test/java/com/github/git24j/core/ReferenceTest.java#68)
+
+### Open bare
+```
+Repository.openBare(repoPath)
+```
+more details: [RepositoryTest.openBare](../src/test/java/com/github/git24j/core/ReferenceTest.java#45)
+
+### Find repository
+```
+Repository.discover(Paths.get("/tmp/foo/bar/sub"), true, "/tmp:/home");
+```
+more details: [RepositoryTest.discover](../src/test/java/com/github/git24j/core/ReferenceTest.java#85)

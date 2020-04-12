@@ -190,7 +190,7 @@ public class IndexTest extends TestBase {
         Path repoPath = tempCopyOf(TestRepo.SIMPLE1, folder.getRoot().toPath());
         FileUtils.writeStringToFile(repoPath.resolve("a").toFile(), "test");
         Map<String, String> cbParams = new HashMap<>();
-        try (Repository repo = Repository.open(repoPath.toString())) {
+        try (Repository repo = Repository.open(repoPath)) {
             try (Index index = repo.index()) {
                 index.addAll(
                         new String[] {"."}, EnumSet.of(Index.AddOption.DEFAULT), cbParams::put);
@@ -204,7 +204,7 @@ public class IndexTest extends TestBase {
     public void addByPath() throws IOException {
         Path repoPath = tempCopyOf(TestRepo.SIMPLE1, folder.getRoot().toPath());
         FileUtils.writeStringToFile(repoPath.resolve("a").toFile(), "add index by path");
-        try (Repository repo = Repository.open(repoPath.toString())) {
+        try (Repository repo = Repository.open(repoPath)) {
             try (Index index = repo.index()) {
                 index.add("a");
                 index.write();
