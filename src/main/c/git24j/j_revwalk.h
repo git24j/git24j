@@ -16,11 +16,9 @@ extern "C"
 
     /** int git_revwalk_hide(git_revwalk *walk, const git_oid *commit_id); */
     JNIEXPORT jint JNICALL J_MAKE_METHOD(Revwalk_jniHide)(JNIEnv *env, jclass obj, jlong walkPtr, jobject commitId);
-    JNIEXPORT jint JNICALL J_MAKE_METHOD(Revwalk_jniHideWithCb)(JNIEnv *env, jclass obj, jlong walkPtr, jobject commitId, jobject hideCb);
 
     /** int git_revwalk_hide_glob(git_revwalk *walk, const char *glob); */
     JNIEXPORT jint JNICALL J_MAKE_METHOD(Revwalk_jniHideGlob)(JNIEnv *env, jclass obj, jlong walkPtr, jstring glob);
-    JNIEXPORT jint JNICALL J_MAKE_METHOD(Revwalk_jniHideGlobWithCb)(JNIEnv *env, jclass obj, jlong walkPtr, jstring glob, jobject hideCb);
 
     /** int git_revwalk_hide_head(git_revwalk *walk); */
     JNIEXPORT jint JNICALL J_MAKE_METHOD(Revwalk_jniHideHead)(JNIEnv *env, jclass obj, jlong walkPtr);

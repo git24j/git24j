@@ -33,8 +33,6 @@ public class Revwalk extends CAutoReleasable {
     /** int git_revwalk_hide(git_revwalk *walk, const git_oid *commit_id); */
     static native int jniHide(long walk, Oid commitId);
 
-    static native int jniHideWithCb(long walk, Oid commitId, BArrCallback hideCb);
-
     /**
      * Mark a commit (and its ancestors) uninteresting for the output.
      *
@@ -50,27 +48,9 @@ public class Revwalk extends CAutoReleasable {
         Error.throwIfNeeded(jniHide(getRawPointer(), commitId));
     }
 
-    /**
-     * Mark a commit (and its ancestors) uninteresting for the output.
-     *
-     * <p>The given id must belong to a committish on the walked repository.
-     *
-     * <p>The resolved commit and all its parents will be hidden from the output on the revision
-     * walk.
-     *
-     * @param commitId the oid of commit that will be ignored during the traversal
-     * @param callback callback function to hide the commit and its parents
-     * @throws GitException git errors
-     */
-    public void hide(@Nonnull Oid commitId, @Nonnull HideCb callback) {
-        Error.throwIfNeeded(
-                jniHideWithCb(getRawPointer(), commitId, raw -> callback.accept(Oid.of(raw))));
-    }
 
     /** int git_revwalk_hide_glob(git_revwalk *walk, const char *glob); */
     static native int jniHideGlob(long walk, String glob);
-
-    static native int jniHideGlobWithCb(long walk, String glob, BArrCallback callback);
 
     /**
      * Hide matching references.
@@ -88,26 +68,6 @@ public class Revwalk extends CAutoReleasable {
      */
     public void hideGlob(@Nonnull String glob) {
         Error.throwIfNeeded(jniHideGlob(getRawPointer(), glob));
-    }
-
-    /**
-     * Hide matching references.
-     *
-     * <p>The OIDs pointed to by the references that match the given glob pattern and their
-     * ancestors will be hidden from the output on the revision walk.
-     *
-     * <p>A leading 'refs/' is implied if not present as well as a trailing '/\*' if the glob lacks
-     * '?', '\*' or '['.
-     *
-     * <p>Any references matching this glob which do not point to a committish will be ignored.
-     *
-     * @param glob the glob pattern references should match
-     * @param callback callback function to hide the commit and its parents
-     * @throws GitException git errors
-     */
-    public void hideGlob(@Nonnull String glob, @Nonnull HideCb callback) {
-        Error.throwIfNeeded(
-                jniHideGlobWithCb(getRawPointer(), glob, raw -> callback.accept(Oid.of(raw))));
     }
 
     /** int git_revwalk_hide_head(git_revwalk *walk); */

@@ -6,6 +6,44 @@
 #include <stdio.h>
 #include <string.h>
 
+extern JavaVM *globalJvm;
+
+/** Retrieve env attached to the current thread. */
+JNIEnv *getEnv(void)
+{
+    JNIEnv *env;
+    int st = (*globalJvm)->GetEnv(globalJvm, (void **)&env, JNI_VERSION_1_6);
+    if (st == JNI_EDETACHED)
+    {
+        /* retry after attaching */
+        (*globalJvm)->AttachCurrentThread(globalJvm, (void **)&env, NULL);
+    }
+    assert(env && "Could not obtain attached jni env");
+    return env;
+}
+
+/** initialize payload object: create global ref. */
+void j_cb_payload_init(JNIEnv *env, j_cb_payload *payload, jobject callback, const char *methodSig)
+{
+    assert(payload && callback && "cannot initialize empty payload or with empty callback");
+    jclass clz = (*env)->GetObjectClass(env, callback);
+    assert(clz && "failed to set callback: calss not found");
+    jmethodID mid = (*env)->GetMethodID(env, clz, "accept", methodSig);
+    assert(mid && "failed to set callback: method 'accept' not found");
+    payload->callback = (*env)->NewGlobalRef(env, callback);
+    payload->mid = mid;
+    (*env)->DeleteLocalRef(env, clz);
+}
+
+/** release payload object: delete global ref. This does not free payload itself. */
+void j_cb_payload_release(JNIEnv *env, j_cb_payload *payload)
+{
+    if (payload && payload->callback)
+    {
+        (*env)->DeleteGlobalRef(env, payload->callback);
+    }
+}
+
 char *j_strdup(const char *src)
 {
     char *copy = NULL;
@@ -371,7 +409,12 @@ void j_atomic_long_set(JNIEnv *env, long val, jobject outAL)
 /** FOR DEBUG: inspect object class */
 void __debug_inspect(JNIEnv *env, jobject obj)
 {
-    printf("------------------ INSPECT obj(%p) ----------------- \n", obj);
+    __debug_inspect2(env, obj, "obj");
+}
+
+void __debug_inspect2(JNIEnv *env, jobject obj, const char *message)
+{
+    printf("------------------ INSPECT %s(%p) ----------------- \n", message, obj);
     jclass clz = (*env)->GetObjectClass(env, obj);
     // First get the class object
     jmethodID midGetClass = (*env)->GetMethodID(env, clz, "getClass", "()Ljava/lang/Class;");
@@ -384,9 +427,9 @@ void __debug_inspect(JNIEnv *env, jobject obj)
 
     // Call the getName() to get a jstring object back
     jstring objClassName = (jstring)(*env)->CallObjectMethod(env, clsObj, midGetName);
-    printf("qqqqq class of the object: %s \n", j_copy_of_jstring(env, objClassName, true));
+    printf("qqqqq class of the object[%p]: %s \n", obj, j_copy_of_jstring(env, objClassName, true));
     (*env)->CallObjectMethod(env, clz, midGetName);
-    printf("------------------ INSPECT end ----------------- \n");
+    printf("------------------ INSPECTION (%s) end ----------------- \n", message);
     (*env)->DeleteLocalRef(env, objClassName);
     (*env)->DeleteLocalRef(env, clzClz);
     (*env)->DeleteLocalRef(env, clsObj);

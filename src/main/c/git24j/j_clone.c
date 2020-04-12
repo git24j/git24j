@@ -35,9 +35,14 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Clone_jniOptionsNew)(JNIEnv *env, jclass ob
     (*env)->CallVoidMethod(env, outOpts, jniConstants->midAtomicLongSet, (long)opts);
     return r;
 }
+
 JNIEXPORT void JNICALL J_MAKE_METHOD(Clone_jniOptionsFree)(JNIEnv *env, jclass obj, jlong optionsPtr)
 {
     git_clone_options *opts = (git_clone_options *)optionsPtr;
+    opts->remote_cb = NULL;
+    opts->repository_cb = NULL;
+    j_cb_payload_release(env, opts->remote_cb_payload);
+    j_cb_payload_release(env, opts->repository_cb_payload);
     free(opts->remote_cb_payload);
     free(opts->repository_cb_payload);
 }
@@ -46,21 +51,20 @@ int j_git_repository_create_cb(git_repository **out, const char *path, int bare,
 {
     assert(payload && "jni callback cannot be null");
     j_cb_payload *j_payload = (j_cb_payload *)payload;
-    JNIEnv *env = j_payload->env;
-    jobject consumer = j_payload->consumer;
-    jclass jclz = (*env)->GetObjectClass(env, consumer);
-    assert(jclz && "jni error: could not resolve consumer class");
-    /** int accetp(AtomicLong outRepo, String path, int bare)*/
-    jmethodID accept = (*env)->GetMethodID(env, jclz, "accept", "(Ljava/util/concurrent/atomic/AtomicLong;Ljava/lang/String;I)I");
-    assert(accept && "jni error: could not resolve method consumer method");
+    jobject callback = j_payload->callback;
+    jmethodID mid = j_payload->mid;
+    if (callback == NULL || mid == NULL)
+    {
+        return 0;
+    }
+    JNIEnv *env = getEnv();
     jobject outRepo = (*env)->NewObject(env, jniConstants->clzAtomicLong, jniConstants->midAtomicLongInit);
     jstring jPath = (*env)->NewStringUTF(env, path);
-    int r = (*env)->CallIntMethod(env, consumer, accept, outRepo, jPath, bare);
+    int r = (*env)->CallIntMethod(env, callback, mid, outRepo, jPath, bare);
     jlong repoPtr = (*env)->CallLongMethod(env, outRepo, jniConstants->midAtomicLongGet);
     *out = (git_repository *)repoPtr;
     (*env)->DeleteLocalRef(env, jPath);
     (*env)->DeleteLocalRef(env, outRepo);
-    (*env)->DeleteLocalRef(env, jclz);
     return r;
 }
 
@@ -68,23 +72,24 @@ int j_git_remote_create_cb(git_remote **out, git_repository *repo, const char *n
 {
     assert(payload && "jni callback cannot be null");
     j_cb_payload *j_payload = (j_cb_payload *)payload;
-    JNIEnv *env = j_payload->env;
-    jobject consumer = j_payload->consumer;
-    jclass jclz = (*env)->GetObjectClass(env, consumer);
-    assert(jclz && "jni error: could not resolve consumer class");
-    /** int accept(AtomicLong outRemote, jlong repo, String name, String url)*/
-    jmethodID accept = (*env)->GetMethodID(env, jclz, "accept", "(Ljava/util/concurrent/atomic/AtomicLong;JLjava/lang/String;Ljava/lang/String;)I");
-    assert(accept && "jni error: could not resolve method consumer method");
+    jobject callback = j_payload->callback;
+    jmethodID mid = j_payload->mid;
+    if (callback == NULL || mid == NULL)
+    {
+        return 0;
+    }
+    JNIEnv *env = getEnv();
+    // TODO
+    // jmethodID accept = (*env)->GetMethodID(env, jclz, "accept", "(Ljava/util/concurrent/atomic/AtomicLong;JLjava/lang/String;Ljava/lang/String;)I");
     jobject outRemote = (*env)->NewObject(env, jniConstants->clzAtomicLong, jniConstants->midAtomicLongInit);
     jstring jName = (*env)->NewStringUTF(env, name);
     jstring jUrl = (*env)->NewStringUTF(env, url);
-    int r = (*env)->CallIntMethod(env, consumer, accept, outRemote, (jlong)repo, jName, jUrl);
+    int r = (*env)->CallIntMethod(env, callback, mid, outRemote, (jlong)repo, jName, jUrl);
     jlong remotePtr = (*env)->CallLongMethod(env, outRemote, jniConstants->midAtomicLongGet);
     *out = (git_remote *)remotePtr;
     (*env)->DeleteLocalRef(env, jUrl);
     (*env)->DeleteLocalRef(env, jName);
     (*env)->DeleteLocalRef(env, outRemote);
-    (*env)->DeleteLocalRef(env, jclz);
     return r;
 }
 
@@ -153,11 +158,16 @@ JNIEXPORT void JNICALL J_MAKE_METHOD(Clone_jniOptionsSetLocal)(JNIEnv *env, jcla
 JNIEXPORT void JNICALL J_MAKE_METHOD(Clone_jniOptionsSetRepositoryCb)(JNIEnv *env, jclass obj, jlong optionsPtr, jobject repositoryCb)
 {
     git_clone_options *opts = (git_clone_options *)optionsPtr;
+    jclass clz = (*env)->GetObjectClass(env, repositoryCb);
+    assert(clz && "could not find repository callback class");
+    jmethodID mid = (*env)->GetMethodID(env, clz, "accept", "(Ljava/util/concurrent/atomic/AtomicLong;Ljava/lang/String;I)I");
+    assert(mid && "could not find repository callback method");
     j_cb_payload *payload = (j_cb_payload *)malloc(sizeof(j_cb_payload));
-    payload->consumer = repositoryCb;
-    payload->env = env;
-    opts->repository_cb = j_git_repository_create_cb;
+    payload->callback = repositoryCb;
+    payload->mid = mid;
     opts->repository_cb_payload = payload;
+    opts->repository_cb = j_git_repository_create_cb;
+    (*env)->DeleteLocalRef(env, clz);
 }
 
 /** git_remote_create_cb remote_cb*/
@@ -165,8 +175,13 @@ JNIEXPORT void JNICALL J_MAKE_METHOD(Clone_jniOptionsSetRemoteCb)(JNIEnv *env, j
 {
     git_clone_options *opts = (git_clone_options *)optionsPtr;
     j_cb_payload *payload = (j_cb_payload *)malloc(sizeof(j_cb_payload));
-    payload->consumer = remoteCb;
-    payload->env = env;
-    opts->remote_cb = j_git_remote_create_cb;
+    jclass clz = (*env)->GetObjectClass(env, remoteCb);
+    assert(clz && "could not find remote callback class");
+    jmethodID mid = (*env)->GetMethodID(env, clz, "accept", "(Ljava/util/concurrent/atomic/AtomicLong;JLjava/lang/String;Ljava/lang/String;)I");
+    assert(mid && "could not find remote callback class");
+    payload->callback = remoteCb;
+    payload->mid = mid;
     opts->remote_cb_payload = payload;
+    opts->remote_cb = j_git_remote_create_cb;
+    (*env)->DeleteLocalRef(env, clz);
 }

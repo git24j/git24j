@@ -5,6 +5,8 @@
 #include <jni.h>
 #include <stdio.h>
 
+extern j_constants_t *jniConstants;
+
 jclass j_find_and_hold_clz(JNIEnv *env, const char *descriptor)
 {
     jclass clz = (*env)->FindClass(env, descriptor);
@@ -14,14 +16,20 @@ jclass j_find_and_hold_clz(JNIEnv *env, const char *descriptor)
     return gClz;
 }
 
+jint JNI_OnLoad(JavaVM *vm, void *reserved)
+{
+    globalJvm = vm;
+    return JNI_VERSION_1_6;
+}
+
 void git24j_init(JNIEnv *env)
 {
     assert(env && "cannot initiate git24j without jvm");
     jniConstants = (j_constants_t *)malloc(sizeof(j_constants_t));
-    jniConstants->clzAtomicInt = j_find_and_hold_clz(env, "Ljava/util/concurrent/atomic/AtomicInteger;");
-    jniConstants->clzAtomicLong = j_find_and_hold_clz(env, "Ljava/util/concurrent/atomic/AtomicLong;");
-    jniConstants->clzAtomicReference = j_find_and_hold_clz(env, "Ljava/util/concurrent/atomic/AtomicReference;");
-    jniConstants->clzList = j_find_and_hold_clz(env, "Ljava/util/List;");
+    jniConstants->clzAtomicInt = j_find_and_hold_clz(env, "java/util/concurrent/atomic/AtomicInteger");
+    jniConstants->clzAtomicLong = j_find_and_hold_clz(env, "java/util/concurrent/atomic/AtomicLong");
+    jniConstants->clzAtomicReference = j_find_and_hold_clz(env, "java/util/concurrent/atomic/AtomicReference");
+    jniConstants->clzList = j_find_and_hold_clz(env, "java/util/List");
     assert(jniConstants->clzAtomicInt && "AtomicInteger class not found");
     assert(jniConstants->clzAtomicLong && "AtomicLong class not found");
     assert(jniConstants->clzAtomicReference && "AtomicReference class not found");

@@ -245,6 +245,19 @@ public class Submodule extends CAutoReleasable {
             return opts;
         }
     }
+
+    @FunctionalInterface
+    public interface Callback {
+        /**
+         * Function pointer to receive each submodule
+         *
+         * @param sm git_submodule currently being visited
+         * @param name name of the submodule
+         * @return 0 on success or error code
+         */
+        int accept(Submodule sm, String name);
+    }
+
     // no matching type found for 'git_submodule_cb callback'
     /**
      * int git_submodule_foreach(git_repository *repo, git_submodule_cb callback, void *payload);

@@ -38,7 +38,7 @@ public class Init {
         try {
             System.loadLibrary(lib.shortName());
         } catch (UnsatisfiedLinkError ignore) {
-            // ignore
+            // ignore and try next candidate location
         }
         Path libPath = Paths.get(DEFAULT_LIB_PATH, lib.shortName(), lib.mappedLibraryName());
         if (!Files.exists(libPath)) {

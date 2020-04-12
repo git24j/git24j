@@ -8,11 +8,11 @@ extern "C"
 {
 #endif
 
-    /**Pack jni objects to pass to update callback. */
+    /** Save jni objects to be passed to async callbacks. */
     typedef struct
     {
-        JNIEnv *env;
-        jobject consumer;
+        jobject callback;
+        jmethodID mid;
     } j_cb_payload;
 
     typedef struct
@@ -66,6 +66,14 @@ extern "C"
 
     /** commonly used constants. */
     j_constants_t *jniConstants;
+
+    /** Retrieve env attached to the current thread. */
+    JNIEnv *getEnv(void);
+
+    /** initialize payload object: create global ref. */
+    void j_cb_payload_init(JNIEnv *env, j_cb_payload *payload, jobject callback, const char *methodSig);
+    /** release payload object: delete global ref. This does not free payload itself. */
+    void j_cb_payload_release(JNIEnv *env, j_cb_payload *payload);
 
     /**
      * Duplicate c string, returned string needs to be free-ed separately.
@@ -175,6 +183,7 @@ extern "C"
 
     /** FOR DEBUG: inspect object class */
     void __debug_inspect(JNIEnv *env, jobject obj);
+    void __debug_inspect2(JNIEnv *env, jobject obj, const char *message);
 #ifdef __cplusplus
 }
 #endif

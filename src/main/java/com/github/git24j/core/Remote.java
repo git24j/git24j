@@ -236,25 +236,9 @@ public class Remote extends CAutoReleasable {
         Optional<Transport> accept(@Nonnull Remote owner);
     }
 
-    static native void jniCallbacksSetTransportMessageCb(long cbPtr);
+    static native void jniCallbacksFree(long cbsPtr);
 
-    static native void jniCallbacksSetCredAcquireCb(long cbPtr);
-
-    static native void jniCallbacksSetTransportCertificateCheckCb(long cbPtr);
-
-    static native void jniCallbacksSetTransferProgressCb(long cbPtr);
-
-    static native void jniCallbacksSetUpdateTipsCb(long cbPtr);
-
-    static native void jniCallbacksSetPackProgressCb(long cbPtr);
-
-    static native void jniCallbacksSetPushTransferProgressCb(long cbPtr);
-
-    static native void jniCallbacksSetUpdateReferenceCb(long cbPtr);
-
-    static native void jniCallbacksSetPushNegotiationCb(long cbPtr);
-
-    static native void jniCallbacksSetTransportCb(long cbPtr);
+    static native void jniCallbacksSetCallbackObject(long cbsPtr, Callbacks cbsObject);
 
     public static final class Callbacks extends CAutoReleasable {
         private CredAcquireCb _credAcquireCb;
@@ -269,52 +253,52 @@ public class Remote extends CAutoReleasable {
         private TransportCb _transportCb;
 
         public void setCredAcquireCb(CredAcquireCb credAcquireCb) {
-            jniCallbacksSetCredAcquireCb(getRawPointer());
+            jniCallbacksSetCallbackObject(getRawPointer(), this);
             _credAcquireCb = credAcquireCb;
         }
 
         public void setTransportMsg(TransportMessageCb transportMsg) {
-            jniCallbacksSetTransportMessageCb(getRawPointer());
+            jniCallbacksSetCallbackObject(getRawPointer(), this);
             _transportMsg = transportMsg;
         }
 
         public void setCertificateCheckCb(TransportCertificateCheckCb certificateCheckCb) {
-            jniCallbacksSetTransportCertificateCheckCb(getRawPointer());
+            jniCallbacksSetCallbackObject(getRawPointer(), this);
             _certificateCheckCb = certificateCheckCb;
         }
 
         public void setTransferProgressCb(TransferProgressCb transferProgressCb) {
-            jniCallbacksSetTransferProgressCb(getRawPointer());
+            jniCallbacksSetCallbackObject(getRawPointer(), this);
             _transferProgressCb = transferProgressCb;
         }
 
         public void setUpdateTipsCb(UpdateTipsCb updateTipsCb) {
-            jniCallbacksSetUpdateTipsCb(getRawPointer());
+            jniCallbacksSetCallbackObject(getRawPointer(), this);
             _updateTipsCb = updateTipsCb;
         }
 
         public void setPackProgressCb(PackProgressCb packProgressCb) {
-            jniCallbacksSetPackProgressCb(getRawPointer());
+            jniCallbacksSetCallbackObject(getRawPointer(), this);
             _packProgressCb = packProgressCb;
         }
 
         public void setPushTransferProgressCb(PushTransferProgressCb pushTransferProgressCb) {
-            jniCallbacksSetPushTransferProgressCb(getRawPointer());
+            jniCallbacksSetCallbackObject(getRawPointer(), this);
             _pushTransferProgressCb = pushTransferProgressCb;
         }
 
         public void setUpdateReferenceCb(UpdateReferenceCb updateReferenceCb) {
-            jniCallbacksSetUpdateReferenceCb(getRawPointer());
+            jniCallbacksSetCallbackObject(getRawPointer(), this);
             _updateReferenceCb = updateReferenceCb;
         }
 
         public void setPushNegotiationCb(PushNegotiationCb pushNegotiationCb) {
-            jniCallbacksSetPushNegotiationCb(getRawPointer());
+            jniCallbacksSetCallbackObject(getRawPointer(), this);
             _pushNegotiationCb = pushNegotiationCb;
         }
 
         public void setTransportCb(TransportCb transportCb) {
-            jniCallbacksSetTransportCb(getRawPointer());
+            jniCallbacksSetCallbackObject(getRawPointer(), this);
             _transportCb = transportCb;
         }
 
@@ -417,8 +401,8 @@ public class Remote extends CAutoReleasable {
          * 		return error;
          * </pre>
          *
-         * We would like to return < 0 values for error > 0 values for valid pointer 0 as not able
-         * to allocate.
+         * HACK: We would like to return < 0 values for error > 0 values for valid pointer 0 as not
+         * able to allocate.
          *
          * @param ownerPtr
          * @return <0 for error,

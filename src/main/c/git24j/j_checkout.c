@@ -7,6 +7,8 @@
 #include <stdio.h>
 
 extern j_constants_t *jniConstants;
+extern JavaVM *globalJvm;
+
 // no matching type found for 'git_checkout_notify_t why'
 /** int git_checkout_notify_cb(git_checkout_notify_t why, const char *path, const git_diff_file *baseline, const git_diff_file *target, const git_diff_file *workdir, void *payload); */
 /** -------- Wrapper Body ---------- */
@@ -33,8 +35,14 @@ JNIEXPORT void JNICALL J_MAKE_METHOD(Checkout_jniOptionsFree)(JNIEnv *env, jclas
     }
 
     git_checkout_options *opts = (git_checkout_options *)optsPtr;
+    opts->progress_cb = NULL;
+    opts->perfdata_cb = NULL;
+    opts->notify_cb = NULL;
+    j_cb_payload_release(env, opts->progress_payload);
+    j_cb_payload_release(env, opts->perfdata_payload);
+    j_cb_payload_release(env, opts->notify_payload);
     free(opts->progress_payload);
-    free(opts->perfdata_payload);
+    free(opts->perfdata_cb);
     free(opts->notify_payload);
     git_strarray_free(&(opts->paths));
     free((void *)opts->target_directory);
@@ -72,79 +80,67 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Checkout_jniTree)(JNIEnv *env, jclass obj, 
 /** void git_checkout_options_set_perfdata_cb(const git_checkout_options *opts, jobject perfdata_cb); */
 int j_git_checkout_notify_cb(git_checkout_notify_t why, const char *path, const git_diff_file *baseline, const git_diff_file *target, const git_diff_file *workdir, void *payload)
 {
+    assert(payload && "j_git_checkout_notify_cb must be called with payload");
     j_cb_payload *j_payload = (j_cb_payload *)payload;
-    JNIEnv *env = j_payload->env;
-    jobject consumer = j_payload->consumer;
-    if (consumer == NULL)
-    {
-        return 0;
-    }
+    JNIEnv *env = getEnv();
     jstring jPath = (*env)->NewStringUTF(env, path);
-    jclass clz = (*env)->GetObjectClass(env, consumer);
-    jmethodID mid = (*env)->GetMethodID(env, clz, "accept", "(ILjava/lang/String;JJJ)I");
-    int r = (*env)->CallIntMethod(env, consumer, mid, (int)why, jPath, (jlong)baseline, (jlong)target, (jlong)workdir);
+    int r = (*env)->CallIntMethod(env, j_payload->callback, j_payload->mid, (int)why, jPath, (jlong)baseline, (jlong)target, (jlong)workdir);
     (*env)->DeleteLocalRef(env, jPath);
     return r;
 }
 
 void j_git_checkout_progress_cb(const char *path, size_t completed_steps, size_t total_steps, void *payload)
 {
+    assert(payload && "j_git_checkout_progress_cb must be called with payload");
     j_cb_payload *j_payload = (j_cb_payload *)payload;
-    JNIEnv *env = j_payload->env;
-    jobject consumer = j_payload->consumer;
-    if (consumer == NULL)
-    {
-        return;
-    }
+    JNIEnv *env = getEnv();
     jstring jPath = (*env)->NewStringUTF(env, path);
-    jclass clz = (*env)->GetObjectClass(env, consumer);
-    jmethodID mid = (*env)->GetMethodID(env, clz, "accept", "(Ljava/lang/String;II)V");
-    (*env)->CallVoidMethod(env, consumer, mid, jPath, completed_steps, total_steps);
-    (*env)->DeleteLocalRef(env, jPath);
+    (*env)->CallVoidMethod(env, j_payload->callback, j_payload->mid, jPath, completed_steps, total_steps);
+    if (jPath)
+    {
+        (*env)->DeleteLocalRef(env, jPath);
+    }
 }
 
 void j_git_checkout_perfdata_cb(const git_checkout_perfdata *perfdata, void *payload)
 {
     j_cb_payload *j_payload = (j_cb_payload *)payload;
-    JNIEnv *env = j_payload->env;
-    jobject consumer = j_payload->consumer;
-    if (consumer == NULL)
+    jobject consumer = j_payload->callback;
+    jmethodID mid = j_payload->mid;
+    if (consumer == NULL || mid == NULL)
     {
         return;
     }
-    jclass clz = (*env)->GetObjectClass(env, consumer);
-    jmethodID mid = (*env)->GetMethodID(env, clz, "accept", "(III)V");
+    JNIEnv *env = getEnv();
     (*env)->CallVoidMethod(env, consumer, mid, perfdata->mkdir_calls, perfdata->stat_calls, perfdata->chmod_calls);
 }
 
 JNIEXPORT void JNICALL J_MAKE_METHOD(Checkout_jniOptionsSetNotifyCb)(JNIEnv *env, jclass obj, jlong optsPtr, jobject notifyCb)
 {
     git_checkout_options *opts = (git_checkout_options *)optsPtr;
-    /* released in `jniOptionsFree()` */
     j_cb_payload *payload = (j_cb_payload *)malloc(sizeof(j_cb_payload));
-    payload->env = env;
-    payload->consumer = notifyCb;
+    j_cb_payload_init(env, payload, notifyCb, "(ILjava/lang/String;JJJ)I");
     opts->notify_payload = payload;
+    opts->notify_cb = j_git_checkout_notify_cb;
 }
 
-JNIEXPORT void JNICALL J_MAKE_METHOD(Checkout_jniOptionsSetProcessCb)(JNIEnv *env, jclass obj, jlong optsPtr, jobject processCb)
+JNIEXPORT void JNICALL J_MAKE_METHOD(Checkout_jniOptionsSetProgressCb)(JNIEnv *env, jclass obj, jlong optsPtr, jobject progressCb)
 {
     git_checkout_options *opts = (git_checkout_options *)optsPtr;
     /* released in `jniOptionsFree()` */
     j_cb_payload *payload = (j_cb_payload *)malloc(sizeof(j_cb_payload));
-    payload->env = env;
-    payload->consumer = processCb;
+    j_cb_payload_init(env, payload, progressCb, "(Ljava/lang/String;II)V");
     opts->progress_payload = payload;
+    opts->progress_cb = j_git_checkout_progress_cb;
 }
 
 JNIEXPORT void JNICALL J_MAKE_METHOD(Checkout_jniOptionsSetPerfdataCb)(JNIEnv *env, jclass obj, jlong optsPtr, jobject perfdataCb)
 {
     git_checkout_options *opts = (git_checkout_options *)optsPtr;
-    /* released in `jniOptionsFree()` */
     j_cb_payload *payload = (j_cb_payload *)malloc(sizeof(j_cb_payload));
-    payload->env = env;
-    payload->consumer = perfdataCb;
+    j_cb_payload_init(env, payload, perfdataCb, "(III)V");
     opts->perfdata_payload = payload;
+    opts->perfdata_cb = j_git_checkout_perfdata_cb;
 }
 
 /** -------- Wrapper Body ---------- */

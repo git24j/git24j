@@ -11,25 +11,10 @@ extern "C"
 {
 #endif
 
-    int j_git_submodule_cb(git_submodule *sm, const char *name, void *payload)
-    {
-        j_cb_payload *j_payload = (j_cb_payload *)payload;
-        JNIEnv *env = j_payload->env;
-        jobject consumer = j_payload->consumer;
-        if (consumer == NULL)
-            return 0;
-        jclass jclz = (*env)->GetObjectClass(env, consumer);
-        assert(jclz && "jni error: could not resolve consumer class");
-        jmethodID accept = (*env)->GetMethodID(env, jclz, "accept", "(JLjava/lang/String;)I");
-        assert(accept && "jni error: could not resolve method consumer method");
-        jstring jName = (*env)->NewStringUTF(env, name);
-        int r = (*env)->CallIntMethod(env, consumer, accept, (jlong)sm, jName);
-        (*env)->DeleteLocalRef(env, jName);
-        return r;
-    }
-
+    int j_git_submodule_cb(git_submodule *sm, const char *name, void *payload);
     // no matching type found for 'git_submodule_cb callback'
     /** int git_submodule_foreach(git_repository *repo, git_submodule_cb callback, void *payload); */
+    JNIEXPORT jint JNICALL J_MAKE_METHOD(Submodule_jniForeach)(JNIEnv *env, jclass obj, jlong repoPtr, jobject foreachCb);
     /** -------- Signature of the header ---------- */
     /** int git_submodule_add_finalize(git_submodule *submodule); */
     JNIEXPORT jint JNICALL J_MAKE_METHOD(Submodule_jniAddFinalize)(JNIEnv *env, jclass obj, jlong submodulePtr);

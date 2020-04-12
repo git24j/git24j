@@ -36,7 +36,7 @@ extern "C"
     JNIEXPORT void JNICALL J_MAKE_METHOD(Checkout_jniOptionsSetNotifyCb)(JNIEnv *env, jclass obj, jlong optsPtr, jobject notifyCb);
     // no matching type found for 'jobject progress_cb'
     /** void git_checkout_options_set_progress_cb(const git_checkout_options *opts, jobject progress_cb); */
-    JNIEXPORT void JNICALL J_MAKE_METHOD(Checkout_jniOptionsSetProcessCb)(JNIEnv *env, jclass obj, jlong optsPtr, jobject processCb);
+    JNIEXPORT void JNICALL J_MAKE_METHOD(Checkout_jniOptionsSetProgressCb)(JNIEnv *env, jclass obj, jlong optsPtr, jobject progressCb);
     // no matching type found for 'jobject perfdata_cb'
     /** void git_checkout_options_set_perfdata_cb(const git_checkout_options *opts, jobject perfdata_cb); */
     JNIEXPORT void JNICALL J_MAKE_METHOD(Checkout_jniOptionsSetPerfdataCb)(JNIEnv *env, jclass obj, jlong optsPtr, jobject perfdataCb);

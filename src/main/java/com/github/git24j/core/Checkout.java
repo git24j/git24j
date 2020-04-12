@@ -2,6 +2,7 @@ package com.github.git24j.core;
 
 import java.util.EnumSet;
 import java.util.concurrent.atomic.AtomicLong;
+import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
@@ -105,8 +106,8 @@ public class Checkout {
                                     Diff.File.ofWeak(workdirPtr)));
         }
 
-        public void setProcessCb(@Nonnull ProcessCb callback) {
-            jniOptionsSetProcessCb(getRawPointer(), callback);
+        public void setProgressCb(@Nonnull ProgressCb callback) {
+            jniOptionsSetProgressCb(getRawPointer(), callback);
         }
 
         public void setPerfdataCb(@Nonnull PerfdataCb callback) {
@@ -149,8 +150,8 @@ public class Checkout {
     }
 
     @FunctionalInterface
-    public interface ProcessCb {
-        void accept(String path, int completedSteps, int totalSteps);
+    public interface ProgressCb {
+        void accept(@CheckForNull String path, int completedSteps, int totalSteps);
     }
 
     @FunctionalInterface
@@ -407,7 +408,7 @@ public class Checkout {
 
     static native void jniOptionsSetNotifyCb(long optsPtr, Internals.ISJJJCallback notifyCb);
 
-    static native void jniOptionsSetProcessCb(long optsPtr, ProcessCb processCb);
+    static native void jniOptionsSetProgressCb(long optsPtr, ProgressCb progressCb);
 
     static native void jniOptionsSetPerfdataCb(long optsPtr, PerfdataCb perfdataCb);
 
