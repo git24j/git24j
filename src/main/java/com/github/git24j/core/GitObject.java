@@ -1,6 +1,7 @@
 package com.github.git24j.core;
 
 import java.util.concurrent.atomic.AtomicLong;
+import javax.annotation.Nonnull;
 
 /** Generic git object: {@code Commit}, {@code Tag}, {@code Tree} or {@code Blob} */
 public class GitObject extends CAutoReleasable {
@@ -74,11 +75,13 @@ public class GitObject extends CAutoReleasable {
      * @param repository the repository to look up the object
      * @param oid the unique identifier for the object
      * @param type the type of the object
-     * @return found object
+     * @return found object, throw error if lookup failed.
      * @throws GitException git errors
      * @throws IllegalStateException required objects are not open or have been closed.
      */
-    public static GitObject lookup(Repository repository, Oid oid, Type type) {
+    @Nonnull
+    public static GitObject lookup(
+            @Nonnull Repository repository, @Nonnull Oid oid, @Nonnull Type type) {
         AtomicLong outObj = new AtomicLong();
         if (oid.isShortId()) {
             Error.throwIfNeeded(
@@ -112,7 +115,6 @@ public class GitObject extends CAutoReleasable {
         return GitObject.create(outObj.get(), type);
     }
 
-    /** TODO: change to type() Get the object type of an object. */
     public Type type() {
         return Type.valueOf(jniType(_rawPtr.get()));
     }

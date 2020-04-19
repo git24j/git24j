@@ -16,6 +16,11 @@ class Internals {
     }
 
     @FunctionalInterface
+    interface JCallback {
+        int accept(long ptr);
+    }
+
+    @FunctionalInterface
     interface JJJCallback {
         int accept(long ptr1, long ptr2, long ptr3);
     }

@@ -1,21 +1,21 @@
 package com.github.git24j.core;
 
+import static com.github.git24j.core.Repository.InitFlagT.MKPATH;
+
+import java.io.IOException;
+import java.net.URI;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.EnumSet;
+import java.util.HashMap;
+import java.util.Map;
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
-import java.io.IOException;
-import java.nio.file.Path;
-import java.util.EnumSet;
-import java.util.HashMap;
-import java.util.Map;
-
-import static com.github.git24j.core.Repository.InitFlagT.MKPATH;
-
 public class BasicOperationsTest extends TestBase {
-    @Rule
-    public TemporaryFolder folder = new TemporaryFolder();
+    @Rule public TemporaryFolder folder = new TemporaryFolder();
 
     @Test
     public void initSimple() throws Exception {
@@ -32,7 +32,7 @@ public class BasicOperationsTest extends TestBase {
 
         opts.setFlags(EnumSet.of(MKPATH));
         try (Repository repo =
-                     Repository.initExt(folder.newFolder("tmp").getAbsolutePath(), opts)) {
+                Repository.initExt(folder.newFolder("tmp").getAbsolutePath(), opts)) {
             Assert.assertTrue(repo.headUnborn());
         }
     }
@@ -42,35 +42,44 @@ public class BasicOperationsTest extends TestBase {
         Path localPath = folder.newFolder("newClone2").toPath();
         try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {
             try (Repository cloned =
-                         Clone.cloneRepo(testRepo.workdir().toString(), localPath, null)) {
+                    Clone.cloneRepo(testRepo.workdir().toString(), localPath, null)) {
                 Assert.assertEquals(localPath, cloned.workdir());
             }
         }
     }
 
-
     @Test
-    public void cloneWithCallback() throws Exception {
-        Clone.Options opts = Clone.Options.defaultOpts();
+    public void cloneWithProgressCallback() throws Exception {
         Map<String, Integer> progressTrack = new HashMap<>();
+        Clone.Options opts = Clone.Options.defaultOpts();
         opts.getCheckoutOpts()
-                .setProgressCb((path, completedSteps, totalSteps) -> {
-                    progressTrack.put(path, completedSteps);
-                    System.out.println(
-                            "path="
-                                    + path
-                                    + ", step: "
-                                    + completedSteps
-                                    + ", total steps = "
-                                    + totalSteps);
-                });
+                .setProgressCb(
+                        (path, completedSteps, totalSteps) -> {
+                            progressTrack.put(path, completedSteps);
+                            System.out.printf(
+                                    "path=%s, step=%d, total steps=%d %n",
+                                    path, completedSteps, totalSteps);
+                        });
 
         Path localPath = folder.newFolder("newClone2").toPath();
         try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {
             try (Repository cloned =
-                         Clone.cloneRepo(testRepo.workdir().toString(), localPath, opts)) {
-            }
+                    Clone.cloneRepo(testRepo.workdir().toString(), localPath, opts)) {}
             Assert.assertTrue(progressTrack.size() > 0);
+        }
+    }
+
+    @Test
+    public void cloneWithRepositoryAndRemoteCallback() throws Exception {
+        Clone.Options opts = Clone.Options.defaultOpts();
+        opts.setRemoteCreateCb(((repo, name, url) -> Remote.create(repo, name, URI.create(url))));
+        opts.setRepositoryCreateCb((path, bare) -> Repository.init(Paths.get(path), true));
+        Path localPath = folder.newFolder("newClone2").toPath();
+        try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {
+            try (Repository cloned =
+                    Clone.cloneRepo(testRepo.workdir().toString(), localPath, opts)) {
+                Assert.assertTrue(cloned.isBare());
+            }
         }
     }
 }

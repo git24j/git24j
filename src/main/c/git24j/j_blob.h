@@ -51,7 +51,7 @@ extern "C"
     JNIEXPORT jint JNICALL J_MAKE_METHOD(Blob_jniDup)(JNIEnv *env, jclass obj, jobject outDest, jlong srcPtr);
 
     /** int git_blob_filtered_content(git_buf *out, git_blob *blob, const char *as_path, int check_for_binary_data); */
-    /* TODO: marked as deprecated already, figure out which one to be wrapped */
+    JNIEXPORT jint JNICALL J_MAKE_METHOD(Blob_jniFilteredContent)(JNIEnv *env, jclass obj, jobject out, jlong blobPtr, jstring as_path, jint check_for_binary_data);
 
 #ifdef __cplusplus
 }

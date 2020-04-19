@@ -17,6 +17,12 @@ public class GitObjectTest extends TestBase {
         GitObject searched = GitObject.lookup(testRepo, obj.id(), GitObject.Type.COMMIT);
         Assert.assertEquals(GitObject.Type.COMMIT, searched.type());
         Assert.assertEquals(searched.getRawPointer(), obj.getRawPointer());
+        try {
+            GitObject.lookup(testRepo, Oid.of("123456abcde"), GitObject.Type.COMMIT);
+            Assert.fail("should have thrown ENOTFOUND error");
+        } catch (GitException e) {
+            Assert.assertEquals(GitException.ErrorCode.ENOTFOUND, e.getCode());
+        }
     }
 
     @Test

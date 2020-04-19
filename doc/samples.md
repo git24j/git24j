@@ -55,4 +55,133 @@ try (Repository repo = Clone.cloneRepo("http://github.com/abc/awesome", localPat
 ```
 see also [BasicOperationsTest.simpleClone](../src/test/java/com/github/git24j/core/BasicOperationsTest.java#37)
 
-### Clone with callbacks
+### Clone and monitor progress
+One can monitor clone progress by adding a callback to `Clone.Options`
+```
+Clone.Options opts = Clone.Options.defaultOpts();
+opts.getCheckoutOpts()
+                .setProgressCb((path, completedSteps, totalSteps) -> {
+                    progressTrack.put(path, completedSteps);
+                    System.out.printf("path=%s, step=%d, total steps=%d %n", path, completedSteps, totalSteps);
+                });
+```
+At runtime the output looks like:
+> path=null, step=0, total steps=6 
+> 
+> path=.gitignore, step=1, total steps=6 
+> 
+> path=README.md, step=2, total steps=6 
+> 
+> path=a, step=3, total steps=6 
+> 
+> path=b, step=4, total steps=6 
+> 
+> path=c, step=5, total steps=6 
+> 
+> path=d, step=6, total steps=6 
+
+see also [BasicOperationsTest.cloneWithProgressCallbak](../src/test/java/com/github/git24j/core/BasicOperationsTest.java#53)
+
+
+### Clone (Custom repo and remote)
+One can replace the default repository creation process of clone with a customized one. This is done by setting `Options.RepositoryCreateCb`
+
+```
+Clone.Options opts = Clone.Options.defaultOpts();
+opts.setRemoteCreateCb(((repo, name, url) -> Remote.create(repo, name, URI.create(url))));
+opts.setRepositoryCreateCb((path, bare) -> Repository.init(Paths.get(path), true));
+```
+
+see also [BasicOperationsTest.cloneWithRepositoryAndRemoteCallback](../src/test/java/com/github/git24j/core/BasicOperationsTest.java#76)
+
+
+### Open Repository
+To open a repository, one can use `Repository.open(...)`
+```
+try (Repository repo = Repository.open(repoPath)) {
+    // repo operations
+}
+```
+more examples [RepositoryTest.java](../src/test/java/com/github/git24j/core/ReferenceTest.java#17)
+
+### Open repository with options
+```
+# open without search
+Repository.openExt(repoPath, EnumSet.of(Repository.OpenFlag.NO_SEARCH), null)
+try (Repository repo2 = Repository.openExt(sub, null, "/tmp:/home:/usr"))
+```
+more details: [RepositoryTest.openExt](../src/test/java/com/github/git24j/core/ReferenceTest.java#68)
+
+### Open bare
+```
+Repository.openBare(repoPath)
+```
+more details: [RepositoryTest.openBare](../src/test/java/com/github/git24j/core/ReferenceTest.java#45)
+
+### Find repository
+```
+Repository.discover(Paths.get("/tmp/foo/bar/sub"), true, "/tmp:/home");
+```
+more details: [RepositoryTest.discover](../src/test/java/com/github/git24j/core/ReferenceTest.java#85)
+
+
+## Objects
+
+There are four types of `GitObject`: Commit, Tag, Tree and Blob. They share following common methods:
+
+- `public static GitObject lookup(Repository repository, Oid oid, Type type)`
+- `public static GitObject lookupPrefix(Repository repository, Oid oid, int len, Type type)`
+- `public Type type()`
+- `public Oid id()`
+- `public Buf shortId()`
+- `public GitObject peel(Type targetType)`
+- `public GitObject dup()`
+- `public Repository owner()`
+
+### SHAs and OIDs
+
+Commonly used APIS are
+- `Oid.of(String)` create Oid object from SHA string
+- `Oid.of(byte[])` create Oid object from bytes
+- `Oid.toString()` get SHA string of oid
+
+Internally, Oid stores stores the data in a fixed size (length of 20) byte array. And can be interpreted as 40 length characters. 
+
+Note: use `Oid.of(byte[])` judiciously. Don't use it like `Oid.of("c33dfe912b2984d5".getBytes())`. If you would like to get Oid from string, simply use `Oid.of(String)`.
+ It is because Oid internally combine two hex chars into one byte. For example, `"a1".getBytes()` will return `byte[] {97, 49}`, but in Oid, "a1" will be combined into one byte, aka `(10 << 4) + 1 = 161`. 
+
+### Lookup
+
+```
+Commit commit = Commit.lookup(repo, Oid.of("012345abcde"));
+Tree tree = Tree.lookup(repo, Oid.of("abcde012345"));
+Blob blob = Blob.lookup(repo, Oid.of("0a1b2c3d4e"));
+```
+
+More examples: [CommitTest.java](../src/test/java/com/github/git24j/core/CommitTest.java)
+
+### Casting
+
+GitObject is the super class of `Commit`, `Tag`, `Tree` and `Blob`. So GitObject can be casted to sub types directly, for example
+```
+ return (Commit) GitObject.lookup(repo, oid, Type.COMMIT);
+```
+
+## Blobs
+
+### lookup
+
+```
+Blob.lookup(testRepo, Oid.of("012345abcde"));
+```
+### Content
+
+```
+blob1.filteredContent("README.md", true);
+```
+more details: [BlobTest.filteredContent](../src/test/java/com/github/git24j/core/BlobTest.java)
+
+
+## Trees
+
+### lookup tree from commit

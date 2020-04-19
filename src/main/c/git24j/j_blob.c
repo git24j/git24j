@@ -123,3 +123,15 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Blob_jniDup)(JNIEnv *env, jclass obj, jobje
     j_save_c_pointer(env, (void *)out, outDest, "set");
     return e;
 }
+
+/** int git_blob_filtered_content(git_buf *out, git_blob *blob, const char *as_path, int check_for_binary_data); */
+JNIEXPORT jint JNICALL J_MAKE_METHOD(Blob_jniFilteredContent)(JNIEnv *env, jclass obj, jobject out, jlong blobPtr, jstring as_path, jint check_for_binary_data)
+{
+    git_buf c_out = {0};
+    char *c_as_path = j_copy_of_jstring(env, as_path, true);
+    int r = git_blob_filtered_content(&c_out, (git_blob *)blobPtr, c_as_path, check_for_binary_data);
+    j_git_buf_to_java(env, &c_out, out);
+    git_buf_dispose(&c_out);
+    free(c_as_path);
+    return r;
+}

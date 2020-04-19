@@ -115,7 +115,7 @@ public class TestBase {
         }
 
         public Repository tempRepo(TemporaryFolder folder) {
-            return Repository.open(this.tempCopy(folder).toString());
+            return Repository.open(this.tempCopy(folder));
         }
     }
 }

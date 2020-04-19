@@ -1,6 +1,7 @@
 package com.github.git24j.core;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Optional;
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
@@ -8,7 +9,11 @@ import org.junit.rules.TemporaryFolder;
 
 public class BlobTest extends TestBase {
     private static final String MASTER_HASH = "476f0c95825ef4479cab580b71f8b85f9dea4ee4";
+    /** from {@code git rev-parse HEAD:a } */
     private static final String BLOB_A = "78981922613b2afb6025042ff6bd878ac1994e85";
+    /** from {@code git ls-tree HEAD^tree | grep README.md } */
+    private static final String BLOB_README = "d628ad3b584b5ab3fa93dbdbcc66a15e4413d9b2";
+
     @Rule public TemporaryFolder folder = new TemporaryFolder();
 
     @Test
@@ -20,6 +25,16 @@ public class BlobTest extends TestBase {
             Assert.assertNotNull(blob1);
             Assert.assertNotNull(blob2);
             Assert.assertEquals(blob2.id(), blob3.id());
+        }
+    }
+
+    @Test
+    public void filteredContent() {
+        try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {
+            Blob blob1 = Blob.lookup(testRepo, Oid.of(BLOB_README));
+            Assert.assertNotNull(blob1);
+            Optional<String> maybeContent = blob1.filteredContent("README.md", true);
+            Assert.assertTrue(maybeContent.isPresent());
         }
     }
 
