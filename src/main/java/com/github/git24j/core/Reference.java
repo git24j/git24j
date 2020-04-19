@@ -501,15 +501,15 @@ public class Reference {
         REFSPEC_SHORTHAND(1 << 2),
         ;
 
-        private final int bit;
+        private final int _bit;
 
         Format(int bit) {
-            this.bit = bit;
+            this._bit = bit;
         }
 
         @Override
         public int getBit() {
-            return bit;
+            return _bit;
         }
     }
     /**
@@ -858,15 +858,15 @@ public class Reference {
         SYMBOLIC(2),
         ALL(3);
 
-        private final int _value;
+        private final int _bit;
 
-        ReferenceType(int value) {
-            _value = value;
+        ReferenceType(int bit) {
+            _bit = bit;
         }
 
         static ReferenceType valueOf(int iVal) {
             for (ReferenceType x : ReferenceType.values()) {
-                if (x._value == iVal) {
+                if (x._bit == iVal) {
                     return x;
                 }
             }
@@ -875,7 +875,7 @@ public class Reference {
 
         @Override
         public int getBit() {
-            return 0;
+            return _bit;
         }
     }
 

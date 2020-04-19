@@ -34,15 +34,15 @@ public class Index implements AutoCloseable {
         FROM_OWNER(-1),
         ;
 
-        private final int bit;
+        private final int _bit;
 
         Capability(int bit) {
-            this.bit = bit;
+            this._bit = bit;
         }
 
         @Override
         public int getBit() {
-            return bit;
+            return _bit;
         }
     }
     /**
@@ -422,15 +422,15 @@ public class Index implements AutoCloseable {
         CHECK_PATHSPEC(1 << 2),
         ;
 
-        private final int bit;
+        private final int _bit;
 
         AddOption(int bit) {
-            this.bit = bit;
+            this._bit = bit;
         }
 
         @Override
         public int getBit() {
-            return bit;
+            return _bit;
         }
     }
 

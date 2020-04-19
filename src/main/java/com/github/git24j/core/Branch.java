@@ -164,15 +164,15 @@ public class Branch {
         REMOTE(2),
         ALL(3);
 
-        private final int _value;
+        private final int _bit;
 
-        BranchType(int value) {
-            _value = value;
+        BranchType(int bit) {
+            _bit = bit;
         }
 
         static BranchType valueOf(int iVal) {
             for (BranchType x : BranchType.values()) {
-                if (x._value == iVal) {
+                if (x._bit == iVal) {
                     return x;
                 }
             }
@@ -181,7 +181,7 @@ public class Branch {
 
         @Override
         public int getBit() {
-            return _value;
+            return _bit;
         }
     }
 

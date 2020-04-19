@@ -29,7 +29,7 @@ public class OdbObject extends CAutoReleasable {
 
         @Override
         public int getBit() {
-            return 0;
+            return _bit;
         }
     }
 

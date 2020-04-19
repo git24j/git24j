@@ -46,6 +46,11 @@ class Internals {
     }
 
     @FunctionalInterface
+    interface SJCallback {
+        int accept(String s, long ptr);
+    }
+
+    @FunctionalInterface
     interface ASICallback {
         int accept(AtomicLong out, String str, int i);
     }

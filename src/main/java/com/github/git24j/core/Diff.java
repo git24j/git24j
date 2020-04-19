@@ -192,15 +192,15 @@ public class Diff extends CAutoReleasable {
         SHOW_BINARY(1 << 30),
         ;
 
-        final int bit;
+        final int _bit;
 
         OptionFlag(int bit) {
-            this.bit = bit;
+            this._bit = bit;
         }
 
         @Override
         public int getBit() {
-            return bit;
+            return _bit;
         }
     }
 

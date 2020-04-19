@@ -649,15 +649,15 @@ public class Repository extends CAutoCloseable {
          * either $GIT_WORK_TREE or $GIT_COMMON_DIR is set.
          */
         FROM_ENV(1 << 4);
-        private final int bit;
+        private final int _bit;
 
         OpenFlag(int bit) {
-            this.bit = bit;
+            this._bit = bit;
         }
 
         @Override
         public int getBit() {
-            return bit;
+            return _bit;
         }
     }
 
@@ -688,7 +688,7 @@ public class Repository extends CAutoCloseable {
 
         @Override
         public int getBit() {
-            return 0;
+            return _bit;
         }
     }
 
@@ -708,7 +708,7 @@ public class Repository extends CAutoCloseable {
 
         @Override
         public int getBit() {
-            return 0;
+            return _bit;
         }
     }
 

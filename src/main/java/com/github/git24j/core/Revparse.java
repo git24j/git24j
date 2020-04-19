@@ -28,7 +28,7 @@ public class Revparse {
     public static GitObject single(Repository repository, String spec) {
         AtomicLong outObj = new AtomicLong();
         Error.throwIfNeeded(jniSingle(outObj, repository.getRawPointer(), spec));
-        return new GitObject(outObj.get());
+        return GitObject.create(outObj.get());
     }
 
     /**
@@ -53,15 +53,15 @@ public class Revparse {
         SINGLE(1 << 0),
         RANGE(1 << 1),
         MERGE_BASE(1 << 2);
-        final int bit;
+        final int _bit;
 
         Mode(int bit) {
-            this.bit = bit;
+            this._bit = bit;
         }
 
         @Override
         public int getBit() {
-            return bit;
+            return _bit;
         }
     }
 

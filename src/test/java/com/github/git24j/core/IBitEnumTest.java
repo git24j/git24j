@@ -38,15 +38,15 @@ public class IBitEnumTest {
         TWO(1 << 1),
         FOUR(1 << 2),
         EIGHT(1 << 3);
-        final int bit;
+        final int _bit;
 
         Example(int bit) {
-            this.bit = bit;
+            this._bit = bit;
         }
 
         @Override
         public int getBit() {
-            return bit;
+            return _bit;
         }
     }
 }
