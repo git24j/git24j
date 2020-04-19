@@ -28,4 +28,9 @@ public class OidTest {
         Assert.assertEquals("c3", Oid.of("c3d").toString());
         Assert.assertEquals("c3df", Oid.of("c3df").toString());
     }
+
+    @Test
+    public void fromByteArray() {
+        Assert.assertEquals(Oid.of("a1a2"), Oid.of(new byte[] {(byte) 161, (byte) 162}));
+    }
 }

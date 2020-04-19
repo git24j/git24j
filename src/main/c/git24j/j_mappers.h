@@ -103,6 +103,9 @@ extern "C"
     /** create a long[] to hold raw pointers. */
     jlongArray j_long_array_from_pointers(JNIEnv *env, const void **ptrs, size_t n);
 
+    /** get array of pointers from long[] */
+    void **j_long_array_to_pointers(JNIEnv *env, jlongArray pointers, size_t *out_len);
+
     /** 
      * Copy jni jbyteArray to unsigned char array. 
      * @param array jni array from which content is copied.

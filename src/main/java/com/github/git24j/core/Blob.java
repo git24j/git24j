@@ -1,6 +1,9 @@
 package com.github.git24j.core;
 
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
+import javax.annotation.CheckForNull;
+import javax.annotation.Nonnull;
 
 public class Blob extends GitObject {
     Blob(long rawPointer) {
@@ -127,7 +130,8 @@ public class Blob extends GitObject {
      * @return found blob or null
      * @throws GitException git error
      */
-    public static Blob lookup(Repository repo, Oid oid) {
+    @CheckForNull
+    public static Blob lookup(@Nonnull Repository repo, @Nonnull Oid oid) {
         AtomicLong out = new AtomicLong();
         if (oid.isShortId()) {
             Error.throwIfNeeded(
@@ -147,7 +151,8 @@ public class Blob extends GitObject {
      * @return found blob or null
      * @throws GitException git error
      */
-    public static Blob lookupPrefix(Repository repo, Oid oid) {
+    @CheckForNull
+    public static Blob lookupPrefix(@Nonnull Repository repo, @Nonnull Oid oid) {
         AtomicLong outBlob = new AtomicLong();
         Error.throwIfNeeded(
                 jniLookupPrefix(outBlob, repo.getRawPointer(), oid, oid.getEffectiveSize()));
@@ -155,6 +160,7 @@ public class Blob extends GitObject {
     }
 
     @Override
+    @Nonnull
     public Blob dup() {
         AtomicLong out = new AtomicLong();
         Error.throwIfNeeded(jniDup(out, getRawPointer()));
@@ -163,6 +169,7 @@ public class Blob extends GitObject {
 
     /** Get the id of a blob. */
     @Override
+    @Nonnull
     public Oid id() {
         Oid oid = new Oid();
         jniId(getRawPointer(), oid);
@@ -182,5 +189,35 @@ public class Blob extends GitObject {
 
     public boolean isBinary() {
         return jniIsBinary(getRawPointer()) == 1;
+    }
+
+    /**
+     * int git_blob_filtered_content(git_buf *out, git_blob *blob, const char *as_path, int
+     * check_for_binary_data);
+     */
+    static native int jniFilteredContent(Buf out, long blob, String asPath, int checkForBinaryData);
+
+    /**
+     * Get a buffer with the filtered content of a blob.
+     *
+     * <p>This applies filters as if the blob was being checked out to the working directory under
+     * the specified filename. This may apply CRLF filtering or other types of changes depending on
+     * the file attributes set for the blob and the content detected in it.
+     *
+     * <p>If no filters need to be applied, then the `out` buffer will just be populated with a
+     * pointer to the raw content of the blob. In that case, be careful to *not* free the blob until
+     * done with the buffer or copy it into memory you own.
+     *
+     * @param asPath Path used for file attribute lookups, etc.
+     * @param checkForBinaryData Should this test if blob content contains NUL bytes / looks like
+     *     binary data before applying filters?
+     * @throws GitException git errors
+     */
+    @Nonnull
+    public Optional<String> filteredContent(@Nonnull String asPath, boolean checkForBinaryData) {
+        Buf out = new Buf();
+        Error.throwIfNeeded(
+                jniFilteredContent(out, getRawPointer(), asPath, checkForBinaryData ? 1 : 0));
+        return out.getString();
     }
 }

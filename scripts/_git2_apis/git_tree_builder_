@@ -1,0 +1,11 @@
+int git_tree_builder_new(git_tree_builder **out, git_repository *repo, const git_tree *source);
+int git_tree_builder_clear(git_tree_builder *bld);
+size_t git_tree_builder_entrycount(git_tree_builder *bld);
+void git_tree_builder_free(git_tree_builder *bld);
+const git_tree_entry * git_tree_builder_get(git_tree_builder *bld, const char *filename);
+int git_tree_builder_insert(const git_tree_entry **out, git_tree_builder *bld, const char *filename, const git_oid *id, git_filemode_t filemode);
+int git_tree_builder_remove(git_tree_builder *bld, const char *filename);
+int git_tree_builder_filter(git_tree_builder *bld, git_tree_builder_filter_cb filter, void *payload);
+int git_tree_builder_write(git_oid *id, git_tree_builder *bld);
+int git_tree_builder_write_with_buffer(git_oid *oid, git_tree_builder *bld, git_buf *tree);
+int git_tree_builder_filter_cb(const git_tree_entry *entry, void *payload);

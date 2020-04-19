@@ -40,6 +40,23 @@
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>2.22.0</version>
+                <configuration>
+                    <forkedProcessExitTimeoutInSeconds>120</forkedProcessExitTimeoutInSeconds>
+                    <testFailureIgnore>true</testFailureIgnore>
+                    <forkCount>3</forkCount>
+                    <reuseForks>true</reuseForks>
+                    <argLine>-Xmx1024m -XX:MaxPermSize=256m</argLine>
+                    <argLine>-Dfile.encoding=UTF-8</argLine>
+                    <useSystemClassLoader>false</useSystemClassLoader>
+                    <excludes>
+                        <!--<exclude>**/MailmapTest.java</exclude>-->
+                    </excludes>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-site-plugin</artifactId>
                 <version>3.7.1</version>
             </plugin>

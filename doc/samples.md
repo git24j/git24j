@@ -123,3 +123,65 @@ more details: [RepositoryTest.openBare](../src/test/java/com/github/git24j/core/
 Repository.discover(Paths.get("/tmp/foo/bar/sub"), true, "/tmp:/home");
 ```
 more details: [RepositoryTest.discover](../src/test/java/com/github/git24j/core/ReferenceTest.java#85)
+
+
+## Objects
+
+There are four types of `GitObject`: Commit, Tag, Tree and Blob. They share following common methods:
+
+- `public static GitObject lookup(Repository repository, Oid oid, Type type)`
+- `public static GitObject lookupPrefix(Repository repository, Oid oid, int len, Type type)`
+- `public Type type()`
+- `public Oid id()`
+- `public Buf shortId()`
+- `public GitObject peel(Type targetType)`
+- `public GitObject dup()`
+- `public Repository owner()`
+
+### SHAs and OIDs
+
+Commonly used APIS are
+- `Oid.of(String)` create Oid object from SHA string
+- `Oid.of(byte[])` create Oid object from bytes
+- `Oid.toString()` get SHA string of oid
+
+Internally, Oid stores stores the data in a fixed size (length of 20) byte array. And can be interpreted as 40 length characters. 
+
+Note: use `Oid.of(byte[])` judiciously. Don't use it like `Oid.of("c33dfe912b2984d5".getBytes())`. If you would like to get Oid from string, simply use `Oid.of(String)`.
+ It is because Oid internally combine two hex chars into one byte. For example, `"a1".getBytes()` will return `byte[] {97, 49}`, but in Oid, "a1" will be combined into one byte, aka `(10 << 4) + 1 = 161`. 
+
+### Lookup
+
+```
+Commit commit = Commit.lookup(repo, Oid.of("012345abcde"));
+Tree tree = Tree.lookup(repo, Oid.of("abcde012345"));
+Blob blob = Blob.lookup(repo, Oid.of("0a1b2c3d4e"));
+```
+
+More examples: [CommitTest.java](../src/test/java/com/github/git24j/core/CommitTest.java)
+
+### Casting
+
+GitObject is the super class of `Commit`, `Tag`, `Tree` and `Blob`. So GitObject can be casted to sub types directly, for example
+```
+ return (Commit) GitObject.lookup(repo, oid, Type.COMMIT);
+```
+
+## Blobs
+
+### lookup
+
+```
+Blob.lookup(testRepo, Oid.of("012345abcde"));
+```
+### Content
+
+```
+blob1.filteredContent("README.md", true);
+```
+more details: [BlobTest.filteredContent](../src/test/java/com/github/git24j/core/BlobTest.java)
+
+
+## Trees
+
+### lookup tree from commit

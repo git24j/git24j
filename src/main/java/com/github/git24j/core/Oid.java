@@ -20,6 +20,10 @@ public class Oid {
 
     Oid(byte[] bytes) {
         eSize = bytes.length;
+        if (eSize > RAWSZ) {
+            throw new IllegalArgumentException(
+                    "Invalid Oid data, length must be <=20 for bytes or <=40 for hex string");
+        }
         System.arraycopy(bytes, 0, this.id, 0, eSize);
     }
 

@@ -24,7 +24,7 @@ public class Commit extends GitObject {
      * @throws GitException git error
      * @throws IllegalStateException required objects are not open or have been closed.
      */
-    public static Commit lookup(Repository repo, Oid oid) {
+    public static Commit lookup(@Nonnull Repository repo, @Nonnull Oid oid) {
         return (Commit) GitObject.lookup(repo, oid, Type.COMMIT);
     }
 
@@ -40,7 +40,7 @@ public class Commit extends GitObject {
      * @throws GitException git errors
      * @deprecated in preference to {@code lookup} which handles if oid is short id already.
      */
-    public static Commit lookupPrefix(Repository repo, Oid oid) {
+    public static Commit lookupPrefix(@Nonnull Repository repo, @Nonnull Oid oid) {
         return lookup(repo, oid);
     }
 
