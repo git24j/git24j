@@ -6,8 +6,7 @@ import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
 public class BlameTest extends TestBase {
-    @Rule
-    public TemporaryFolder folder = new TemporaryFolder();
+    @Rule public TemporaryFolder folder = new TemporaryFolder();
 
     @Test
     public void jniFile() {

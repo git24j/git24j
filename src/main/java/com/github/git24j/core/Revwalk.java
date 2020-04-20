@@ -48,7 +48,6 @@ public class Revwalk extends CAutoReleasable {
         Error.throwIfNeeded(jniHide(getRawPointer(), commitId));
     }
 
-
     /** int git_revwalk_hide_glob(git_revwalk *walk, const char *glob); */
     static native int jniHideGlob(long walk, String glob);
 

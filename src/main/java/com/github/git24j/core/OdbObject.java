@@ -1,7 +1,7 @@
 package com.github.git24j.core;
 
-import javax.annotation.Nonnull;
 import java.util.Objects;
+import javax.annotation.Nonnull;
 
 public class OdbObject extends CAutoReleasable {
     public enum Type implements IBitEnum {

@@ -1,8 +1,8 @@
 package com.github.git24j.core;
 
-import javax.annotation.Nonnull;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
+import javax.annotation.Nonnull;
 
 public class Refspec extends CAutoReleasable {
     protected Refspec(boolean isWeak, long rawPtr) {
