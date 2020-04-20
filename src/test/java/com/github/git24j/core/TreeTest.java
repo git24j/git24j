@@ -1,16 +1,12 @@
 package com.github.git24j.core;
 
+import java.util.HashSet;
+import java.util.Optional;
+import java.util.Set;
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
-
-import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
 
 public class TreeTest extends TestBase {
     private static final String MASTER_TREE_SHA = "8c5f4d727b339fe7d9ee4d1806aa9ca3a5cc5b3e";
@@ -27,7 +23,7 @@ public class TreeTest extends TestBase {
 
     @Test
     public void entries() {
-        try(Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {
+        try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {
             GitObject obj = Revparse.single(testRepo, "HEAD^{tree}");
             Tree tree = (Tree) obj;
             Assert.assertNotNull(tree);
@@ -44,20 +40,22 @@ public class TreeTest extends TestBase {
 
     @Test
     public void walk() {
-        try(Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {
+        try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {
             Tree tree = (Tree) Revparse.single(testRepo, "HEAD^{tree}");
             Set<String> entryNames = new HashSet<>();
-            tree.walk(Tree.WalkMode.PRE, ((root, entry) -> {
-                entryNames.add(entry.name());
-                return 0;
-            }));
+            tree.walk(
+                    Tree.WalkMode.PRE,
+                    ((root, entry) -> {
+                        entryNames.add(entry.name());
+                        return 0;
+                    }));
             Assert.assertTrue(entryNames.contains("README.md"));
         }
     }
 
     @Test
     public void treeBuilder() {
-        try(Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {
+        try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {
             Tree.Builder bld = Tree.newBuilder(testRepo, null);
             GitObject obj1 = Revparse.single(testRepo, "HEAD:README.md");
             bld.insert("README.md", obj1.id(), FileMode.BLOB);

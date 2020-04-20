@@ -229,3 +229,42 @@ see also: [TreeTest.treeBuilder](../src/test/java/com/github/git24j/core/TreeTes
 ```
 Commit commit = Commit.lookup(testRepo, MASTER_OID);
 ```
+see also [CommitTest.lookup](../src/test/java/com/github/git24j/core/CommitTest.java#20)
+
+### Properties
+```
+System.out.printf("      oid: %s %n", commit.id());
+System.out.printf(" encoding: %s %n", commit.id());
+System.out.printf("  message: %s %n", commit.message());
+System.out.printf("  summary: %s %n", commit.summary());
+System.out.printf("     time: %s %n", commit.time());
+System.out.printf("   offset: %d %n", commit.timeOffset());
+System.out.printf("committer: %s %n", commit.committer());
+System.out.printf("   author: %s %n", commit.author());
+System.out.printf("   header: %s %n", commit.rawHeader());
+System.out.printf("  tree_id: %s %n", commit.treeId());
+```
+see also [CommitTest.lookup](../src/test/java/com/github/git24j/core/CommitTest.java#36)
+
+### Parents
+```
+commit.parent(0);
+commit.nthGenAncestor(1);
+```
+see also: [CommitTest.lookup](../src/test/java/com/github/git24j/core/CommitTest.java#208)
+
+### Create
+
+```
+Commit.create(
+    testRepo,
+    "NEW_HEAD",
+    Signature.now("tester", "test@ab.cc"),
+    Signature.now("admin", "admin@ab.cc"),
+    null,
+    "some commit message",
+    masterTree,
+    Collections.singletonList(master));
+```
+see also: [CommitTest.create](../src/test/java/com/github/git24j/core/CommitTest.java#246)
+

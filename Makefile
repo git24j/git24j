@@ -39,7 +39,9 @@ lint:
 	$(CURDIR)/scripts/lint.sh download
 	$(CURDIR)/scripts/lint.sh changes
 	
-test: | build_wrapper
+test:
+	mvn clean
+	make build_wrapper
 	mvn test
 
 .DEFAULT_GOAL := rebuild_wrapper

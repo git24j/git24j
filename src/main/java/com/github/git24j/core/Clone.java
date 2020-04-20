@@ -145,7 +145,8 @@ public class Clone {
                     ((out, str, i) -> {
                         try {
                             Repository repo = createCb.accept(str, i == 1);
-                            out.set(repo.getRawPointer());
+                            // release owner ship to options
+                            out.set(repo._rawPtr.getAndSet(0));
                         } catch (GitException e) {
                             return e.getCode().getCode();
                         }
@@ -164,7 +165,9 @@ public class Clone {
                     (out, repoPtr, name, url) -> {
                         try {
                             Remote remote = createCb.accept(new Repository(repoPtr), name, url);
-                            out.set(remote.getRawPointer());
+                            // we must release ownership of "remote" here, `git_remote_create_cb`
+                            // is going to free it.
+                            out.set(remote._rawPtr.getAndSet(0));
                         } catch (GitException e) {
                             return e.getCode().getCode();
                         }
