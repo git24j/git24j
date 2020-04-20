@@ -33,6 +33,24 @@ public class CommitTest extends TestBase {
     }
 
     @Test
+    public void properties() {
+        try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {
+            Commit commit = (Commit) Revparse.single(testRepo, "master");
+            Assert.assertEquals(MASTER_HASH, commit.id().toString());
+            System.out.printf("      oid: %s %n", commit.id());
+            System.out.printf(" encoding: %s %n", commit.id());
+            System.out.printf("  message: %s %n", commit.message());
+            System.out.printf("  summary: %s %n", commit.summary());
+            System.out.printf("     time: %s %n", commit.time());
+            System.out.printf("   offset: %d %n", commit.timeOffset());
+            System.out.printf("committer: %s %n", commit.committer());
+            System.out.printf("   author: %s %n", commit.author());
+            System.out.printf("   header: %s %n", commit.rawHeader());
+            System.out.printf("  tree_id: %s %n", commit.treeId());
+        }
+    }
+
+    @Test
     public void id() {
         try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {
             Commit commit = Commit.lookup(testRepo, Oid.of(MASTER_HASH.substring(0, 9)));
