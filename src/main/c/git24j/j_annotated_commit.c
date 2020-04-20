@@ -2,13 +2,14 @@
 #include "j_mappers.h"
 #include "j_util.h"
 #include <assert.h>
+extern j_constants_t *jniConstants;
 
 /** int git_annotated_commit_from_ref(git_annotated_commit **out, git_repository *repo, const git_reference *ref); */
 JNIEXPORT jint JNICALL J_MAKE_METHOD(AnnotatedCommit_jniFromRef)(JNIEnv *env, jclass obj, jobject outAc, long repoPtr, long refPtr)
 {
     git_annotated_commit *c_ac;
     int e = git_annotated_commit_from_ref(&c_ac, (git_repository *)repoPtr, (git_reference *)refPtr);
-    j_save_c_pointer(env, (void *)c_ac, outAc, "set");
+    (*env)->CallVoidMethod(env, outAc, jniConstants->midAtomicLongSet, (long)c_ac);
     return e;
 }
 
@@ -22,7 +23,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(AnnotatedCommit_jniFromFetchHead)(JNIEnv *e
     git_oid c_oid;
     j_git_oid_from_java(env, oid, &c_oid);
     int e = git_annotated_commit_from_fetchhead(&c_ac, (git_repository *)repoPtr, branch_name, remote_url, &c_oid);
-    j_save_c_pointer(env, (void *)c_ac, outAc, "set");
+    (*env)->CallVoidMethod(env, outAc, jniConstants->midAtomicLongSet, (long)c_ac);
     free(branch_name);
     free(remote_url);
     return e;
@@ -35,7 +36,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(AnnotatedCommit_jniLookup)(JNIEnv *env, jcl
     git_oid c_oid;
     j_git_oid_from_java(env, oid, &c_oid);
     int e = git_annotated_commit_lookup(&c_out, (git_repository *)repoPtr, &c_oid);
-    j_save_c_pointer(env, (void *)c_out, outAc, "set");
+    (*env)->CallVoidMethod(env, outAc, jniConstants->midAtomicLongSet, (long)c_out);
     return e;
 }
 
@@ -45,7 +46,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(AnnotatedCommit_jniFromRevspec)(JNIEnv *env
     git_annotated_commit *c_out;
     char *c_revspec = j_copy_of_jstring(env, revspec, false);
     int e = git_annotated_commit_from_revspec(&c_out, (git_repository *)repoPtr, c_revspec);
-    j_save_c_pointer(env, (void *)c_out, outAc, "set");
+    (*env)->CallVoidMethod(env, outAc, jniConstants->midAtomicLongSet, (long)c_out);
     free(c_revspec);
     return e;
 }

@@ -2,6 +2,7 @@
 #include "j_mappers.h"
 #include "j_util.h"
 #include <stdio.h>
+extern j_constants_t *jniConstants;
 
 JNIEXPORT void JNICALL J_MAKE_METHOD(GitObject_jniFree)(JNIEnv *env, jclass obj, jlong objPtr)
 {
@@ -34,7 +35,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(GitObject_jniLookup)(JNIEnv *env, jclass ob
     git_oid c_oid;
     j_git_oid_from_java(env, oid, &c_oid);
     int error = git_object_lookup(&out_obj, (git_repository *)repoPtr, &c_oid, (git_object_t)objType);
-    j_save_c_pointer(env, (void *)out_obj, outObj, "set");
+    (*env)->CallVoidMethod(env, outObj, jniConstants->midAtomicLongSet, (long)out_obj);
     return error;
 }
 
@@ -44,7 +45,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(GitObject_jniLookupPrefix)(JNIEnv *env, jcl
     git_oid c_oid;
     j_git_oid_from_java(env, oid, &c_oid);
     int error = git_object_lookup_prefix(&out_obj, (git_repository *)repoPtr, &c_oid, (size_t)len, (git_object_t)objType);
-    j_save_c_pointer(env, (void *)out_obj, outObj, "set");
+    (*env)->CallVoidMethod(env, outObj, jniConstants->midAtomicLongSet, (long)out_obj);
     return error;
 }
 
@@ -57,7 +58,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(GitObject_jniPeel)(JNIEnv *env, jclass obj,
 {
     git_object *out_obj;
     int error = git_object_peel(&out_obj, (git_object *)objPtr, (git_object_t)objType);
-    j_save_c_pointer(env, (void *)out_obj, outObj, "set");
+    (*env)->CallVoidMethod(env, outObj, jniConstants->midAtomicLongSet, (long)out_obj);
     return error;
 }
 
@@ -65,6 +66,6 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(GitObject_jniDup)(JNIEnv *env, jclass obj, 
 {
     git_object *out_obj;
     int error = git_object_dup(&out_obj, (git_object *)objPtr);
-    j_save_c_pointer(env, (void *)out_obj, outObj, "set");
+    (*env)->CallVoidMethod(env, outObj, jniConstants->midAtomicLongSet, (long)out_obj);
     return error;
 }

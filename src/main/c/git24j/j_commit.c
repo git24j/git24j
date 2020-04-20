@@ -7,6 +7,7 @@
 #include <assert.h>
 #include <git2.h>
 #include <stdio.h>
+extern j_constants_t *jniConstants;
 
 /**int git_commit_lookup(git_commit **commit, git_repository *repo, const git_oid *id); */
 /**int git_commit_lookup_prefix(git_commit **commit, git_repository *repo, const git_oid *id, size_t len); */
@@ -104,7 +105,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Commit_jniTree)(JNIEnv *env, jclass obj, jo
 {
     git_tree *tree;
     int e = git_commit_tree(&tree, (git_commit *)commitPtr);
-    j_save_c_pointer(env, (void *)tree, outTreePtr, "set");
+    (*env)->CallVoidMethod(env, outTreePtr, jniConstants->midAtomicLongSet, (long)tree);
     return e;
 }
 
@@ -126,7 +127,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Commit_jniParent)(JNIEnv *env, jclass obj, 
 {
     git_commit *c_out;
     int e = git_commit_parent(&c_out, (git_commit *)commitPtr, (unsigned int)n);
-    j_save_c_pointer(env, (void *)c_out, outPtr, "set");
+    (*env)->CallVoidMethod(env, outPtr, jniConstants->midAtomicLongSet, (long)c_out);
     return e;
 }
 
@@ -142,7 +143,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Commit_jniNthGenAncestor)(JNIEnv *env, jcla
 {
     git_commit *ancestor;
     int e = git_commit_nth_gen_ancestor(&ancestor, (git_commit *)commitPtr, (unsigned int)n);
-    j_save_c_pointer(env, (void *)ancestor, outPtr, "set");
+    (*env)->CallVoidMethod(env, outPtr, jniConstants->midAtomicLongSet, (long)ancestor);
     return e;
 }
 

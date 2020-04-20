@@ -3,6 +3,7 @@
 #include "j_mappers.h"
 #include "j_util.h"
 #include <assert.h>
+extern j_constants_t *jniConstants;
 
 void j_save_revspec_c_value(JNIEnv *env, git_revspec *rev_spec, jobject revSpec)
 {
@@ -30,7 +31,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Revparse_jniSingle)(JNIEnv *env, jclass obj
     git_object *c_out;
     char *c_spec = j_copy_of_jstring(env, spec, false);
     int error = git_revparse_single(&c_out, (git_repository *)repoPtr, c_spec);
-    j_save_c_pointer(env, (void *)c_out, outObj, "set");
+    (*env)->CallVoidMethod(env, outObj, jniConstants->midAtomicLongSet, (long)c_out);
     free(c_spec);
     return error;
 }
@@ -41,8 +42,8 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Revparse_jniExt)(JNIEnv *env, jclass obj, j
     git_reference *c_out_ref;
     char *c_spec = j_copy_of_jstring(env, spec, false);
     int error = git_revparse_ext(&c_out_obj, &c_out_ref, (git_repository *)repoPtr, c_spec);
-    j_save_c_pointer(env, (void *)c_out_obj, outObj, "set");
-    j_save_c_pointer(env, (void *)c_out_ref, outRef, "set");
+    (*env)->CallVoidMethod(env, outObj, jniConstants->midAtomicLongSet, (long)c_out_obj);
+    (*env)->CallVoidMethod(env, outRef, jniConstants->midAtomicLongSet, (long)c_out_ref);
     free(c_spec);
     return error;
 }
