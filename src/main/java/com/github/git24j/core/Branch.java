@@ -1,5 +1,6 @@
 package com.github.git24j.core;
 
+import javax.annotation.Nonnull;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -24,7 +25,10 @@ public class Branch {
      * @throws IllegalStateException if repository has already been closed.
      */
     public static Reference create(
-            Repository repo, String branchName, Commit target, boolean force) {
+            @Nonnull Repository repo,
+            @Nonnull String branchName,
+            @Nonnull Commit target,
+            boolean force) {
         AtomicLong outRef = new AtomicLong();
         Error.throwIfNeeded(
                 jniCreate(
@@ -171,12 +175,7 @@ public class Branch {
         }
 
         static BranchType valueOf(int iVal) {
-            for (BranchType x : BranchType.values()) {
-                if (x._bit == iVal) {
-                    return x;
-                }
-            }
-            return INVALID;
+            return IBitEnum.valueOf(iVal, BranchType.class, INVALID);
         }
 
         @Override

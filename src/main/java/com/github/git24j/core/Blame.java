@@ -1,9 +1,10 @@
 package com.github.git24j.core;
 
-import java.util.Optional;
-import java.util.concurrent.atomic.AtomicLong;
+import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.Optional;
+import java.util.concurrent.atomic.AtomicLong;
 
 public class Blame extends CAutoReleasable {
     protected Blame(boolean isWeak, long rawPtr) {
@@ -110,6 +111,59 @@ public class Blame extends CAutoReleasable {
         protected void freeOnce(long cPtr) {
             Libgit2.jniShadowFree(cPtr);
         }
+
+        /** -------- Jni Signature ---------- */
+        /** size_t lines_in_hunk */
+        public int getLinesInHunk() {
+            return jniHunkGetLinesInHunk(getRawPointer());
+        }
+
+        /** git_oid final_commit_id */
+        @CheckForNull
+        public Oid getFinalCommitId() {
+            byte[] rawId = jniHunkGetFinalCommitId(getRawPointer());
+            return rawId == null ? null : Oid.of(rawId);
+        }
+
+        /** size_t final_start_line_number */
+        public int getFinalStartLineNumber() {
+            return jniHunkGetFinalStartLineNumber(getRawPointer());
+        }
+
+        /** git_signature *final_signature */
+        public long getFinalSignature() {
+            return jniHunkGetFinalSignature(getRawPointer());
+        }
+
+        /** git_oid orig_commit_id */
+        @CheckForNull
+        public Oid getOrigCommitId() {
+            byte[] rawId = jniHunkGetOrigCommitId(getRawPointer());
+            return rawId == null ? null : Oid.of(rawId);
+        }
+
+        /** const char *orig_path */
+        @CheckForNull
+        public String getOrigPath() {
+            return jniHunkGetOrigPath(getRawPointer());
+        }
+
+        /** size_t orig_start_line_number */
+        public int getOrigStartLineNumber() {
+            return jniHunkGetOrigStartLineNumber(getRawPointer());
+        }
+
+        /** git_signature *orig_signature */
+        @CheckForNull
+        public Signature getOrigSignature() {
+            long ptr = jniHunkGetOrigSignature(getRawPointer());
+            return ptr == 0 ? null : new Signature(true, ptr);
+        }
+
+        /** char boundary */
+        public char getBoundary() {
+            return jniHunkGetBoundary(getRawPointer());
+        }
     }
 
     /** int git_blame_init_options(git_blame_options *opts, unsigned int version); */
@@ -199,20 +253,45 @@ public class Blame extends CAutoReleasable {
      * <p>Lines that differ between the buffer and the committed version are marked as having a zero
      * OID for their final_commit_id.
      *
-     * @param reference cached blame from the history of the file (usually the output from
-     *     git_blame_file)
      * @param buffer the (possibly) modified contents of the file
      * @return blame data.
      * @throws GitException git errors
      */
     @Nonnull
-    public static Blame buffer(@Nonnull Blame reference, @Nonnull String buffer) {
-        Blame out = new Blame(false, 0);
-        Error.throwIfNeeded(
-                jniBuffer(out._rawPtr, reference.getRawPointer(), buffer, buffer.length()));
+    public Blame buffer(@Nonnull String buffer) {
+        Blame out = new Blame(true, 0);
+        Error.throwIfNeeded(jniBuffer(out._rawPtr, getRawPointer(), buffer, buffer.length()));
         return out;
     }
 
     /** void git_blame_free(git_blame *blame); */
     static native void jniFree(long blame);
+
+    /** -------- Jni Signature ---------- */
+    /** size_t lines_in_hunk */
+    static native int jniHunkGetLinesInHunk(long hunkPtr);
+
+    /** git_oid final_commit_id */
+    static native byte[] jniHunkGetFinalCommitId(long hunkPtr);
+
+    /** size_t final_start_line_number */
+    static native int jniHunkGetFinalStartLineNumber(long hunkPtr);
+
+    /** git_signature *final_signature */
+    static native long jniHunkGetFinalSignature(long hunkPtr);
+
+    /** git_oid orig_commit_id */
+    static native byte[] jniHunkGetOrigCommitId(long hunkPtr);
+
+    /** const char *orig_path */
+    static native String jniHunkGetOrigPath(long hunkPtr);
+
+    /** size_t orig_start_line_number */
+    static native int jniHunkGetOrigStartLineNumber(long hunkPtr);
+
+    /** git_signature *orig_signature */
+    static native long jniHunkGetOrigSignature(long hunkPtr);
+
+    /** char boundary */
+    static native char jniHunkGetBoundary(long hunkPtr);
 }

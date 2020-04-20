@@ -40,7 +40,7 @@ JNIEXPORT jlong JNICALL J_MAKE_METHOD(Blame_jniGetHunkByline)(JNIEnv *env, jclas
 /** int git_blame_file(git_blame **out, git_repository *repo, const char *path, git_blame_options *options); */
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Blame_jniFile)(JNIEnv *env, jclass obj, jobject out, jlong repoPtr, jstring path, jlong optionsPtr)
 {
-    git_blame *c_out;
+    git_blame *c_out = NULL;
     char *c_path = j_copy_of_jstring(env, path, true);
     int r = git_blame_file(&c_out, (git_repository *)repoPtr, c_path, (git_blame_options *)optionsPtr);
     (*env)->CallVoidMethod(env, out, jniConstants->midAtomicLongSet, (long)c_out);
@@ -52,7 +52,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Blame_jniFile)(JNIEnv *env, jclass obj, job
 /** int git_blame_buffer(git_blame **out, git_blame *reference, const char *buffer, size_t buffer_len); */
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Blame_jniBuffer)(JNIEnv *env, jclass obj, jobject out, jlong referencePtr, jstring buffer, jint bufferLen)
 {
-    git_blame *c_out;
+    git_blame *c_out = NULL;
     char *c_buffer = j_copy_of_jstring(env, buffer, true);
     int r = git_blame_buffer(&c_out, (git_blame *)referencePtr, c_buffer, bufferLen);
     (*env)->CallVoidMethod(env, out, jniConstants->midAtomicLongSet, (long)c_out);
@@ -65,4 +65,59 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Blame_jniBuffer)(JNIEnv *env, jclass obj, j
 JNIEXPORT void JNICALL J_MAKE_METHOD(Blame_jniFree)(JNIEnv *env, jclass obj, jlong blamePtr)
 {
     git_blame_free((git_blame *)blamePtr);
+}
+
+/** -------- Wrapper Body ---------- */
+/** size_t lines_in_hunk*/
+JNIEXPORT jint JNICALL J_MAKE_METHOD(Blame_jniHunkGetLinesInHunk)(JNIEnv *env, jclass obj, jlong hunkPtr)
+{
+    return ((git_blame_hunk *)hunkPtr)->lines_in_hunk;
+}
+
+/** git_oid final_commit_id*/
+JNIEXPORT jbyteArray JNICALL J_MAKE_METHOD(Blame_jniHunkGetFinalCommitId)(JNIEnv *env, jclass obj, jlong hunkPtr)
+{
+    return j_git_oid_to_bytearray(env, &((git_blame_hunk *)hunkPtr)->final_commit_id);
+}
+
+/** size_t final_start_line_number*/
+JNIEXPORT jint JNICALL J_MAKE_METHOD(Blame_jniHunkGetFinalStartLineNumber)(JNIEnv *env, jclass obj, jlong hunkPtr)
+{
+    return ((git_blame_hunk *)hunkPtr)->final_start_line_number;
+}
+
+/** git_signature *final_signature*/
+JNIEXPORT jlong JNICALL J_MAKE_METHOD(Blame_jniHunkGetFinalSignature)(JNIEnv *env, jclass obj, jlong hunkPtr)
+{
+    return (jlong)((git_blame_hunk *)hunkPtr)->final_signature;
+}
+
+/** git_oid orig_commit_id*/
+JNIEXPORT jbyteArray JNICALL J_MAKE_METHOD(Blame_jniHunkGetOrigCommitId)(JNIEnv *env, jclass obj, jlong hunkPtr)
+{
+    return j_git_oid_to_bytearray(env, &((git_blame_hunk *)hunkPtr)->orig_commit_id);
+}
+
+/** const char *orig_path*/
+JNIEXPORT jstring JNICALL J_MAKE_METHOD(Blame_jniHunkGetOrigPath)(JNIEnv *env, jclass obj, jlong hunkPtr)
+{
+    return (*env)->NewStringUTF(env, ((git_blame_hunk *)hunkPtr)->orig_path);
+}
+
+/** size_t orig_start_line_number*/
+JNIEXPORT jint JNICALL J_MAKE_METHOD(Blame_jniHunkGetOrigStartLineNumber)(JNIEnv *env, jclass obj, jlong hunkPtr)
+{
+    return ((git_blame_hunk *)hunkPtr)->orig_start_line_number;
+}
+
+/** git_signature *orig_signature*/
+JNIEXPORT jlong JNICALL J_MAKE_METHOD(Blame_jniHunkGetOrigSignature)(JNIEnv *env, jclass obj, jlong hunkPtr)
+{
+    return (jlong)((git_blame_hunk *)hunkPtr)->orig_signature;
+}
+
+/** char boundary*/
+JNIEXPORT jchar JNICALL J_MAKE_METHOD(Blame_jniHunkGetBoundary)(JNIEnv *env, jclass obj, jlong hunkPtr)
+{
+    return ((git_blame_hunk *)hunkPtr)->boundary;
 }
