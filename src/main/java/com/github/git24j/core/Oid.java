@@ -1,6 +1,7 @@
 package com.github.git24j.core;
 
 import java.util.Objects;
+import javax.annotation.Nonnull;
 
 // TODO: change this class to immutable java object
 /**
@@ -27,11 +28,11 @@ public class Oid {
         System.arraycopy(bytes, 0, this.id, 0, eSize);
     }
 
-    public static Oid of(byte[] bytes) {
+    public static Oid of(@Nonnull byte[] bytes) {
         return new Oid(bytes);
     }
 
-    public static Oid of(String hexSha) {
+    public static Oid of(@Nonnull String hexSha) {
         byte[] bytes = hexStringToByteArray(hexSha.toLowerCase());
         return new Oid(bytes);
     }

@@ -6,5 +6,6 @@ before_install:
   - sudo apt-get update
   - sudo apt-get -y install cmake libssl-dev maven
   - git submodule update --init --recursive
+  - rm -rf target/
   - make
 

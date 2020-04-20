@@ -7,6 +7,7 @@
 #include <assert.h>
 #include <git2.h>
 #include <stdio.h>
+extern j_constants_t *jniConstants;
 
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Branch_jniCreate)(JNIEnv *env, jclass obj, jobject outRef, jlong repoPtr, jstring branchName, jlong targetPtr, jint force)
 {
@@ -14,7 +15,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Branch_jniCreate)(JNIEnv *env, jclass obj, 
     char *c_branch_name = j_copy_of_jstring(env, branchName, false);
     int error = git_branch_create(&c_ref, (git_repository *)repoPtr, c_branch_name, (const git_commit *)targetPtr, force);
     free(c_branch_name);
-    j_save_c_pointer(env, (void *)c_ref, outRef, "set");
+    (*env)->CallVoidMethod(env, outRef, jniConstants->midAtomicLongSet, (long)c_ref);
     return error;
 }
 
@@ -24,7 +25,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Branch_jniCreateFromAnnotated)(JNIEnv *env,
     git_reference *c_ref;
     char *branch_name = j_copy_of_jstring(env, branchName, false);
     int e = git_branch_create_from_annotated(&c_ref, (git_repository *)repoPtr, branch_name, (git_annotated_commit *)annoCommitPtr, force);
-    j_save_c_pointer(env, (void *)c_ref, outRef, "set");
+    (*env)->CallVoidMethod(env, outRef, jniConstants->midAtomicLongSet, (long)c_ref);
     free(branch_name);
     return e;
 }

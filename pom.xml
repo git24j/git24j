@@ -43,6 +43,13 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>3.0.0-M4</version>
                 <configuration>
+                    <forkedProcessExitTimeoutInSeconds>120</forkedProcessExitTimeoutInSeconds>
+                    <testFailureIgnore>true</testFailureIgnore>
+                    <forkCount>3</forkCount>
+                    <reuseForks>true</reuseForks>
+                    <argLine>-Xmx1024m -XX:MaxPermSize=256m</argLine>
+                    <argLine>-Dfile.encoding=UTF-8</argLine>
+                    <useSystemClassLoader>false</useSystemClassLoader>
                     <excludes>
                         <!--<exclude>**/MailmapTest.java</exclude>-->
                     </excludes>
