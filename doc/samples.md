@@ -184,4 +184,48 @@ more details: [BlobTest.filteredContent](../src/test/java/com/github/git24j/core
 
 ## Trees
 
-### lookup tree from commit
+### get tree from commit
+
+```
+Tree masterTree = commit.tree();
+```
+see also: [Commit.tree](../src/test/java/com/github/git24j/core/CommitTest.java#163)
+
+### lookup tree from tree hash directly
+```
+Tree t1 = Tree.lookup(testRepo, Oid.of("8c5f4d727b339fe7d9ee4d1806aa9ca3a5cc5b3e"));
+```
+see also: [TreeTest.lookup](../src/test/java/com/github/git24j/core/TreeTest.java#13)
+
+### Tree entries
+
+```
+Optional<Tree.Entry> maybeE0 = tree.entryByIndex(0);
+Optional<Tree.Entry> maybeE1 = tree.entryByName("README.md");
+```
+
+### Walking
+
+```
+tree.walk(Tree.WalkMode.PRE, ((root, entry) -> {
+    entryNames.add(entry.name());
+    return 0;
+}));
+``` 
+see also: [TreeTest.walk](../src/test/java/com/github/git24j/core/TreeTest.java#46)
+
+### TreeBuilder
+
+```
+Tree.Builder bld = Tree.newBuilder(testRepo, null);
+bld.insert("README.md", obj1.id(), FileMode.BLOB);
+```
+see also: [TreeTest.treeBuilder](../src/test/java/com/github/git24j/core/TreeTest.java#59)
+
+
+## Commits
+
+### Lookup
+```
+Commit commit = Commit.lookup(testRepo, MASTER_OID);
+```

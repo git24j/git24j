@@ -517,9 +517,6 @@ public class Commit extends GitObject {
         Buf outBuf = new Buf();
         long[] parentsArray =
                 parents.stream().map(Commit::getRawPointer).mapToLong(Long::longValue).toArray();
-        System.out.printf(
-                "jni author.getName() = %s, addr = %s \n",
-                author.getName(), Long.toHexString(author.getRawPointer()));
         int e =
                 jniCreateBuffer(
                         outBuf,

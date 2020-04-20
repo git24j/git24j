@@ -16,6 +16,6 @@ public enum FileMode implements IBitEnum {
 
     @Override
     public int getBit() {
-        return 0;
+        return _bit;
     }
 }
