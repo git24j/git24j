@@ -143,6 +143,28 @@ public class Tree extends GitObject {
         }
     }
 
+    /**
+     * Callback for Tree.walk
+     */
+    public interface WalkCb {
+        int accept(String root, Entry entry);
+    }
+
+    public enum WalkMode implements IBitEnum {
+        PRE(0),
+        POST(1);
+        private final int _bit;
+
+        WalkMode(int bit) {
+            _bit = bit;
+        }
+
+        @Override
+        public int getBit() {
+            return _bit;
+        }
+    }
+
     public static class Builder extends CAutoReleasable {
 
         @FunctionalInterface
@@ -173,6 +195,110 @@ public class Tree extends GitObject {
             jniBuilderFilter(builder.getRawPointer(), ptr -> callback.accept(new Entry(true, ptr)));
         }
 
+        /**
+         * Clear all the entires in the builder
+         *
+         * @throws GitException git error if clear failed
+         */
+        public void clear() {
+            Error.throwIfNeeded(jniBuilderClear(this.getRawPointer()));
+        }
+
+
+        /**
+         * @return the number of entries in the treebuilder
+         */
+        public int entryCount() {
+            return jniBuilderEntrycount(getRawPointer());
+        }
+
+        /**
+         * Get an entry from the builder from its filename
+         *
+         * @param filename Name of the entry
+         * @return entry if found
+         */
+        public Optional<Entry> get(@Nonnull String filename) {
+            long ptr = jniBuilderGet(this.getRawPointer(), filename);
+            if (ptr == 0) {
+                return Optional.empty();
+            }
+            return Optional.of(new Entry(true, ptr));
+        }
+
+        /**
+         * Add or update an entry to the builder
+         * <p>
+         * Insert a new entry for `filename` in the builder with the
+         * given attributes.
+         * <p>
+         * If an entry named `filename` already exists, its attributes
+         * will be updated with the given ones.
+         * <p>
+         * The optional pointer `out` can be used to retrieve a pointer to the
+         * newly created/updated entry.  Pass NULL if you do not need it. The
+         * pointer may not be valid past the next operation in this
+         * builder. Duplicate the entry if you want to keep it.
+         * <p>
+         * By default the entry that you are inserting will be checked for
+         * validity; that it exists in the object database and is of the
+         * correct type.  If you do not want this behavior, set the
+         * `GIT_OPT_ENABLE_STRICT_OBJECT_CREATION` library option to false.
+         *
+         * @param filename Filename of the entry
+         * @param oid      oid of the entry
+         * @param filemode Folder attributes of the entry.
+         * @return added entry
+         * @throws GitException git errors
+         */
+        @Nonnull
+        public Entry insert(@Nonnull String filename, @Nonnull Oid oid, @Nonnull FileMode filemode) {
+            Entry out = new Entry(true, 0);
+            Error.throwIfNeeded(jniBuilderInsert(out._rawPtr, this.getRawPointer(), filename, oid, filemode.getBit()));
+            return out;
+        }
+
+        /**
+         * Remove an entry from the builder by its filename
+         *
+         * @param filename Filename of the entry to remove
+         */
+        public void remove(@Nonnull String filename) {
+            Error.throwIfNeeded(jniBuilderRemove(this.getRawPointer(), filename));
+        }
+
+        /**
+         * Write the contents of the tree builder as a tree object
+         * <p>
+         * The tree builder will be written to the given `repo`, and its
+         * identifying SHA1 hash will be stored in the `id` pointer.
+         *
+         * @return OID of the newly written tree
+         * @throws GitException git errors
+         */
+        @Nonnull
+        public Oid write() {
+            Oid out = new Oid();
+            Error.throwIfNeeded(jniBuilderWrite(out, getRawPointer()));
+            return out;
+        }
+
+        /**
+         * Write the contents of the tree builder as a tree object
+         * using a shared git_buf.
+         *
+         * @param buf Shared buffer for writing the tree. Will be grown as necessary.
+         * @return OID of the newly written tree
+         * @see {Tree.write}
+         */
+        public Oid writeWithBuf(@Nullable Buf buf) {
+            if (buf == null) {
+                buf = new Buf();
+            }
+            Oid out = new Oid();
+            Error.throwIfNeeded(jniBuilderWriteWithBuffer(out, this.getRawPointer(), buf));
+            return out;
+        }
     }
 
     Tree(long rawPointer) {
@@ -188,12 +314,12 @@ public class Tree extends GitObject {
      * int git_tree_walk(const git_tree *tree, git_treewalk_mode mode, git_treewalk_cb callback,
      * void *payload);
      */
-    /** -------- Jni Signature ---------- */
-    /**
-     * int git_tree_lookup(git_tree **out, git_repository *repo, const git_oid *id);
-     */
-    static native int jniLookup(AtomicLong out, long repoPtr, Oid id);
+    static native int jniWalk(long treePtr, int mode, Internals.SJCallback callback);
 
+    public int walk(WalkMode mode, WalkCb cb) {
+        return jniWalk(getRawPointer(), mode.getBit(), ((s, ptr) -> cb.accept(s, new Entry(true, ptr))));
+    }
+    /** -------- Jni Signature ---------- */
     /**
      * Look up tree object given its oid
      *
@@ -206,12 +332,6 @@ public class Tree extends GitObject {
     public static Tree lookup(@Nonnull Repository repo, @Nonnull Oid oid) {
         return (Tree) GitObject.lookup(repo, oid, Type.TREE);
     }
-
-    /**
-     * int git_tree_lookup_prefix(git_tree **out, git_repository *repo, const git_oid *id, size_t
-     * len);
-     */
-    static native int jniLookupPrefix(AtomicLong out, long repoPtr, Oid id, int len);
 
     @Nonnull
     public static Tree lookupPrefix(@Nonnull Repository repo, @Nonnull Oid oid) {
@@ -427,17 +547,17 @@ public class Tree extends GitObject {
 
     /**
      * Create a new tree builder.
-     *
+     * <p>
      * The tree builder can be used to create or modify trees in memory and
      * write them as tree objects to the database.
-     *
+     * <p>
      * If the `source` parameter is not NULL, the tree builder will be
      * initialized with the entries of the given tree.
-     *
+     * <p>
      * If the `source` parameter is NULL, the tree builder will start with no
      * entries and will have to be filled manually.
      *
-     * @param repo Repository in which to store the object
+     * @param repo   Repository in which to store the object
      * @param source Source tree to initialize the builder (optional)
      * @return tree builder
      * @throws GitException git errors
@@ -446,7 +566,7 @@ public class Tree extends GitObject {
     @Nonnull
     public static Builder newBuilder(@Nonnull Repository repo, @Nullable Tree source) {
         Builder bld = new Builder(false, 0);
-        int e = jniBuilderNew(bld._rawPtr, repo.getRawPointer(),  source == null ? 0 : source.getRawPointer());
+        int e = jniBuilderNew(bld._rawPtr, repo.getRawPointer(), source == null ? 0 : source.getRawPointer());
         Error.throwIfNeeded(e);
         return bld;
     }
@@ -490,11 +610,4 @@ public class Tree extends GitObject {
      * int git_tree_builder_write_with_buffer(git_oid *oid, git_tree_builder *bld, git_buf *tree);
      */
     static native int jniBuilderWriteWithBuffer(Oid oid, long bld, Buf tree);
-
-    /**
-     * int git_tree_builder_filter_cb(const git_tree_entry *entry, void *payload);
-     */
-    static native int jniBuilderFilterCb(long entry);
-
-
 }

@@ -67,15 +67,15 @@ public class Merge {
          * provides a similar merge base to `git-merge-resolve`.
          */
         NO_RECURSIVE(1 << 3);
-        private final int bit;
+        private final int _bit;
 
         FlagT(int bit) {
-            this.bit = bit;
+            this._bit = bit;
         }
 
         @Override
         public int getBit() {
-            return bit;
+            return _bit;
         }
     };
 
@@ -145,15 +145,15 @@ public class Merge {
 
         /** Take extra time to find minimal diff */
         DIFF_MINIMAL(1 << 7);
-        private final int bit;
+        private final int _bit;
 
         FileFlagT(int bit) {
-            this.bit = bit;
+            this._bit = bit;
         }
 
         @Override
         public int getBit() {
-            return bit;
+            return _bit;
         }
     }
 
@@ -238,15 +238,15 @@ public class Merge {
          * commit(s).
          */
         UNBORN(1 << 3);
-        private final int bit;
+        private final int _bit;
 
         AnalysisT(int bit) {
-            this.bit = bit;
+            this._bit = bit;
         }
 
         @Override
         public int getBit() {
-            return bit;
+            return _bit;
         }
     }
 
@@ -266,15 +266,15 @@ public class Merge {
          * fast-forward merges.
          */
         FASTFORWARD_ONLY(1 << 1);
-        private final int bit;
+        private final int _bit;
 
         PreferenceT(int bit) {
-            this.bit = bit;
+            this._bit = bit;
         }
 
         @Override
         public int getBit() {
-            return bit;
+            return _bit;
         }
     }
 

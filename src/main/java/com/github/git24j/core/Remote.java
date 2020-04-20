@@ -32,15 +32,15 @@ public class Remote extends CAutoReleasable {
         NONE(2),
         /** Ask for the all the tags. */
         ALL(3);
-        private final int bit;
+        private final int _bit;
 
         AutotagOptionT(int bit) {
-            this.bit = bit;
+            this._bit = bit;
         }
 
         @Override
         public int getBit() {
-            return bit;
+            return _bit;
         }
     }
     /**
@@ -61,15 +61,15 @@ public class Remote extends CAutoReleasable {
 
         /** Don't build a fetchspec from the name if none is set */
         SKIP_DEFAULT_FETCHSPEC(1 << 1);
-        private final int bit;
+        private final int _bit;
 
         CreateFlags(int bit) {
-            this.bit = bit;
+            this._bit = bit;
         }
 
         @Override
         public int getBit() {
-            return bit;
+            return _bit;
         }
     }
 

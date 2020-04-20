@@ -46,7 +46,7 @@ public class Status {
 
         @Override
         public int getBit() {
-            return 0;
+            return _bit;
         }
     }
 
@@ -130,7 +130,7 @@ public class Status {
 
         @Override
         public int getBit() {
-            return 0;
+            return _bit;
         }
     }
 
