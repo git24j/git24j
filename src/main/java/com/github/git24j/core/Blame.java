@@ -13,6 +13,7 @@ public class Blame extends CAutoReleasable {
 
     @Override
     protected void freeOnce(long cPtr) {
+        // FIXME: undo disable
         // jniFree(cPtr);
     }
 
