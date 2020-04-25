@@ -89,7 +89,8 @@ public class Clone {
 
         @Override
         protected void freeOnce(long cPtr) {
-            jniOptionsFree(cPtr);
+            // FIXME
+            // jniOptionsFree(cPtr);
         }
 
         public int getVersion() {

@@ -9,7 +9,8 @@ public class Cred extends CAutoReleasable {
 
     @Override
     protected void freeOnce(long cPtr) {
-        jniFree(cPtr);
+        // FIXME
+        // jniFree(cPtr);
     }
 
     // no matching type found for 'git_cred_ssh_interactive_callback prompt_callback'
