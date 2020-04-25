@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -62,6 +63,7 @@ public class TagTest extends TestBase {
         }
     }
 
+    @Ignore
     @Test
     public void peel() {
         try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {

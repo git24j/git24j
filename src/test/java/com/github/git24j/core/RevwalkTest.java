@@ -1,13 +1,22 @@
 package com.github.git24j.core;
 
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 
 import static org.junit.Assert.*;
 
 public class RevwalkTest extends TestBase {
 
+    @Rule public TemporaryFolder _folder = new TemporaryFolder();
+
     @Test
-    public void hide() {}
+    public void hide() {
+        try(Repository repo = TestRepo.SIMPLE1.tempRepo(_folder)){
+            Revwalk revwalk = Revwalk.create(repo);
+
+        }
+    }
 
     @Test
     public void hideGlob() {}
