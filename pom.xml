@@ -61,12 +61,12 @@
                         <exclude>**/DiffTest.java</exclude>
                         <exclude>**/ErrorTest.java</exclude>
                         <exclude>**/GitObjectTest.java</exclude>
-<!--                        <exclude>**/IBitEnumTest.java</exclude>-->
-<!--                        <exclude>**/IndexTest.java</exclude>-->
-<!--                        <exclude>**/Libgit2Test.java</exclude>-->
-<!--                        <exclude>**/MailmapTest.java</exclude>-->
-<!--                        <exclude>**/MainTest.java</exclude>-->
-<!--                        <exclude>**/MergeTest.java</exclude>-->
+                        <exclude>**/IBitEnumTest.java</exclude>
+                        <exclude>**/IndexTest.java</exclude>
+                        <exclude>**/Libgit2Test.java</exclude>
+                        <exclude>**/MailmapTest.java</exclude>
+                        <exclude>**/MainTest.java</exclude>
+                        <exclude>**/MergeTest.java</exclude>
 <!--                        <exclude>**/OidTest.java</exclude>-->
 <!--                        <exclude>**/ReferenceTest.java</exclude>-->
 <!--                        <exclude>**/RepositoryTest.java</exclude>-->
