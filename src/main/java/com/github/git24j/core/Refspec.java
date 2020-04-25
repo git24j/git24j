@@ -11,8 +11,7 @@ public class Refspec extends CAutoReleasable {
 
     @Override
     protected void freeOnce(long cPtr) {
-        // FIXME
-        // jniFree(cPtr);
+        jniFree(cPtr);
     }
 
     /** int git_refspec_parse(git_refspec **refspec, const char *input, int is_fetch); */

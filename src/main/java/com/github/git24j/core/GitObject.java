@@ -13,8 +13,7 @@ public class GitObject extends CAutoReleasable {
 
     @Override
     protected void freeOnce(long cPtr) {
-        // FIXME: undo disable
-        // jniFree(cPtr);
+        jniFree(cPtr);
     }
 
     static native void jniFree(long objPtr);
