@@ -66,7 +66,8 @@ public class Blame extends CAutoReleasable {
 
         @Override
         protected void freeOnce(long cPtr) {
-            Libgit2.jniShadowFree(cPtr);
+            // FIXME
+            // Libgit2.jniShadowFree(cPtr);
         }
 
         public static Options init(int version) {
@@ -110,7 +111,8 @@ public class Blame extends CAutoReleasable {
 
         @Override
         protected void freeOnce(long cPtr) {
-            Libgit2.jniShadowFree(cPtr);
+            // FIXME:
+            // Libgit2.jniShadowFree(cPtr);
         }
 
         /** -------- Jni Signature ---------- */

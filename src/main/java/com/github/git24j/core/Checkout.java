@@ -21,7 +21,8 @@ public class Checkout {
 
         @Override
         protected void freeOnce(long cPtr) {
-            Libgit2.jniShadowFree(cPtr);
+            // FIXME
+            // Libgit2.jniShadowFree(cPtr);
         }
 
         @Nonnull

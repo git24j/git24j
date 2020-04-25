@@ -24,8 +24,7 @@ public abstract class CAutoReleasable {
     @Override
     protected void finalize() throws Throwable {
         if (!_isWeak && _rawPtr.get() > 0) {
-            // FIXME: undo comment
-            // freeOnce(_rawPtr.getAndSet(0));
+            freeOnce(_rawPtr.getAndSet(0));
         }
         super.finalize();
     }
