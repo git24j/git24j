@@ -40,45 +40,45 @@ public class RepositoryTest extends TestBase {
         }
     }
 
-//    @Test
-//    public void openBare() {
-//        Path repoPath = TestRepo.SIMPLE1_BARE.tempCopy(folder);
-//        try (Repository repo = Repository.openBare(repoPath)) {
-//            Assert.assertTrue(sameFile(repoPath, Paths.get(repo.getPath())));
-//        }
-//    }
-//
-//    @Test
-//    public void initOptions() {
-//        Repository.InitOptions initOptions = Repository.InitOptions.defaultOpts();
-//        Assert.assertEquals(Repository.InitOptions.VERSION, initOptions.getVersion());
-//    }
-//
-//    @Test
-//    public void init() {
-//        Path repoPath = folder.getRoot().toPath();
-//        try (Repository repo = Repository.init(repoPath, false)) {
-//            Assert.assertTrue(repo.isEmpty());
-//            Assert.assertTrue(repo.headUnborn());
-//        }
-//    }
-//
-//    @Test
-//    public void iniExt() {
-//        Path repoPath = folder.getRoot().toPath();
-//        String initPath = repoPath.toString();
-//        Repository.InitOptions opts = Repository.InitOptions.defaultOpts();
-//        try (Repository repo = Repository.initExt(initPath, opts)) {
-//            Assert.assertNotNull(repo);
-//            Assert.assertTrue(repo.isEmpty());
-//            Assert.assertTrue(repo.headUnborn());
-//        }
-//        try (Repository repo = Repository.openExt(repoPath, null, null)) {
-//            Assert.assertNotNull(repo);
-//            Assert.assertTrue(repo.isEmpty());
-//            Assert.assertTrue(repo.headUnborn());
-//        }
-//    }
+    @Test
+    public void openBare() {
+        Path repoPath = TestRepo.SIMPLE1_BARE.tempCopy(folder);
+        try (Repository repo = Repository.openBare(repoPath)) {
+            Assert.assertTrue(sameFile(repoPath, Paths.get(repo.getPath())));
+        }
+    }
+
+    @Test
+    public void initOptions() {
+        Repository.InitOptions initOptions = Repository.InitOptions.defaultOpts();
+        Assert.assertEquals(Repository.InitOptions.VERSION, initOptions.getVersion());
+    }
+
+    @Test
+    public void init() {
+        Path repoPath = folder.getRoot().toPath();
+        try (Repository repo = Repository.init(repoPath, false)) {
+            Assert.assertTrue(repo.isEmpty());
+            Assert.assertTrue(repo.headUnborn());
+        }
+    }
+
+    @Test
+    public void iniExt() {
+        Path repoPath = folder.getRoot().toPath();
+        String initPath = repoPath.toString();
+        Repository.InitOptions opts = Repository.InitOptions.defaultOpts();
+        try (Repository repo = Repository.initExt(initPath, opts)) {
+            Assert.assertNotNull(repo);
+            Assert.assertTrue(repo.isEmpty());
+            Assert.assertTrue(repo.headUnborn());
+        }
+        try (Repository repo = Repository.openExt(repoPath, null, null)) {
+            Assert.assertNotNull(repo);
+            Assert.assertTrue(repo.isEmpty());
+            Assert.assertTrue(repo.headUnborn());
+        }
+    }
 //
 //    @Test
 //    public void discover() throws Exception {
