@@ -13,8 +13,7 @@ public class Blame extends CAutoReleasable {
 
     @Override
     protected void freeOnce(long cPtr) {
-        // FIXME: undo disable
-        // jniFree(cPtr);
+        jniFree(cPtr);
     }
 
     public enum FlagT implements IBitEnum {
@@ -66,8 +65,7 @@ public class Blame extends CAutoReleasable {
 
         @Override
         protected void freeOnce(long cPtr) {
-            // FIXME
-            // Libgit2.jniShadowFree(cPtr);
+            Libgit2.jniShadowFree(cPtr);
         }
 
         public static Options init(int version) {
@@ -111,8 +109,7 @@ public class Blame extends CAutoReleasable {
 
         @Override
         protected void freeOnce(long cPtr) {
-            // FIXME:
-            // Libgit2.jniShadowFree(cPtr);
+            Libgit2.jniShadowFree(cPtr);
         }
 
         /** -------- Jni Signature ---------- */
