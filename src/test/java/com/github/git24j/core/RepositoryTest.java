@@ -79,18 +79,18 @@ public class RepositoryTest extends TestBase {
             Assert.assertTrue(repo.headUnborn());
         }
     }
-//
-//    @Test
-//    public void discover() throws Exception {
-//        Path repoPath = TestRepo.SIMPLE1.tempCopy(folder);
-//        Path sub = repoPath.resolve("sub");
-//        Files.createDirectories(sub);
-//        Optional<String> path1 = Repository.discover(sub, true, "/tmp:/home");
-//        Assert.assertEquals(repoPath.resolve(".git/"), path1.map(Paths::get).orElse(null));
-//        Optional<String> path2 =
-//                Repository.discover(folder.newFolder("not-a-repo").toPath(), false, "/tmp:/home");
-//        Assert.assertFalse(path2.isPresent());
-//    }
+
+    @Test
+    public void discover() throws Exception {
+        Path repoPath = TestRepo.SIMPLE1.tempCopy(folder);
+        Path sub = repoPath.resolve("sub");
+        Files.createDirectories(sub);
+        Optional<String> path1 = Repository.discover(sub, true, "/tmp:/home");
+        Assert.assertEquals(repoPath.resolve(".git/"), path1.map(Paths::get).orElse(null));
+        Optional<String> path2 =
+                Repository.discover(folder.newFolder("not-a-repo").toPath(), false, "/tmp:/home");
+        Assert.assertFalse(path2.isPresent());
+    }
 //
 //    @Test
 //    public void headForWorkTree() {
