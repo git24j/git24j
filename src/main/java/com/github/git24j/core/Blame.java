@@ -13,7 +13,7 @@ public class Blame extends CAutoReleasable {
 
     @Override
     protected void freeOnce(long cPtr) {
-        jniFree(cPtr);
+        // jniFree(cPtr);
     }
 
     public enum FlagT implements IBitEnum {
