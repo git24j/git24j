@@ -20,8 +20,7 @@ public class Reference extends CAutoReleasable {
 
     @Override
     protected void freeOnce(long cPtr) {
-        // FIXME
-        // jniFree(cPtr);
+        jniFree(cPtr);
     }
 
     /** const git_oid * git_reference_target(const git_reference *ref); */
@@ -919,8 +918,7 @@ public class Reference extends CAutoReleasable {
 
         @Override
         protected void freeOnce(long cPtr) {
-            // FIXME
-            // jniIteratorFree(cPtr);
+            jniIteratorFree(cPtr);
         }
     }
 
