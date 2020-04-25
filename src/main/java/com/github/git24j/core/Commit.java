@@ -10,8 +10,8 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 public class Commit extends GitObject {
-    Commit(long rawPointer) {
-        super(rawPointer);
+    Commit(boolean weak, long rawPointer) {
+        super(weak, rawPointer);
     }
 
     /**
@@ -233,7 +233,7 @@ public class Commit extends GitObject {
     public Tree tree() {
         AtomicLong outTreePtr = new AtomicLong();
         Error.throwIfNeeded(jniTree(outTreePtr, getRawPointer()));
-        return new Tree(outTreePtr.get());
+        return new Tree(false, outTreePtr.get());
     }
 
     static native void jniTreeId(Oid outOid, long commitPtr);
@@ -273,7 +273,7 @@ public class Commit extends GitObject {
     public Commit parent(int n) {
         AtomicLong outPtr = new AtomicLong();
         Error.throwIfNeeded(jniParent(outPtr, getRawPointer(), n));
-        return new Commit(outPtr.get());
+        return new Commit(false, outPtr.get());
     }
 
     static native void jniParentId(Oid outOid, long commitPtr, int n);
@@ -315,7 +315,7 @@ public class Commit extends GitObject {
             return null;
         }
         Error.throwIfNeeded(e);
-        return new Commit(outPtr.get());
+        return new Commit(false, outPtr.get());
     }
 
     static native int jniHeaderField(Buf outBuf, long commitPtr, String field);
@@ -563,6 +563,6 @@ public class Commit extends GitObject {
     public Commit dup() {
         AtomicLong out = new AtomicLong();
         Error.throwIfNeeded(jniDup(out, getRawPointer()));
-        return new Commit(out.get());
+        return new Commit(false, out.get());
     }
 }

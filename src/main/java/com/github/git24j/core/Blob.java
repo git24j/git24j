@@ -6,8 +6,8 @@ import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 
 public class Blob extends GitObject {
-    Blob(long rawPointer) {
-        super(rawPointer);
+    Blob(boolean weak, long rawPointer) {
+        super(weak, rawPointer);
     }
 
     static native int jniLookup(AtomicLong outBlob, long repoPtr, Oid oid);
@@ -139,7 +139,7 @@ public class Blob extends GitObject {
         } else {
             Error.throwIfNeeded(jniLookup(out, repo.getRawPointer(), oid));
         }
-        return out.get() == 0 ? null : new Blob(out.get());
+        return out.get() == 0 ? null : new Blob(false, out.get());
     }
 
     /**
@@ -156,7 +156,7 @@ public class Blob extends GitObject {
         AtomicLong outBlob = new AtomicLong();
         Error.throwIfNeeded(
                 jniLookupPrefix(outBlob, repo.getRawPointer(), oid, oid.getEffectiveSize()));
-        return outBlob.get() == 0 ? null : new Blob(outBlob.get());
+        return outBlob.get() == 0 ? null : new Blob(false, outBlob.get());
     }
 
     @Override
@@ -164,7 +164,7 @@ public class Blob extends GitObject {
     public Blob dup() {
         AtomicLong out = new AtomicLong();
         Error.throwIfNeeded(jniDup(out, getRawPointer()));
-        return new Blob(out.get());
+        return new Blob(false, out.get());
     }
 
     /** Get the id of a blob. */

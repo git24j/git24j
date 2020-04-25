@@ -9,12 +9,18 @@ import java.util.Objects;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
+import javax.annotation.CheckForNull;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
-public class Reference {
-    final AtomicLong _rawPtr = new AtomicLong();
+public class Reference extends CAutoReleasable {
+    protected Reference(boolean isWeak, long rawPtr) {
+        super(isWeak, rawPtr);
+    }
 
-    Reference(long rawPointer) {
-        _rawPtr.set(rawPointer);
+    @Override
+    protected void freeOnce(long cPtr) {
+        jniFree(cPtr);
     }
 
     /** const git_oid * git_reference_target(const git_reference *ref); */
@@ -34,14 +40,15 @@ public class Reference {
      * @return found reference, if not found, return null.
      * @throws GitException GIT_EINVALIDSPEC or other relevant git errors.
      */
-    public static Reference lookup(Repository repo, String name) {
+    @CheckForNull
+    public static Reference lookup(@Nonnull Repository repo, @Nonnull String name) {
         AtomicLong outRef = new AtomicLong();
         int e = jniLookup(outRef, repo.getRawPointer(), name);
         if (ErrorCode.of(e) == ErrorCode.ENOTFOUND) {
             return null;
         }
         Error.throwIfNeeded(e);
-        return new Reference(outRef.get());
+        return new Reference(false, outRef.get());
     }
 
     static native int jniNameToId(Oid oid, long repoPtr, String name);
@@ -62,9 +69,14 @@ public class Reference {
      * @return found Oid
      * @throws GitException GIT_ENOTFOUND, GIT_EINVALIDSPEC or an error code.
      */
-    public static Oid nameToId(Repository repo, String name) {
+    @CheckForNull
+    public static Oid nameToId(@Nonnull Repository repo, @Nonnull String name) {
         Oid oid = new Oid();
-        Error.throwIfNeeded(jniNameToId(oid, repo.getRawPointer(), name));
+        int e = jniNameToId(oid, repo.getRawPointer(), name);
+        if (ErrorCode.of(e) == ErrorCode.ENOTFOUND) {
+            return null;
+        }
+        Error.throwIfNeeded(e);
         return oid;
     }
 
@@ -83,10 +95,15 @@ public class Reference {
      * @return found reference
      * @throws GitException
      */
-    public static Reference dwim(Repository repo, String shorthand) {
+    @CheckForNull
+    public static Reference dwim(@Nonnull Repository repo, @Nonnull String shorthand) {
         AtomicLong outRef = new AtomicLong();
-        Error.throwIfNeeded(jniDwim(outRef, repo.getRawPointer(), shorthand));
-        return new Reference(outRef.get());
+        int e = jniDwim(outRef, repo.getRawPointer(), shorthand);
+        if (e == ErrorCode.ENOTFOUND.getCode()) {
+            return null;
+        }
+        Error.throwIfNeeded(e);
+        return new Reference(false, outRef.get());
     }
 
     static native int jniSymbolicCreateMatching(
@@ -123,10 +140,11 @@ public class Reference {
      * @return 0 on success
      * @throws GitException GIT_EEXISTS, GIT_EINVALIDSPEC, GIT_EMODIFIED or an error code
      */
+    @Nonnull
     public static Reference symbolicCreateMatching(
-            Repository repo,
-            String name,
-            String target,
+            @Nonnull Repository repo,
+            @Nonnull String name,
+            @Nonnull String target,
             boolean force,
             String currentValue,
             String logMessage) {
@@ -140,7 +158,7 @@ public class Reference {
                         force ? 1 : 0,
                         currentValue,
                         logMessage));
-        return new Reference(outRef.get());
+        return new Reference(false, outRef.get());
     }
 
     static native int jniSymbolicCreate(
@@ -162,13 +180,18 @@ public class Reference {
      * @return created reference
      * @throws GitException GIT_EEXISTS, GIT_EINVALIDSPEC or an error code
      */
+    @Nonnull
     public static Reference symbolicCreate(
-            Repository repo, String name, String target, boolean force, String logMessage) {
+            @Nonnull Repository repo,
+            @Nonnull String name,
+            @Nonnull String target,
+            boolean force,
+            String logMessage) {
         AtomicLong outRef = new AtomicLong();
         Error.throwIfNeeded(
                 jniSymbolicCreate(
                         outRef, repo.getRawPointer(), name, target, force ? 1 : 0, logMessage));
-        return new Reference(outRef.get());
+        return new Reference(false, outRef.get());
     }
 
     static native int jniCreate(
@@ -185,12 +208,17 @@ public class Reference {
      * @return created reference.
      * @throws GitException GIT_EEXISTS, GIT_EINVALIDSPEC or an error code
      */
+    @Nonnull
     public static Reference create(
-            Repository repo, String name, Oid oid, boolean force, String logMessage) {
+            @Nonnull Repository repo,
+            @Nonnull String name,
+            @Nonnull Oid oid,
+            boolean force,
+            String logMessage) {
         AtomicLong outRef = new AtomicLong();
         Error.throwIfNeeded(
                 jniCreate(outRef, repo.getRawPointer(), name, oid, force ? 1 : 0, logMessage));
-        return new Reference(outRef.get());
+        return new Reference(false, outRef.get());
     }
 
     static native int jniCreateMatching(
@@ -216,10 +244,11 @@ public class Reference {
      * @throws GitException GIT_EMODIFIED if the value of the reference has changed, GIT_EEXISTS,
      *     GIT_EINVALIDSPEC or an error code
      */
+    @Nonnull
     public static Reference createMatching(
-            Repository repo,
-            String name,
-            Oid oid,
+            @Nonnull Repository repo,
+            @Nonnull String name,
+            @Nonnull Oid oid,
             boolean force,
             Oid currentId,
             String logMessage) {
@@ -233,7 +262,7 @@ public class Reference {
                         force ? 1 : 0,
                         currentId,
                         logMessage));
-        return new Reference(outRef.get());
+        return new Reference(false, outRef.get());
     }
 
     static native void jniTargetPeel(Oid oid, long refPtr);
@@ -304,7 +333,8 @@ public class Reference {
      * @return list of reference names
      * @throws GitException git error
      */
-    public static List<String> list(Repository repo) {
+    @Nonnull
+    public static List<String> list(@Nonnull Repository repo) {
         List<String> strList = new ArrayList<>();
         Error.throwIfNeeded(jniList(strList, repo.getRawPointer()));
         return strList;
@@ -327,10 +357,10 @@ public class Reference {
      *     terminate the iteration.
      * @throws GitException git errors
      */
-    public static void foreach(Repository repo, Function<Reference, Integer> callback) {
-        ForeachCb cb = ptr -> callback.apply(new Reference(ptr));
+    public static void foreach(
+            @Nonnull Repository repo, @Nonnull Function<Reference, Integer> callback) {
+        ForeachCb cb = ptr -> callback.apply(new Reference(true, ptr));
         int e = jniForeach(repo.getRawPointer(), cb);
-
         Error.throwIfNeeded(e);
     }
 
@@ -347,7 +377,8 @@ public class Reference {
      * @param callback Function which will be called for every listed ref name
      * @throws GitException git errors
      */
-    public static void foreachName(Repository repo, Function<String, Integer> callback) {
+    public static void foreachName(
+            @Nonnull Repository repo, @Nonnull Function<String, Integer> callback) {
         Error.throwIfNeeded(jniForeachName(repo.getRawPointer(), callback::apply));
     }
 
@@ -357,8 +388,9 @@ public class Reference {
 
     static native int jniCmp(long ref1Ptr, long ref2Ptr);
 
-    public static int cmp(Reference ref1, Reference ref2) {
-        return jniCmp(ref1.getRawPointer(), ref2.getRawPointer());
+    public static int cmp(@Nullable Reference ref1, @Nullable Reference ref2) {
+        return jniCmp(
+                ref1 == null ? 0 : ref1.getRawPointer(), ref2 == null ? 0 : ref2.getRawPointer());
     }
 
     static native int jniIteratorNew(AtomicLong outIter, long repoPtr);
@@ -373,10 +405,11 @@ public class Reference {
      * @return newly created iterator
      * @throws GitException git errors
      */
-    public static Iterator iteratorGlobNew(Repository repo, String glob) {
+    @Nonnull
+    public static Iterator iteratorGlobNew(@Nonnull Repository repo, @Nonnull String glob) {
         AtomicLong outIter = new AtomicLong();
         Error.throwIfNeeded(jniIteratorGlobNew(outIter, repo.getRawPointer(), glob));
-        return new Iterator(outIter.get());
+        return new Iterator(false, outIter.get());
     }
 
     static native int jniNext(AtomicLong outRef, long iterPtr);
@@ -388,28 +421,20 @@ public class Reference {
      * @return next reference, null GIT_ITEROVER if there are no more;
      * @throws GitException or an error code
      */
-    public static Reference next(Iterator iter) {
+    @CheckForNull
+    public static Reference next(@Nonnull Iterator iter) {
         AtomicLong outRef = new AtomicLong();
-        int e = jniNext(outRef, iter._ptr.get());
+        int e = jniNext(outRef, iter.getRawPointer());
         if (e == ErrorCode.ITEROVER.getCode()) {
             return null;
         }
         Error.throwIfNeeded(e);
-        return new Reference(outRef.get());
+        return new Reference(true, outRef.get());
     }
 
     static native int jniNextName(AtomicReference<String> outName, long iterPtr);
 
     static native void jniIteratorFree(long iterPtr);
-
-    /**
-     * Free the iterator and its associated resources
-     *
-     * @param iter the iterator to free
-     */
-    public static void iteratorFree(Iterator iter) {
-        jniIteratorFree(iter._ptr.get());
-    }
 
     static native int jniForeachGlob(long repoPtr, String glob, ForeachNameCb callback);
 
@@ -429,8 +454,9 @@ public class Reference {
      * @param callback Function which will be called for every listed ref
      * @throws GitException GIT_EUSER on non-zero callback, or error code
      */
-    public static void foreachGlob(Repository repo, String glob, ForeachNameCb callback) {
-        jniForeachGlob(repo.getRawPointer(), glob, callback);
+    public static void foreachGlob(
+            @Nonnull Repository repo, @Nonnull String glob, @Nonnull ForeachNameCb callback) {
+        Error.throwIfNeeded(jniForeachGlob(repo.getRawPointer(), glob, callback));
     }
 
     static native int jniHasLog(long repoPtr, String refname);
@@ -444,7 +470,7 @@ public class Reference {
      * @return true if reflog exists
      * @throws GitException git errors
      */
-    public static boolean hasLog(Repository repo, String refname) {
+    public static boolean hasLog(@Nonnull Repository repo, @Nonnull String refname) {
         int e = jniHasLog((repo.getRawPointer()), refname);
         if (e == 0 || e == 1) {
             return e == 1;
@@ -560,18 +586,6 @@ public class Reference {
 
     static native String jniShorthand(long refPtr);
 
-    @Override
-    protected void finalize() throws Throwable {
-        if (_rawPtr.get() > 0) {
-            jniFree(_rawPtr.get());
-        }
-        super.finalize();
-    }
-
-    long getRawPointer() {
-        return _rawPtr.get();
-    }
-
     /**
      * Return the peeled OID target of this reference.
      *
@@ -580,6 +594,7 @@ public class Reference {
      *
      * @return peeled Oid or null
      */
+    @CheckForNull
     public Oid targetPeel() {
         Oid oid = new Oid();
         jniTargetPeel(oid, this.getRawPointer());
@@ -591,8 +606,9 @@ public class Reference {
      *
      * <p>Only available if the reference is symbolic.
      *
-     * @return name of the reference
+     * @return name of the reference or null
      */
+    @CheckForNull
     public String symbolicTarget() {
         return jniSymbolicTarget(this.getRawPointer());
     }
@@ -604,6 +620,7 @@ public class Reference {
      *
      * @return the type
      */
+    @Nonnull
     public ReferenceType type() {
         return ReferenceType.valueOf(jniType(this.getRawPointer()));
     }
@@ -615,6 +632,7 @@ public class Reference {
      *
      * @return the full name for the ref
      */
+    @Nonnull
     public String name() {
         return jniName(this.getRawPointer());
     }
@@ -634,10 +652,11 @@ public class Reference {
      * @return resolved reference
      * @throws GitException resolve attempt failed
      */
+    @CheckForNull
     public Reference resolve() {
         AtomicLong outRef = new AtomicLong();
         Error.throwIfNeeded(jniResolve(outRef, getRawPointer()));
-        return new Reference(outRef.get());
+        return outRef.get() > 0 ? new Reference(false, outRef.get()) : null;
     }
 
     /**
@@ -645,6 +664,7 @@ public class Reference {
      *
      * @return owner repository
      */
+    @Nonnull
     public Repository owner() {
         return new Repository(jniOwner(getRawPointer()));
     }
@@ -666,10 +686,11 @@ public class Reference {
      * @return newly created Reference
      * @throws GitException GIT_EINVALIDSPEC or an error code
      */
-    public Reference symbolicSetTarget(String target, String logMessage) {
+    @CheckForNull
+    public Reference symbolicSetTarget(@Nonnull String target, @Nonnull String logMessage) {
         AtomicLong outRef = new AtomicLong();
         Error.throwIfNeeded(jniSymbolicSetTarget(outRef, getRawPointer(), target, logMessage));
-        return new Reference(outRef.get());
+        return outRef.get() > 0 ? new Reference(false, outRef.get()) : null;
     }
 
     /**
@@ -684,10 +705,11 @@ public class Reference {
      * @throws GitException GIT_EMODIFIED if the value of the reference has changed since it was
      *     read, or an error code
      */
-    public Reference setTarget(Oid oid, String logMessage) {
+    @Nonnull
+    public Reference setTarget(@Nonnull Oid oid, @Nonnull String logMessage) {
         AtomicLong outRef = new AtomicLong();
         Error.throwIfNeeded(jniSetTarget(outRef, getRawPointer(), oid, logMessage));
-        return new Reference(outRef.get());
+        return new Reference(false, outRef.get());
     }
 
     /**
@@ -710,10 +732,11 @@ public class Reference {
      * @return new reference
      * @throws GitException GIT_EINVALIDSPEC, GIT_EEXISTS or an error code
      */
-    public Reference rename(String newName, boolean force, String logMessage) {
+    @Nonnull
+    public Reference rename(@Nonnull String newName, boolean force, String logMessage) {
         AtomicLong outRef = new AtomicLong();
         Error.throwIfNeeded(jniRename(outRef, getRawPointer(), newName, force ? 1 : 0, logMessage));
-        return new Reference(outRef.get());
+        return new Reference(false, outRef.get());
     }
 
     /**
@@ -723,10 +746,11 @@ public class Reference {
      *
      * @return 0 or an error code
      */
+    @Nonnull
     public Reference dup() {
         AtomicLong outRef = new AtomicLong();
         Error.throwIfNeeded(jniDup(outRef, this.getRawPointer()));
-        return new Reference(outRef.get());
+        return new Reference(false, outRef.get());
     }
 
     /**
@@ -736,10 +760,11 @@ public class Reference {
      * @return newly constructed iterator
      * @throws GitException git error
      */
-    public static Iterator iteratorNew(Repository repo) {
+    @Nonnull
+    public static Iterator iteratorNew(@Nonnull Repository repo) {
         AtomicLong outIter = new AtomicLong();
         Error.throwIfNeeded(jniIteratorNew(outIter, repo.getRawPointer()));
-        return new Iterator(outIter.get());
+        return new Iterator(false, outIter.get());
     }
 
     /**
@@ -751,9 +776,10 @@ public class Reference {
      * @return name of the next reference, null there are no more (GIT_ITEROVER).
      * @throws GitException git error
      */
-    public static String nextName(Iterator iterator) {
+    @CheckForNull
+    public static String nextName(@Nonnull Iterator iterator) {
         AtomicReference<String> outName = new AtomicReference<>();
-        int e = jniNextName(outName, iterator._ptr.get());
+        int e = jniNextName(outName, iterator.getRawPointer());
         if (ErrorCode.ITEROVER.getCode() == e) {
             return null;
         }
@@ -825,6 +851,7 @@ public class Reference {
      *
      * @return the human-readable version of the name
      */
+    @Nonnull
     public String shorthand() {
         return jniShorthand(getRawPointer());
     }
@@ -865,12 +892,7 @@ public class Reference {
         }
 
         static ReferenceType valueOf(int iVal) {
-            for (ReferenceType x : ReferenceType.values()) {
-                if (x._bit == iVal) {
-                    return x;
-                }
-            }
-            return INVALID;
+            return IBitEnum.valueOf(iVal, ReferenceType.class, INVALID);
         }
 
         @Override
@@ -889,24 +911,25 @@ public class Reference {
         int accept(long refPtr);
     }
 
-    public static class Iterator {
-        private final AtomicLong _ptr = new AtomicLong();
-
-        Iterator(long rawPointer) {
-            _ptr.set(rawPointer);
+    public static class Iterator extends CAutoReleasable {
+        protected Iterator(boolean isWeak, long rawPtr) {
+            super(isWeak, rawPtr);
         }
 
         @Override
-        protected void finalize() throws Throwable {
-            jniIteratorFree(_ptr.get());
-            super.finalize();
+        protected void freeOnce(long cPtr) {
+            jniIteratorFree(cPtr);
         }
     }
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         Reference reference = (Reference) o;
         return Reference.cmp(reference, this) == 0;
     }

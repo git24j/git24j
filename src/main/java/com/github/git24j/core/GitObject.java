@@ -7,10 +7,6 @@ import javax.annotation.Nonnull;
 public class GitObject extends CAutoReleasable {
     // weak referenced git_object won't be free-ed in the finalizer
 
-    protected GitObject(long rawPointer) {
-        super(false, rawPointer);
-    }
-
     protected GitObject(boolean weak, long rawPointer) {
         super(weak, rawPointer);
     }
@@ -57,15 +53,15 @@ public class GitObject extends CAutoReleasable {
             case INVALID:
                 throw new IllegalStateException("invalid git object");
             case COMMIT:
-                return new Commit(objPtr);
+                return new Commit(false, objPtr);
             case BLOB:
-                return new Blob(objPtr);
+                return new Blob(false, objPtr);
             case TAG:
-                return new Tag(objPtr);
+                return new Tag(false, objPtr);
             case TREE:
-                return new Tree(objPtr);
+                return new Tree(false, objPtr);
             default:
-                return new GitObject(objPtr);
+                return new GitObject(false, objPtr);
         }
     }
 
@@ -151,7 +147,7 @@ public class GitObject extends CAutoReleasable {
     public GitObject peel(Type targetType) {
         AtomicLong outPtr = new AtomicLong();
         Error.throwIfNeeded(jniPeel(outPtr, getRawPointer(), targetType.value));
-        return new GitObject(outPtr.get());
+        return new GitObject(false, outPtr.get());
     }
 
     /**

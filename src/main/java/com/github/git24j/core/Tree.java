@@ -279,9 +279,10 @@ public class Tree extends GitObject {
         }
     }
 
-    Tree(long rawPointer) {
-        super(rawPointer);
+    Tree(boolean weak, long rawPointer) {
+        super(weak, rawPointer);
     }
+
     // no matching type found for 'git_filemode_t filemode'
     /**
      * int git_treebuilder_insert(const git_tree_entry **out, git_treebuilder *bld, const char

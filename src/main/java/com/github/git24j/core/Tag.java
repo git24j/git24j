@@ -7,8 +7,8 @@ import java.util.concurrent.atomic.AtomicLong;
 import javax.annotation.Nonnull;
 
 public class Tag extends GitObject {
-    Tag(long rawPointer) {
-        super(rawPointer);
+    Tag(boolean weak, long rawPointer) {
+        super(weak, rawPointer);
     }
 
     public static Tag lookup(Repository repo, Oid oid) {
@@ -22,7 +22,7 @@ public class Tag extends GitObject {
 
     @Override
     public Tag dup() {
-        Tag tag = new Tag(0);
+        Tag tag = new Tag(false, 0);
         GitObject.jniDup(tag._rawPtr, getRawPointer());
         return tag;
     }
@@ -39,7 +39,7 @@ public class Tag extends GitObject {
      * @throws GitException git errors
      */
     public GitObject target() {
-        GitObject out = new GitObject(0);
+        GitObject out = new GitObject(false, 0);
         Error.throwIfNeeded(jniTarget(out._rawPtr, getRawPointer()));
         return out;
     }
