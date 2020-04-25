@@ -42,7 +42,8 @@ public class Signature extends CAutoReleasable {
 
     @Override
     protected void freeOnce(long cPtr) {
-        jniFree(cPtr);
+        // FIXME
+        // jniFree(cPtr);
     }
 
     /** -------- Jni Signature ---------- */

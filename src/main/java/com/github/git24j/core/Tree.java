@@ -17,7 +17,8 @@ public class Tree extends GitObject {
 
         @Override
         protected void freeOnce(long cPtr) {
-            jniEntryFree(cPtr);
+            // FIXME
+            // jniEntryFree(cPtr);
         }
 
         /**
@@ -112,7 +113,8 @@ public class Tree extends GitObject {
 
         @Override
         protected void freeOnce(long cPtr) {
-            jniUpdateFree(cPtr);
+            // FIXME
+            // jniUpdateFree(cPtr);
         }
 
         /** Create an Update object. */
@@ -160,7 +162,8 @@ public class Tree extends GitObject {
 
         @Override
         protected void freeOnce(long cPtr) {
-            jniBuilderFree(cPtr);
+            // FIXME
+            // jniBuilderFree(cPtr);
         }
 
         /**
