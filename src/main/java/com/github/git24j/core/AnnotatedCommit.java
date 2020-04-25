@@ -17,7 +17,8 @@ public class AnnotatedCommit extends CAutoReleasable {
 
     @Override
     protected void freeOnce(long cPtr) {
-        jniFree(cPtr);
+        // FIXME: undo disable
+        // jniFree(cPtr);
     }
 
     static native String jniFree(long acPtr);
