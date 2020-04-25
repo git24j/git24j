@@ -51,7 +51,28 @@
                     <argLine>-Dfile.encoding=UTF-8</argLine>
                     <useSystemClassLoader>false</useSystemClassLoader>
                     <excludes>
-                        <!--<exclude>**/MailmapTest.java</exclude>-->
+<!--                        <exclude>**/AnnotatedCommitTest.java</exclude>-->
+<!--                        <exclude>**/BasicOperationsTest.java</exclude>-->
+<!--                        <exclude>**/BlameTest.java</exclude>-->
+<!--                        <exclude>**/BlobTest.java</exclude>-->
+<!--                        <exclude>**/BranchTest.java</exclude>-->
+<!--                        <exclude>**/CommitTest.java</exclude>-->
+<!--                        <exclude>**/ConfigTest.java</exclude>-->
+<!--                        <exclude>**/DiffTest.java</exclude>-->
+<!--                        <exclude>**/ErrorTest.java</exclude>-->
+<!--                        <exclude>**/GitObjectTest.java</exclude>-->
+<!--                        <exclude>**/IBitEnumTest.java</exclude>-->
+<!--                        <exclude>**/IndexTest.java</exclude>-->
+<!--                        <exclude>**/Libgit2Test.java</exclude>-->
+<!--                        <exclude>**/MailmapTest.java</exclude>-->
+<!--                        <exclude>**/MainTest.java</exclude>-->
+<!--                        <exclude>**/MergeTest.java</exclude>-->
+<!--                        <exclude>**/OidTest.java</exclude>-->
+<!--                        <exclude>**/ReferenceTest.java</exclude>-->
+<!--                        <exclude>**/RepositoryTest.java</exclude>-->
+<!--                        <exclude>**/RevparseTest.java</exclude>-->
+<!--                        <exclude>**/TagTest.java</exclude>-->
+<!--                        <exclude>**/TreeTest.java</exclude>-->
                     </excludes>
                 </configuration>
             </plugin>

@@ -4,6 +4,7 @@
 #include <assert.h>
 #include <stdio.h>
 #include <string.h>
+extern j_constants_t *jniConstants;
 
 /** GIT_EXTERN(void) git_mailmap_free(git_mailmap *mm); */
 JNIEXPORT void JNICALL J_MAKE_METHOD(Mailmap_jniFree)(JNIEnv *env, jclass obj, jlong mmPtr)
@@ -32,7 +33,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Mailmap_jniFromBuffer)(JNIEnv *env, jclass 
     size_t len = strlen(c_buf);
     git_mailmap *c_out;
     int e = git_mailmap_from_buffer(&c_out, c_buf, len);
-    j_save_c_pointer(env, (void *)c_out, outPtr, "set");
+    (*env)->CallVoidMethod(env, outPtr, jniConstants->midAtomicLongSet, (long)c_out);
     free(c_buf);
     return e;
 }
@@ -42,7 +43,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Mailmap_jniFromRepository)(JNIEnv *env, jcl
 {
     git_mailmap *c_out;
     int e = git_mailmap_from_repository(&c_out, (git_repository *)repoPtr);
-    j_save_c_pointer(env, (void *)c_out, outPtr, "set");
+    (*env)->CallVoidMethod(env, outPtr, jniConstants->midAtomicLongSet, (long)c_out);
     return e;
 }
 

@@ -1,6 +1,7 @@
 #include "j_blob.h"
 #include "j_mappers.h"
 #include "j_util.h"
+extern j_constants_t *jniConstants;
 
 /** int git_blob_lookup(git_blob **blob, git_repository *repo, const git_oid *id); */
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Blob_jniLookup)(JNIEnv *env, jclass obj, jobject outBlob, long repoPtr, jobject oid)
@@ -9,7 +10,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Blob_jniLookup)(JNIEnv *env, jclass obj, jo
     git_oid c_oid;
     j_git_oid_from_java(env, oid, &c_oid);
     int e = git_blob_lookup(&c_blob, (git_repository *)repoPtr, &c_oid);
-    j_save_c_pointer(env, (void *)c_blob, outBlob, "set");
+    (*env)->CallVoidMethod(env, outBlob, jniConstants->midAtomicLongSet, (long)c_blob);
     return e;
 }
 
@@ -20,7 +21,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Blob_jniLookupPrefix)(JNIEnv *env, jclass o
     git_oid c_oid;
     j_git_oid_from_java(env, oid, &c_oid);
     int e = git_blob_lookup_prefix(&c_blob, (git_repository *)repoPtr, &c_oid, len);
-    j_save_c_pointer(env, (void *)c_blob, outBlob, "set");
+    (*env)->CallVoidMethod(env, outBlob, jniConstants->midAtomicLongSet, (long)c_blob);
     return e;
 }
 
@@ -83,7 +84,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Blob_jniCreateFromStream)(JNIEnv *env, jcla
     char *hint_path = j_copy_of_jstring(env, hintPath, true);
     git_writestream *out_stream;
     int e = git_blob_create_fromstream(&out_stream, (git_repository *)repoPtr, hint_path);
-    j_save_c_pointer(env, (void *)out_stream, outStream, "set");
+    (*env)->CallVoidMethod(env, outStream, jniConstants->midAtomicLongSet, (long)out_stream);
     free(hint_path);
     return e;
 }
@@ -120,7 +121,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Blob_jniDup)(JNIEnv *env, jclass obj, jobje
 {
     git_blob *out;
     int e = git_blob_dup(&out, (git_blob *)srcPtr);
-    j_save_c_pointer(env, (void *)out, outDest, "set");
+    (*env)->CallVoidMethod(env, outDest, jniConstants->midAtomicLongSet, (long)out);
     return e;
 }
 

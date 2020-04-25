@@ -12,6 +12,7 @@ import java.util.Optional;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import org.apache.commons.io.IOUtils;
+import org.junit.AfterClass;
 import org.junit.rules.TemporaryFolder;
 
 public class TestBase {
@@ -20,6 +21,12 @@ public class TestBase {
     public TestBase() {
         Init.loadLibraries();
         Libgit2.init();
+    }
+
+    @AfterClass
+    public static void tearDownClass() {
+        System.runFinalization();
+        System.gc();
     }
 
     private static void zipTo(Path zip, Path outputDir) throws IOException {
