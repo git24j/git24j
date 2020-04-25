@@ -69,8 +69,8 @@
                         <exclude>**/MergeTest.java</exclude>
                         <exclude>**/OidTest.java</exclude>
                         <exclude>**/ReferenceTest.java</exclude>
-<!--                        <exclude>**/RepositoryTest.java</exclude>-->
-<!--                        <exclude>**/RevparseTest.java</exclude>-->
+                        <exclude>**/RepositoryTest.java</exclude>
+                        <exclude>**/RevparseTest.java</exclude>
 <!--                        <exclude>**/TagTest.java</exclude>-->
 <!--                        <exclude>**/TreeTest.java</exclude>-->
                     </excludes>
