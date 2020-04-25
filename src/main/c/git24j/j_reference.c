@@ -8,6 +8,7 @@
 #include <stdio.h>
 #include <string.h>
 
+extern j_constants_t *jniConstants;
 const size_t MAX_REF_NAME_SIZE = 32768;
 
 /**
@@ -57,7 +58,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Reference_jniLookup)(JNIEnv *env, jclass ob
     git_reference *out_ref;
     char *c_name = j_copy_of_jstring(env, name, false);
     int e = git_reference_lookup(&out_ref, (git_repository *)repoPtr, c_name);
-    j_save_c_pointer(env, (void *)out_ref, outRef, "set");
+    (*env)->CallVoidMethod(env, outRef, jniConstants->midAtomicLongSet, (long)out_ref);
     free(c_name);
     return e;
 }
@@ -78,7 +79,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Reference_jniDwim)(JNIEnv *env, jclass obj,
     char *short_hand = j_copy_of_jstring(env, shorthand, false);
     int e = git_reference_dwim(&out_ref, (git_repository *)repoPtr, short_hand);
     free(short_hand);
-    j_save_c_pointer(env, (void *)out_ref, outRef, "set");
+    (*env)->CallVoidMethod(env, outRef, jniConstants->midAtomicLongSet, (long)out_ref);
     return e;
 }
 /**int git_reference_symbolic_create_matching(git_reference **out, git_repository *repo, const char *name, const char *target, int force, const char *current_value, const char *log_message); */
@@ -90,7 +91,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Reference_jniSymbolicCreateMatching)(JNIEnv
     char *current_value = j_copy_of_jstring(env, currentValue, true);
     char *log_message = j_copy_of_jstring(env, logMessage, true);
     int e = git_reference_symbolic_create_matching(&c_out, (git_repository *)repoPtr, c_name, c_target, force, current_value, log_message);
-    j_save_c_pointer(env, (void *)c_out, outRef, "set");
+    (*env)->CallVoidMethod(env, outRef, jniConstants->midAtomicLongSet, (long)c_out);
     free(log_message);
     free(current_value);
     free(c_target);
@@ -105,7 +106,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Reference_jniSymbolicCreate)(JNIEnv *env, j
     char *c_target = j_copy_of_jstring(env, target, false);
     char *log_message = j_copy_of_jstring(env, logMessage, true);
     int e = git_reference_symbolic_create(&c_out, (git_repository *)repoPtr, c_name, c_target, force, log_message);
-    j_save_c_pointer(env, (void *)c_out, outRef, "set");
+    (*env)->CallVoidMethod(env, outRef, jniConstants->midAtomicLongSet, (long)c_out);
     free(log_message);
     free(c_target);
     free(c_name);
@@ -120,7 +121,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Reference_jniCreate)(JNIEnv *env, jclass ob
     char *c_name = j_copy_of_jstring(env, name, false);
     char *log_message = j_copy_of_jstring(env, logMessage, true);
     int e = git_reference_create(&c_out, (git_repository *)repoPtr, c_name, &c_oid, force, log_message);
-    j_save_c_pointer(env, (void *)c_out, outRef, "set");
+    (*env)->CallVoidMethod(env, outRef, jniConstants->midAtomicLongSet, (long)c_out);
     free(log_message);
     free(c_name);
     return e;
@@ -174,7 +175,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Reference_jniResolve)(JNIEnv *env, jclass o
 {
     git_reference *c_out;
     int e = git_reference_resolve(&c_out, (git_reference *)refPtr);
-    j_save_c_pointer(env, (void *)c_out, outRef, "set");
+    (*env)->CallVoidMethod(env, outRef, jniConstants->midAtomicLongSet, (long)c_out);
     return e;
 }
 /**git_repository * git_reference_owner(const git_reference *ref); */
@@ -189,7 +190,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Reference_jniSymbolicSetTarget)(JNIEnv *env
     char *c_target = j_copy_of_jstring(env, target, false);
     char *log_message = j_copy_of_jstring(env, logMessage, false);
     int e = git_reference_symbolic_set_target(&c_out, (git_reference *)refPtr, c_target, log_message);
-    j_save_c_pointer(env, (void *)c_out, outRef, "set");
+    (*env)->CallVoidMethod(env, outRef, jniConstants->midAtomicLongSet, (long)c_out);
     free(c_target);
     free(log_message);
     return e;
@@ -202,7 +203,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Reference_jniSetTarget)(JNIEnv *env, jclass
     j_git_oid_from_java(env, oid, &c_oid);
     char *log_message = j_copy_of_jstring(env, logMessage, true);
     int e = git_reference_set_target(&c_out, (git_reference *)refPtr, &c_oid, log_message);
-    j_save_c_pointer(env, (void *)c_out, outRef, "set");
+    (*env)->CallVoidMethod(env, outRef, jniConstants->midAtomicLongSet, (long)c_out);
     free(log_message);
     return e;
 }
@@ -213,7 +214,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Reference_jniRename)(JNIEnv *env, jclass ob
     char *new_name = j_copy_of_jstring(env, newName, false);
     char *log_message = j_copy_of_jstring(env, logMessage, true);
     int e = git_reference_rename(&new_ref, (git_reference *)refPtr, new_name, force, log_message);
-    j_save_c_pointer(env, (void *)new_ref, outRef, "set");
+    (*env)->CallVoidMethod(env, outRef, jniConstants->midAtomicLongSet, (long)new_ref);
     free(log_message);
     free(new_name);
     return e;
@@ -264,7 +265,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Reference_jniDup)(JNIEnv *env, jclass obj, 
 {
     git_reference *dest;
     int e = git_reference_dup(&dest, (git_reference *)sourcePtr);
-    j_save_c_pointer(env, (void *)dest, outDest, "set");
+    (*env)->CallVoidMethod(env, outDest, jniConstants->midAtomicLongSet, (long)dest);
     return e;
 }
 /**void git_reference_free(git_reference *ref); */
@@ -282,7 +283,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Reference_jniIteratorNew)(JNIEnv *env, jcla
 {
     git_reference_iterator *c_out;
     int e = git_reference_iterator_new(&c_out, (git_repository *)repoPtr);
-    j_save_c_pointer(env, (void *)c_out, outIter, "set");
+    (*env)->CallVoidMethod(env, outIter, jniConstants->midAtomicLongSet, (long)c_out);
     return e;
 }
 /**int git_reference_iterator_glob_new(git_reference_iterator **out, git_repository *repo, const char *glob); */
@@ -291,7 +292,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Reference_jniIteratorGlobNew)(JNIEnv *env, 
     git_reference_iterator *c_out;
     char *c_glob = j_copy_of_jstring(env, glob, false);
     int e = git_reference_iterator_glob_new(&c_out, (git_repository *)repoPtr, c_glob);
-    j_save_c_pointer(env, (void *)c_out, outIter, "set");
+    (*env)->CallVoidMethod(env, outIter, jniConstants->midAtomicLongSet, (long)c_out);
     free(c_glob);
     return e;
 }
@@ -300,7 +301,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Reference_jniNext)(JNIEnv *env, jclass obj,
 {
     git_reference *c_out;
     int e = git_reference_next(&c_out, (git_reference_iterator *)iterPtr);
-    j_save_c_pointer(env, (void *)c_out, outRef, "set");
+    (*env)->CallVoidMethod(env, outRef, jniConstants->midAtomicLongSet, (long)c_out);
     return e;
 }
 /**int git_reference_next_name(const char **out, git_reference_iterator *iter); */
@@ -423,7 +424,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Reference_jniPeel)(JNIEnv *env, jclass obj,
 {
     git_object *c_out;
     int e = git_reference_peel(&c_out, (git_reference *)refPtr, (git_object_t)objType);
-    j_save_c_pointer(env, (void *)c_out, outObj, "set");
+    (*env)->CallVoidMethod(env, outObj, jniConstants->midAtomicLongSet, (long)c_out);
     return e;
 }
 /**int git_reference_is_valid_name(const char *refname); */

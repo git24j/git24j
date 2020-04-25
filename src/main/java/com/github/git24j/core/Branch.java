@@ -1,11 +1,11 @@
 package com.github.git24j.core;
 
-import javax.annotation.Nonnull;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
+import javax.annotation.Nonnull;
 
 public class Branch {
     static native int jniCreate(
@@ -37,7 +37,7 @@ public class Branch {
                         branchName,
                         target.getRawPointer(),
                         force ? 0 : 1));
-        return new Reference(outRef.get());
+        return new Reference(false, outRef.get());
     }
 
     static native int jniCreateFromAnnotated(
@@ -68,7 +68,7 @@ public class Branch {
                         branchName,
                         annotatedCommit.getRawPointer(),
                         force ? 1 : 0));
-        return new Reference(outRef.get());
+        return new Reference(false, outRef.get());
     }
 
     static native int jniDelete(long refPtr);
@@ -125,7 +125,7 @@ public class Branch {
                 return null;
             }
             Error.throwIfNeeded(e);
-            Reference ref = new Reference(outRef.get());
+            Reference ref = new Reference(true, outRef.get());
             BranchType type = BranchType.valueOf(outType.get());
             return new HashMap.SimpleImmutableEntry<>(ref, type);
         }
@@ -156,7 +156,7 @@ public class Branch {
      * @throws GitException git errors
      */
     public static Reference move(Reference branch, String branchName, boolean force) {
-        Reference outRef = new Reference(0);
+        Reference outRef = new Reference(true, 0);
         Error.throwIfNeeded(
                 jniMove(outRef._rawPtr, branch.getRawPointer(), branchName, force ? 0 : 1));
         return outRef;
@@ -206,7 +206,7 @@ public class Branch {
             return null;
         }
         Error.throwIfNeeded(e);
-        return new Reference(outRef.get());
+        return new Reference(false, outRef.get());
     }
 
     static native int jniName(AtomicReference<String> outStr, long refPtr);
@@ -251,7 +251,7 @@ public class Branch {
             return null;
         }
         Error.throwIfNeeded(e);
-        return new Reference(outRef.get());
+        return new Reference(false, outRef.get());
     }
 
     static native int jniSetUpstream(long refPtr, String upstreamName);
