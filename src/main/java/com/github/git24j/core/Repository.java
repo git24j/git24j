@@ -529,7 +529,7 @@ public class Repository extends CAutoCloseable {
     public Reference headForWorkTree(String name) {
         AtomicLong outRef = new AtomicLong();
         Error.throwIfNeeded(jniHeadForWorktree(outRef, _rawPtr.get(), name));
-        return new Reference(false, outRef.get());
+        return new Reference(true, outRef.get());
     }
 
     /**

@@ -91,15 +91,15 @@ public class RepositoryTest extends TestBase {
                 Repository.discover(folder.newFolder("not-a-repo").toPath(), false, "/tmp:/home");
         Assert.assertFalse(path2.isPresent());
     }
-//
-//    @Test
-//    public void headForWorkTree() {
-//        Path path = TestRepo.WORKTREE1.tempCopy(folder);
-//        try (Repository repository = Repository.open(path)) {
-//            Reference ref = repository.headForWorkTree("wt1");
-//            Assert.assertTrue(ref.getRawPointer() > 0);
-//        }
-//    }
+
+    @Test
+    public void headForWorkTree() {
+        Path path = TestRepo.WORKTREE1.tempCopy(folder);
+        try (Repository repository = Repository.open(path)) {
+            Reference ref = repository.headForWorkTree("wt1");
+            Assert.assertTrue(ref.getRawPointer() > 0);
+        }
+    }
 
 //    @Test
 //    public void headDetached_headUnborn_isEmpty() {
