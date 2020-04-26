@@ -74,7 +74,7 @@
                         <exclude>**/TagTest.java</exclude>
                         <exclude>**/TreeTest.java</exclude>
                         <exclude>**/CredTest.java</exclude>
-                        <exclude>**/RefspecTest.java</exclude>
+<!--                        <exclude>**/RefspecTest.java</exclude>-->
 <!--                        <exclude>**/RevwalkTest.java</exclude>-->
                     </excludes>
                 </configuration>
