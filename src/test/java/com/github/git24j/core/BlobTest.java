@@ -92,28 +92,28 @@ public class BlobTest extends TestBase {
     //    git_blob_create_fromstream_commit	function
     //    git_blob_create_frombuffer	function
 
-    @Test
-    public void createFromBuffer() {
-        try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {
-            Oid oid = Blob.createFromBuffer(testRepo, "a\n".getBytes(StandardCharsets.UTF_8));
-            Assert.assertEquals("78981922613b2afb6025042ff6bd878ac1994e85", oid.toString());
-        }
-    }
-
-    @Test
-    public void isBinary() {
-        try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {
-            Blob blob1 = Blob.lookup(testRepo, Oid.of(BLOB_A));
-            Assert.assertFalse(blob1.isBinary());
-        }
-    }
-
-    @Test
-    public void dup() {
-        try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {
-            Blob blob1 = Blob.lookup(testRepo, Oid.of(BLOB_A));
-            Blob blob2 = blob1.dup();
-            Assert.assertEquals(blob2.id().toString(), BLOB_A);
-        }
-    }
+//    @Test
+//    public void createFromBuffer() {
+//        try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {
+//            Oid oid = Blob.createFromBuffer(testRepo, "a\n".getBytes(StandardCharsets.UTF_8));
+//            Assert.assertEquals("78981922613b2afb6025042ff6bd878ac1994e85", oid.toString());
+//        }
+//    }
+//
+//    @Test
+//    public void isBinary() {
+//        try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {
+//            Blob blob1 = Blob.lookup(testRepo, Oid.of(BLOB_A));
+//            Assert.assertFalse(blob1.isBinary());
+//        }
+//    }
+//
+//    @Test
+//    public void dup() {
+//        try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {
+//            Blob blob1 = Blob.lookup(testRepo, Oid.of(BLOB_A));
+//            Blob blob2 = blob1.dup();
+//            Assert.assertEquals(blob2.id().toString(), BLOB_A);
+//        }
+//    }
 }
