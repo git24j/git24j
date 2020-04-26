@@ -73,7 +73,7 @@
                         <exclude>**/RevparseTest.java</exclude>
                         <exclude>**/TagTest.java</exclude>
                         <exclude>**/TreeTest.java</exclude>
-                        <exclude>**/CredTest.java</exclude>
+<!--                        <exclude>**/CredTest.java</exclude>-->
 <!--                        <exclude>**/RefspecTest.java</exclude>-->
 <!--                        <exclude>**/RevwalkTest.java</exclude>-->
                     </excludes>
