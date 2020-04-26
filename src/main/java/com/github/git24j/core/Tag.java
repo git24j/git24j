@@ -39,7 +39,7 @@ public class Tag extends GitObject {
      * @throws GitException git errors
      */
     public GitObject target() {
-        GitObject out = new GitObject(false, 0);
+        GitObject out = new GitObject(true, 0);
         Error.throwIfNeeded(jniTarget(out._rawPtr, getRawPointer()));
         return out;
     }

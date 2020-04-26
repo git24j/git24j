@@ -146,7 +146,7 @@ public class Revwalk extends CAutoReleasable {
      */
     @Nonnull
     public static Revwalk create(@Nonnull Repository repo) {
-        Revwalk out = new Revwalk(false, 0);
+        Revwalk out = new Revwalk(true, 0);
         Error.throwIfNeeded(jniNew(out._rawPtr, repo.getRawPointer()));
         return out;
     }

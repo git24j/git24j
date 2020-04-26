@@ -3,8 +3,6 @@ package com.github.git24j.core;
 import org.junit.Assert;
 import org.junit.Test;
 
-import static org.junit.Assert.*;
-
 public class CredTest extends TestBase {
 
     @Test

@@ -63,7 +63,6 @@ public class TagTest extends TestBase {
         }
     }
 
-    @Ignore
     @Test
     public void peel() {
         try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {
