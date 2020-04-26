@@ -60,19 +60,19 @@
                         <exclude>**/ConfigTest.java</exclude>
                         <exclude>**/DiffTest.java</exclude>
                         <exclude>**/ErrorTest.java</exclude>
-                        <exclude>**/GitObjectTest.java</exclude>
-                        <exclude>**/IBitEnumTest.java</exclude>
-                        <exclude>**/IndexTest.java</exclude>
-                        <exclude>**/Libgit2Test.java</exclude>
-                        <exclude>**/MailmapTest.java</exclude>
-                        <exclude>**/MainTest.java</exclude>
-                        <exclude>**/MergeTest.java</exclude>
-                        <exclude>**/OidTest.java</exclude>
-                        <exclude>**/ReferenceTest.java</exclude>
-                        <exclude>**/RepositoryTest.java</exclude>
-                        <exclude>**/RevparseTest.java</exclude>
-                        <exclude>**/TagTest.java</exclude>
-                        <exclude>**/TreeTest.java</exclude>
+<!--                        <exclude>**/GitObjectTest.java</exclude>-->
+<!--                        <exclude>**/IBitEnumTest.java</exclude>-->
+<!--                        <exclude>**/IndexTest.java</exclude>-->
+<!--                        <exclude>**/Libgit2Test.java</exclude>-->
+<!--                        <exclude>**/MailmapTest.java</exclude>-->
+<!--                        <exclude>**/MainTest.java</exclude>-->
+<!--                        <exclude>**/MergeTest.java</exclude>-->
+<!--                        <exclude>**/OidTest.java</exclude>-->
+<!--                        <exclude>**/ReferenceTest.java</exclude>-->
+<!--                        <exclude>**/RepositoryTest.java</exclude>-->
+<!--                        <exclude>**/RevparseTest.java</exclude>-->
+<!--                        <exclude>**/TagTest.java</exclude>-->
+<!--                        <exclude>**/TreeTest.java</exclude>-->
 <!--                        <exclude>**/CredTest.java</exclude>-->
 <!--                        <exclude>**/RefspecTest.java</exclude>-->
 <!--                        <exclude>**/RevwalkTest.java</exclude>-->
