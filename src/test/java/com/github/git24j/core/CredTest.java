@@ -10,19 +10,19 @@ public class CredTest extends TestBase {
         Cred cred = Cred.userpassPlaintextNew("user", "passwd");
         Assert.assertTrue(cred.getRawPointer() > 0);
     }
-//
-//    @Test
-//    public void sshKeyNew() {
-//        Cred cred = Cred.sshKeyNew("user", "/tmp/abc.pub", "/tmp/abc.priv", "passphrase");
-//        Assert.assertTrue(cred.getRawPointer() > 0);
-//    }
-//
-//    @Test
-//    public void sshKeyFromAgent() {
-//        Cred cred = Cred.sshKeyFromAgent("user");
-//        Assert.assertTrue(cred.getRawPointer() > 0);
-//    }
-//
+
+    @Test
+    public void sshKeyNew() {
+        Cred cred = Cred.sshKeyNew("user", "/tmp/abc.pub", "/tmp/abc.priv", "passphrase");
+        Assert.assertTrue(cred.getRawPointer() > 0);
+    }
+
+    @Test
+    public void sshKeyFromAgent() {
+        Cred cred = Cred.sshKeyFromAgent("user");
+        Assert.assertTrue(cred.getRawPointer() > 0);
+    }
+
 //    @Test
 //    public void defaultNew() {
 //        Cred cred = Cred.defaultNew();
