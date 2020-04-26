@@ -100,20 +100,20 @@ public class BlobTest extends TestBase {
 //        }
 //    }
 //
-//    @Test
-//    public void isBinary() {
-//        try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {
-//            Blob blob1 = Blob.lookup(testRepo, Oid.of(BLOB_A));
-//            Assert.assertFalse(blob1.isBinary());
-//        }
-//    }
-//
-//    @Test
-//    public void dup() {
-//        try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {
-//            Blob blob1 = Blob.lookup(testRepo, Oid.of(BLOB_A));
-//            Blob blob2 = blob1.dup();
-//            Assert.assertEquals(blob2.id().toString(), BLOB_A);
-//        }
-//    }
+    @Test
+    public void isBinary() {
+        try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {
+            Blob blob1 = Blob.lookup(testRepo, Oid.of(BLOB_A));
+            Assert.assertFalse(blob1.isBinary());
+        }
+    }
+
+    @Test
+    public void dup() {
+        try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {
+            Blob blob1 = Blob.lookup(testRepo, Oid.of(BLOB_A));
+            Blob blob2 = blob1.dup();
+            Assert.assertEquals(blob2.id().toString(), BLOB_A);
+        }
+    }
 }
