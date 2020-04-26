@@ -53,7 +53,7 @@
                     <excludes>
 <!--                        <exclude>**/AnnotatedCommitTest.java</exclude>-->
 <!--                        <exclude>**/BasicOperationsTest.java</exclude>-->
-                        <exclude>**/BlameTest.java</exclude>
+<!--                        <exclude>**/BlameTest.java</exclude>-->
 <!--                        <exclude>**/BlobTest.java</exclude>-->
 <!--                        <exclude>**/BranchTest.java</exclude>-->
 <!--                        <exclude>**/CommitTest.java</exclude>-->
