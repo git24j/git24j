@@ -194,7 +194,7 @@ public class Blame extends CAutoReleasable {
         if (ptr == 0) {
             return Optional.empty();
         }
-        return Optional.of(new Hunk(false, ptr));
+        return Optional.of(new Hunk(true, ptr));
     }
 
     /** const git_blame_hunk * git_blame_get_hunk_byline(git_blame *blame, size_t lineno); */
@@ -208,7 +208,7 @@ public class Blame extends CAutoReleasable {
      */
     public Optional<Hunk> getHunkByLine(int lineno) {
         long ptr = jniGetHunkByline(getRawPointer(), lineno);
-        return ptr == 0 ? Optional.empty() : Optional.of(new Hunk(false, ptr));
+        return ptr == 0 ? Optional.empty() : Optional.of(new Hunk(true, ptr));
     }
 
     /**
@@ -259,7 +259,7 @@ public class Blame extends CAutoReleasable {
      */
     @Nonnull
     public Blame buffer(@Nonnull String buffer) {
-        Blame out = new Blame(true, 0);
+        Blame out = new Blame(false, 0);
         Error.throwIfNeeded(jniBuffer(out._rawPtr, getRawPointer(), buffer, buffer.length()));
         return out;
     }

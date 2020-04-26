@@ -1,5 +1,6 @@
 package com.github.git24j.core;
 
+import javax.annotation.Nonnull;
 import java.util.concurrent.atomic.AtomicLong;
 
 public class Cred extends CAutoReleasable {
@@ -40,6 +41,22 @@ public class Cred extends CAutoReleasable {
     static native int jniUserpassPlaintextNew(AtomicLong out, String username, String password);
 
     /**
+     * Create a new plain-text username and password credential object. The supplied credential
+     * parameter will be internally duplicated.
+     *
+     * @return The newly created credential object.
+     * @param username The username of the credential.
+     * @param password The password of the credential.
+     * @throws GitException git errors
+     */
+    @Nonnull
+    public static Cred userpassPlaintextNew(@Nonnull String username, @Nonnull String password) {
+        Cred cred = new Cred(false, 0);
+        Error.throwIfNeeded(jniUserpassPlaintextNew(cred._rawPtr, username, password));
+        return cred;
+    }
+
+    /**
      * int git_cred_ssh_key_new(git_cred **out, const char *username, const char *publickey, const
      * char *privatekey, const char *passphrase);
      */
@@ -50,14 +67,78 @@ public class Cred extends CAutoReleasable {
             String privatekey,
             String passphrase);
 
+    /**
+     * Create a new passphrase-protected ssh key credential object. The supplied credential
+     * parameter will be internally duplicated.
+     *
+     * @return The newly created credential object.
+     * @param username username to use to authenticate
+     * @param publickey The path to the public key of the credential.
+     * @param privatekey The path to the private key of the credential.
+     * @param passphrase The passphrase of the credential.
+     * @throws GitException git errors
+     */
+    @Nonnull
+    public static Cred sshKeyNew(
+            @Nonnull String username,
+            @Nonnull String publickey,
+            @Nonnull String privatekey,
+            @Nonnull String passphrase) {
+        Cred cred = new Cred(false, 0);
+        Error.throwIfNeeded(
+                jniSshKeyNew(cred._rawPtr, username, publickey, privatekey, passphrase));
+        return cred;
+    }
+
     /** int git_cred_ssh_key_from_agent(git_cred **out, const char *username); */
     static native int jniSshKeyFromAgent(AtomicLong out, String username);
+
+    /**
+     * Create a new ssh key credential object used for querying an ssh-agent. The supplied
+     * credential parameter will be internally duplicated.
+     *
+     * @return The newly created credential object.
+     * @param username username to use to authenticate
+     * @throws GitException git errors
+     */
+    @Nonnull
+    public static Cred sshKeyFromAgent(@Nonnull String username) {
+        Cred cred = new Cred(false, 0);
+        Error.throwIfNeeded(jniSshKeyFromAgent(cred._rawPtr, username));
+        return cred;
+    }
 
     /** int git_cred_default_new(git_cred **out); */
     static native int jniDefaultNew(AtomicLong out);
 
+    /**
+     * Create a "default" credential usable for Negotiate mechanisms like NTLM or Kerberos
+     * authentication.
+     *
+     * @return 0 for success or an error code for failure
+     */
+    @Nonnull
+    public static Cred defaultNew() {
+        Cred cred = new Cred(false, 0);
+        Error.throwIfNeeded(jniDefaultNew(cred._rawPtr));
+        return cred;
+    }
+
     /** int git_cred_username_new(git_cred **cred, const char *username); */
     static native int jniUsernameNew(AtomicLong cred, String username);
+
+    /**
+     * Create a credential to specify a username.
+     *
+     * <p>This is used with ssh authentication to query for the username if none is specified in the
+     * url.
+     */
+    @Nonnull
+    public static Cred usernameNew(@Nonnull String username) {
+        Cred cred = new Cred(false, 0);
+        Error.throwIfNeeded(jniUsernameNew(cred._rawPtr, username));
+        return cred;
+    }
 
     /**
      * int git_cred_ssh_key_memory_new(git_cred **out, const char *username, const char *publickey,
@@ -69,6 +150,28 @@ public class Cred extends CAutoReleasable {
             String publickey,
             String privatekey,
             String passphrase);
+
+    /**
+     * Create a new ssh key credential object reading the keys from memory.
+     *
+     * @return The newly created credential object.
+     * @param username username to use to authenticate.
+     * @param publickey The public key of the credential.
+     * @param privatekey The private key of the credential.
+     * @param passphrase The passphrase of the credential.
+     * @throws GitException git errors
+     */
+    @Nonnull
+    public static Cred sshKeyMemoryNew(
+            @Nonnull String username,
+            @Nonnull String publickey,
+            @Nonnull String privatekey,
+            @Nonnull String passphrase) {
+        Cred cred = new Cred(false, 0);
+        Error.throwIfNeeded(
+                jniSshKeyMemoryNew(cred._rawPtr, username, publickey, privatekey, passphrase));
+        return cred;
+    }
 
     /** void git_cred_free(git_cred *cred); */
     static native void jniFree(long cred);
