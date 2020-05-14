@@ -3,9 +3,11 @@ package com.github.git24j.core;
 import static com.github.git24j.core.GitException.ErrorCode.ITEROVER;
 import static com.github.git24j.core.Internals.BArrCallback;
 
+import java.util.EnumSet;
 import java.util.concurrent.atomic.AtomicLong;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 public class Revwalk extends CAutoReleasable {
     protected Revwalk(boolean isWeak, long rawPtr) {
@@ -316,10 +318,10 @@ public class Revwalk extends CAutoReleasable {
      *
      * <p>Changing the sorting mode resets the walker.
      *
-     * @param sortMode combination of GIT_SORT_XXX flags
+     * @param sortMode combination of GIT_SORT_XXX flags, null defaults to SortT.NONE
      */
-    public void sorting(@Nonnull SortT sortMode) {
-        jniSorting(getRawPointer(), sortMode.getBit());
+    public void sorting(@Nullable EnumSet<SortT> sortMode) {
+        jniSorting(getRawPointer(), IBitEnum.bitOrAll(sortMode));
     }
 
     /**
