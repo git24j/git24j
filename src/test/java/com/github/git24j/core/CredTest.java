@@ -35,9 +35,9 @@ public class CredTest extends TestBase {
         Assert.assertTrue(cred.getRawPointer() > 0);
     }
 
-//    @Test
-//    public void sshKeyMemoryNew() {
-//        Cred cred = Cred.sshKeyMemoryNew("username", "publickey", "privatekey", "passphrase");
-//        Assert.assertTrue(cred.getRawPointer() > 0);
-//    }
+    //    @Test
+    //    public void sshKeyMemoryNew() {
+    //        Cred cred = Cred.sshKeyMemoryNew("username", "publickey", "privatekey", "passphrase");
+    //        Assert.assertTrue(cred.getRawPointer() > 0);
+    //    }
 }

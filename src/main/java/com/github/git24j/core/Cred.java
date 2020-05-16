@@ -1,7 +1,7 @@
 package com.github.git24j.core;
 
-import javax.annotation.Nonnull;
 import java.util.concurrent.atomic.AtomicLong;
+import javax.annotation.Nonnull;
 
 public class Cred extends CAutoReleasable {
     protected Cred(boolean isWeak, long rawPtr) {
