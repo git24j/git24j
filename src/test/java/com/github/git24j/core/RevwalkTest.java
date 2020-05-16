@@ -1,15 +1,16 @@
 package com.github.git24j.core;
 
+import static org.junit.Assert.*;
+
+import java.util.ArrayList;
+import java.util.EnumSet;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
-
-import java.util.EnumSet;
-import java.util.HashMap;
-import java.util.Map;
-
-import static org.junit.Assert.*;
 
 public class RevwalkTest extends TestBase {
 
@@ -17,7 +18,7 @@ public class RevwalkTest extends TestBase {
 
     @Test
     public void hide() {
-        try(Repository repo = TestRepo.SIMPLE1.tempRepo(_folder)){
+        try (Repository repo = TestRepo.SIMPLE1.tempRepo(_folder)) {
             Revwalk revwalk = Revwalk.create(repo);
             revwalk.sorting(EnumSet.of(SortT.TOPOLOGICAL, SortT.TIME, SortT.REVERSE));
             revwalk.pushHead();
@@ -30,13 +31,13 @@ public class RevwalkTest extends TestBase {
                 commits.put(oid, commit);
                 oid = revwalk.next();
             }
-            Assert.assertEquals(2, commits.size());
+            assertEquals(2, commits.size());
         }
     }
 
     @Test
     public void hideGlob() {
-        try(Repository repo = TestRepo.SIMPLE1.tempRepo(_folder)){
+        try (Repository repo = TestRepo.SIMPLE1.tempRepo(_folder)) {
             Revwalk revwalk = Revwalk.create(repo);
             revwalk.sorting(EnumSet.of(SortT.TOPOLOGICAL, SortT.TIME, SortT.REVERSE));
             revwalk.pushHead();
@@ -49,17 +50,18 @@ public class RevwalkTest extends TestBase {
                 commits.put(oid, commit);
                 oid = revwalk.next();
             }
-            Assert.assertFalse(commits.containsKey(Revparse.single(repo, "refs/heads/feature/dev").id()));
+            assertFalse(commits.containsKey(Revparse.single(repo, "refs/heads/feature/dev").id()));
         }
     }
 
     @Test
     public void hideHead() {
-        try(Repository repo = TestRepo.SIMPLE1.tempRepo(_folder)){
+        try (Repository repo = TestRepo.SIMPLE1.tempRepo(_folder)) {
             Revwalk revwalk = Revwalk.create(repo);
             revwalk.sorting(EnumSet.of(SortT.TOPOLOGICAL, SortT.TIME, SortT.REVERSE));
             // hide all refs that has pattern "refs/heads/feature/*" and their ancestors.
             revwalk.hideHead();
+            revwalk.hide(Revparse.single(repo, "HEAD~2").id());
             revwalk.pushRef("refs/heads/feature/dev");
             Oid oid = revwalk.next();
             Map<Oid, Commit> commits = new HashMap<>();
@@ -68,48 +70,76 @@ public class RevwalkTest extends TestBase {
                 commits.put(oid, commit);
                 oid = revwalk.next();
             }
-            Assert.assertFalse(commits.containsKey(Revparse.single(repo, "refs/heads/feature/dev").id()));
+            assertFalse(commits.containsKey(Revparse.single(repo, "refs/heads/feature/dev").id()));
         }
     }
 
     @Test
-    public void testHideHead() {}
+    public void hideRef() {
+        String ref = "refs/heads/feature/dev";
+        try (Repository repo = TestRepo.SIMPLE1.tempRepo(_folder)) {
+            Revwalk revwalk = Revwalk.create(repo);
+            revwalk.sorting(EnumSet.of(SortT.TOPOLOGICAL, SortT.TIME, SortT.REVERSE));
+            // hide all refs that has pattern "refs/heads/feature/*" and their ancestors.
+            revwalk.hideRef(ref);
+            revwalk.pushHead();
+            Oid oid = revwalk.next();
+            List<Oid> visited = new ArrayList<>();
+            while (oid != null) {
+                visited.add(oid);
+                oid = revwalk.next();
+            }
+            assertFalse(visited.contains(Revparse.single(repo, ref).id()));
+        }
+    }
 
     @Test
-    public void hideRef() {}
+    public void addHideCb() {
+        try (Repository repo = TestRepo.SIMPLE1.tempRepo(_folder)) {
+            List<Oid> visited = new ArrayList<>();
+            List<Oid> hidden = new ArrayList<>();
+            Oid oid2Hide = Revparse.single(repo, "HEAD~2").id();
+            Revwalk revwalk = Revwalk.create(repo);
+            revwalk.sorting(EnumSet.of(SortT.TOPOLOGICAL, SortT.TIME, SortT.REVERSE));
+
+            revwalk.addHideCb(
+                    hiddenOid -> {
+                        hidden.add(hiddenOid);
+                        if (oid2Hide.equals(hiddenOid)) {
+                            // return 1 to hide the commit and its parents
+                            return 1;
+                        }
+                        return 0;
+                    });
+            revwalk.pushHead();
+            Oid oid = revwalk.next();
+            while (oid != null) {
+                visited.add(oid);
+                oid = revwalk.next();
+            }
+            assertEquals(2, visited.size());
+            assertTrue(hidden.size() > 0);
+        }
+    }
 
     @Test
-    public void testHideRef() {}
+    public void simplifyFirstParent() {
 
-    @Test
-    public void create() {}
-
-    @Test
-    public void next() {}
-
-    @Test
-    public void push() {}
-
-    @Test
-    public void pushGlob() {}
-
-    @Test
-    public void pushHead() {}
-
-    @Test
-    public void pushRange() {}
-
-    @Test
-    public void pushRef() {}
-
-    @Test
-    public void repository() {}
-
-    @Test
-    public void reset() {}
-
-    @Test
-    public void simplifyFirstParent() {}
+        try (Repository repo = TestRepo.SIMPLE1.tempRepo(_folder)) {
+            Revwalk revwalk = Revwalk.create(repo);
+            revwalk.sorting(EnumSet.of(SortT.TOPOLOGICAL, SortT.TIME, SortT.REVERSE));
+            revwalk.simplifyFirstParent();
+            revwalk.pushHead();
+            revwalk.hide(Revparse.single(repo, "HEAD~5").id());
+            Oid oid = revwalk.next();
+            List<Oid> visited = new ArrayList<>();
+            while (oid != null) {
+                visited.add(oid);
+                oid = revwalk.next();
+            }
+            Assert.assertEquals(5, visited.size());
+        }
+    }
 
     @Test
     public void sorting() {}
