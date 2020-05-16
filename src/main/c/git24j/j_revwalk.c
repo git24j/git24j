@@ -16,32 +16,33 @@ int j_git_revwalk_hide_cb(const git_oid *commit_id, void *payload)
     return r;
 }
 
-/**Hack, git_revwalk structure is invisible, let's expose at least some of it. */
-struct git_revwalk
+/** Release payload */
+JNIEXPORT void JNICALL J_MAKE_METHOD(Revwalk_jniFreeHideCb)(JNIEnv *env, jclass obj, jlong payloadPtr)
 {
-    void *hide_cb_payload;
-};
-
-void _hide_cb_payload_free(JNIEnv *env, git_revwalk *walk)
-{
-    if (walk->hide_cb_payload)
+    j_cb_payload *payload = (j_cb_payload *)payloadPtr;
+    if (!payload)
     {
-        j_cb_payload_release(env, (j_cb_payload *)walk->hide_cb_payload);
-        free(walk->hide_cb_payload);
+        JNIEnv *env = getEnv();
+        j_cb_payload_release(env, payload);
+        free(payload);
     }
 }
 
 /** int git_revwalk_add_hide_cb(git_revwalk *walk, git_revwalk_hide_cb hide_cb, void *payload); */
-JNIEXPORT jint JNICALL J_MAKE_METHOD(Revwalk_jniAddHideCb)(JNIEnv *env, jclass obj, jlong walkPtr, jobject hideCb)
+JNIEXPORT jint JNICALL J_MAKE_METHOD(Revwalk_jniAddHideCb)(JNIEnv *env, jclass obj, jlong walkPtr, jobject hideCb, jobject outPayload)
 {
-    if (!hideCb)
+
+    /*  int e = _hide_cb_payload_free(env, (git_revwalk *)walkPtr); */
+    git_revwalk *walk = (git_revwalk *)walkPtr;
+    if (hideCb == NULL)
     {
-        _hide_cb_payload_free(env, (git_revwalk *)walkPtr);
-        return git_revwalk_add_hide_cb((git_revwalk *)walkPtr, NULL, NULL);
+        return git_revwalk_add_hide_cb(walk, NULL, NULL);
     }
     j_cb_payload *payload = (j_cb_payload *)malloc(sizeof(j_cb_payload));
-    j_cb_payload_init(env, payload, hideCb, "([B])I");
-    return git_revwalk_add_hide_cb((git_revwalk *)walkPtr, j_git_revwalk_hide_cb, &payload);
+    j_cb_payload_init(env, payload, hideCb, "([B)I");
+    int e = git_revwalk_add_hide_cb((git_revwalk *)walkPtr, j_git_revwalk_hide_cb, payload);
+    (*env)->CallVoidMethod(env, outPayload, jniConstants->midAtomicLongSet, (long)payload);
+    return e;
 }
 
 // no matching type found for 'git_revwalk_hide_cb hide_cb'
@@ -51,7 +52,6 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Revwalk_jniAddHideCb)(JNIEnv *env, jclass o
 JNIEXPORT void JNICALL J_MAKE_METHOD(Revwalk_jniFree)(JNIEnv *env, jclass obj, jlong walkPtr)
 {
     git_revwalk *walk = (struct git_revwalk *)walkPtr;
-    _hide_cb_payload_free(env, walk);
     git_revwalk_free(walk);
 }
 
@@ -86,22 +86,6 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Revwalk_jniHideRef)(JNIEnv *env, jclass obj
     char *c_refname = j_copy_of_jstring(env, refname, true);
     int r = git_revwalk_hide_ref((git_revwalk *)walkPtr, c_refname);
     free(c_refname);
-    return r;
-}
-
-/** int git_revwalk_hide_ref(git_revwalk *walk, const char *refname); */
-JNIEXPORT jint JNICALL J_MAKE_METHOD(Revwalk_jniHideRefWithCb)(JNIEnv *env, jclass obj, jlong walkPtr, jstring refname, jobject hideCb)
-{
-    int r;
-    j_cb_payload payload = {0};
-    // j_cb_payload_init(env, &payload);
-    if (hideCb && (r = git_revwalk_add_hide_cb((git_revwalk *)walkPtr, j_git_revwalk_hide_cb, &payload)) != 0)
-        return r;
-    char *c_refname = j_copy_of_jstring(env, refname, true);
-    r = git_revwalk_hide_ref((git_revwalk *)walkPtr, c_refname);
-    free(c_refname);
-    if (hideCb)
-        git_revwalk_add_hide_cb((git_revwalk *)walkPtr, NULL, NULL);
     return r;
 }
 

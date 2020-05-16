@@ -9,7 +9,8 @@ extern "C"
 #endif
     // no matching type found for 'git_revwalk_hide_cb hide_cb'
     /** int git_revwalk_add_hide_cb(git_revwalk *walk, git_revwalk_hide_cb hide_cb, void *payload); */
-    JNIEXPORT jint JNICALL J_MAKE_METHOD(Revwalk_jniAddHideCb)(JNIEnv *env, jclass obj, jlong walkPtr, jobject hideCb);
+    JNIEXPORT jint JNICALL J_MAKE_METHOD(Revwalk_jniAddHideCb)(JNIEnv *env, jclass obj, jlong walkPtr, jobject hideCb, jobject outPayload);
+    JNIEXPORT void JNICALL J_MAKE_METHOD(Revwalk_jniFreeHideCb)(JNIEnv *env, jclass obj, jlong payloadPtr);
     /** -------- Signature of the header ---------- */
     /** void git_revwalk_free(git_revwalk *walk); */
     JNIEXPORT void JNICALL J_MAKE_METHOD(Revwalk_jniFree)(JNIEnv *env, jclass obj, jlong walkPtr);
@@ -22,11 +23,9 @@ extern "C"
 
     /** int git_revwalk_hide_head(git_revwalk *walk); */
     JNIEXPORT jint JNICALL J_MAKE_METHOD(Revwalk_jniHideHead)(JNIEnv *env, jclass obj, jlong walkPtr);
-    JNIEXPORT jint JNICALL J_MAKE_METHOD(Revwalk_jniHideHeadWithCb)(JNIEnv *env, jclass obj, jlong walkPtr, jobject hideCb);
 
     /** int git_revwalk_hide_ref(git_revwalk *walk, const char *refname); */
     JNIEXPORT jint JNICALL J_MAKE_METHOD(Revwalk_jniHideRef)(JNIEnv *env, jclass obj, jlong walkPtr, jstring refname);
-    JNIEXPORT jint JNICALL J_MAKE_METHOD(Revwalk_jniHideRefWithCb)(JNIEnv *env, jclass obj, jlong walkPtr, jstring refname, jobject hideCb);
 
     /** int git_revwalk_new(git_revwalk **out, git_repository *repo); */
     JNIEXPORT jint JNICALL J_MAKE_METHOD(Revwalk_jniNew)(JNIEnv *env, jclass obj, jobject out, jlong repoPtr);

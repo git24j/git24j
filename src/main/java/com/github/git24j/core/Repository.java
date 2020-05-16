@@ -508,18 +508,6 @@ public class Repository extends CAutoCloseable {
     }
 
     /**
-     * Retrieve and resolve the reference pointed at by HEAD.
-     *
-     * @return the reference
-     * @throws GitException git error.
-     */
-    public Reference head() {
-        AtomicLong outRef = new AtomicLong();
-        Error.throwIfNeeded(jniHead(outRef, _rawPtr.get()));
-        return new Reference(false, outRef.get());
-    }
-
-    /**
      * Retrieve the referenced HEAD for the worktree
      *
      * @param name name of the worktree to retrieve HEAD for
