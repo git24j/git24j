@@ -38,9 +38,10 @@ public class RevwalkTest extends TestBase {
     @Test
     public void hideGlob() {
         try (Repository repo = TestRepo.SIMPLE1.tempRepo(_folder)) {
+            Oid head = Revparse.single(repo, "HEAD").id();
             Revwalk revwalk = Revwalk.create(repo);
             revwalk.sorting(EnumSet.of(SortT.TOPOLOGICAL, SortT.TIME, SortT.REVERSE));
-            revwalk.pushHead();
+            revwalk.push(head);
             // hide all refs that has pattern "refs/heads/feature/*" and their ancestors.
             revwalk.hideGlob("heads/feature/*");
             Oid oid = revwalk.next();
@@ -77,19 +78,30 @@ public class RevwalkTest extends TestBase {
     @Test
     public void hideRef() {
         String ref = "refs/heads/feature/dev";
+        List<Oid> visited = new ArrayList<>();
         try (Repository repo = TestRepo.SIMPLE1.tempRepo(_folder)) {
             Revwalk revwalk = Revwalk.create(repo);
             revwalk.sorting(EnumSet.of(SortT.TOPOLOGICAL, SortT.TIME, SortT.REVERSE));
             // hide all refs that has pattern "refs/heads/feature/*" and their ancestors.
             revwalk.hideRef(ref);
             revwalk.pushHead();
+            // revwalk.pushGlob("refs/heads/master");
             Oid oid = revwalk.next();
-            List<Oid> visited = new ArrayList<>();
             while (oid != null) {
                 visited.add(oid);
                 oid = revwalk.next();
             }
-            assertFalse(visited.contains(Revparse.single(repo, ref).id()));
+            int half = visited.size();
+            // start loop again
+            revwalk.reset();
+            revwalk.pushGlob("heads/*");
+            revwalk.hideRef(ref);
+            oid = revwalk.next();
+            while (oid != null) {
+                visited.add(oid);
+                oid = revwalk.next();
+            }
+            Assert.assertEquals(half * 2, visited.size());
         }
     }
 
@@ -111,7 +123,7 @@ public class RevwalkTest extends TestBase {
                         }
                         return 0;
                     });
-            revwalk.pushHead();
+            revwalk.pushRange("HEAD~5..HEAD");
             Oid oid = revwalk.next();
             while (oid != null) {
                 visited.add(oid);
@@ -124,7 +136,6 @@ public class RevwalkTest extends TestBase {
 
     @Test
     public void simplifyFirstParent() {
-
         try (Repository repo = TestRepo.SIMPLE1.tempRepo(_folder)) {
             Revwalk revwalk = Revwalk.create(repo);
             revwalk.sorting(EnumSet.of(SortT.TOPOLOGICAL, SortT.TIME, SortT.REVERSE));
@@ -142,5 +153,10 @@ public class RevwalkTest extends TestBase {
     }
 
     @Test
-    public void sorting() {}
+    public void repository() {
+        try (Repository repo = TestRepo.SIMPLE1.tempRepo(_folder)) {
+            Revwalk revwalk = Revwalk.create(repo);
+            Assert.assertEquals(repo, revwalk.repository());
+        }
+    }
 }

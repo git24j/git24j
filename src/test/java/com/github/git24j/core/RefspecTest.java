@@ -26,9 +26,9 @@ public class RefspecTest extends TestBase {
         Assert.assertEquals(
                 "refs/heads/master", spec.rtransform("refs/remotes/origin/master").orElse(""));
 
-        try{
-           spec.transform("refs/remotes/heads/master");
-           Assert.fail("should have failed");
+        try {
+            spec.transform("refs/remotes/heads/master");
+            Assert.fail("should have failed");
         } catch (GitException e) {
             Assert.assertNotNull(e);
             Assert.assertEquals(e.getErrorClass(), GitException.ErrorClass.INVALID);
