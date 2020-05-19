@@ -4,6 +4,7 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 public class Blob extends GitObject {
     Blob(boolean weak, long rawPointer) {
@@ -14,14 +15,9 @@ public class Blob extends GitObject {
 
     static native int jniLookupPrefix(AtomicLong outBlob, long repoPtr, Oid oid, int len);
 
-    static native void jniFree(long blobPtr);
-
     static native void jniId(long blobPtr, Oid oid);
 
     static native long jniOwner(long blobPtr);
-
-    /** TODO: figure out how to wrap (void *) */
-    static native long jniRawContent(long blobPtr);
 
     static native long jniRawSize(long blobPtr);
 
@@ -80,7 +76,8 @@ public class Blob extends GitObject {
      * @return {@link WriteStream} an object to write data to.
      * @throws GitException git error
      */
-    public static WriteStream createFromStream(Repository repo, String hintpath) {
+    public static @Nonnull WriteStream createFromStream(
+            @Nonnull Repository repo, @Nullable String hintpath) {
         AtomicLong outWs = new AtomicLong();
         Error.throwIfNeeded(jniCreateFromStream(outWs, repo.getRawPointer(), hintpath));
         return new WriteStream(outWs.get());
@@ -159,6 +156,12 @@ public class Blob extends GitObject {
         return outBlob.get() == 0 ? null : new Blob(false, outBlob.get());
     }
 
+    /**
+     * int git_blob_filtered_content(git_buf *out, git_blob *blob, const char *as_path, int
+     * check_for_binary_data);
+     */
+    static native int jniFilteredContent(Buf out, long blob, String asPath, int checkForBinaryData);
+
     @Override
     @Nonnull
     public Blob dup() {
@@ -190,12 +193,6 @@ public class Blob extends GitObject {
     public boolean isBinary() {
         return jniIsBinary(getRawPointer()) == 1;
     }
-
-    /**
-     * int git_blob_filtered_content(git_buf *out, git_blob *blob, const char *as_path, int
-     * check_for_binary_data);
-     */
-    static native int jniFilteredContent(Buf out, long blob, String asPath, int checkForBinaryData);
 
     /**
      * Get a buffer with the filtered content of a blob.

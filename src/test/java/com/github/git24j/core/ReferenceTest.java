@@ -34,6 +34,7 @@ public class ReferenceTest extends TestBase {
         try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {
             Oid oid = Reference.nameToId(testRepo, REF_NAME_DEV);
             Assert.assertEquals(OID_STR_DEV, oid.toString());
+            Assert.assertNull(Reference.nameToId(testRepo, "refs/heads/non-exist-name"));
         }
     }
 
@@ -42,6 +43,7 @@ public class ReferenceTest extends TestBase {
         try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {
             Reference ref = Reference.dwim(testRepo, "feature/dev");
             Assert.assertEquals(REF_NAME_DEV, ref.name());
+            Assert.assertNull(Reference.dwim(testRepo, "feature/non-exist-name"));
         }
     }
 
@@ -307,7 +309,7 @@ public class ReferenceTest extends TestBase {
         }
     }
 
-    // @Test
+    @Test
     public void foreachGlob() {
         try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {
             ArrayList<String> list = new ArrayList<>();

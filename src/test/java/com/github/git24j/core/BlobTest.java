@@ -93,6 +93,16 @@ public class BlobTest extends TestBase {
     //    git_blob_create_frombuffer	function
 
     @Test
+    public void createFromStream() {
+        try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {
+            WriteStream ws = Blob.createFromStream(testRepo, null);
+            ws.write("a".getBytes());
+            Oid oid = Blob.createFromStreamCommit(ws);
+            Assert.assertTrue(oid.getEffectiveSize() > 0);
+        }
+    }
+
+    @Test
     public void createFromBuffer() {
         try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {
             Oid oid = Blob.createFromBuffer(testRepo, "a\n".getBytes(StandardCharsets.UTF_8));

@@ -406,7 +406,7 @@ public class Merge {
             @Nullable Tree ourTree,
             @Nullable Tree theirTree,
             @Nullable Options opts) {
-        Index out = new Index();
+        Index out = new Index(0);
         Error.throwIfNeeded(
                 jniTrees(
                         out._rawPtr,
@@ -445,7 +445,7 @@ public class Merge {
             @Nullable Commit ourCommit,
             @Nullable Commit theirCommit,
             @Nullable Options opts) {
-        Index out = new Index();
+        Index out = new Index(0);
         Error.throwIfNeeded(
                 jniCommits(
                         out._rawPtr,

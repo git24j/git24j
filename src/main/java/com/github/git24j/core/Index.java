@@ -2,49 +2,26 @@ package com.github.git24j.core;
 
 import static com.github.git24j.core.GitException.ErrorCode.ITEROVER;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.BiConsumer;
 
-public class Index implements AutoCloseable {
-    final AtomicLong _rawPtr = new AtomicLong();
+public class Index extends CAutoCloseable {
+    protected Index(long rawPointer) {
+        super(rawPointer);
+    }
+
+    @Override
+    protected void releaseOnce(long cPtr) {
+        jniFree(cPtr);
+    }
 
     static native int jniOpen(AtomicLong outIndexPtr, String indexPath);
 
-    public Index() {}
-
-    public Index(long rawPtr) {
-        this._rawPtr.set(rawPtr);
-    }
-
-    long getRawPointer() {
-        long ptr = _rawPtr.get();
-        if (ptr == 0) {
-            throw new IllegalStateException("Repository has been closed");
-        }
-        return ptr;
-    }
-
-    public enum Capability implements IBitEnum {
-        IGNORE_CASE(1),
-        NO_FILEMODE(1 << 1),
-        NO_SYMLINKS(1 << 2),
-        FROM_OWNER(-1),
-        ;
-
-        private final int _bit;
-
-        Capability(int bit) {
-            this._bit = bit;
-        }
-
-        @Override
-        public int getBit() {
-            return _bit;
-        }
-    }
     /**
      * Create a new bare Git index object as a memory representation of the Git index file in
      * 'indexPath', without a repository to back it.
@@ -62,22 +39,108 @@ public class Index implements AutoCloseable {
      * @throws GitException git errors
      */
     public static Index open(String indexPath) {
-        Index outIdx = new Index();
+        Index outIdx = new Index(0);
         Error.throwIfNeeded(jniOpen(outIdx._rawPtr, indexPath));
         return outIdx;
     }
 
     static native void jniFree(long idxPtr);
 
-    /** Delegate {@code git_index_free} Free an existing index object. */
-    @Override
-    public void close() {
-        if (_rawPtr.get() > 0) {
-            jniFree(_rawPtr.getAndSet(0));
-        }
-    }
-
     static native long jniOwner(long idxPtr);
+
+    static native int jniCaps(long idxPtr);
+
+    static native int jniSetCaps(long idxPtr, int caps);
+
+    static native int jniVersion(long indexPtr);
+
+    static native int jniSetVersion(long indexPtr, int version);
+
+    static native int jniRead(long indexPtr, int force);
+
+    static native int jniWrite(long idxPtr);
+
+    static native String jniPath(long indexPtr);
+
+    static native void jniChecksum(Oid outOid, long indexPtr);
+
+    static native int jniReadTree(long indexPtr, long treePtr);
+
+    static native int jniWriteTree(Oid outOid, long indexPtr);
+
+    static native int jniWriteTreeTo(Oid outOid, long indexPtr, long repoPtr);
+
+    static native int jniEntryCount(long indexPtr);
+
+    static native int jniClear(long indexPtr);
+
+    static native long jniGetByIndex(long indexPtr, int n);
+
+    static native long jniGetByPath(long indexPtr, String path, int stage);
+
+    static native int jniRemove(long indexPtr, String path, int stage);
+
+    static native int jniRemoveDirectory(long indexPtr, String dir, int stage);
+
+    static native int jniAdd(long idxPtr, long entryPtr);
+
+    static native int jniEntryStage(long entryPtr);
+
+    static native int jniEntryIsConflict(long entryPtr);
+
+    static native int jniAddByPath(long idxPtr, String path);
+
+    static native int jniAddFromBuffer(long indexPtr, long entryPtr, byte[] buffer);
+
+    /** int git_index_remove_bypath(git_index *index, const char *path); */
+    static native int jniRemoveByPath(long indexPtr, String path);
+
+    static native int jniIteratorNew(AtomicLong outIterPtr, long indexPtr);
+
+    static native int jniIteratorNext(AtomicLong outEntryPtr, long iterPtr);
+
+    static native int jniIteratorFree(long iterPtr);
+
+    static native int jniAddAll(long idxPtr, String[] pathSpec, int flags, Callback callback);
+    /* Index entry manipulation */
+
+    static native int jniUpdateAll(long idxPtr, String[] pathSpec, Callback callback);
+
+    static native int jniFind(AtomicInteger outPos, long indexPtr, String path);
+
+    static native int jniFindPrefix(AtomicInteger outPos, long indexPtr, String prefix);
+
+    static native int jniConflictAdd(
+            long indexPtr, long ancestorEntryPtr, long ourEntryPtr, long theirEntryPtr);
+
+    static native int jniConflictGet(
+            AtomicLong ancestorOut,
+            AtomicLong ourOut,
+            AtomicLong theirOut,
+            long indexPtr,
+            String path);
+
+    static native int jniConflictRemove(long indexPtr, String path);
+
+    static native int jniConflictCleanup(long indexPtr);
+
+    static native int jniHasConflicts(long indexPtr);
+
+    /**
+     * int git_index_conflict_iterator_new(git_index_conflict_iterator **iterator_out, git_index
+     * *index);
+     */
+    static native int jniConflictIteratorNew(AtomicLong outIter, long indexPtr);
+
+    /**
+     * int git_index_conflict_next(const git_index_entry **ancestor_out, const git_index_entry
+     * **our_out, const git_index_entry **their_out, git_index_conflict_iterator *iterator);
+     */
+    static native int jniConflictNext(
+            AtomicLong ancestorOut, AtomicLong ourOut, AtomicLong theirOut, long iterPtr);
+
+    /** void git_index_conflict_iterator_free(git_index_conflict_iterator *iterator); */
+    static native void jniConflictIteratorFree(long iterPtr);
 
     /**
      * Get the repository this index relates to
@@ -92,8 +155,6 @@ public class Index implements AutoCloseable {
         return new Repository(ptr);
     }
 
-    static native int jniCaps(long idxPtr);
-
     /**
      * Read index capabilities flags.
      *
@@ -106,8 +167,6 @@ public class Index implements AutoCloseable {
         }
         return IBitEnum.parse(c, Capability.class);
     }
-
-    static native int jniSetCaps(long idxPtr, int caps);
 
     /**
      * Set index capabilities flags.
@@ -127,7 +186,6 @@ public class Index implements AutoCloseable {
         Error.throwIfNeeded(jniSetCaps(getRawPointer(), IBitEnum.bitOrAll(caps)));
     }
 
-    static native int jniVersion(long indexPtr);
     /**
      * Get index on-disk version.
      *
@@ -140,7 +198,6 @@ public class Index implements AutoCloseable {
         return jniVersion(getRawPointer());
     }
 
-    static native int jniSetVersion(long indexPtr, int version);
     /**
      * Set index on-disk version.
      *
@@ -153,8 +210,6 @@ public class Index implements AutoCloseable {
     public void setVersion(int version) {
         Error.throwIfNeeded(jniSetVersion(getRawPointer(), version));
     }
-
-    static native int jniRead(long indexPtr, int force);
 
     /**
      * Update the contents of an existing index object in memory by reading from the hard disk.
@@ -173,7 +228,6 @@ public class Index implements AutoCloseable {
         Error.throwIfNeeded(jniRead(getRawPointer(), force ? 0 : 1));
     }
 
-    static native int jniWrite(long idxPtr);
     /**
      * Write an existing index object from memory back to disk using an atomic file lock.
      *
@@ -183,13 +237,9 @@ public class Index implements AutoCloseable {
         Error.throwIfNeeded(jniWrite(getRawPointer()));
     }
 
-    static native String jniPath(long indexPtr);
-
-    public String path() {
-        return jniPath(getRawPointer());
+    public Path path() {
+        return Paths.get(jniPath(getRawPointer()));
     }
-
-    static native void jniChecksum(Oid outOid, long indexPtr);
 
     /**
      * Get the checksum of the index
@@ -204,8 +254,6 @@ public class Index implements AutoCloseable {
         jniChecksum(oid, getRawPointer());
         return oid;
     }
-
-    static native int jniReadTree(long indexPtr, long treePtr);
 
     /**
      * Read a tree into the index file with stats, roughly equals to:
@@ -222,8 +270,6 @@ public class Index implements AutoCloseable {
     public void readTree(Tree tree) {
         Error.throwIfNeeded(jniReadTree(getRawPointer(), tree.getRawPointer()));
     }
-
-    static native int jniWriteTree(Oid outOid, long indexPtr);
 
     /**
      * Write the index as a tree, roughly equals to:
@@ -251,8 +297,6 @@ public class Index implements AutoCloseable {
         return outOid;
     }
 
-    static native int jniWriteTreeTo(Oid outOid, long indexPtr, long repoPtr);
-
     /**
      * Write the index as a tree to the given repository
      *
@@ -271,9 +315,6 @@ public class Index implements AutoCloseable {
         return outOid;
     }
 
-    static native int jniEntryCount(long indexPtr);
-    /* Index entry manipulation */
-
     /**
      * Get the count of entries currently in the index, roughly equals to:
      *
@@ -287,8 +328,6 @@ public class Index implements AutoCloseable {
         return jniEntryCount(getRawPointer());
     }
 
-    static native int jniClear(long indexPtr);
-
     /**
      * Clear the contents (all the entries) of an index object.
      *
@@ -301,19 +340,13 @@ public class Index implements AutoCloseable {
         Error.throwIfNeeded(jniClear(getRawPointer()));
     }
 
-    static native long jniGetByIndex(long indexPtr, int n);
-
     public Entry getEntryByIndex(int n) {
         return Entry.getByIndex(this, n);
     }
 
-    static native long jniGetByPath(long indexPtr, String path, int stage);
-
     public Entry getEntryByPath(String path, int stage) {
         return Entry.getByPath(this, path, stage);
     }
-
-    static native int jniRemove(long indexPtr, String path, int stage);
 
     /**
      * Remove an entry from the index
@@ -326,8 +359,6 @@ public class Index implements AutoCloseable {
         Error.throwIfNeeded(jniRemove(getRawPointer(), path, stage));
     }
 
-    static native int jniRemoveDirectory(long indexPtr, String dir, int stage);
-
     /**
      * Remove all entries from the index under a given directory
      *
@@ -338,8 +369,6 @@ public class Index implements AutoCloseable {
     public void removeDirectory(String dir, int stage) {
         Error.throwIfNeeded(jniRemoveDirectory(getRawPointer(), dir, stage));
     }
-
-    static native int jniAdd(long idxPtr, long entryPtr);
 
     /**
      * Add or update an index entry from an in-memory struct.
@@ -353,14 +382,6 @@ public class Index implements AutoCloseable {
         }
         Error.throwIfNeeded(jniAdd(getRawPointer(), sourceEntry._ptr.get()));
     }
-
-    static native int jniEntryStage(long entryPtr);
-
-    static native int jniEntryIsConflict(long entryPtr);
-
-    static native int jniAddByPath(long idxPtr, String path);
-
-    static native int jniAddFromBuffer(long indexPtr, long entryPtr, byte[] buffer);
 
     /**
      * Add or update an index entry from a buffer in memory
@@ -387,8 +408,6 @@ public class Index implements AutoCloseable {
     public void addFromBuffer(Entry entry, byte[] buffer) {
         Error.throwIfNeeded(jniAddFromBuffer(getRawPointer(), entry._ptr.get(), buffer));
     }
-    /** int git_index_remove_bypath(git_index *index, const char *path); */
-    static native int jniRemoveByPath(long indexPtr, String path);
 
     /**
      * Remove an index entry corresponding to a file on disk
@@ -405,6 +424,7 @@ public class Index implements AutoCloseable {
     public void removeByPath(String path) {
         Error.throwIfNeeded(jniRemoveByPath(getRawPointer(), path));
     }
+
     /**
      * Add or update an index entry from a file on disk
      *
@@ -413,6 +433,165 @@ public class Index implements AutoCloseable {
      */
     public void add(String path) {
         Error.throwIfNeeded(jniAddByPath(getRawPointer(), path));
+    }
+
+    /**
+     * Add or update index entries matching files in the working directory.
+     *
+     * @param pathSpec array of path patterns
+     * @param flags combination of git_index_add_option_t flags
+     * @param callback notification callback for each added/updated path (also gets index of
+     *     matching pathspec entry); can be NULL; return 0 to add, >0 to skip, < 0 to abort scan.
+     * @throws GitException git error
+     */
+    public void addAll(
+            String[] pathSpec, EnumSet<AddOption> flags, BiConsumer<String, String> callback) {
+        Error.throwIfNeeded(
+                jniAddAll(getRawPointer(), pathSpec, IBitEnum.bitOrAll(flags), callback::accept));
+    }
+
+    /**
+     * Update all index entries, which have already been included and match the {@code pathSpec} pattern),
+     * to line up with the working directory.
+     *
+     * <pre>
+     *  # show which files are included in existing index,
+     *  $ git ls-files --cached
+     *  # make a trivial change to one of the file, say "README.md"
+     *  $ echo "" >> README.md
+     *  # update the index: `updateAll(List.of("README.md", (path, pathSpec)-> {})`
+     *  $ git update-index README.md
+     * <pre/>
+     *
+     * @param pathSpec array of path patterns
+     * @param callback notification callback for each updated path (also gets index of matching
+     *     pathspec entry); can be NULL; return 0 to add, >0 to skip, < 0 to abort scan.
+     * @throws GitException git error.
+     */
+    public void updateAll(List<String> pathSpec, Callback callback) {
+        Error.throwIfNeeded(
+                jniUpdateAll(getRawPointer(), pathSpec.toArray(new String[0]), callback));
+    }
+
+    /**
+     * Find the first position of any entries which point to given path in the Git index.
+     *
+     * @param path path to search
+     * @return a zero-based position in the index if found; GIT_ENOTFOUND otherwise
+     */
+    public int find(String path) {
+        AtomicInteger outPos = new AtomicInteger();
+        int e = jniFind(outPos, getRawPointer(), path);
+        Error.throwIfNeeded(e);
+        return outPos.get();
+    }
+
+    /**
+     * Find the first position of any entries matching a prefix. To find the first position of a
+     * path inside a given folder, suffix the prefix with a '/'.
+     *
+     * @param prefix the prefix to search for
+     * @return 0 with valid value in at_pos;
+     * @throws GitException git errors like GIT_ENOTFOUND
+     */
+    public int findPrefix(String prefix) {
+        AtomicInteger outPos = new AtomicInteger();
+        int e = jniFindPrefix(outPos, getRawPointer(), prefix);
+        Error.throwIfNeeded(e);
+        return outPos.get();
+    }
+
+    /**
+     * Add or update index entries to represent a conflict. Any staged entries that exist at the
+     * given paths will be removed.
+     *
+     * <p>The entries are the entries from the tree included in the merge. Any entry may be null to
+     * indicate that that file was not present in the trees during the merge. For example,
+     * ancestor_entry may be NULL to indicate that a file was added in both branches and must be
+     * resolved.
+     *
+     * @param conflict a set of entry that represents a conflict
+     * @throws GitException git errors
+     */
+    public void conflictAdd(Conflict conflict) {
+        Error.throwIfNeeded(
+                jniConflictAdd(
+                        getRawPointer(),
+                        conflict.ancestor._ptr.get(),
+                        conflict.our._ptr.get(),
+                        conflict.their._ptr.get()));
+    }
+
+    /**
+     * Roughly equals to {@code git ls-files -u}
+     *
+     * @see <a href=https://libgit2.org/libgit2/#HEAD/group/index/git_index_conflict_get></a>
+     * @param path path to get the conflict
+     * @throws GitException git errors
+     */
+    Conflict conflictGet(String path) {
+        Conflict conflict = new Conflict();
+        jniConflictGet(
+                conflict.ancestor._ptr,
+                conflict.our._ptr,
+                conflict.their._ptr,
+                getRawPointer(),
+                path);
+        return conflict;
+    }
+
+    /**
+     * Removes the index entries that represent a conflict of a single file.
+     *
+     * @param path path to remove conflicts for
+     * @throws GitException git errors
+     */
+    public void conflictRemove(String path) {
+        Error.throwIfNeeded(jniConflictRemove(getRawPointer(), path));
+    }
+
+    /**
+     * Remove all conflicts in the index (entries with a stage greater than 0).
+     *
+     * @throws GitException git errors
+     */
+    public void conflictCleanup() {
+        Error.throwIfNeeded(jniConflictCleanup(getRawPointer()));
+    }
+
+    /**
+     * Determine if the index contains entries representing file conflicts.
+     *
+     * @return 1 if at least one conflict is found, 0 otherwise.
+     */
+    public boolean hasConflicts() {
+        return jniHasConflicts(getRawPointer()) == 1;
+    }
+
+    /** @return an iterator that can loops over iterator */
+    public ConflictIterator conflictIteratorNew() {
+        ConflictIterator iterator = new ConflictIterator();
+        Error.throwIfNeeded(jniConflictIteratorNew(iterator._ptr, getRawPointer()));
+        return iterator;
+    }
+
+    public enum Capability implements IBitEnum {
+        IGNORE_CASE(1),
+        NO_FILEMODE(1 << 1),
+        NO_SYMLINKS(1 << 2),
+        FROM_OWNER(-1),
+        ;
+
+        private final int _bit;
+
+        Capability(int bit) {
+            this._bit = bit;
+        }
+
+        @Override
+        public int getBit() {
+            return _bit;
+        }
     }
 
     public enum AddOption implements IBitEnum {
@@ -509,12 +688,6 @@ public class Index implements AutoCloseable {
         }
     }
 
-    static native int jniIteratorNew(AtomicLong outIterPtr, long indexPtr);
-
-    static native int jniIteratorNext(AtomicLong outEntryPtr, long iterPtr);
-
-    static native int jniIteratorFree(long iterPtr);
-
     public static class Iterator {
         private final AtomicLong _ptr = new AtomicLong();
 
@@ -539,78 +712,6 @@ public class Index implements AutoCloseable {
         }
     }
 
-    static native int jniAddAll(long idxPtr, String[] pathSpec, int flags, Callback callback);
-    /**
-     * Add or update index entries matching files in the working directory.
-     *
-     * @param pathSpec array of path patterns
-     * @param flags combination of git_index_add_option_t flags
-     * @param callback notification callback for each added/updated path (also gets index of
-     *     matching pathspec entry); can be NULL; return 0 to add, >0 to skip, < 0 to abort scan.
-     * @throws GitException git error
-     */
-    public void addAll(
-            String[] pathSpec, EnumSet<AddOption> flags, BiConsumer<String, String> callback) {
-        Error.throwIfNeeded(
-                jniAddAll(getRawPointer(), pathSpec, IBitEnum.bitOrAll(flags), callback::accept));
-    }
-
-    static native int jniUpdateAll(long idxPtr, String[] pathSpec, Callback callback);
-
-    /**
-     * Update all index entries, which have already been included and match the {@code pathSpec} pattern),
-     * to line up with the working directory.
-     *
-     * <pre>
-     *  # show which files are included in existing index,
-     *  $ git ls-files --cached
-     *  # make a trivial change to one of the file, say "README.md"
-     *  $ echo "" >> README.md
-     *  # update the index: `updateAll(List.of("README.md", (path, pathSpec)-> {})`
-     *  $ git update-index README.md
-     * <pre/>
-     *
-     * @param pathSpec array of path patterns
-     * @param callback notification callback for each updated path (also gets index of matching
-     *     pathspec entry); can be NULL; return 0 to add, >0 to skip, < 0 to abort scan.
-     * @throws GitException git error.
-     */
-    public void updateAll(List<String> pathSpec, Callback callback) {
-        Error.throwIfNeeded(
-                jniUpdateAll(getRawPointer(), pathSpec.toArray(new String[0]), callback));
-    }
-
-    static native int jniFind(AtomicInteger outPos, long indexPtr, String path);
-
-    /**
-     * Find the first position of any entries which point to given path in the Git index.
-     *
-     * @param path path to search
-     * @return a zero-based position in the index if found; GIT_ENOTFOUND otherwise
-     */
-    public int find(String path) {
-        AtomicInteger outPos = new AtomicInteger();
-        int e = jniFind(outPos, getRawPointer(), path);
-        Error.throwIfNeeded(e);
-        return outPos.get();
-    }
-
-    static native int jniFindPrefix(AtomicInteger outPos, long indexPtr, String prefix);
-    /**
-     * Find the first position of any entries matching a prefix. To find the first position of a
-     * path inside a given folder, suffix the prefix with a '/'.
-     *
-     * @param prefix the prefix to search for
-     * @return 0 with valid value in at_pos;
-     * @throws GitException git errors like GIT_ENOTFOUND
-     */
-    public int findPrefix(String prefix) {
-        AtomicInteger outPos = new AtomicInteger();
-        int e = jniFindPrefix(outPos, getRawPointer(), prefix);
-        Error.throwIfNeeded(e);
-        return outPos.get();
-    }
-
     /** A set of Entry that represents a conflict. */
     public static class Conflict {
         public final Entry ancestor;
@@ -623,108 +724,6 @@ public class Index implements AutoCloseable {
             their = new Entry(0);
         }
     }
-
-    static native int jniConflictAdd(
-            long indexPtr, long ancestorEntryPtr, long ourEntryPtr, long theirEntryPtr);
-
-    /**
-     * Add or update index entries to represent a conflict. Any staged entries that exist at the
-     * given paths will be removed.
-     *
-     * <p>The entries are the entries from the tree included in the merge. Any entry may be null to
-     * indicate that that file was not present in the trees during the merge. For example,
-     * ancestor_entry may be NULL to indicate that a file was added in both branches and must be
-     * resolved.
-     *
-     * @param conflict a set of entry that represents a conflict
-     * @throws GitException git errors
-     */
-    public void conflictAdd(Conflict conflict) {
-        Error.throwIfNeeded(
-                jniConflictAdd(
-                        getRawPointer(),
-                        conflict.ancestor._ptr.get(),
-                        conflict.our._ptr.get(),
-                        conflict.their._ptr.get()));
-    }
-
-    static native int jniConflictGet(
-            AtomicLong ancestorOut,
-            AtomicLong ourOut,
-            AtomicLong theirOut,
-            long indexPtr,
-            String path);
-
-    /**
-     * Roughly equals to {@code git ls-files -u}
-     *
-     * @see <a href=https://libgit2.org/libgit2/#HEAD/group/index/git_index_conflict_get></a>
-     * @param path path to get the conflict
-     * @throws GitException git errors
-     */
-    Conflict conflictGet(String path) {
-        Conflict conflict = new Conflict();
-        jniConflictGet(
-                conflict.ancestor._ptr,
-                conflict.our._ptr,
-                conflict.their._ptr,
-                getRawPointer(),
-                path);
-        return conflict;
-    }
-
-    static native int jniConflictRemove(long indexPtr, String path);
-
-    /**
-     * Removes the index entries that represent a conflict of a single file.
-     *
-     * @param path path to remove conflicts for
-     * @throws GitException git errors
-     */
-    public void conflictRemove(String path) {
-        Error.throwIfNeeded(jniConflictRemove(getRawPointer(), path));
-    }
-
-    static native int jniConflictCleanup(long indexPtr);
-    /**
-     * Remove all conflicts in the index (entries with a stage greater than 0).
-     *
-     * @throws GitException git errors
-     */
-    public void conflictCleanup() {
-        Error.throwIfNeeded(jniConflictCleanup(getRawPointer()));
-    }
-
-    static native int jniHasConflicts(long indexPtr);
-
-    /**
-     * Determine if the index contains entries representing file conflicts.
-     *
-     * @return 1 if at least one conflict is found, 0 otherwise.
-     */
-    public boolean hasConflicts() {
-        return jniHasConflicts(getRawPointer()) == 1;
-    }
-
-    /**
-     * int git_index_conflict_iterator_new(git_index_conflict_iterator **iterator_out, git_index
-     * *index);
-     */
-    // JNIEXPORT jint JNICALL J_MAKE_METHOD(Index_jniConflictIteratorNew)(JNIEnv *env, jclass obj,
-    // jobject outIterPtr, jlong indexPtr);
-    static native int jniConflictIteratorNew(AtomicLong outIter, long indexPtr);
-    /**
-     * int git_index_conflict_next(const git_index_entry **ancestor_out, const git_index_entry
-     * **our_out, const git_index_entry **their_out, git_index_conflict_iterator *iterator);
-     */
-    // JNIEXPORT jint JNICALL J_MAKE_METHOD(Index_jniConflictNext)(JNIEnv *env, jclass obj, jobject
-    // ancestorOut, jobject ourOut, jobject theirOut, jlong iterPtr);
-    static native int jniConflictNext(
-            AtomicLong ancestorOut, AtomicLong ourOut, AtomicLong theirOut, long iterPtr);
-    /** void git_index_conflict_iterator_free(git_index_conflict_iterator *iterator); */
-    // JNIEXPORT void JNICALL J_MAKE_METHOD(Index_jniConflictIteratorFree)(JNIEnv *env, jclass obj,
-    // jlong iterPtr);
-    static native void jniConflictIteratorFree(long iterPtr);
 
     public static class ConflictIterator {
         AtomicLong _ptr = new AtomicLong();
@@ -751,12 +750,5 @@ public class Index implements AutoCloseable {
             Error.throwIfNeeded(e);
             return conflict;
         }
-    }
-
-    /** @return an iterator that can loops over iterator */
-    public ConflictIterator conflictIteratorNew() {
-        ConflictIterator iterator = new ConflictIterator();
-        Error.throwIfNeeded(jniConflictIteratorNew(iterator._ptr, getRawPointer()));
-        return iterator;
     }
 }
