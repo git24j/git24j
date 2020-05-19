@@ -11,11 +11,6 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 public class Repository extends CAutoCloseable {
-    @Override
-    protected void releaseOnce(long cPtr) {
-        jniFree(cPtr);
-    }
-
     public Repository(long rawPointer) {
         super(rawPointer);
     }
@@ -216,6 +211,11 @@ public class Repository extends CAutoCloseable {
         AtomicLong out = new AtomicLong();
         Error.throwIfNeeded(jniOpenBare(out, path.toString()));
         return new Repository(out.get());
+    }
+
+    @Override
+    protected void releaseOnce(long cPtr) {
+        jniFree(cPtr);
     }
 
     /**
@@ -576,11 +576,32 @@ public class Repository extends CAutoCloseable {
      * @return the loaded index
      * @throws GitException git error.
      */
+    @Nonnull
     public Index index() {
-        Index index = new Index();
-        int error = jniIndex(index._rawPtr, _rawPtr.get());
+        Index index = new Index(0);
+        int error = jniIndex(index._rawPtr, getRawPointer());
         Error.throwIfNeeded(error);
         return index;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        Repository that = (Repository) o;
+        if (this._rawPtr.equals(that._rawPtr)) {
+            return true;
+        }
+        return Objects.equals(this.getPath(), that.getPath());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getPath());
     }
 
     public enum Item {
@@ -885,25 +906,5 @@ public class Repository extends CAutoCloseable {
          * @return non-zero to terminate the iteration
          */
         public abstract int call(Oid oid);
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        Repository that = (Repository) o;
-        if (this._rawPtr.equals(that._rawPtr)) {
-            return true;
-        }
-        return Objects.equals(this.getPath(), that.getPath());
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(getPath());
     }
 }

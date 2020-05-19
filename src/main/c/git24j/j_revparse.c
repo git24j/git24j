@@ -10,8 +10,15 @@ void j_save_revspec_c_value(JNIEnv *env, git_revspec *rev_spec, jobject revSpec)
     assert(revSpec && "receiving object must not be null");
     jclass clz = (*env)->GetObjectClass(env, revSpec);
     assert(clz && "Could not find Revspec class from given revspec object");
-    j_call_setter_long(env, clz, revSpec, "setFrom", (long)(rev_spec->from));
-    j_call_setter_long(env, clz, revSpec, "setTo", (long)(rev_spec->to));
+    if (rev_spec->from)
+    {
+        j_call_setter_long(env, clz, revSpec, "setFrom", (long)(rev_spec->from));
+    }
+
+    if (rev_spec->to)
+    {
+        j_call_setter_long(env, clz, revSpec, "setTo", (long)(rev_spec->to));
+    }
     j_call_setter_int(env, clz, revSpec, "setFlags", (long)(rev_spec->flags));
     (*env)->DeleteLocalRef(env, clz);
 }

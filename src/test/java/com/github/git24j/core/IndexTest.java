@@ -21,9 +21,8 @@ import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
 public class IndexTest extends TestBase {
-    @Rule public TemporaryFolder folder = new TemporaryFolder();
-
     private static final String FEATURE_DEV_TREE_SHA = "3b597d284bc12d61638124054b19889587127208";
+    @Rule public TemporaryFolder folder = new TemporaryFolder();
 
     @Test
     public void open() {
@@ -280,6 +279,15 @@ public class IndexTest extends TestBase {
                 Index.Conflict conflict = iter.next();
                 Assert.assertTrue(conflict.our.isConflict());
                 Assert.assertNull(iter.next());
+            }
+        }
+    }
+
+    @Test
+    public void path() {
+        try (Repository testRepo = TestRepo.CONFLICT.tempRepo(folder)) {
+            try (Index idx = testRepo.index()) {
+                Assert.assertEquals(testRepo.workdir().resolve(".git/index"), idx.path());
             }
         }
     }

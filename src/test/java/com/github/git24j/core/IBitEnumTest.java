@@ -7,6 +7,7 @@ import static com.github.git24j.core.IBitEnumTest.Example.TWO;
 import static org.junit.Assert.assertEquals;
 
 import java.util.EnumSet;
+import org.junit.Assert;
 import org.junit.Test;
 
 public class IBitEnumTest {
@@ -48,5 +49,10 @@ public class IBitEnumTest {
         public int getBit() {
             return _bit;
         }
+    }
+
+    @Test
+    public void valueOf() {
+        Assert.assertEquals(FOUR, IBitEnum.valueOf(1 << 2, Example.class));
     }
 }

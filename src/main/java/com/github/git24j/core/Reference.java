@@ -18,11 +18,6 @@ public class Reference extends CAutoReleasable {
         super(isWeak, rawPtr);
     }
 
-    @Override
-    protected void freeOnce(long cPtr) {
-        jniFree(cPtr);
-    }
-
     /** const git_oid * git_reference_target(const git_reference *ref); */
     static native void jniTarget(Oid oid, long refPtr);
 
@@ -504,40 +499,6 @@ public class Reference extends CAutoReleasable {
 
     static native int jniNormalizeName(AtomicReference<String> outName, String name, int flags);
 
-    public enum Format implements IBitEnum {
-        /** No particular normalization. */
-        NORMAL(0),
-        /**
-         * Control whether one-level refnames are accepted (i.e., refnames that do not contain
-         * multiple /-separated components). Those are expected to be written only using uppercase
-         * letters and underscore (FETCH_HEAD, ...)
-         */
-        ALLOW_ONELEVEL(1 << 0),
-        /**
-         * Interpret the provided name as a reference pattern for a refspec (as used with remote
-         * repositories). If this option is enabled, the name is allowed to contain a single *
-         * (<star>) in place of a one full pathname component (e.g., foo/<star>/bar but not
-         * foo/bar<star>).
-         */
-        REFSPEC_PATTERN(1 << 1),
-        /**
-         * Interpret the name as part of a refspec in shorthand form so the `ONELEVEL` naming rules
-         * aren't enforced and 'master' becomes a valid name.
-         */
-        REFSPEC_SHORTHAND(1 << 2),
-        ;
-
-        private final int _bit;
-
-        Format(int bit) {
-            this._bit = bit;
-        }
-
-        @Override
-        public int getBit() {
-            return _bit;
-        }
-    }
     /**
      * Normalize reference name and check validity. See also {@code git check-ref-format
      * [--normalize]}
@@ -585,6 +546,45 @@ public class Reference extends CAutoReleasable {
     }
 
     static native String jniShorthand(long refPtr);
+
+    /**
+     * Create an iterator for the repo's references
+     *
+     * @param repo the repository
+     * @return newly constructed iterator
+     * @throws GitException git error
+     */
+    @Nonnull
+    public static Iterator iteratorNew(@Nonnull Repository repo) {
+        AtomicLong outIter = new AtomicLong();
+        Error.throwIfNeeded(jniIteratorNew(outIter, repo.getRawPointer()));
+        return new Iterator(false, outIter.get());
+    }
+
+    /**
+     * Get the next reference's name
+     *
+     * <p>This function is provided for convenience in case only the names are interesting as it
+     * avoids the allocation of the `git_reference` object which `git_reference_next()` needs.
+     *
+     * @return name of the next reference, null there are no more (GIT_ITEROVER).
+     * @throws GitException git error
+     */
+    @CheckForNull
+    public static String nextName(@Nonnull Iterator iterator) {
+        AtomicReference<String> outName = new AtomicReference<>();
+        int e = jniNextName(outName, iterator.getRawPointer());
+        if (ErrorCode.ITEROVER.getCode() == e) {
+            return null;
+        }
+        Error.throwIfNeeded(e);
+        return outName.get();
+    }
+
+    @Override
+    protected void freeOnce(long cPtr) {
+        jniFree(cPtr);
+    }
 
     /**
      * Return the peeled OID target of this reference.
@@ -754,40 +754,6 @@ public class Reference extends CAutoReleasable {
     }
 
     /**
-     * Create an iterator for the repo's references
-     *
-     * @param repo the repository
-     * @return newly constructed iterator
-     * @throws GitException git error
-     */
-    @Nonnull
-    public static Iterator iteratorNew(@Nonnull Repository repo) {
-        AtomicLong outIter = new AtomicLong();
-        Error.throwIfNeeded(jniIteratorNew(outIter, repo.getRawPointer()));
-        return new Iterator(false, outIter.get());
-    }
-
-    /**
-     * Get the next reference's name
-     *
-     * <p>This function is provided for convenience in case only the names are interesting as it
-     * avoids the allocation of the `git_reference` object which `git_reference_next()` needs.
-     *
-     * @return name of the next reference, null there are no more (GIT_ITEROVER).
-     * @throws GitException git error
-     */
-    @CheckForNull
-    public static String nextName(@Nonnull Iterator iterator) {
-        AtomicReference<String> outName = new AtomicReference<>();
-        int e = jniNextName(outName, iterator.getRawPointer());
-        if (ErrorCode.ITEROVER.getCode() == e) {
-            return null;
-        }
-        Error.throwIfNeeded(e);
-        return outName.get();
-    }
-
-    /**
      * Check if a reference is a local branch.
      *
      * @return true if the reference lives in the refs/heads namespace;
@@ -879,6 +845,58 @@ public class Reference extends CAutoReleasable {
         return target();
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        Reference reference = (Reference) o;
+        return Reference.cmp(reference, this) == 0;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(_rawPtr);
+    }
+
+    public enum Format implements IBitEnum {
+        /** No particular normalization. */
+        NORMAL(0),
+        /**
+         * Control whether one-level refnames are accepted (i.e., refnames that do not contain
+         * multiple /-separated components). Those are expected to be written only using uppercase
+         * letters and underscore (FETCH_HEAD, ...)
+         */
+        ALLOW_ONELEVEL(1 << 0),
+        /**
+         * Interpret the provided name as a reference pattern for a refspec (as used with remote
+         * repositories). If this option is enabled, the name is allowed to contain a single *
+         * (<star>) in place of a one full pathname component (e.g., foo/<star>/bar but not
+         * foo/bar<star>).
+         */
+        REFSPEC_PATTERN(1 << 1),
+        /**
+         * Interpret the name as part of a refspec in shorthand form so the `ONELEVEL` naming rules
+         * aren't enforced and 'master' becomes a valid name.
+         */
+        REFSPEC_SHORTHAND(1 << 2),
+        ;
+
+        private final int _bit;
+
+        Format(int bit) {
+            this._bit = bit;
+        }
+
+        @Override
+        public int getBit() {
+            return _bit;
+        }
+    }
+
     public enum ReferenceType implements IBitEnum {
         INVALID(0),
         DIRECT(1),
@@ -920,22 +938,5 @@ public class Reference extends CAutoReleasable {
         protected void freeOnce(long cPtr) {
             jniIteratorFree(cPtr);
         }
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        Reference reference = (Reference) o;
-        return Reference.cmp(reference, this) == 0;
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(_rawPtr);
     }
 }

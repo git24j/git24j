@@ -13,8 +13,9 @@ public class RevparseTest extends TestBase {
     public void call() {
         Repository repository = TestRepo.SIMPLE1.tempRepo(folder);
         Revparse.Revspec revspec = Revparse.call(repository, "HEAD");
-        Assert.assertTrue(revspec.from.getRawPointer() > 0);
-        Assert.assertEquals(EnumSet.of(Revparse.Mode.SINGLE), revspec.flags);
+        Assert.assertTrue(revspec.getFrom().getRawPointer() > 0);
+        Assert.assertNull(revspec.getTo());
+        Assert.assertEquals(EnumSet.of(Revparse.Mode.SINGLE), revspec.getFlags());
     }
 
     @Test

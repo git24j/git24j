@@ -249,8 +249,9 @@ public class Rebase extends CAutoReleasable {
      * <p>This is only applicable for in-memory rebases; for rebases within a working directory, the
      * changes were applied to the repository's index.
      */
+    @Nonnull
     public Index inmemoryIndex() {
-        Index outIdx = new Index();
+        Index outIdx = new Index(0);
         Error.throwIfNeeded(jniInmemoryIndex(outIdx._rawPtr, getRawPointer()));
         return outIdx;
     }

@@ -333,4 +333,12 @@ public class RepositoryTest extends TestBase {
             Assert.assertEquals("test_name", id.getName());
         }
     }
+
+    @Test
+    public void state() {
+        try (Repository testRepo = TestRepo.MERGE1.tempRepo(folder)) {
+            Repository.StateT state = testRepo.state();
+            Assert.assertEquals(Repository.StateT.MERGE, state);
+        }
+    }
 }

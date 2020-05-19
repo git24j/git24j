@@ -17,12 +17,6 @@ public class GitException extends RuntimeException {
         this.message = message;
     }
 
-    public GitException() {
-        super();
-        this.klass = null;
-        this.message = "";
-    }
-
     /**
      * @see {@code git_error_t }
      * @return git error class or null if we could not retrieve error class.
@@ -33,10 +27,6 @@ public class GitException extends RuntimeException {
 
     public ErrorCode getCode() {
         return code;
-    }
-
-    public void setCode(ErrorCode code) {
-        this.code = code;
     }
 
     public void setCode(int rawCode) {
