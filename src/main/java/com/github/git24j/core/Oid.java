@@ -95,7 +95,7 @@ public class Oid {
         return eSize;
     }
 
-    /** Set effective size of the oid. */
+    /** Set effective size of the oid, called by jni c code */
     void setEffectiveSize(int eSize) {
         if (eSize > RAWSZ) {
             throw new IllegalArgumentException(

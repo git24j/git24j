@@ -11,11 +11,6 @@ public class GitObject extends CAutoReleasable {
         super(weak, rawPointer);
     }
 
-    @Override
-    protected void freeOnce(long cPtr) {
-        jniFree(cPtr);
-    }
-
     static native void jniFree(long objPtr);
 
     static native int jniType(long objPtr);
@@ -109,6 +104,11 @@ public class GitObject extends CAutoReleasable {
         Error.throwIfNeeded(
                 jniLookupPrefix(outObj, repository.getRawPointer(), oid, len, type.value));
         return GitObject.create(outObj.get(), type);
+    }
+
+    @Override
+    protected void freeOnce(long cPtr) {
+        jniFree(cPtr);
     }
 
     public Type type() {

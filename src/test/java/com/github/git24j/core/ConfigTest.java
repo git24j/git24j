@@ -81,4 +81,10 @@ public class ConfigTest extends TestBase {
             Config.openLevel(Config.ConfigLevel.LOCAL, parent);
         }
     }
+
+    @Test
+    public void openGlobal() throws IOException {
+        Config parent = Config.newConfig();
+        Config.openGlobal(parent);
+    }
 }
