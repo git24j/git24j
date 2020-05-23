@@ -8,6 +8,8 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
+import javax.annotation.CheckForNull;
+import javax.annotation.Nonnull;
 
 /** Memory representation of a set of config files */
 public class Config extends CAutoCloseable {
@@ -299,9 +301,10 @@ public class Config extends CAutoCloseable {
     /** int git_config_open_global(git_config **out, git_config *config); */
     static native int jniOpenGlobal(AtomicLong out, long config);
 
-    public static Config openGlobal(Config config) {
+    @CheckForNull
+    public static Config openGlobal(@Nonnull Config parent) {
         Config cfg = new Config(0);
-        int e = jniOpenGlobal(cfg._rawPtr, config.getRawPointer());
+        int e = jniOpenGlobal(cfg._rawPtr, parent.getRawPointer());
         if (ENOTFOUND.getCode() == e) {
             return null;
         }

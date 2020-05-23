@@ -20,80 +20,17 @@ public class Tag extends GitObject {
         return (Tag) GitObject.lookup(repo, oid, Type.TAG);
     }
 
-    @Override
-    public Tag dup() {
-        Tag tag = new Tag(false, 0);
-        GitObject.jniDup(tag._rawPtr, getRawPointer());
-        return tag;
-    }
-
     static native int jniTarget(AtomicLong outTargetPtr, long tagPtr);
-    /**
-     *
-     *
-     * <pre>
-     *     git rev-parse 'tag_name^{commit}'
-     * </pre>
-     *
-     * @return Target object
-     * @throws GitException git errors
-     */
-    public GitObject target() {
-        GitObject out = new GitObject(true, 0);
-        Error.throwIfNeeded(jniTarget(out._rawPtr, getRawPointer()));
-        return out;
-    }
 
     static native void jniTargetId(long tagPtr, Oid outOid);
-    /**
-     * Get the OID of the tagged object of a tag
-     *
-     * @return target OID
-     */
-    public Oid targetId() {
-        Oid oid = new Oid();
-        jniTargetId(getRawPointer(), oid);
-        return oid;
-    }
 
     static native int jniTargetType(long tagPtr);
 
-    /**
-     * @return target type, this can be {@code Commit}, {@code Tag}, {@code Tree} or {@code Blob}
-     */
-    public Type targetType() {
-        return Type.valueOf(jniTargetType(getRawPointer()));
-    }
-
     static native String jniName(long tagPtr);
-
-    /** @return Get tag name */
-    public String name() {
-        return jniName(getRawPointer());
-    }
 
     static native long jniTagger(long tagPtr);
 
-    /** @return Signature of the tagger */
-    public Optional<Signature> tagger() {
-        long ptr = jniTagger(getRawPointer());
-        return ptr == 0 ? Optional.empty() : Optional.of(new Signature(true, ptr));
-    }
-
     static native String jniMessage(long tagPtr);
-
-    /**
-     *
-     *
-     * <pre>
-     *     git show tag $tag_name
-     * </pre>
-     *
-     * @return message associated with the tag.
-     */
-    public String message() {
-        return jniMessage(getRawPointer());
-    }
 
     static native int jniCreate(
             Oid oid,
@@ -188,49 +125,8 @@ public class Tag extends GitObject {
 
     static native int jniCreateFromBuffer(Oid oid, long repoPtr, String buffer, int force);
 
-    /**
-     * Create a new tag in the repository from a buffer
-     *
-     * @param repo Repository where to store the tag
-     * @param buffer Raw tag data
-     * @param force Overwrite existing tags
-     * @return newly created tag
-     * @throws GitException git error
-     */
-    public Oid createFromBuffer(Repository repo, String buffer, boolean force) {
-        Oid outOid = new Oid();
-        Error.throwIfNeeded(
-                jniCreateFromBuffer(outOid, repo.getRawPointer(), buffer, force ? 1 : 0));
-        return outOid;
-    }
-
     static native int jniCreateLightWeight(
             Oid oid, long repoPtr, String tagName, long targetPtr, int force);
-
-    /**
-     * Create a new lightweight tag pointing at a target object
-     *
-     * <p>A new direct reference will be created pointing to this target object. If `force` is true
-     * and a reference already exists with the given name, it'll be replaced.
-     *
-     * <p>The tag name will be checked for validity. See `git_tag_create()` for rules about valid
-     * names.
-     *
-     * @param repo Repository where to store the lightweight tag
-     * @param tagName Name for the tag; this name is validated for consistency. It should also not
-     *     conflict with an already existing tag name
-     * @param target Object to which this tag points. This object must belong to the given `repo`.
-     * @param force Overwrite existing references
-     * @return newly created tag
-     * @throws GitException e.g GIT_EINVALIDSPEC and GIT_EEXISTS
-     */
-    public Oid createLightWeight(Repository repo, String tagName, GitObject target, boolean force) {
-        Oid oid = new Oid();
-        Error.throwIfNeeded(
-                jniCreateLightWeight(
-                        oid, repo.getRawPointer(), tagName, target.getRawPointer(), force ? 1 : 0));
-        return oid;
-    }
 
     static native int jniDelete(long repoPtr, String tagName);
 
@@ -288,16 +184,6 @@ public class Tag extends GitObject {
         return tagNames;
     }
 
-    /**
-     * Callback used to iterate over tag names, return non-zero to terminate iteration.
-     *
-     * @see Tag::foreach
-     */
-    @FunctionalInterface
-    public interface ForeachCb {
-        int accept(String name, String oid);
-    }
-
     static native int jniForeach(long repoPtr, ForeachCb callback);
 
     /**
@@ -312,6 +198,112 @@ public class Tag extends GitObject {
 
     static native int jniPeel(AtomicLong outTarget, long tagPtr);
 
+    @Override
+    public Tag dup() {
+        Tag tag = new Tag(false, 0);
+        GitObject.jniDup(tag._rawPtr, getRawPointer());
+        return tag;
+    }
+
+    /**
+     *
+     *
+     * <pre>
+     *     git rev-parse 'tag_name^{commit}'
+     * </pre>
+     *
+     * @return Target object
+     * @throws GitException git errors
+     */
+    public GitObject target() {
+        GitObject out = new GitObject(true, 0);
+        Error.throwIfNeeded(jniTarget(out._rawPtr, getRawPointer()));
+        return out;
+    }
+
+    /**
+     * Get the OID of the tagged object of a tag
+     *
+     * @return target OID
+     */
+    public Oid targetId() {
+        Oid oid = new Oid();
+        jniTargetId(getRawPointer(), oid);
+        return oid;
+    }
+
+    /**
+     * @return target type, this can be {@code Commit}, {@code Tag}, {@code Tree} or {@code Blob}
+     */
+    public Type targetType() {
+        return Type.valueOf(jniTargetType(getRawPointer()));
+    }
+
+    /** @return Get tag name */
+    public String name() {
+        return jniName(getRawPointer());
+    }
+
+    /** @return Signature of the tagger */
+    public Optional<Signature> tagger() {
+        long ptr = jniTagger(getRawPointer());
+        return ptr == 0 ? Optional.empty() : Optional.of(new Signature(true, ptr));
+    }
+
+    /**
+     *
+     *
+     * <pre>
+     *     git show tag $tag_name
+     * </pre>
+     *
+     * @return message associated with the tag.
+     */
+    public String message() {
+        return jniMessage(getRawPointer());
+    }
+
+    /**
+     * Create a new tag in the repository from a buffer
+     *
+     * @param repo Repository where to store the tag
+     * @param buffer Raw tag data
+     * @param force Overwrite existing tags
+     * @return newly created tag
+     * @throws GitException git error
+     */
+    public Oid createFromBuffer(Repository repo, String buffer, boolean force) {
+        Oid outOid = new Oid();
+        Error.throwIfNeeded(
+                jniCreateFromBuffer(outOid, repo.getRawPointer(), buffer, force ? 1 : 0));
+        return outOid;
+    }
+
+    /**
+     * Create a new lightweight tag pointing at a target object
+     *
+     * <p>A new direct reference will be created pointing to this target object. If `force` is true
+     * and a reference already exists with the given name, it'll be replaced.
+     *
+     * <p>The tag name will be checked for validity. See `git_tag_create()` for rules about valid
+     * names.
+     *
+     * @param repo Repository where to store the lightweight tag
+     * @param tagName Name for the tag; this name is validated for consistency. It should also not
+     *     conflict with an already existing tag name
+     * @param target Object to which this tag points. This object must belong to the given `repo`.
+     * @param force Overwrite existing references
+     * @return newly created tag
+     * @throws GitException e.g GIT_EINVALIDSPEC and GIT_EEXISTS
+     */
+    public Oid createLightWeight(Repository repo, String tagName, GitObject target, boolean force) {
+        Oid oid = new Oid();
+        Error.throwIfNeeded(
+                jniCreateLightWeight(
+                        oid, repo.getRawPointer(), tagName, target.getRawPointer(), force ? 1 : 0));
+        return oid;
+    }
+
     /**
      * Recursively peel a tag until a non tag git_object is found
      *
@@ -325,5 +317,15 @@ public class Tag extends GitObject {
         GitObject target = new GitObject(true, 0);
         Error.throwIfNeeded(jniPeel(target._rawPtr, getRawPointer()));
         return target;
+    }
+
+    /**
+     * Callback used to iterate over tag names, return non-zero to terminate iteration.
+     *
+     * @see Tag::foreach
+     */
+    @FunctionalInterface
+    public interface ForeachCb {
+        int accept(String name, String oid);
     }
 }

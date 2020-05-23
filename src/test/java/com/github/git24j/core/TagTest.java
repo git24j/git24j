@@ -25,6 +25,20 @@ public class TagTest extends TestBase {
     }
 
     @Test
+    public void dup() {
+        try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {
+            Tag v01 = Tag.lookup(testRepo, Oid.of(TAG_V01_SHA));
+            Tag v02 = v01.dup();
+            Assert.assertEquals(v01.id(), v02.id());
+        }
+    }
+
+    @Test
+    public void create() {
+        try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {}
+    }
+
+    @Test
     public void nameAndTaggerMessage() {
         try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {
             Tag v01 = Tag.lookup(testRepo, Oid.of(TAG_V01_SHA));
