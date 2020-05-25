@@ -9,6 +9,15 @@ extern "C"
 {
 #endif
 
+    /** const char *name*/
+    JNIEXPORT jstring JNICALL J_MAKE_METHOD(Config_jniEntryGetName)(JNIEnv *env, jclass obj, jlong entryPtr);
+    /** const char *value*/
+    JNIEXPORT jstring JNICALL J_MAKE_METHOD(Config_jniEntryGetValue)(JNIEnv *env, jclass obj, jlong entryPtr);
+    /** unsigned int include_depth*/
+    JNIEXPORT jint JNICALL J_MAKE_METHOD(Config_jniEntryGetIncludeDepth)(JNIEnv *env, jclass obj, jlong entryPtr);
+    /** git_config_level_t level*/
+    JNIEXPORT jint JNICALL J_MAKE_METHOD(Config_jniEntryGetLevel)(JNIEnv *env, jclass obj, jlong entryPtr);
+
     /** void git_config_entry_free(git_config_entry *entry); */
     JNIEXPORT void JNICALL J_MAKE_METHOD(Config_jniEntryFree)(JNIEnv *env, jclass obj, jlong entryPtr);
 

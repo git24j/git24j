@@ -23,22 +23,52 @@ public class Config extends CAutoCloseable {
     }
 
     public void foreachMatch(String regexp, ForeachCb foreachCb) {
-        jniForeachMatch(getRawPointer(), regexp, entryPtr -> foreachCb.accept(new Entry(entryPtr)));
+        jniForeachMatch(getRawPointer(), regexp, entryPtr -> foreachCb.accept(new Entry(true, entryPtr)));
     }
 
-    public static class Entry {
-        private AtomicLong _rawPtr = new AtomicLong();
-
-        public Entry(long ptr) {
-            _rawPtr.set(ptr);
+    public static class Entry extends CAutoReleasable {
+        protected Entry(boolean isWeak, long rawPtr) {
+            super(isWeak, rawPtr);
         }
 
         @Override
-        protected void finalize() throws Throwable {
-            jniEntryFree(_rawPtr.getAndSet(0));
-            super.finalize();
+        protected void freeOnce(long cPtr) {
+            jniEntryFree(cPtr);
+        }
+
+        public String getName() {
+            return jniEntryGetName(getRawPointer());
+        }
+
+        public String getValue() {
+            return jniEntryGetValue(getRawPointer());
+        }
+
+        public int getIncludeDepth() {
+            return jniEntryGetIncludeDepth(getRawPointer());
+        }
+
+        public int getLevel() {
+            return jniEntryGetLevel(getRawPointer());
         }
     }
+
+    /**const char *name*/
+    static native String jniEntryGetName(long entryPtr);
+
+
+    /**const char *value*/
+    static native String jniEntryGetValue(long entryPtr);
+
+
+    /**unsigned int include_depth*/
+    static native int jniEntryGetIncludeDepth(long entryPtr);
+
+
+    /**git_config_level_t level*/
+    static native int jniEntryGetLevel(long entryPtr);
+
+
 
     @FunctionalInterface
     public interface ForeachCb {

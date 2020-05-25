@@ -4,10 +4,12 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
+@Ignore
 public class BranchTest extends TestBase {
     private final String MASTER_HASH = "476f0c95825ef4479cab580b71f8b85f9dea4ee4";
     private final String FEATURE_DEV_HASH = "e5b28427ba064002e0e343e783ea3095018ce72c";
