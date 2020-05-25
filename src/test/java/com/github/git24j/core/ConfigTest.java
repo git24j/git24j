@@ -4,10 +4,15 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
 import org.apache.commons.io.FileUtils;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -38,6 +43,24 @@ public class ConfigTest extends TestBase {
         Config.findXdg().ifPresent(this::verifyConfigPath);
         Config.findSystem().ifPresent(this::verifyConfigPath);
         Config.findProgramdata().ifPresent(this::verifyConfigPath);
+    }
+
+    @Test
+    public void foreachMatch() {
+        Map<String, String> entries = new HashMap<>();
+        Map<String, Integer> depLevels = new HashMap<>();
+        try (Config cfg = Config.openDefault()) {
+            cfg.foreachMatch(".*", new Config.ForeachCb() {
+                @Override
+                public int accept(Config.Entry entry) {
+                    entries.put(entry.getName(), entry.getValue());
+                    depLevels.put(entry.getName(), entry.getIncludeDepth() + entry.getLevel());
+                    return 0;
+                }
+            });
+        }
+        System.out.println(entries);
+        System.out.println(depLevels);
     }
 
     @Test

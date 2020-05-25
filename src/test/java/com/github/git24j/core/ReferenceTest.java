@@ -256,6 +256,7 @@ public class ReferenceTest extends TestBase {
         try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {
             Reference ref = Reference.lookup(testRepo, REF_NAME_DEV);
             Reference ref2 = ref.dup();
+            Assert.assertEquals(ref, ref2);
             Assert.assertEquals(REF_NAME_DEV, ref2.name());
         }
     }

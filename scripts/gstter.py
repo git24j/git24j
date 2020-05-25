@@ -9,7 +9,7 @@ from git2types.git2_structure import Git2Structure
 
 def get_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog='gen')
-    parser.add_argument('-c', '--class', dest='clazz', help='set class, e.g, Commit, Commit$Options', required=True)
+    parser.add_argument('-c', '--class', dest='clazz', help='set class, e.g, Commit, Commit.Options', required=True)
     parser.add_argument('-s', '--string', help='read a string and generate')
     parser.add_argument('-f', '--file', help='read a file and generate line by line')
     parser.add_argument(

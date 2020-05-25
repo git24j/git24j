@@ -43,7 +43,8 @@ public class BasicOperationsTest extends TestBase {
         try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {
             try (Repository cloned =
                     Clone.cloneRepo(testRepo.workdir().toString(), localPath, null)) {
-                Assert.assertEquals(localPath, cloned.workdir());
+
+                Assert.assertTrue(sameFile(localPath, cloned.workdir()));
             }
         }
     }

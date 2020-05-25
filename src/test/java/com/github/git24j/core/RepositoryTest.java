@@ -30,13 +30,13 @@ public class RepositoryTest extends TestBase {
         // open repository without looking at parent directories
         try (Repository repo1 =
                 Repository.openExt(repoPath, EnumSet.of(Repository.OpenFlag.NO_SEARCH), null)) {
-            Assert.assertEquals(repo1.workdir(), repoPath);
+            Assert.assertTrue(sameFile(repo1.workdir(), repoPath));
         }
         Path sub = repoPath.resolve("sub");
         Files.createDirectories(sub);
         // walk up parent directories looking for the repository
         try (Repository repo2 = Repository.openExt(sub, null, "/tmp:/home:/usr")) {
-            Assert.assertEquals(repo2.workdir(), repoPath);
+            Assert.assertTrue(sameFile(repo2.workdir(), repoPath));
         }
     }
 
@@ -86,7 +86,7 @@ public class RepositoryTest extends TestBase {
         Path sub = repoPath.resolve("sub");
         Files.createDirectories(sub);
         Optional<String> path1 = Repository.discover(sub, true, "/tmp:/home");
-        Assert.assertEquals(repoPath.resolve(".git/"), path1.map(Paths::get).orElse(null));
+        Assert.assertTrue(sameFile(repoPath.resolve(".git/"), path1.map(Paths::get).orElse(null)));
         Optional<String> path2 =
                 Repository.discover(folder.newFolder("not-a-repo").toPath(), false, "/tmp:/home");
         Assert.assertFalse(path2.isPresent());

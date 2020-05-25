@@ -25,6 +25,7 @@ build_wrapper: build_libgit2 $(LIBGIT2_TARGET)/libgit2.$(SO_EXTENSION)
 	@mkdir -p $(WRAPPER_TARGET)
 	(cd $(WRAPPER_TARGET) && \
     	 cmake $(WRAPPER_SRC) \
+		 -DCMAKE_BUILD_TYPE=Debug \
     	 -DINCLUDE_LIBGIT2="$(LIBGIT2_SRC)/include" \
     	 -DLINK_LIBGIT2="$(LIBGIT2_TARGET)" \
     	 -DCMAKE_C_FLAGS="$(CMAKE_C_FLAGS) $(ARCH_CFLAGS)")

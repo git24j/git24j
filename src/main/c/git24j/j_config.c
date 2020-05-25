@@ -30,6 +30,30 @@ int j_git_config_foreach_cb(const git_config_entry *entry, void *payload)
     return (*env)->CallIntMethod(env, callback, mid, (long)entry);
 }
 
+/** const char *name*/
+JNIEXPORT jstring JNICALL J_MAKE_METHOD(Config_jniEntryGetName)(JNIEnv *env, jclass obj, jlong entryPtr)
+{
+    return (*env)->NewStringUTF(env, ((git_config_entry *)entryPtr)->name);
+}
+
+/** const char *value*/
+JNIEXPORT jstring JNICALL J_MAKE_METHOD(Config_jniEntryGetValue)(JNIEnv *env, jclass obj, jlong entryPtr)
+{
+    return (*env)->NewStringUTF(env, ((git_config_entry *)entryPtr)->value);
+}
+
+/** unsigned int include_depth*/
+JNIEXPORT jint JNICALL J_MAKE_METHOD(Config_jniEntryGetIncludeDepth)(JNIEnv *env, jclass obj, jlong entryPtr)
+{
+    return ((git_config_entry *)entryPtr)->include_depth;
+}
+
+/** git_config_level_t level*/
+JNIEXPORT jint JNICALL J_MAKE_METHOD(Config_jniEntryGetLevel)(JNIEnv *env, jclass obj, jlong entryPtr)
+{
+    return ((git_config_entry *)entryPtr)->level;
+}
+
 /** void git_config_entry_free(git_config_entry *entry); */
 JNIEXPORT void JNICALL J_MAKE_METHOD(Config_jniEntryFree)(JNIEnv *env, jclass obj, jlong entryPtr)
 {
