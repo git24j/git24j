@@ -4,15 +4,12 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import org.apache.commons.io.FileUtils;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -50,14 +47,17 @@ public class ConfigTest extends TestBase {
         Map<String, String> entries = new HashMap<>();
         Map<String, Integer> depLevels = new HashMap<>();
         try (Config cfg = Config.openDefault()) {
-            cfg.foreachMatch(".*", new Config.ForeachCb() {
-                @Override
-                public int accept(Config.Entry entry) {
-                    entries.put(entry.getName(), entry.getValue());
-                    depLevels.put(entry.getName(), entry.getIncludeDepth() + entry.getLevel());
-                    return 0;
-                }
-            });
+            cfg.foreachMatch(
+                    ".*",
+                    new Config.ForeachCb() {
+                        @Override
+                        public int accept(Config.Entry entry) {
+                            entries.put(entry.getName(), entry.getValue());
+                            depLevels.put(
+                                    entry.getName(), entry.getIncludeDepth() + entry.getLevel());
+                            return 0;
+                        }
+                    });
         }
         System.out.println(entries);
         System.out.println(depLevels);
@@ -109,5 +109,11 @@ public class ConfigTest extends TestBase {
     public void openGlobal() throws IOException {
         Config parent = Config.newConfig();
         Config.openGlobal(parent);
+    }
+
+    @Test
+    public void snapshot() {
+        Assert.assertFalse(
+                Config.openDefault().snapshot().getBool("does.not.exist.38yt1").isPresent());
     }
 }

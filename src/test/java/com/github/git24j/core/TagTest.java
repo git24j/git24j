@@ -1,5 +1,6 @@
 package com.github.git24j.core;
 
+import java.time.OffsetDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -21,6 +22,8 @@ public class TagTest extends TestBase {
             Assert.assertEquals(TAG_V01_TARGET, v01.target().id().toString());
             Assert.assertEquals(TAG_V01_TARGET, v01.targetId().toString());
             Assert.assertEquals(GitObject.Type.COMMIT, v01.targetType());
+            Tag v02 = Tag.lookupPrefix(testRepo, Oid.of("d9420a0ba5cbe"));
+            Assert.assertEquals(v01.id(), v02.id());
         }
     }
 
@@ -35,7 +38,44 @@ public class TagTest extends TestBase {
 
     @Test
     public void create() {
-        try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {}
+        try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {
+            Oid id =
+                    Tag.create(
+                            testRepo,
+                            "unit-test-tag",
+                            Commit.lookup(testRepo, Oid.of(TAG_V01_TARGET)),
+                            new Signature("tester", "tester@abc.cc", OffsetDateTime.now()),
+                            "message",
+                            false);
+            Assert.assertFalse(id.isEmpty());
+        }
+    }
+
+    @Test
+    public void annotatedCreate() {
+        try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {
+            Oid out =
+                    Tag.annotationCreate(
+                            testRepo,
+                            "unittest-annotated-tag",
+                            Commit.lookup(testRepo, Oid.of(TAG_V01_TARGET)),
+                            Signature.now("tester", "tester@abc.cc"),
+                            "creating annotated tag from test");
+            Assert.assertFalse(out.isEmpty());
+        }
+    }
+
+    @Test
+    public void createLightWeight() {
+        try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {
+            Oid id =
+                    Tag.createLightWeight(
+                            testRepo,
+                            "test-tag-lw",
+                            Commit.lookup(testRepo, Oid.of(TAG_V01_TARGET)),
+                            false);
+            Assert.assertFalse(id.isEmpty());
+        }
     }
 
     @Test
