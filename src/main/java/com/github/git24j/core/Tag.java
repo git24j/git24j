@@ -272,7 +272,7 @@ public class Tag extends GitObject {
      * @return newly created tag
      * @throws GitException git error
      */
-    public Oid createFromBuffer(Repository repo, String buffer, boolean force) {
+    public static Oid createFromBuffer(Repository repo, String buffer, boolean force) {
         Oid outOid = new Oid();
         Error.throwIfNeeded(
                 jniCreateFromBuffer(outOid, repo.getRawPointer(), buffer, force ? 1 : 0));
@@ -296,7 +296,8 @@ public class Tag extends GitObject {
      * @return newly created tag
      * @throws GitException e.g GIT_EINVALIDSPEC and GIT_EEXISTS
      */
-    public Oid createLightWeight(Repository repo, String tagName, GitObject target, boolean force) {
+    public static Oid createLightWeight(
+            Repository repo, String tagName, GitObject target, boolean force) {
         Oid oid = new Oid();
         Error.throwIfNeeded(
                 jniCreateLightWeight(

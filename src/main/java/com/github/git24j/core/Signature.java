@@ -128,13 +128,12 @@ public class Signature extends CAutoReleasable {
      *
      * <p>Call `git_signature_free()` to free the data.
      *
-     * @param sig signature to duplicate
      * @return copy of the signature
      * @throws GitException git error
      */
-    public static Signature dup(@Nonnull Signature sig) {
+    public Signature dup() {
         Signature out = new Signature(false, 0);
-        Error.throwIfNeeded(jniDup(out._rawPtr, sig.getRawPointer()));
+        Error.throwIfNeeded(jniDup(out._rawPtr, getRawPointer()));
         return out;
     }
 
