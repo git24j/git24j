@@ -553,3 +553,40 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Diff_jniPatchid)(JNIEnv *env, jclass obj, j
     j_git_oid_to_java(env, &c_out, out);
     return r;
 }
+
+/** -------- Wrapper Body ---------- */
+/** git_delta_t   status*/
+JNIEXPORT jint JNICALL J_MAKE_METHOD(Diff_jniDeltaGetStatus)(JNIEnv *env, jclass obj, jlong deltaPtr)
+{
+    return ((git_diff_delta *)deltaPtr)->status;
+}
+
+/** int      flags*/
+JNIEXPORT jint JNICALL J_MAKE_METHOD(Diff_jniDeltaGetFlags)(JNIEnv *env, jclass obj, jlong deltaPtr)
+{
+    return ((git_diff_delta *)deltaPtr)->flags;
+}
+
+/** int      similarity*/
+JNIEXPORT jint JNICALL J_MAKE_METHOD(Diff_jniDeltaGetSimilarity)(JNIEnv *env, jclass obj, jlong deltaPtr)
+{
+    return ((git_diff_delta *)deltaPtr)->similarity;
+}
+
+/** int      nfiles*/
+JNIEXPORT jint JNICALL J_MAKE_METHOD(Diff_jniDeltaGetNfiles)(JNIEnv *env, jclass obj, jlong deltaPtr)
+{
+    return ((git_diff_delta *)deltaPtr)->nfiles;
+}
+
+/** git_diff_file old_file*/
+JNIEXPORT jlong JNICALL J_MAKE_METHOD(Diff_jniDeltaGetOldFile)(JNIEnv *env, jclass obj, jlong deltaPtr)
+{
+    return (jlong)(&(((git_diff_delta *)deltaPtr)->old_file));
+}
+
+/** git_diff_file new_file*/
+JNIEXPORT jlong JNICALL J_MAKE_METHOD(Diff_jniDeltaGetNewFile)(JNIEnv *env, jclass obj, jlong deltaPtr)
+{
+    return (jlong)(&(((git_diff_delta *)deltaPtr)->new_file));
+}

@@ -77,3 +77,82 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Status_jniShouldIgnore)(JNIEnv *env, jclass
     free(c_path);
     return r;
 }
+
+/** -------- Wrapper Body ---------- */
+/** unsigned int      version*/
+JNIEXPORT jint JNICALL J_MAKE_METHOD(Status_jniOptionsGetVersion)(JNIEnv *env, jclass obj, jlong optionsPtr)
+{
+    return ((git_status_options *)optionsPtr)->version;
+}
+
+/** git_status_show_t show*/
+JNIEXPORT jint JNICALL J_MAKE_METHOD(Status_jniOptionsGetShow)(JNIEnv *env, jclass obj, jlong optionsPtr)
+{
+    return ((git_status_options *)optionsPtr)->show;
+}
+
+/** unsigned int      flags*/
+JNIEXPORT jint JNICALL J_MAKE_METHOD(Status_jniOptionsGetFlags)(JNIEnv *env, jclass obj, jlong optionsPtr)
+{
+    return ((git_status_options *)optionsPtr)->flags;
+}
+
+/** git_strarray      pathspec*/
+JNIEXPORT void JNICALL J_MAKE_METHOD(Status_jniOptionsGetPathspec)(JNIEnv *env, jclass obj, jlong optionsPtr, jobject outListPathSpec)
+{
+    j_strarray_to_java_list(env, &(((git_status_options *)optionsPtr)->pathspec), outListPathSpec);
+}
+
+/** git_tree          *baseline*/
+JNIEXPORT jlong JNICALL J_MAKE_METHOD(Status_jniOptionsGetBaseline)(JNIEnv *env, jclass obj, jlong optionsPtr)
+{
+    return (jlong)((git_status_options *)optionsPtr)->baseline;
+}
+
+/** unsigned int      version*/
+JNIEXPORT void JNICALL J_MAKE_METHOD(Status_jniOptionsSetVersion)(JNIEnv *env, jclass obj, jlong optionsPtr, jint version)
+{
+    ((git_status_options *)optionsPtr)->version = (unsigned int)version;
+}
+
+/** git_status_show_t show*/
+JNIEXPORT void JNICALL J_MAKE_METHOD(Status_jniOptionsSetShow)(JNIEnv *env, jclass obj, jlong optionsPtr, jint show)
+{
+    ((git_status_options *)optionsPtr)->show = (git_status_show_t)show;
+}
+
+/** unsigned int      flags*/
+JNIEXPORT void JNICALL J_MAKE_METHOD(Status_jniOptionsSetFlags)(JNIEnv *env, jclass obj, jlong optionsPtr, jint flags)
+{
+    ((git_status_options *)optionsPtr)->flags = (unsigned int)flags;
+}
+
+/** git_strarray      pathspec*/
+JNIEXPORT void JNICALL J_MAKE_METHOD(Status_jniOptionsSetPathspec)(JNIEnv *env, jclass obj, jlong optionsPtr, jobjectArray outPathspec)
+{
+    j_strarray_from_java(env, &(((git_status_options *)optionsPtr)->pathspec), outPathspec);
+}
+
+/** git_tree          *baseline*/
+JNIEXPORT void JNICALL J_MAKE_METHOD(Status_jniOptionsSetBaseline)(JNIEnv *env, jclass obj, jlong optionsPtr, jlong baseline)
+{
+    ((git_status_options *)optionsPtr)->baseline = (git_tree *)baseline;
+}
+
+/** git_status_t status*/
+JNIEXPORT jint JNICALL J_MAKE_METHOD(Status_jniEntryGetStatus)(JNIEnv *env, jclass obj, jlong entryPtr)
+{
+    return ((git_status_entry *)entryPtr)->status;
+}
+
+/** git_diff_delta *head_to_index*/
+JNIEXPORT jlong JNICALL J_MAKE_METHOD(Status_jniEntryGetHeadToIndex)(JNIEnv *env, jclass obj, jlong entryPtr)
+{
+    return (jlong)((git_status_entry *)entryPtr)->head_to_index;
+}
+
+/** git_diff_delta *index_to_workdir*/
+JNIEXPORT jlong JNICALL J_MAKE_METHOD(Status_jniEntryGetIndexToWorkdir)(JNIEnv *env, jclass obj, jlong entryPtr)
+{
+    return (jlong)((git_status_entry *)entryPtr)->index_to_workdir;
+}

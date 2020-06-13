@@ -1,0 +1,5 @@
+typedef struct {
+	git_status_t status;
+	git_diff_delta *head_to_index;
+	git_diff_delta *index_to_workdir;
+} git_status_entry;

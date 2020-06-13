@@ -1,14 +1,17 @@
 package com.github.git24j.core;
 
+import javax.annotation.CheckForNull;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.EnumSet;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
-import javax.annotation.CheckForNull;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+
+import static com.github.git24j.core.GitException.ErrorCode.ENOTFOUND;
+import static com.github.git24j.core.GitException.ErrorCode.EUNBORNBRANCH;
 
 public class Repository extends CAutoCloseable {
     public Repository(long rawPointer) {
@@ -508,16 +511,37 @@ public class Repository extends CAutoCloseable {
     }
 
     /**
+     * @return the reference pointed at by HEAD, return empty if GIT_EUNBORNBRANCH when HEAD points
+     *     to a non existing branch, GIT_ENOTFOUND when HEAD is missing
+     */
+    @Nonnull
+    public Optional<Reference> head() {
+        Reference out = new Reference(false, 0);
+        int e = jniHead(out._rawPtr, getRawPointer());
+        Error.throwIfNeeded(e);
+        if (ENOTFOUND.getCode() == e || EUNBORNBRANCH.getCode() == e) {
+            return Optional.empty();
+        }
+        return Optional.of(out);
+    }
+
+    /**
      * Retrieve the referenced HEAD for the worktree
      *
      * @param name name of the worktree to retrieve HEAD for
-     * @return HEAD reference.
+     * @return HEAD reference, return empty if GIT_EUNBORNBRANCH when HEAD points to a non existing
+     *     branch, GIT_ENOTFOUND when HEAD is missing
      * @throws GitException git error.
      */
-    public Reference headForWorkTree(String name) {
-        AtomicLong outRef = new AtomicLong();
-        Error.throwIfNeeded(jniHeadForWorktree(outRef, _rawPtr.get(), name));
-        return new Reference(true, outRef.get());
+    @Nonnull
+    public Optional<Reference> headForWorkTree(@Nonnull String name) {
+        Reference out = new Reference(false, 0);
+        int e = jniHeadForWorktree(out._rawPtr, _rawPtr.get(), name);
+        if (ENOTFOUND.getCode() == e || EUNBORNBRANCH.getCode() == e) {
+            return Optional.empty();
+        }
+        Error.throwIfNeeded(e);
+        return Optional.of(out);
     }
 
     /**

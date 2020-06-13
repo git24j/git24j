@@ -1,14 +1,16 @@
 package com.github.git24j.core;
 
-import static com.github.git24j.core.Internals.JFCallback;
-import static com.github.git24j.core.Internals.JJCallback;
-import static com.github.git24j.core.Internals.JJJCallback;
-
-import java.nio.file.Path;
-import java.util.concurrent.atomic.AtomicLong;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.nio.file.Path;
+import java.util.EnumSet;
+import java.util.Optional;
+import java.util.concurrent.atomic.AtomicLong;
+
+import static com.github.git24j.core.Internals.JFCallback;
+import static com.github.git24j.core.Internals.JJCallback;
+import static com.github.git24j.core.Internals.JJJCallback;
 
 public class Diff extends CAutoReleasable {
     AtomicLong _rawPtr = new AtomicLong();
@@ -267,6 +269,29 @@ public class Diff extends CAutoReleasable {
         }
     }
 
+    public enum FlagT implements IBitEnum {
+        /** < file(s) treated as binary data */
+        BINARY(1 << 0),
+        /** < file(s) treated as text data */
+        NOT_BINARY(1 << 1),
+        /** < `id` value is known correct */
+        VALID_ID(1 << 2),
+        /** < file exists at this side of the delta */
+        EXISTS(1 << 3),
+        ;
+
+        private final int _bit;
+
+        FlagT(int bit) {
+            _bit = bit;
+        }
+
+        @Override
+        public int getBit() {
+            return _bit;
+        }
+    }
+
     /**
      * What type of change is described by a git_diff_delta?
      *
@@ -276,7 +301,7 @@ public class Diff extends CAutoReleasable {
      * <p>`TYPECHANGE` only shows up given `GIT_DIFF_INCLUDE_TYPECHANGE` in the option flags
      * (otherwise type changes will be split into ADDED / DELETED pairs).
      */
-    public enum DeltaT {
+    public enum DeltaT implements IBitEnum {
         UNMODIFIED(0),
         /** < no changes */
         ADDED(1),
@@ -300,14 +325,15 @@ public class Diff extends CAutoReleasable {
         CONFLICTED(10),
         ;
         /** < entry in the index is conflicted */
-        private final int _code;
+        private final int _bit;
 
         DeltaT(int _code) {
-            this._code = _code;
+            this._bit = _code;
         }
 
-        public int getCode() {
-            return _code;
+        @Override
+        public int getBit() {
+            return _bit;
         }
     }
 
@@ -371,7 +397,51 @@ public class Diff extends CAutoReleasable {
             throw new IllegalStateException(
                     "Diff.Delta is owned by Diff and should not be released manually");
         }
+
+        /** @return delta status, default {@code DeltaT.UNMODIFIED} */
+        @Nonnull
+        public DeltaT getStatus() {
+            return IBitEnum.valueOf(
+                    jniDeltaGetStatus(getRawPointer()), DeltaT.class, DeltaT.UNMODIFIED);
+        }
+
+        /** @return {@code FlagT} values */
+        public EnumSet<FlagT> getFlags() {
+            return IBitEnum.parse(jniDeltaGetFlags(getRawPointer()), FlagT.class);
+        }
+
+        /** for RENAMED and COPIED, value 0-100 */
+        public int getSimilarity() {
+            return jniDeltaGetSimilarity(getRawPointer());
+        }
+
+        /** @return number of files in this delta */
+        public int getNfiles() {
+            return jniDeltaGetNfiles(getRawPointer());
+        }
+
+        public Optional<File> getOldFile() {
+            return Optional.ofNullable(File.ofWeak(jniDeltaGetOldFile(getRawPointer())));
+        }
+
+        public Optional<File> getNewFile() {
+            return Optional.ofNullable(File.ofWeak(jniDeltaGetNewFile(getRawPointer())));
+        }
     }
+
+    /** -------- Jni Signature ---------- */
+    /** git_delta_t status */
+    static native int jniDeltaGetStatus(long deltaPtr);
+    /** int flags */
+    static native int jniDeltaGetFlags(long deltaPtr);
+    /** int similarity */
+    static native int jniDeltaGetSimilarity(long deltaPtr);
+    /** int nfiles */
+    static native int jniDeltaGetNfiles(long deltaPtr);
+    /** git_diff_file old_file */
+    static native long jniDeltaGetOldFile(long deltaPtr);
+    /** git_diff_file new_file */
+    static native long jniDeltaGetNewFile(long deltaPtr);
 
     /**
      * Structure describing the binary contents of a diff.
@@ -924,7 +994,7 @@ public class Diff extends CAutoReleasable {
      * @return Count of number of deltas matching delta_t type
      */
     public int numDeltasOfType(@Nonnull DeltaT type) {
-        return jniNumDeltasOfType(getRawPointer(), type.getCode());
+        return jniNumDeltasOfType(getRawPointer(), type.getBit());
     }
 
     /** const git_diff_delta * git_diff_get_delta(const git_diff *diff, size_t idx); */
@@ -1037,7 +1107,7 @@ public class Diff extends CAutoReleasable {
      * @return The single character label for that code
      */
     public static char statusChar(@Nonnull DeltaT status) {
-        return jniStatusChar(status.getCode());
+        return jniStatusChar(status.getBit());
     }
 
     /**

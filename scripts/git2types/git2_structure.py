@@ -137,8 +137,8 @@ class Git2Structure(object):
             f"/**{self.fsig}*/\n"
             f"static native {self.java_type} jni{self.sub_obj_pc}Get{self.var_pc}(long {self.c_sub_obj}Ptr);\n"
             f"{sub_class_reminder}"
-            f"public {self.java_type} get{self.var_pc}(long {self.c_sub_obj}Ptr) {{\n"
-            f"    return jni{self.sub_obj_pc}Get{self.var_pc}();\n"
+            f"public {self.java_type} get{self.var_pc}() {{\n"
+            f"    return jni{self.sub_obj_pc}Get{self.var_pc}(getRawPointer());\n"
             f"}}\n"
         )
 
