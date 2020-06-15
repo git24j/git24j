@@ -590,3 +590,39 @@ JNIEXPORT jlong JNICALL J_MAKE_METHOD(Diff_jniDeltaGetNewFile)(JNIEnv *env, jcla
 {
     return (jlong)(&(((git_diff_delta *)deltaPtr)->new_file));
 }
+
+/** git_oid            id*/
+JNIEXPORT jbyteArray JNICALL J_MAKE_METHOD(Diff_jniFileGetId)(JNIEnv *env, jclass obj, jlong filePtr)
+{
+    return j_git_oid_to_bytearray(env, &(((git_diff_file *)filePtr)->id));
+}
+
+/** const char        *path*/
+JNIEXPORT jstring JNICALL J_MAKE_METHOD(Diff_jniFileGetPath)(JNIEnv *env, jclass obj, jlong filePtr)
+{
+    return (*env)->NewStringUTF(env, ((git_diff_file *)filePtr)->path);
+}
+
+/** git_object_size_t  size*/
+JNIEXPORT jint JNICALL J_MAKE_METHOD(Diff_jniFileGetSize)(JNIEnv *env, jclass obj, jlong filePtr)
+{
+    return ((git_diff_file *)filePtr)->size;
+}
+
+/** uint32_t           flags*/
+JNIEXPORT jint JNICALL J_MAKE_METHOD(Diff_jniFileGetFlags)(JNIEnv *env, jclass obj, jlong filePtr)
+{
+    return ((git_diff_file *)filePtr)->flags;
+}
+
+/** uint16_t           mode*/
+JNIEXPORT jint JNICALL J_MAKE_METHOD(Diff_jniFileGetMode)(JNIEnv *env, jclass obj, jlong filePtr)
+{
+    return ((git_diff_file *)filePtr)->mode;
+}
+
+/** uint16_t           id_abbrev*/
+JNIEXPORT jint JNICALL J_MAKE_METHOD(Diff_jniFileGetIdAbbrev)(JNIEnv *env, jclass obj, jlong filePtr)
+{
+    return ((git_diff_file *)filePtr)->id_abbrev;
+}

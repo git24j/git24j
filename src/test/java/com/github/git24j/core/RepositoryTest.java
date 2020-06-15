@@ -96,8 +96,8 @@ public class RepositoryTest extends TestBase {
     public void headForWorkTree() {
         Path path = TestRepo.WORKTREE1.tempCopy(folder);
         try (Repository repository = Repository.open(path)) {
-            Reference ref = repository.headForWorkTree("wt1");
-            Assert.assertTrue(ref.getRawPointer() > 0);
+            Optional<Reference> ref = repository.headForWorkTree("wt1");
+            Assert.assertTrue(ref.get().getRawPointer() > 0);
         }
     }
 

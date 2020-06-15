@@ -1,6 +1,7 @@
 package com.github.git24j.core;
 
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 
 public class CredTest extends TestBase {
@@ -17,6 +18,7 @@ public class CredTest extends TestBase {
         Assert.assertTrue(cred.getRawPointer() > 0);
     }
 
+    @Ignore
     @Test
     public void sshKeyFromAgent() {
         Cred cred = Cred.sshKeyFromAgent("user");

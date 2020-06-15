@@ -512,7 +512,66 @@ public class Diff extends CAutoReleasable {
         static File ofWeak(long ptr) {
             return ptr == 0 ? null : new File(true, ptr);
         }
+
+        /** @return Oid of the file, it can also be all zeros, which means absense of a file. */
+        public Oid getId() {
+            return Oid.of(jniFileGetId(getRawPointer()));
+        }
+
+        /** @return file path relative to the working directory of the repository */
+        public String getPath() {
+            return jniFileGetPath(getRawPointer());
+        }
+
+        /** @return the size of the entry in bytes. */
+        public int getSize() {
+            return jniFileGetSize(getRawPointer());
+        }
+
+        /** @return combination of the `git_diff_flag_t` types */
+        @Nonnull
+        public EnumSet<FlagT> getFlags() {
+            return IBitEnum.parse(jniFileGetFlags(getRawPointer()), FlagT.class);
+        }
+
+        /**
+         * @return roughly, the stat() `st_mode` value for the item. This will be restricted to one
+         *     of the `FileMode` values.
+         */
+        @Nonnull
+        public FileMode getMode() {
+            return IBitEnum.valueOf(
+                    jniFileGetMode(getRawPointer()), FileMode.class, FileMode.UNREADABLE);
+        }
+
+        /**
+         * @return `id_abbrev` represents the known length of the `id` field, when converted to a
+         *     hex string. It is generally `GIT_OID_HEXSZ`, unless this delta was created from
+         *     reading a patch file, in which case it may be abbreviated to something reasonable,
+         *     like 7 characters.
+         */
+        public int getIdAbbrev() {
+            return jniFileGetIdAbbrev(getRawPointer());
+        }
     }
+    /** -------- Jni Signature ---------- */
+    /** git_oid id */
+    static native byte[] jniFileGetId(long filePtr);
+
+    /** const char *path */
+    static native String jniFileGetPath(long filePtr);
+
+    /** git_object_size_t size */
+    static native int jniFileGetSize(long filePtr);
+
+    /** uint32_t flags */
+    static native int jniFileGetFlags(long filePtr);
+
+    /** uint16_t mode */
+    static native int jniFileGetMode(long filePtr);
+
+    /** uint16_t id_abbrev */
+    static native int jniFileGetIdAbbrev(long filePtr);
 
     /**
      * Structure describing a line (or data span) of a diff.

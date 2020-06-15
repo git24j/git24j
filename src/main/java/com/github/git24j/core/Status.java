@@ -169,6 +169,39 @@ public class Status {
     }
 
     /**
+     * Select the files on which to report status.
+     *
+     * <p>With `git_status_foreach_ext`, this will control which changes get callbacks. With
+     * `git_status_list_new`, these will control which changes are included in the list.
+     *
+     * <pre>
+     * - GIT_STATUS_SHOW_INDEX_AND_WORKDIR is the default.  This roughly
+     *   matches `git status --porcelain` regarding which files are
+     *   included and in what order.
+     * - GIT_STATUS_SHOW_INDEX_ONLY only gives status based on HEAD to index
+     *   comparison, not looking at working directory changes.
+     * - GIT_STATUS_SHOW_WORKDIR_ONLY only gives status based on index to
+     *   working directory comparison, not comparing the index to the HEAD.
+     *   </pre>
+     */
+    public enum ShowT implements IBitEnum {
+        INDEX_AND_WORKDIR(0),
+        INDEX_ONLY(1),
+        WORKDIR_ONLY(2),
+        ;
+        private final int _bit;
+
+        ShowT(int bit) {
+            _bit = bit;
+        }
+
+        @Override
+        public int getBit() {
+            return _bit;
+        }
+    }
+
+    /**
      * Flags to control status callbacks
      *
      * <pre>
@@ -335,7 +368,7 @@ public class Status {
          * @return 0 on success or error code
          */
         @Nonnull
-        public static StatusList create(@Nonnull Repository repo, @Nullable Options opts) {
+        public static StatusList listNew(@Nonnull Repository repo, @Nullable Options opts) {
             StatusList out = new StatusList(false, 0);
             Error.throwIfNeeded(
                     jniListNew(
