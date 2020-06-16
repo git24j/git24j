@@ -1,7 +1,8 @@
 package com.github.git24j.core;
 
-import static com.github.git24j.core.GitException.ErrorCode.ENOTFOUND;
-
+import javax.annotation.CheckForNull;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.net.URI;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -9,9 +10,8 @@ import java.util.EnumSet;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
-import javax.annotation.CheckForNull;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+
+import static com.github.git24j.core.GitException.ErrorCode.ENOTFOUND;
 
 public class Submodule extends CAutoReleasable {
     protected Submodule(boolean isWeak, long rawPtr) {
@@ -262,6 +262,29 @@ public class Submodule extends CAutoReleasable {
     /**
      * int git_submodule_foreach(git_repository *repo, git_submodule_cb callback, void *payload);
      */
+    static native int jniForeach(long repoPtr, Internals.SJCallback foreachCb);
+
+    /**
+     * Iterate over all tracked submodules of a repository.
+     *
+     * <p>See the note on `git_submodule` above. This iterates over the tracked submodules as
+     * described therein.
+     *
+     * <p>If you are concerned about items in the working directory that look like submodules but
+     * are not tracked, the diff API will generate a diff record for workdir items that look like
+     * submodules but are not tracked, showing them as added in the workdir. Also, the status API
+     * will treat the entire subdirectory of a contained git repo as a single GIT_STATUS_WT_NEW
+     * item.
+     *
+     * @param repo The repository
+     * @param callback Function to be called with the name of each submodule. Return a non-zero
+     *     value to terminate the iteration.
+     * @throws GitException git errors
+     */
+    public static void foreach(@Nonnull Repository repo, @Nonnull Callback callback) {
+        Error.throwIfNeeded(jniForeach(repo.getRawPointer(), (name, ptr) -> callback.accept(new Submodule(true, ptr), name)));
+    }
+
     /** -------- Jni Signature ---------- */
     /** int git_submodule_add_finalize(git_submodule *submodule); */
     static native int jniAddFinalize(long submodule);

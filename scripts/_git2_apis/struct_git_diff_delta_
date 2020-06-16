@@ -1,0 +1,8 @@
+typedef struct {
+	git_delta_t   status;
+	int      flags;
+	int      similarity;
+	int      nfiles;
+	git_diff_file old_file;
+	git_diff_file new_file;
+} git_diff_delta;

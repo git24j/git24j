@@ -15,6 +15,7 @@ extern "C"
     // no matching type found for 'git_submodule_cb callback'
     /** int git_submodule_foreach(git_repository *repo, git_submodule_cb callback, void *payload); */
     JNIEXPORT jint JNICALL J_MAKE_METHOD(Submodule_jniForeach)(JNIEnv *env, jclass obj, jlong repoPtr, jobject foreachCb);
+
     /** -------- Signature of the header ---------- */
     /** int git_submodule_add_finalize(git_submodule *submodule); */
     JNIEXPORT jint JNICALL J_MAKE_METHOD(Submodule_jniAddFinalize)(JNIEnv *env, jclass obj, jlong submodulePtr);

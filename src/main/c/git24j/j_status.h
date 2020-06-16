@@ -35,6 +35,35 @@ extern "C"
     /** int git_status_should_ignore(int *ignored, git_repository *repo, const char *path); */
     JNIEXPORT jint JNICALL J_MAKE_METHOD(Status_jniShouldIgnore)(JNIEnv *env, jclass obj, jobject ignored, jlong repoPtr, jstring path);
 
+    /** -------- Signature of the header ---------- */
+    /** unsigned int      version*/
+    JNIEXPORT jint JNICALL J_MAKE_METHOD(Status_jniOptionsGetVersion)(JNIEnv *env, jclass obj, jlong optionsPtr);
+    /** git_status_show_t show*/
+    JNIEXPORT jint JNICALL J_MAKE_METHOD(Status_jniOptionsGetShow)(JNIEnv *env, jclass obj, jlong optionsPtr);
+    /** unsigned int      flags*/
+    JNIEXPORT jint JNICALL J_MAKE_METHOD(Status_jniOptionsGetFlags)(JNIEnv *env, jclass obj, jlong optionsPtr);
+    /** git_strarray      pathspec*/
+    JNIEXPORT void JNICALL J_MAKE_METHOD(Status_jniOptionsGetPathspec)(JNIEnv *env, jclass obj, jlong optionsPtr, jobject outListPathSpec);
+    /** git_tree          *baseline*/
+    JNIEXPORT jlong JNICALL J_MAKE_METHOD(Status_jniOptionsGetBaseline)(JNIEnv *env, jclass obj, jlong optionsPtr);
+    /** unsigned int      version*/
+    JNIEXPORT void JNICALL J_MAKE_METHOD(Status_jniOptionsSetVersion)(JNIEnv *env, jclass obj, jlong optionsPtr, jint version);
+    /** git_status_show_t show*/
+    JNIEXPORT void JNICALL J_MAKE_METHOD(Status_jniOptionsSetShow)(JNIEnv *env, jclass obj, jlong optionsPtr, jint show);
+    /** unsigned int      flags*/
+    JNIEXPORT void JNICALL J_MAKE_METHOD(Status_jniOptionsSetFlags)(JNIEnv *env, jclass obj, jlong optionsPtr, jint flags);
+    /** git_strarray      pathspec*/
+    JNIEXPORT void JNICALL J_MAKE_METHOD(Status_jniOptionsSetPathspec)(JNIEnv *env, jclass obj, jlong optionsPtr, jobjectArray pathspec);
+    /** git_tree          *baseline*/
+    JNIEXPORT void JNICALL J_MAKE_METHOD(Status_jniOptionsSetBaseline)(JNIEnv *env, jclass obj, jlong optionsPtr, jlong baseline);
+
+    /** git_status_t status*/
+    JNIEXPORT jint JNICALL J_MAKE_METHOD(Status_jniEntryGetStatus)(JNIEnv *env, jclass obj, jlong entryPtr);
+    /** git_diff_delta *head_to_index*/
+    JNIEXPORT jlong JNICALL J_MAKE_METHOD(Status_jniEntryGetHeadToIndex)(JNIEnv *env, jclass obj, jlong entryPtr);
+    /** git_diff_delta *index_to_workdir*/
+    JNIEXPORT jlong JNICALL J_MAKE_METHOD(Status_jniEntryGetIndexToWorkdir)(JNIEnv *env, jclass obj, jlong entryPtr);
+
 #ifdef __cplusplus
 }
 #endif

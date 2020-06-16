@@ -11,7 +11,7 @@ int j_git_submodule_cb(git_submodule *sm, const char *name, void *payload)
     j_cb_payload *j_payload = (j_cb_payload *)payload;
     JNIEnv *env = getEnv();
     jstring jName = (*env)->NewStringUTF(env, name);
-    int r = (*env)->CallIntMethod(env, j_payload->callback, j_payload->mid, (jlong)sm, jName);
+    int r = (*env)->CallIntMethod(env, j_payload->callback, j_payload->mid, jName, (jlong)sm);
     (*env)->DeleteLocalRef(env, jName);
     return r;
 }
@@ -22,7 +22,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Submodule_jniForeach)(JNIEnv *env, jclass o
 {
     assert(foreachCb && "Call Submodule::foreach with empty callback does not make any sense");
     j_cb_payload payload = {0};
-    j_cb_payload_init(env, &payload, foreachCb, "(L" J_CLZ_PREFIX "Submodule$Callback;Ljava/lang/String)I");
+    j_cb_payload_init(env, &payload, foreachCb, "(Ljava/lang/String;J)I");
     int r = git_submodule_foreach((git_repository *)repoPtr, j_git_submodule_cb, &payload);
     j_cb_payload_release(env, &payload);
     return r;

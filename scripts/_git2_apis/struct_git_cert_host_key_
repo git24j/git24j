@@ -1,0 +1,7 @@
+typedef struct {
+	git_cert parent;
+	git_cert_ssh_t type;
+	unsigned char hash_md5[16];
+	unsigned char hash_sha1[20];
+	unsigned char hash_sha256[32];
+} git_cert_hostkey
