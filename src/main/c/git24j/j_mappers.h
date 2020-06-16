@@ -186,7 +186,7 @@ extern "C"
 
     /** FOR DEBUG: inspect object class */
     void __debug_inspect(JNIEnv *env, jobject obj);
-    void __debug_inspect2(JNIEnv *env, jobject obj, const char *message);
+    void __debug_inspect2(JNIEnv *env, jobject obj, const char *message, const char *fname);
 #ifdef __cplusplus
 }
 #endif

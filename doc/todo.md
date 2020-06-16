@@ -65,3 +65,4 @@
 - [ ] Change `CURRENT_VERSION` in Options structures to `VERSION`
 - [ ] Every DeleteLocalRef after NewStringUTF(...) must perform a null check! 
 - [ ] Rewrite the callbacks
+- [ ] All places that have `type foo(References **out)`, should return weak reference unless specified

@@ -426,12 +426,22 @@ void j_atomic_long_set(JNIEnv *env, long val, jobject outAL)
 /** FOR DEBUG: inspect object class */
 void __debug_inspect(JNIEnv *env, jobject obj)
 {
-    __debug_inspect2(env, obj, "obj");
+    __debug_inspect2(env, obj, "obj", NULL);
 }
 
-void __debug_inspect2(JNIEnv *env, jobject obj, const char *message)
+void __debug_inspect2(JNIEnv *env, jobject obj, const char *message, const char *fname)
 {
-    printf("------------------ INSPECT %s(%p) ----------------- \n", message, obj);
+    FILE *fout = NULL;
+    if (fname != NULL)
+    {
+        fout = fopen(fname, "a");
+    }
+    if (fout == NULL)
+    {
+        fout = stderr;
+    }
+
+    fprintf(fout, "------------------ INSPECT %s(%p) ----------------- \n", message, obj);
     jclass clz = (*env)->GetObjectClass(env, obj);
     // First get the class object
     jmethodID midGetClass = (*env)->GetMethodID(env, clz, "getClass", "()Ljava/lang/Class;");
@@ -444,9 +454,9 @@ void __debug_inspect2(JNIEnv *env, jobject obj, const char *message)
 
     // Call the getName() to get a jstring object back
     jstring objClassName = (jstring)(*env)->CallObjectMethod(env, clsObj, midGetName);
-    printf("qqqqq class of the object[%p]: %s \n", obj, j_copy_of_jstring(env, objClassName, true));
+    fprintf(fout, "qqqqq class of the object[%p]: %s \n", obj, j_copy_of_jstring(env, objClassName, true));
     (*env)->CallObjectMethod(env, clz, midGetName);
-    printf("------------------ INSPECTION (%s) end ----------------- \n", message);
+    fprintf(fout, "------------------ INSPECTION (%s) end ----------------- \n", message);
     (*env)->DeleteLocalRef(env, objClassName);
     (*env)->DeleteLocalRef(env, clzClz);
     (*env)->DeleteLocalRef(env, clsObj);

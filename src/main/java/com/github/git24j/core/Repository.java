@@ -516,7 +516,7 @@ public class Repository extends CAutoCloseable {
      */
     @Nonnull
     public Optional<Reference> head() {
-        Reference out = new Reference(false, 0);
+        Reference out = new Reference(true, 0);
         int e = jniHead(out._rawPtr, getRawPointer());
         Error.throwIfNeeded(e);
         if (ENOTFOUND.getCode() == e || EUNBORNBRANCH.getCode() == e) {
@@ -535,7 +535,7 @@ public class Repository extends CAutoCloseable {
      */
     @Nonnull
     public Optional<Reference> headForWorkTree(@Nonnull String name) {
-        Reference out = new Reference(false, 0);
+        Reference out = new Reference(true, 0);
         int e = jniHeadForWorktree(out._rawPtr, _rawPtr.get(), name);
         if (ENOTFOUND.getCode() == e || EUNBORNBRANCH.getCode() == e) {
             return Optional.empty();
