@@ -1,10 +1,13 @@
 language: java
+os:
+ - linux
+ - osx
 jdk:
- - openjdk8
+ - openjdk9
 
 before_install:
-  - sudo apt-get update
-  - sudo apt-get -y install cmake libssl-dev maven
+  - if [ "$TRAVIS_OS_NAME" = "linux" ]; then sudo apt-get update; fi
+  - if [ "$TRAVIS_OS_NAME" = "linux" ]; then sudo apt-get -y install cmake libssl-dev maven; fi
   - git submodule update --init --recursive
   - rm -rf target/
   - make

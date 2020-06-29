@@ -113,7 +113,8 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Worktree_jniPrune)(JNIEnv *env, jclass obj,
 /** int git_worktree_prune_init_options(git_worktree_prune_options *opts, unsigned int version); */
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Worktree_jniPruneInitOptions)(JNIEnv *env, jclass obj, jlong optsPtr, jint version)
 {
-    int r = git_worktree_prune_init_options((git_worktree_prune_options *)optsPtr, version);
+    int r = git_worktree_prune_options_init((git_worktree_prune_options *)optsPtr, version);
+    // int r = git_worktree_prune_init_options((git_worktree_prune_options *)optsPtr, version);
     return r;
 }
 

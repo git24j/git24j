@@ -24,7 +24,6 @@ public abstract class CAutoReleasable {
     @Override
     protected void finalize() throws Throwable {
         if (!_isWeak && _rawPtr.get() > 0) {
-            System.out.printf("deallocating<%d>: %s %n", _rawPtr.get(), this.getClass().asSubclass(this.getClass()));
             freeOnce(_rawPtr.getAndSet(0));
         }
         super.finalize();
