@@ -528,14 +528,16 @@ JNIEXPORT void JNICALL J_MAKE_METHOD(Diff_jniFormatEmailOptionsFree)(JNIEnv *env
 /** int git_diff_patchid_init_options(git_diff_patchid_options *opts, unsigned int version); */
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Diff_jniPatchidInitOptions)(JNIEnv *env, jclass obj, jlong optsPtr, jint version)
 {
-    int r = git_diff_patchid_init_options((git_diff_patchid_options *)optsPtr, version);
+    int r = git_diff_patchid_options_init((git_diff_patchid_options *)optsPtr, version);
+    // int r = git_diff_patchid_init_options((git_diff_patchid_options *)optsPtr, version);
     return r;
 }
 /** new git_diff_patchid_options*/
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Diff_jniPatchidOptionsNew)(JNIEnv *env, jclass obj, jobject outPtr, jint version)
 {
     git_diff_patchid_options *opts = (git_diff_patchid_options *)malloc(sizeof(git_diff_patchid_options));
-    int r = git_diff_patchid_init_options(opts, version);
+    int r = git_diff_patchid_options_init(opts, version);
+    // int r = git_diff_patchid_init_options(opts, version);
     (*env)->CallVoidMethod(env, outPtr, jniConstants->midAtomicLongSet, (long)opts);
     return r;
 }
