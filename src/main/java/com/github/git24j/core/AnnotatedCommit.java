@@ -33,7 +33,8 @@ public class AnnotatedCommit extends CAutoReleasable {
      * @throws GitException git error
      */
     public static AnnotatedCommit fromRef(Repository repo, Reference ref) {
-        AnnotatedCommit commit = new AnnotatedCommit(false, 0);
+        // FIXME: api doc suggests `fromRef` returns a strong ref, but poractice suggests otherwise
+        AnnotatedCommit commit = new AnnotatedCommit(true, 0);
         Error.throwIfNeeded(jniFromRef(commit._rawPtr, repo.getRawPointer(), ref.getRawPointer()));
         return commit;
     }
