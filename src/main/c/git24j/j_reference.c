@@ -134,11 +134,19 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Reference_jniCreateMatching)(JNIEnv *env, j
     char *log_message = j_copy_of_jstring(env, logMessage, true);
     git_oid c_oid;
     j_git_oid_from_java(env, oid, &c_oid);
-    git_oid current_id;
-    j_git_oid_from_java(env, currentId, &current_id);
-    int e = git_reference_create_matching(&c_out, (git_repository *)repoPtr, c_name, &c_oid, force, &current_id, log_message);
+    git_oid *current_id = NULL;
+    if (currentId != NULL)
+    {
+        current_id = (git_oid *)malloc(sizeof(git_oid));
+        j_git_oid_from_java(env, currentId, current_id);
+    }
+
+    // int e = git_reference_create_matching(&c_out, (git_repository *)repoPtr, c_name, &c_oid, force, &current_id, log_message);
+    int e = git_reference_create_matching(&c_out, (git_repository *)repoPtr, c_name, &c_oid, force, current_id, log_message);
+    (*env)->CallVoidMethod(env, outRef, jniConstants->midAtomicLongSet, (long)c_out);
     free(c_name);
     free(log_message);
+    free(current_id);
     return e;
 }
 /**const git_oid * git_reference_target(const git_reference *ref); */

@@ -23,7 +23,7 @@ void j_save_revspec_c_value(JNIEnv *env, git_revspec *rev_spec, jobject revSpec)
     (*env)->DeleteLocalRef(env, clz);
 }
 
-JNIEXPORT jint JNICALL J_MAKE_METHOD(Revparse_jniCall)(JNIEnv *env, jclass obj, jobject revspec, jlong repoPtr, jstring spec)
+JNIEXPORT jint JNICALL J_MAKE_METHOD(Revparse_jniLookup)(JNIEnv *env, jclass obj, jobject revspec, jlong repoPtr, jstring spec)
 {
     git_revspec c_revspec;
     char *c_spec = j_copy_of_jstring(env, spec, false);

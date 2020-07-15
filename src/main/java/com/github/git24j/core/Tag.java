@@ -264,7 +264,8 @@ public class Tag extends GitObject {
     }
 
     /**
-     * Create a new tag in the repository from a buffer
+     * Create a new tag in the repository from a buffer. To see what the "buffer" should look like:
+     * {@code git cat-file -p v0.1}
      *
      * @param repo Repository where to store the tag
      * @param buffer Raw tag data

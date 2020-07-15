@@ -52,6 +52,23 @@ public class TagTest extends TestBase {
     }
 
     @Test
+    public void createFromBuffer() {
+        try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {
+            Oid id =
+                    Tag.createFromBuffer(
+                            testRepo,
+                            "object 67a36754360b373d391af2182f9ad8929fed54d8\n"
+                                    + "type commit\n"
+                                    + "tag v0.2\n"
+                                    + "tagger Shijing Lu <shijing.lu@gmail.com> 1569090490 -0400\n"
+                                    + "\n"
+                                    + "second tag\n",
+                            false);
+            Assert.assertFalse(id.isEmpty());
+        }
+    }
+
+    @Test
     public void annotatedCreate() {
         try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {
             Oid out =

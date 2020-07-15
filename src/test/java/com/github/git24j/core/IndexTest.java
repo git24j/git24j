@@ -16,7 +16,6 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.commons.io.FileUtils;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -132,6 +131,16 @@ public class IndexTest extends TestBase {
     }
 
     @Test
+    public void getEntryByPath() {
+        try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {
+            try (Index idx = testRepo.index()) {
+                Index.Entry entry = idx.getEntryByPath("a", Index.Stage.NORMAL);
+                Assert.assertNotNull(entry);
+            }
+        }
+    }
+
+    @Test
     public void clear() {
         try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {
             try (Index idx = testRepo.index()) {
@@ -146,7 +155,7 @@ public class IndexTest extends TestBase {
             try (Index idx = testRepo.index()) {
                 Index.Entry e1 = Index.Entry.getByIndex(idx, 0);
                 Assert.assertNotNull(e1);
-                Index.Entry e2 = Index.Entry.getByPath(idx, "a", 0);
+                Index.Entry e2 = Index.Entry.getByPath(idx, "a", Index.Stage.NORMAL);
                 Assert.assertNotNull(e2);
             }
         }
@@ -289,6 +298,20 @@ public class IndexTest extends TestBase {
         try (Repository testRepo = TestRepo.CONFLICT.tempRepo(folder)) {
             try (Index idx = testRepo.index()) {
                 Assert.assertEquals(testRepo.workdir().resolve(".git/index"), idx.path());
+            }
+        }
+    }
+
+    @Test
+    public void iterator() {
+        try (Repository testRepo = TestRepo.CONFLICT.tempRepo(folder)) {
+            try (Index idx = testRepo.index()) {
+                Index.Iterator idxIter = Index.Iterator.of(idx);
+                int count = 0;
+                for (Index.Entry entry = idxIter.next(); entry != null; entry = idxIter.next()) {
+                    count += 1;
+                }
+                Assert.assertEquals(count, idx.entryCount());
             }
         }
     }

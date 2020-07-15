@@ -62,7 +62,8 @@ public class GitObjectTest extends TestBase {
     public void dup() {
         Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder);
         GitObject obj = Revparse.single(testRepo, "HEAD");
-        GitObject copy = obj.dup();
+        GitObject obj2 = new GitObject(true, obj.getRawPointer());
+        GitObject copy = obj2.dup();
         Assert.assertEquals(copy.shortId().getPtr(), obj.shortId().getPtr());
     }
 }

@@ -5,10 +5,13 @@ import static com.github.git24j.core.GitException.ErrorCode.ITEROVER;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.EnumSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.BiConsumer;
+import javax.annotation.CheckForNull;
+import javax.annotation.Nonnull;
 
 public class Index extends CAutoCloseable {
     protected Index(long rawPointer) {
@@ -344,7 +347,8 @@ public class Index extends CAutoCloseable {
         return Entry.getByIndex(this, n);
     }
 
-    public Entry getEntryByPath(String path, int stage) {
+    @CheckForNull
+    public Entry getEntryByPath(@Nonnull String path, @Nonnull Stage stage) {
         return Entry.getByPath(this, path, stage);
     }
 
@@ -656,8 +660,10 @@ public class Index extends CAutoCloseable {
          * @param stage stage to search
          * @return the entry or null if it was not found
          */
-        public static Entry getByPath(Index index, String path, int stage) {
-            long ptr = Index.jniGetByPath(index.getRawPointer(), path, stage);
+        @CheckForNull
+        public static Entry getByPath(
+                @Nonnull Index index, @Nonnull String path, @Nonnull Stage stage) {
+            long ptr = Index.jniGetByPath(index.getRawPointer(), path, stage.getBit());
             if (ptr == 0) {
                 return null;
             }
@@ -688,27 +694,34 @@ public class Index extends CAutoCloseable {
         }
     }
 
-    public static class Iterator {
+    public static class Iterator extends CAutoReleasable {
         private final AtomicLong _ptr = new AtomicLong();
 
-        Iterator(long rawPointer) {
-            _ptr.set(rawPointer);
-        }
-
-        public Iterator(Index index) {
-            Index.jniIteratorNew(_ptr, index.getRawPointer());
-        }
-
-        public Entry next() {
-            Entry nextEntry = new Entry(0);
-            Index.jniIteratorNext(nextEntry._ptr, _ptr.get());
-            return nextEntry;
+        protected Iterator(boolean isWeak, long rawPtr) {
+            super(isWeak, rawPtr);
         }
 
         @Override
-        protected void finalize() throws Throwable {
-            Index.jniIteratorFree(_ptr.get());
-            super.finalize();
+        protected void freeOnce(long cPtr) {
+            Index.jniIteratorFree(cPtr);
+        }
+
+        @Nonnull
+        public static Iterator of(@Nonnull Index index) {
+            Iterator iterator = new Iterator(false, 0);
+            Error.throwIfNeeded(Index.jniIteratorNew(iterator._ptr, index.getRawPointer()));
+            return iterator;
+        }
+
+        @CheckForNull
+        public Entry next() {
+            Entry nextEntry = new Entry(0);
+            int e = Index.jniIteratorNext(nextEntry._ptr, _ptr.get());
+            if (e == ITEROVER.getCode()) {
+                return null;
+            }
+            Error.throwIfNeeded(e);
+            return nextEntry;
         }
     }
 
@@ -749,6 +762,38 @@ public class Index extends CAutoCloseable {
             }
             Error.throwIfNeeded(e);
             return conflict;
+        }
+    }
+
+    public enum Stage implements IBitEnum {
+        /**
+         * Match any index stage.
+         *
+         * <p>Some index APIs take a stage to match; pass this value to match any entry matching the
+         * path regardless of stage.
+         */
+        ANY(-1),
+
+        /** A normal staged file in the index. */
+        NORMAL(0),
+
+        /** The ancestor side of a conflict. */
+        ANCESTOR(1),
+
+        /** The "ours" side of a conflict. */
+        OURS(2),
+
+        /** The "theirs" side of a conflict. */
+        THEIRS(3);
+        private final int _bit;
+
+        Stage(int bit) {
+            _bit = bit;
+        }
+
+        @Override
+        public int getBit() {
+            return 0;
         }
     }
 }

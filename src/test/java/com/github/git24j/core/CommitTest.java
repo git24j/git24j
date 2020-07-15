@@ -3,7 +3,6 @@ package com.github.git24j.core;
 import java.time.Instant;
 import java.util.Collections;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -28,7 +27,7 @@ public class CommitTest extends TestBase {
     @Test
     public void lookupPrefix() {
         try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {
-            Commit commit = Commit.lookup(testRepo, Oid.of(MASTER_HASH.substring(0, 9)));
+            Commit commit = Commit.lookupPrefix(testRepo, Oid.of(MASTER_HASH.substring(0, 9)));
             Assert.assertEquals(MASTER_HASH, commit.id().toString());
         }
     }

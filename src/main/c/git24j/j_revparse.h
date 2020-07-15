@@ -10,7 +10,7 @@ extern "C"
 #endif
 
     /**int git_revparse(git_revspec *revspec, git_repository *repo, const char *spec); */
-    JNIEXPORT jint JNICALL J_MAKE_METHOD(Revparse_jniCall)(JNIEnv *env, jclass obj, jobject revspec, jlong repoPtr, jstring spec);
+    JNIEXPORT jint JNICALL J_MAKE_METHOD(Revparse_jniLookup)(JNIEnv *env, jclass obj, jobject revspec, jlong repoPtr, jstring spec);
 
     /** int git_revparse_single(git_object **out, git_repository *repo, const char *spec); */
     JNIEXPORT jint JNICALL J_MAKE_METHOD(Revparse_jniSingle)(JNIEnv *env, jclass obj, jobject outObj, jlong repoPtr, jstring spec);

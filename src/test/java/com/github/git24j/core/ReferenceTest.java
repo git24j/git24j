@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -97,21 +96,15 @@ public class ReferenceTest extends TestBase {
         }
     }
 
-    /** TODO: libgit2's this function may have been wrong. */
     @Test
     public void createMatching() {
-        //        try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {
-        //            Reference ref1 =
-        //                    Reference.createMatching(
-        //                            testRepo,
-        //                            REF_NAME_DEV,
-        //                            Oid.of(OID_STR_DEV),
-        //                            false,
-        //                            Oid.of(OID_STR_DEV),
-        //                            "some log message");
-        //
-        //            Assert.assertEquals(REF_NAME_DEV, ref1.name());
-        //        }
+        try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {
+            Reference ref1 =
+                    Reference.createMatching(
+                            testRepo, "refs/tag/vxyz", Oid.of(OID_STR_DEV), false, null, null);
+
+            Assert.assertEquals("refs/tag/vxyz", ref1.name());
+        }
     }
 
     /** TODO: find a real case that tag can be peeled. */
