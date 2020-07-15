@@ -4,15 +4,15 @@ import java.util.EnumSet;
 import java.util.concurrent.atomic.AtomicLong;
 
 public class Revparse {
-    static native int jniCall(Revspec revspec, long repoPtr, String spec);
+    static native int jniLookup(Revspec revspec, long repoPtr, String spec);
 
     static native int jniSingle(AtomicLong outObj, long repoPtr, String spec);
 
     static native int jniExt(AtomicLong outObj, AtomicLong outRef, long repoPtr, String spec);
 
-    public static Revspec call(Repository repository, String spec) {
+    public static Revspec lookup(Repository repository, String spec) {
         Revspec revspec = new Revspec(null, null, EnumSet.noneOf(Mode.class));
-        Error.throwIfNeeded(jniCall(revspec, repository.getRawPointer(), spec));
+        Error.throwIfNeeded(jniLookup(revspec, repository.getRawPointer(), spec));
         return revspec;
     }
 

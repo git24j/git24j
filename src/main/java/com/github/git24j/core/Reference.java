@@ -2,15 +2,7 @@ package com.github.git24j.core;
 
 import static com.github.git24j.core.GitException.ErrorCode;
 
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.OpenOption;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Objects;
@@ -24,9 +16,6 @@ import javax.annotation.Nullable;
 public class Reference extends CAutoReleasable {
     protected Reference(boolean isWeak, long rawPtr) {
         super(isWeak, rawPtr);
-        if (!isWeak) {
-            System.out.println(Thread.currentThread().getStackTrace());
-        }
     }
 
     /** const git_oid * git_reference_target(const git_reference *ref); */
@@ -237,8 +226,7 @@ public class Reference extends CAutoReleasable {
             String logMessage);
 
     /**
-     * Conditionally create new direct reference Note: this methods is untested, use with caution
-     * (you are welcome to contribute a test here).
+     * Conditionally create new direct reference.
      *
      * @param repo Repository where that reference will live
      * @param name The name of the reference
@@ -870,7 +858,7 @@ public class Reference extends CAutoReleasable {
 
     @Override
     public int hashCode() {
-        return Objects.hash(_rawPtr);
+        return Objects.hashCode(_rawPtr);
     }
 
     public enum Format implements IBitEnum {

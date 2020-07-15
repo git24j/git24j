@@ -48,10 +48,6 @@ public class Oid {
         return new String(hexChars);
     }
 
-    private static String bytesToHex(byte[] bytes) {
-        return bytesToHex(bytes, bytes.length);
-    }
-
     public static byte[] hexStringToByteArray(String s) {
         int len = s.length();
         byte[] data = new byte[len / 2];

@@ -6,6 +6,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 public class Branch {
     static native int jniCreate(
@@ -268,10 +269,7 @@ public class Branch {
      * @param upstreamName remote-tracking or local branch to set as upstream.
      * @return 0 on success; GIT_ENOTFOUND if there's no branch named `branch_name` or an error code
      */
-    public static void setUpstream(Reference branch, String upstreamName) {
-        if (branch == null) {
-            return;
-        }
+    public static void setUpstream(@Nonnull Reference branch, @Nullable String upstreamName) {
         Error.throwIfNeeded(jniSetUpstream(branch.getRawPointer(), upstreamName));
     }
 

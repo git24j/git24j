@@ -4,7 +4,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -137,6 +136,19 @@ public class BranchTest extends TestBase {
         try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {
             String name = Branch.upstreamRemote(testRepo, "master");
             Assert.assertNull(name);
+        }
+    }
+
+    @Test
+    public void setUpstream() {
+        try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {
+            Reference ref =
+                    Branch.create(
+                            testRepo,
+                            "test_branch",
+                            Commit.lookup(testRepo, Oid.of(MASTER_HASH)),
+                            false);
+            Branch.setUpstream(ref, "master");
         }
     }
 }

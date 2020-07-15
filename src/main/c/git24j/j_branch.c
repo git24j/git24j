@@ -112,7 +112,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Branch_jniUpstream)(JNIEnv *env, jclass obj
 /**int git_branch_set_upstream(git_reference *branch, const char *upstream_name); */
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Branch_jniSetUpstream)(JNIEnv *env, jclass obj, jlong refPtr, jstring upstreamName)
 {
-    char *upstream_name = j_copy_of_jstring(env, upstreamName, false);
+    char *upstream_name = j_copy_of_jstring(env, upstreamName, true);
     int e = git_branch_set_upstream((git_reference *)refPtr, upstream_name);
     free(upstream_name);
     return e;
