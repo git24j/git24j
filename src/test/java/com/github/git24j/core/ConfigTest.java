@@ -88,23 +88,23 @@ public class ConfigTest extends TestBase {
         }
     }
 
-//    @Test
-//    public void openOnDisk() throws IOException {
-//        File f = folder.newFile("ext.config");
-//        FileUtils.writeLines(f, CONFIG_LINES);
-//        try (Config cfg = Config.openOndisk(f.toPath())) {
-//            Assert.assertFalse(cfg.getBool("http.sslVerify").orElse(true));
-//        }
-//    }
-//
-//    @Test
-//    public void openLocal() throws IOException {
-//        File f = folder.newFile("ext.config");
-//        FileUtils.writeLines(f, CONFIG_LINES);
-//        try (Config parent = Config.openOndisk(f.toPath())) {
-//            Config.openLevel(Config.ConfigLevel.LOCAL, parent);
-//        }
-//    }
+    @Test
+    public void openOnDisk() throws IOException {
+        File f = folder.newFile("ext.config");
+        FileUtils.writeLines(f, CONFIG_LINES);
+        try (Config cfg = Config.openOndisk(f.toPath())) {
+            Assert.assertFalse(cfg.getBool("http.sslVerify").orElse(true));
+        }
+    }
+
+    @Test
+    public void openLocal() throws IOException {
+        File f = folder.newFile("ext.config");
+        FileUtils.writeLines(f, CONFIG_LINES);
+        try (Config parent = Config.openOndisk(f.toPath())) {
+            Config.openLevel(Config.ConfigLevel.LOCAL, parent);
+        }
+    }
 
     @Test
     public void openGlobal() throws IOException {
@@ -112,9 +112,9 @@ public class ConfigTest extends TestBase {
         Config.openGlobal(parent);
     }
 
-    @Test
-    public void snapshot() {
-        Assert.assertFalse(
-                Config.openDefault().snapshot().getBool("does.not.exist.38yt1").isPresent());
-    }
+//    @Test
+//    public void snapshot() {
+//        Assert.assertFalse(
+//                Config.openDefault().snapshot().getBool("does.not.exist.38yt1").isPresent());
+//    }
 }
