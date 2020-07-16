@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
+import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 
 public class Tag extends GitObject {
@@ -22,7 +23,7 @@ public class Tag extends GitObject {
 
     static native int jniTarget(AtomicLong outTargetPtr, long tagPtr);
 
-    static native void jniTargetId(long tagPtr, Oid outOid);
+    static native byte[] jniTargetId(long tagPtr);
 
     static native int jniTargetType(long tagPtr);
 
@@ -226,10 +227,9 @@ public class Tag extends GitObject {
      *
      * @return target OID
      */
+    @CheckForNull
     public Oid targetId() {
-        Oid oid = new Oid();
-        jniTargetId(getRawPointer(), oid);
-        return oid;
+        return Oid.ofNullable(jniTargetId(getRawPointer()));
     }
 
     /**

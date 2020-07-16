@@ -112,10 +112,10 @@ JNIEXPORT jstring JNICALL J_MAKE_METHOD(Index_jniPath)(JNIEnv *env, jclass obj, 
 }
 
 /** const git_oid * git_index_checksum(git_index *index); */
-JNIEXPORT void JNICALL J_MAKE_METHOD(Index_jniChecksum)(JNIEnv *env, jclass obj, jobject outOid, jlong indexPtr)
+JNIEXPORT jbyteArray JNICALL J_MAKE_METHOD(Index_jniChecksum)(JNIEnv *env, jclass obj, jlong indexPtr)
 {
     const git_oid *c_oid = git_index_checksum((git_index *)indexPtr);
-    j_git_oid_to_java(env, c_oid, outOid);
+    return j_git_oid_to_bytearray(env, c_oid);
 }
 
 /** int git_index_read_tree(git_index *index, const git_tree *tree); */

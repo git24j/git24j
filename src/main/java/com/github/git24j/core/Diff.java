@@ -1,16 +1,16 @@
 package com.github.git24j.core;
 
-import javax.annotation.CheckForNull;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import static com.github.git24j.core.Internals.JFCallback;
+import static com.github.git24j.core.Internals.JJCallback;
+import static com.github.git24j.core.Internals.JJJCallback;
+
 import java.nio.file.Path;
 import java.util.EnumSet;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
-
-import static com.github.git24j.core.Internals.JFCallback;
-import static com.github.git24j.core.Internals.JJCallback;
-import static com.github.git24j.core.Internals.JJJCallback;
+import javax.annotation.CheckForNull;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 public class Diff extends CAutoReleasable {
     AtomicLong _rawPtr = new AtomicLong();

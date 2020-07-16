@@ -46,10 +46,10 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Tag_jniTarget)(JNIEnv *env, jclass obj, job
     return e;
 }
 /** const git_oid * git_tag_target_id(const git_tag *tag); */
-JNIEXPORT void JNICALL J_MAKE_METHOD(Tag_jniTargetId)(JNIEnv *env, jclass obj, jlong tagPtr, jobject outOid)
+JNIEXPORT jbyteArray JNICALL J_MAKE_METHOD(Tag_jniTargetId)(JNIEnv *env, jclass obj, jlong tagPtr)
 {
     const git_oid *c_oid = git_tag_target_id((const git_tag *)tagPtr);
-    j_git_oid_to_java(env, c_oid, outOid);
+    return j_git_oid_to_bytearray(env, c_oid);
 }
 
 /** git_object_t git_tag_target_type(const git_tag *tag); */

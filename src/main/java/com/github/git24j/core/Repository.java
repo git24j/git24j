@@ -1,17 +1,17 @@
 package com.github.git24j.core;
 
-import javax.annotation.CheckForNull;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import static com.github.git24j.core.GitException.ErrorCode.ENOTFOUND;
+import static com.github.git24j.core.GitException.ErrorCode.EUNBORNBRANCH;
+
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.EnumSet;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
-
-import static com.github.git24j.core.GitException.ErrorCode.ENOTFOUND;
-import static com.github.git24j.core.GitException.ErrorCode.EUNBORNBRANCH;
+import javax.annotation.CheckForNull;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 public class Repository extends CAutoCloseable {
     public Repository(long rawPointer) {

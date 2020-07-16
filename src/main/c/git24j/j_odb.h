@@ -85,7 +85,7 @@ extern "C"
     JNIEXPORT void JNICALL J_MAKE_METHOD(Odb_jniObjectFree)(JNIEnv *env, jclass obj, jlong objectPtr);
 
     /** const git_oid * git_odb_object_id(git_odb_object *object); */
-    JNIEXPORT void JNICALL J_MAKE_METHOD(Odb_jniObjectId)(JNIEnv *env, jclass obj, jlong objectPtr, jobject outId);
+    JNIEXPORT jbyteArray JNICALL J_MAKE_METHOD(Odb_jniObjectId)(JNIEnv *env, jclass obj, jlong objectPtr);
 
     /** const void * git_odb_object_data(git_odb_object *object); */
     JNIEXPORT jlong JNICALL J_MAKE_METHOD(Odb_jniObjectData)(JNIEnv *env, jclass obj, jlong objectPtr);

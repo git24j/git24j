@@ -24,9 +24,9 @@ extern "C"
     /**int git_reference_create_matching(git_reference **out, git_repository *repo, const char *name, const git_oid *id, int force, const git_oid *current_id, const char *log_message); */
     JNIEXPORT jint JNICALL J_MAKE_METHOD(Reference_jniCreateMatching)(JNIEnv *env, jclass obj, jobject outRef, jlong repoPtr, jstring name, jobject oid, jint force, jobject currentId, jstring logMessage);
     /**const git_oid * git_reference_target(const git_reference *ref); */
-    JNIEXPORT void JNICALL J_MAKE_METHOD(Reference_jniTarget)(JNIEnv *env, jclass obj, jobject oid, jlong refPtr);
+    JNIEXPORT jbyteArray JNICALL J_MAKE_METHOD(Reference_jniTarget)(JNIEnv *env, jclass obj, jlong refPtr);
     /**const git_oid * git_reference_target_peel(const git_reference *ref); */
-    JNIEXPORT void JNICALL J_MAKE_METHOD(Reference_jniTargetPeel)(JNIEnv *env, jclass obj, jobject oid, jlong refPtr);
+    JNIEXPORT jbyteArray JNICALL J_MAKE_METHOD(Reference_jniTargetPeel)(JNIEnv *env, jclass obj, jlong refPtr);
     /**const char * git_reference_symbolic_target(const git_reference *ref); */
     JNIEXPORT jstring JNICALL J_MAKE_METHOD(Reference_jniSymbolicTarget)(JNIEnv *env, jclass obj, jlong refPtr);
     /**git_reference_t git_reference_type(const git_reference *ref); */

@@ -1,7 +1,9 @@
 package com.github.git24j.core;
 
 import java.util.Objects;
+import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 // TODO: change this class to immutable java object
 /**
@@ -26,6 +28,14 @@ public class Oid {
                     "Invalid Oid data, length must be <=20 for bytes or <=40 for hex string");
         }
         System.arraycopy(bytes, 0, this.id, 0, eSize);
+    }
+
+    @CheckForNull
+    public static Oid ofNullable(@Nullable byte[] bytes) {
+        if (bytes == null) {
+            return null;
+        }
+        return new Oid(bytes);
     }
 
     public static Oid of(@Nonnull byte[] bytes) {

@@ -259,10 +259,10 @@ JNIEXPORT void JNICALL J_MAKE_METHOD(Odb_jniObjectFree)(JNIEnv *env, jclass obj,
 }
 
 /** const git_oid * git_odb_object_id(git_odb_object *object); */
-JNIEXPORT void JNICALL J_MAKE_METHOD(Odb_jniObjectId)(JNIEnv *env, jclass obj, jlong objectPtr, jobject outId)
+JNIEXPORT jbyteArray JNICALL J_MAKE_METHOD(Odb_jniObjectId)(JNIEnv *env, jclass obj, jlong objectPtr)
 {
     const git_oid *c_oid = git_odb_object_id((git_odb_object *)objectPtr);
-    j_git_oid_to_java(env, c_oid, outId);
+    return j_git_oid_to_bytearray(env, c_oid);
 }
 
 /** const void * git_odb_object_data(git_odb_object *object); */

@@ -32,10 +32,10 @@ JNIEXPORT void JNICALL J_MAKE_METHOD(Blob_jniFree)(JNIEnv *env, jclass obj, long
 }
 
 /** const git_oid * git_blob_id(const git_blob *blob); */
-JNIEXPORT void JNICALL J_MAKE_METHOD(Blob_jniId)(JNIEnv *env, jclass obj, long blobPtr, jobject outId)
+JNIEXPORT jbyteArray JNICALL J_MAKE_METHOD(Blob_jniId)(JNIEnv *env, jclass obj, long blobPtr)
 {
     const git_oid *c_oid = git_blob_id((git_blob *)blobPtr);
-    j_git_oid_to_java(env, c_oid, outId);
+    return j_git_oid_to_bytearray(env, c_oid);
 }
 
 /** git_repository * git_blob_owner(const git_blob *blob); */

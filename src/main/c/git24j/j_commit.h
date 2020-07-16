@@ -54,7 +54,7 @@ extern "C"
     JNIEXPORT jint JNICALL J_MAKE_METHOD(Commit_jniTree)(JNIEnv *env, jclass obj, jobject outTreePtr, jlong commitPtr);
 
     /**const git_oid * git_commit_tree_id(const git_commit *commit); */
-    JNIEXPORT void JNICALL J_MAKE_METHOD(Commit_jniTreeId)(JNIEnv *env, jclass obj, jobject outOid, jlong commitPtr);
+    JNIEXPORT jbyteArray JNICALL J_MAKE_METHOD(Commit_jniTreeId)(JNIEnv *env, jclass obj, jlong commitPtr);
 
     /**unsigned int git_commit_parentcount(const git_commit *commit); */
     JNIEXPORT jint JNICALL J_MAKE_METHOD(Commit_jniParentCount)(JNIEnv *env, jclass obj, long commitPtr);
@@ -63,7 +63,7 @@ extern "C"
     JNIEXPORT jint JNICALL J_MAKE_METHOD(Commit_jniParent)(JNIEnv *env, jclass obj, jobject outPtr, long commitPtr, jint n);
 
     /**const git_oid * git_commit_parent_id(const git_commit *commit, unsigned int n); */
-    JNIEXPORT void JNICALL J_MAKE_METHOD(Commit_jniParentId)(JNIEnv *env, jclass obj, jobject outOid, jlong commitPtr, jint n);
+    JNIEXPORT jbyteArray JNICALL J_MAKE_METHOD(Commit_jniParentId)(JNIEnv *env, jclass obj, jlong commitPtr, jint n);
 
     /**int git_commit_nth_gen_ancestor(git_commit **ancestor, const git_commit *commit, unsigned int n); */
     JNIEXPORT jint JNICALL J_MAKE_METHOD(Commit_jniNthGenAncestor)(JNIEnv *env, jclass obj, jobject outPtr, jlong commitPtr, jint n);

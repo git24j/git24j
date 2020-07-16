@@ -18,7 +18,7 @@ extern "C"
     JNIEXPORT void JNICALL J_MAKE_METHOD(Blob_jniFree)(JNIEnv *env, jclass obj, long blobPtr);
 
     /** const git_oid * git_blob_id(const git_blob *blob); */
-    JNIEXPORT void JNICALL J_MAKE_METHOD(Blob_jniId)(JNIEnv *env, jclass obj, long blobPtr, jobject outId);
+    JNIEXPORT jbyteArray JNICALL J_MAKE_METHOD(Blob_jniId)(JNIEnv *env, jclass obj, long blobPtr);
 
     /** git_repository * git_blob_owner(const git_blob *blob); */
     JNIEXPORT jlong JNICALL J_MAKE_METHOD(Blob_jniOwner)(JNIEnv *env, jclass obj, long blobPtr);
