@@ -106,15 +106,16 @@ public class ConfigTest extends TestBase {
         }
     }
 
+    @Ignore
     @Test
     public void openGlobal() throws IOException {
         Config parent = Config.newConfig();
         Config.openGlobal(parent);
     }
 
-//    @Test
-//    public void snapshot() {
-//        Assert.assertFalse(
-//                Config.openDefault().snapshot().getBool("does.not.exist.38yt1").isPresent());
-//    }
+    @Test
+    public void snapshot() {
+        Assert.assertFalse(
+                Config.openDefault().snapshot().getBool("does.not.exist.38yt1").isPresent());
+    }
 }
