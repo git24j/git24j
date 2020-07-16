@@ -77,10 +77,10 @@ JNIEXPORT void JNICALL J_MAKE_METHOD(Submodule_jniFree)(JNIEnv *env, jclass obj,
 }
 
 /** const git_oid * git_submodule_head_id(git_submodule *submodule); */
-JNIEXPORT void JNICALL J_MAKE_METHOD(Submodule_jniHeadId)(JNIEnv *env, jclass obj, jlong submodulePtr, jobject outOid)
+JNIEXPORT jbyteArray JNICALL J_MAKE_METHOD(Submodule_jniHeadId)(JNIEnv *env, jclass obj, jlong submodulePtr)
 {
     const git_oid *c_oid = git_submodule_head_id((git_submodule *)submodulePtr);
-    j_git_oid_to_java(env, c_oid, outOid);
+    return j_git_oid_to_bytearray(env, c_oid);
 }
 
 /** git_submodule_ignore_t git_submodule_ignore(git_submodule *submodule); */
@@ -91,10 +91,10 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Submodule_jniIgnore)(JNIEnv *env, jclass ob
 }
 
 /** const git_oid * git_submodule_index_id(git_submodule *submodule); */
-JNIEXPORT void JNICALL J_MAKE_METHOD(Submodule_jniIndexId)(JNIEnv *env, jclass obj, jlong submodulePtr, jobject outOid)
+JNIEXPORT jbyteArray JNICALL J_MAKE_METHOD(Submodule_jniIndexId)(JNIEnv *env, jclass obj, jlong submodulePtr)
 {
     const git_oid *c_oid = git_submodule_index_id((git_submodule *)submodulePtr);
-    j_git_oid_to_java(env, c_oid, outOid);
+    return j_git_oid_to_bytearray(env, c_oid);
 }
 
 /** int git_submodule_init(git_submodule *submodule, int overwrite); */

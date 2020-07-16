@@ -100,13 +100,12 @@ public class OdbObject extends CAutoReleasable {
      */
     @Nonnull
     public Oid id() {
-        Oid out = new Oid();
-        Odb.jniObjectId(getRawPointer(), out);
-        if (out.isEmpty()) {
+        byte[] bytes = Odb.jniObjectId(getRawPointer());
+        if (bytes == null) {
             throw new GitException(
                     GitException.ErrorClass.ODB, "Could not get id of the given OdbObject");
         }
-        return out;
+        return Oid.of(bytes);
     }
 
     /** @return the type of an ODB object */

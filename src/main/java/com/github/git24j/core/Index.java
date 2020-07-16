@@ -5,7 +5,6 @@ import static com.github.git24j.core.GitException.ErrorCode.ITEROVER;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.EnumSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
@@ -65,7 +64,7 @@ public class Index extends CAutoCloseable {
 
     static native String jniPath(long indexPtr);
 
-    static native void jniChecksum(Oid outOid, long indexPtr);
+    static native byte[] jniChecksum(long indexPtr);
 
     static native int jniReadTree(long indexPtr, long treePtr);
 
@@ -252,10 +251,15 @@ public class Index extends CAutoCloseable {
      *
      * @return the checksum of the index
      */
+    @Nonnull
     public Oid checksum() {
-        Oid oid = new Oid();
-        jniChecksum(oid, getRawPointer());
-        return oid;
+        byte[] bytes = jniChecksum(getRawPointer());
+        if (bytes == null) {
+            throw new GitException(
+                    GitException.ErrorClass.INDEX,
+                    "git_index_checksum returned NULL unexpectedly.");
+        }
+        return Oid.of(bytes);
     }
 
     /**

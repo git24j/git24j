@@ -15,7 +15,7 @@ public class Blob extends GitObject {
 
     static native int jniLookupPrefix(AtomicLong outBlob, long repoPtr, Oid oid, int len);
 
-    static native void jniId(long blobPtr, Oid oid);
+    static native byte[] jniId(long blobPtr);
 
     static native long jniOwner(long blobPtr);
 
@@ -171,12 +171,10 @@ public class Blob extends GitObject {
     }
 
     /** Get the id of a blob. */
+    @CheckForNull
     @Override
-    @Nonnull
     public Oid id() {
-        Oid oid = new Oid();
-        jniId(getRawPointer(), oid);
-        return oid;
+        return Oid.ofNullable(jniId(getRawPointer()));
     }
 
     /** Get the repository that contains the blob. */

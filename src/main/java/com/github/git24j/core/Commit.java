@@ -6,6 +6,7 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
+import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
@@ -236,7 +237,7 @@ public class Commit extends GitObject {
         return new Tree(false, outTreePtr.get());
     }
 
-    static native void jniTreeId(Oid outOid, long commitPtr);
+    static native byte[] jniTreeId(long commitPtr);
 
     /**
      * Get the id of the tree pointed to by a commit. This differs from `tree()` in that no attempts
@@ -244,10 +245,9 @@ public class Commit extends GitObject {
      *
      * @return the id of tree pointed to by commit.
      */
+    @CheckForNull
     public Oid treeId() {
-        Oid oid = new Oid();
-        jniTreeId(oid, getRawPointer());
-        return oid;
+        return Oid.ofNullable(jniTreeId(getRawPointer()));
     }
 
     static native int jniParentCount(long commitPtr);
@@ -276,7 +276,7 @@ public class Commit extends GitObject {
         return new Commit(false, outPtr.get());
     }
 
-    static native void jniParentId(Oid outOid, long commitPtr, int n);
+    static native byte[] jniParentId(long commitPtr, int n);
 
     /**
      *
@@ -290,10 +290,9 @@ public class Commit extends GitObject {
      * @param n the position of the parent (from 0 to `parentcount`)
      * @return the id of the parent, NULL on error.
      */
+    @CheckForNull
     public Oid parentId(int n) {
-        Oid outOid = new Oid();
-        jniParentId(outOid, getRawPointer(), n);
-        return outOid;
+        return Oid.ofNullable(jniParentId(getRawPointer(), n));
     }
 
     static native int jniNthGenAncestor(AtomicLong outPtr, long commitPtr, int n);

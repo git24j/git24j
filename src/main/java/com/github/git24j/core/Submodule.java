@@ -1,8 +1,7 @@
 package com.github.git24j.core;
 
-import javax.annotation.CheckForNull;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import static com.github.git24j.core.GitException.ErrorCode.ENOTFOUND;
+
 import java.net.URI;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -10,8 +9,9 @@ import java.util.EnumSet;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
-
-import static com.github.git24j.core.GitException.ErrorCode.ENOTFOUND;
+import javax.annotation.CheckForNull;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 public class Submodule extends CAutoReleasable {
     protected Submodule(boolean isWeak, long rawPtr) {
@@ -282,7 +282,10 @@ public class Submodule extends CAutoReleasable {
      * @throws GitException git errors
      */
     public static void foreach(@Nonnull Repository repo, @Nonnull Callback callback) {
-        Error.throwIfNeeded(jniForeach(repo.getRawPointer(), (name, ptr) -> callback.accept(new Submodule(true, ptr), name)));
+        Error.throwIfNeeded(
+                jniForeach(
+                        repo.getRawPointer(),
+                        (name, ptr) -> callback.accept(new Submodule(true, ptr), name)));
     }
 
     /** -------- Jni Signature ---------- */
@@ -407,21 +410,16 @@ public class Submodule extends CAutoReleasable {
     static native void jniFree(long submodule);
 
     /** const git_oid * git_submodule_head_id(git_submodule *submodule); */
-    static native void jniHeadId(long submodule, Oid outOid);
+    static native byte[] jniHeadId(long submodule);
 
     /**
      * Get the OID for the submodule in the current HEAD tree.
      *
      * @return Pointer to git_oid or empty if submodule is not in the HEAD.
      */
-    @Nonnull
-    public Optional<Oid> headId() {
-        Oid oid = new Oid();
-        jniHeadId(getRawPointer(), oid);
-        if (oid.getId() == null) {
-            return Optional.empty();
-        }
-        return Optional.of(oid);
+    @CheckForNull
+    public Oid headId() {
+        return Oid.ofNullable(jniHeadId(getRawPointer()));
     }
 
     /** git_submodule_ignore_t git_submodule_ignore(git_submodule *submodule); */
@@ -460,21 +458,16 @@ public class Submodule extends CAutoReleasable {
     }
 
     /** const git_oid * git_submodule_index_id(git_submodule *submodule); */
-    static native void jniIndexId(long submodule, Oid outOid);
+    static native byte[] jniIndexId(long submodule);
 
     /**
      * Get the OID for the submodule in the index.
      *
      * @return Pointer to git_oid or NULL if submodule is not in index.
      */
-    @Nonnull
-    public Optional<Oid> indexId() {
-        Oid out = new Oid();
-        jniIndexId(getRawPointer(), out);
-        if (out.getId() == null) {
-            return Optional.empty();
-        }
-        return Optional.of(out);
+    @CheckForNull
+    public Oid indexId() {
+        return Oid.ofNullable(jniIndexId(getRawPointer()));
     }
 
     /** int git_submodule_init(git_submodule *submodule, int overwrite); */

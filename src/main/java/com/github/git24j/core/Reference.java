@@ -19,7 +19,7 @@ public class Reference extends CAutoReleasable {
     }
 
     /** const git_oid * git_reference_target(const git_reference *ref); */
-    static native void jniTarget(Oid oid, long refPtr);
+    static native byte[] jniTarget(long refPtr);
 
     static native int jniLookup(AtomicLong outRef, long repoPtr, String name);
 
@@ -259,7 +259,7 @@ public class Reference extends CAutoReleasable {
         return new Reference(false, outRef.get());
     }
 
-    static native void jniTargetPeel(Oid oid, long refPtr);
+    static native byte[] jniTargetPeel(long refPtr);
 
     static native String jniSymbolicTarget(long refPtr);
 
@@ -595,9 +595,7 @@ public class Reference extends CAutoReleasable {
      */
     @CheckForNull
     public Oid targetPeel() {
-        Oid oid = new Oid();
-        jniTargetPeel(oid, this.getRawPointer());
-        return oid.isEmpty() ? null : oid;
+        return Oid.ofNullable(jniTargetPeel(this.getRawPointer()));
     }
 
     /**
@@ -833,13 +831,13 @@ public class Reference extends CAutoReleasable {
      *
      * @return a pointer to the oid if available, NULL otherwise
      */
+    @CheckForNull
     public Oid target() {
-        Oid oid = new Oid();
-        jniTarget(oid, getRawPointer());
-        return oid;
+        return Oid.ofNullable(jniTarget(getRawPointer()));
     }
 
     /** @return target of this reference. */
+    @CheckForNull
     public Oid id() {
         return target();
     }

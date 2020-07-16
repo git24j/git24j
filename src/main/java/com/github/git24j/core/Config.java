@@ -23,7 +23,8 @@ public class Config extends CAutoCloseable {
     }
 
     public void foreachMatch(String regexp, ForeachCb foreachCb) {
-        jniForeachMatch(getRawPointer(), regexp, entryPtr -> foreachCb.accept(new Entry(true, entryPtr)));
+        jniForeachMatch(
+                getRawPointer(), regexp, entryPtr -> foreachCb.accept(new Entry(true, entryPtr)));
     }
 
     public static class Entry extends CAutoReleasable {
@@ -53,22 +54,17 @@ public class Config extends CAutoCloseable {
         }
     }
 
-    /**const char *name*/
+    /** const char *name */
     static native String jniEntryGetName(long entryPtr);
 
-
-    /**const char *value*/
+    /** const char *value */
     static native String jniEntryGetValue(long entryPtr);
 
-
-    /**unsigned int include_depth*/
+    /** unsigned int include_depth */
     static native int jniEntryGetIncludeDepth(long entryPtr);
 
-
-    /**git_config_level_t level*/
+    /** git_config_level_t level */
     static native int jniEntryGetLevel(long entryPtr);
-
-
 
     @FunctionalInterface
     public interface ForeachCb {

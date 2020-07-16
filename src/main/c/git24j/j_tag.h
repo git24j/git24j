@@ -20,7 +20,7 @@ extern "C"
     /** int git_tag_target(git_object **target_out, const git_tag *tag); */
     JNIEXPORT jint JNICALL J_MAKE_METHOD(Tag_jniTarget)(JNIEnv *env, jclass obj, jobject outTargetPtr, jlong tagPtr);
     /** const git_oid * git_tag_target_id(const git_tag *tag); */
-    JNIEXPORT void JNICALL J_MAKE_METHOD(Tag_jniTargetId)(JNIEnv *env, jclass obj, jlong tagPtr, jobject outOid);
+    JNIEXPORT jbyteArray JNICALL J_MAKE_METHOD(Tag_jniTargetId)(JNIEnv *env, jclass obj, jlong tagPtr);
 
     /** git_object_t git_tag_target_type(const git_tag *tag); */
     JNIEXPORT jint JNICALL J_MAKE_METHOD(Tag_jniTargetType)(JNIEnv *env, jclass obj, jlong tagPtr);

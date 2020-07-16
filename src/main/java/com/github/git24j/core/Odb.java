@@ -542,7 +542,7 @@ public class Odb extends CAutoCloseable {
     static native void jniObjectFree(long object);
 
     /** const git_oid * git_odb_object_id(git_odb_object *object); */
-    static native long jniObjectId(long object, Oid outOid);
+    static native byte[] jniObjectId(long object);
 
     /** const void * git_odb_object_data(git_odb_object *object); */
     static native long jniObjectData(long object);

@@ -48,7 +48,7 @@ extern "C"
     /** const char * git_index_path(const git_index *index); */
     JNIEXPORT jstring JNICALL J_MAKE_METHOD(Index_jniPath)(JNIEnv *env, jclass obj, jlong idxPtr);
     /** const git_oid * git_index_checksum(git_index *index); */
-    JNIEXPORT void JNICALL J_MAKE_METHOD(Index_jniChecksum)(JNIEnv *env, jclass obj, jobject outOid, jlong indexPtr);
+    JNIEXPORT jbyteArray JNICALL J_MAKE_METHOD(Index_jniChecksum)(JNIEnv *env, jclass obj, jlong indexPtr);
 
     /** int git_index_read_tree(git_index *index, const git_tree *tree); */
     JNIEXPORT jint JNICALL J_MAKE_METHOD(Index_jniReadTree)(JNIEnv *env, jclass obj, jlong indexPtr, jlong treePtr);

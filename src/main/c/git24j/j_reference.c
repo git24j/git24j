@@ -150,16 +150,16 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Reference_jniCreateMatching)(JNIEnv *env, j
     return e;
 }
 /**const git_oid * git_reference_target(const git_reference *ref); */
-JNIEXPORT void JNICALL J_MAKE_METHOD(Reference_jniTarget)(JNIEnv *env, jclass obj, jobject oid, jlong refPtr)
+JNIEXPORT jbyteArray JNICALL J_MAKE_METHOD(Reference_jniTarget)(JNIEnv *env, jclass obj, jlong refPtr)
 {
     const git_oid *c_oid = git_reference_target((git_reference *)refPtr);
-    j_git_oid_to_java(env, c_oid, oid);
+    return j_git_oid_to_bytearray(env, c_oid);
 }
 /**const git_oid * git_reference_target_peel(const git_reference *ref); */
-JNIEXPORT void JNICALL J_MAKE_METHOD(Reference_jniTargetPeel)(JNIEnv *env, jclass obj, jobject oid, jlong refPtr)
+JNIEXPORT jbyteArray JNICALL J_MAKE_METHOD(Reference_jniTargetPeel)(JNIEnv *env, jclass obj, jlong refPtr)
 {
     const git_oid *c_oid = git_reference_target_peel((git_reference *)refPtr);
-    j_git_oid_to_java(env, c_oid, oid);
+    return j_git_oid_to_bytearray(env, c_oid);
 }
 /**const char * git_reference_symbolic_target(const git_reference *ref); */
 JNIEXPORT jstring JNICALL J_MAKE_METHOD(Reference_jniSymbolicTarget)(JNIEnv *env, jclass obj, jlong refPtr)
