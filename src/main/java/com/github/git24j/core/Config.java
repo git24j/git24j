@@ -1,25 +1,27 @@
 package com.github.git24j.core;
 
-import static com.github.git24j.core.GitException.ErrorCode.ENOTFOUND;
-
+import javax.annotation.CheckForNull;
+import javax.annotation.Nonnull;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Map.Entry;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
-import javax.annotation.CheckForNull;
-import javax.annotation.Nonnull;
+
+import static com.github.git24j.core.GitException.ErrorCode.ENOTFOUND;
 
 /** Memory representation of a set of config files */
-public class Config extends CAutoCloseable {
-    @Override
-    protected void releaseOnce(long cPtr) {
-        jniFree(cPtr);
+public class Config extends CAutoReleasable {
+    protected Config(boolean isWeak, long rawPtr) {
+        super(isWeak, rawPtr);
     }
 
-    Config(long rawPointer) {
-        super(rawPointer);
+    @Override
+    protected void freeOnce(long cPtr) {
+        jniFree(cPtr);
     }
 
     public void foreachMatch(String regexp, ForeachCb foreachCb) {
@@ -74,12 +76,6 @@ public class Config extends CAutoCloseable {
     @FunctionalInterface
     private interface CallbackJ {
         int accept(long entryPtr);
-    }
-
-    @Override
-    protected void finalize() throws Throwable {
-        close();
-        super.finalize();
     }
 
     /** void git_config_entry_free(git_config_entry *entry); */
@@ -188,7 +184,7 @@ public class Config extends CAutoCloseable {
     static native int jniOpenDefault(AtomicLong out);
 
     public static Config openDefault() {
-        Config cfg = new Config(0);
+        Config cfg = new Config(false, 0);
         Error.throwIfNeeded(jniOpenDefault(cfg._rawPtr));
         return cfg;
     }
@@ -197,7 +193,7 @@ public class Config extends CAutoCloseable {
     static native int jniNew(AtomicLong out);
 
     public static Config newConfig() {
-        Config cfg = new Config(0);
+        Config cfg = new Config(false, 0);
         Error.throwIfNeeded(jniNew(cfg._rawPtr));
         return cfg;
     }
@@ -288,7 +284,7 @@ public class Config extends CAutoCloseable {
      * @throws GitException git errors
      */
     public static Config openOndisk(Path path) {
-        Config cfg = new Config(0);
+        Config cfg = new Config(false, 0);
         Error.throwIfNeeded(jniOpenOndisk(cfg._rawPtr, path.toString()));
         return cfg;
     }
@@ -315,7 +311,7 @@ public class Config extends CAutoCloseable {
      * @throws GitException git errors
      */
     public static Config openLevel(ConfigLevel level, Config parent) {
-        Config cfg = new Config(0);
+        Config cfg = new Config(false, 0);
         int e = jniOpenLevel(cfg._rawPtr, parent.getRawPointer(), level._code);
         if (ENOTFOUND.getCode() == e) {
             return null;
@@ -329,7 +325,7 @@ public class Config extends CAutoCloseable {
 
     @CheckForNull
     public static Config openGlobal(@Nonnull Config parent) {
-        Config cfg = new Config(0);
+        Config cfg = new Config(false, 0);
         int e = jniOpenGlobal(cfg._rawPtr, parent.getRawPointer());
         if (ENOTFOUND.getCode() == e) {
             return null;
@@ -354,7 +350,7 @@ public class Config extends CAutoCloseable {
      * @throws GitException git errors
      */
     public Config snapshot() {
-        Config cfg = new Config(0);
+        Config cfg = new Config(false, 0);
         Error.throwIfNeeded(jniSnapshot(cfg._rawPtr, getRawPointer()));
         return cfg;
     }
@@ -367,11 +363,44 @@ public class Config extends CAutoCloseable {
      */
     static native int jniGetEntry(AtomicLong out, long cfg, String name);
 
+    @Nonnull
+    public Optional<Entry> getEntry(@Nonnull String name) {
+        Entry entry = new Entry(false, 0);
+        int e = jniGetEntry(entry._rawPtr, getRawPointer(), name);
+        if (e == ENOTFOUND.getCode()) {
+            return Optional.empty();
+        }
+        Error.throwIfNeeded(e);
+        return Optional.of(entry);
+    }
+
     /** int git_config_get_int32(int32_t *out, const git_config *cfg, const char *name); */
     static native int jniGetInt32(AtomicInteger out, long cfg, String name);
 
+    @Nonnull
+    public Optional<Integer> getInt(@Nonnull String name) {
+        AtomicInteger out = new AtomicInteger();
+        int e = jniGetInt32(out, getRawPointer(), name);
+        if (e == ENOTFOUND.getCode()) {
+            return Optional.empty();
+        }
+        Error.throwIfNeeded(e);
+        return Optional.of(out.get());
+    }
+
     /** int git_config_get_int64(int64_t *out, const git_config *cfg, const char *name); */
     static native int jniGetInt64(AtomicLong out, long cfg, String name);
+
+    @Nonnull
+    public Optional<Long> getLong(@Nonnull String name) {
+        AtomicLong out = new AtomicLong();
+        int e = jniGetInt64(out, getRawPointer(), name);
+        if (e == ENOTFOUND.getCode()) {
+            return Optional.empty();
+        }
+        Error.throwIfNeeded(e);
+        return Optional.of(out.get());
+    }
 
     /** int git_config_get_bool(int *out, const git_config *cfg, const char *name); */
     static native int jniGetBool(AtomicInteger out, long cfg, String name);
@@ -398,6 +427,32 @@ public class Config extends CAutoCloseable {
 
     /** int git_config_get_path(git_buf *out, const git_config *cfg, const char *name); */
     static native int jniGetPath(Buf out, long cfg, String name);
+
+    /**
+     * Get the value of a path config variable.
+     *
+     * A leading '~' will be expanded to the global search path (which
+     * defaults to the user's home directory but can be overridden via
+     * `git_libgit2_opts()`.
+     *
+     * All config files will be looked into, in the order of their
+     * defined level. A higher level means a higher priority. The
+     * first occurrence of the variable will be returned here.
+     *
+     * @param name the variable's name
+     * @return path
+     * @throws GitException git errors
+     */
+    @Nonnull
+    public Optional<Path> getPath(@Nonnull String name) {
+        Buf out = new Buf();
+        int e = jniGetPath(out, getRawPointer(), name);
+        if (e == ENOTFOUND.getCode()) {
+            return Optional.empty();
+        }
+        Error.throwIfNeeded(e);
+        return out.getString().map(Paths::get);
+    }
 
     /** int git_config_get_string(const char **out, const git_config *cfg, const char *name); */
     static native int jniGetString(AtomicReference<String> out, long cfg, String name);
@@ -450,10 +505,31 @@ public class Config extends CAutoCloseable {
             long cfg, String name, String regexp, CallbackJ callback);
 
     /**
+     * Get each value of a multivar in a foreach callback
+     *
+     * The callback will be called on each variable found
+     *
+     * The regular expression is applied case-sensitively on the normalized form of
+     * the variable name: the section and variable parts are lower-cased. The
+     * subsection is left unchanged.
+     *
+     * @param name the variable's name
+     * @param regexp regular expression to filter which variables we're
+     * interested in. Use NULL to indicate all
+     * @param cb the function to be called on each value of the variable
+     * @throws GitException git errors
+     */
+    public void GetMultivarForeach(@Nonnull String name, @Nonnull String regexp, @Nonnull ForeachCb cb) {
+        int e = jniGetMultivarForeach(getRawPointer(), name, regexp, entryPtr -> cb.accept(new Entry(true, entryPtr)));
+        Error.throwIfNeeded(e);
+    }
+
+    /**
      * int git_config_multivar_iterator_new(git_config_iterator **out, const git_config *cfg, const
      * char *name, const char *regexp);
      */
     static native int jniMultivarIteratorNew(AtomicLong out, long cfg, String name, String regexp);
+
 
     /** int git_config_next(git_config_entry **entry, git_config_iterator *iter); */
     static native int jniNext(AtomicLong entry, long iter);

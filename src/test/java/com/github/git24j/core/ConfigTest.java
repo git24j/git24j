@@ -1,5 +1,12 @@
 package com.github.git24j.core;
 
+import org.apache.commons.io.FileUtils;
+import org.junit.Assert;
+import org.junit.Ignore;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -8,12 +15,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.apache.commons.io.FileUtils;
-import org.junit.Assert;
-import org.junit.Ignore;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
 
 public class ConfigTest extends TestBase {
     private static final String MASTER_HASH = "476f0c95825ef4479cab580b71f8b85f9dea4ee4";
@@ -47,63 +48,57 @@ public class ConfigTest extends TestBase {
     public void foreachMatch() {
         Map<String, String> entries = new HashMap<>();
         Map<String, Integer> depLevels = new HashMap<>();
-        try (Config cfg = Config.openDefault()) {
-            cfg.foreachMatch(
-                    ".*",
-                    new Config.ForeachCb() {
-                        @Override
-                        public int accept(Config.Entry entry) {
-                            entries.put(entry.getName(), entry.getValue());
-                            depLevels.put(
-                                    entry.getName(), entry.getIncludeDepth() + entry.getLevel());
-                            return 0;
-                        }
-                    });
-        }
+        Config cfg = Config.openDefault();
+        cfg.foreachMatch(
+                ".*",
+                new Config.ForeachCb() {
+                    @Override
+                    public int accept(Config.Entry entry) {
+                        entries.put(entry.getName(), entry.getValue());
+                        depLevels.put(entry.getName(), entry.getIncludeDepth() + entry.getLevel());
+                        return 0;
+                    }
+                });
+
         System.out.println(entries);
         System.out.println(depLevels);
     }
 
     @Test
     public void openDefault() {
-        try (Config cfg = Config.openDefault()) {
-            Assert.assertTrue(cfg.getRawPointer() > 0);
-        }
+        Config cfg = Config.openDefault();
+        Assert.assertTrue(cfg.getRawPointer() > 0);
     }
 
     @Test
     public void newConfig() {
-        try (Config cfg = Config.newConfig()) {
-            Assert.assertTrue(cfg.getRawPointer() > 0);
-        }
+        Config cfg = Config.newConfig();
+        Assert.assertTrue(cfg.getRawPointer() > 0);
     }
 
     @Test
     public void addFileOnDisk() throws IOException {
         File f = folder.newFile("ext.config");
         FileUtils.writeLines(f, CONFIG_LINES);
-        try (Config cfg = Config.newConfig()) {
-            cfg.addFileOndisk(f.toPath(), Config.ConfigLevel.LOCAL, null, false);
-            Assert.assertFalse(cfg.getBool("http.sslVerify").orElse(true));
-        }
+        Config cfg = Config.newConfig();
+        cfg.addFileOndisk(f.toPath(), Config.ConfigLevel.LOCAL, null, false);
+        Assert.assertFalse(cfg.getBool("http.sslVerify").orElse(true));
     }
 
     @Test
     public void openOnDisk() throws IOException {
         File f = folder.newFile("ext.config");
         FileUtils.writeLines(f, CONFIG_LINES);
-        try (Config cfg = Config.openOndisk(f.toPath())) {
-            Assert.assertFalse(cfg.getBool("http.sslVerify").orElse(true));
-        }
+        Config cfg = Config.openOndisk(f.toPath());
+        Assert.assertFalse(cfg.getBool("http.sslVerify").orElse(true));
     }
 
     @Test
     public void openLocal() throws IOException {
         File f = folder.newFile("ext.config");
         FileUtils.writeLines(f, CONFIG_LINES);
-        try (Config parent = Config.openOndisk(f.toPath())) {
-            Config.openLevel(Config.ConfigLevel.LOCAL, parent);
-        }
+        Config parent = Config.openOndisk(f.toPath());
+        Config.openLevel(Config.ConfigLevel.LOCAL, parent);
     }
 
     @Ignore
