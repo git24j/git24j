@@ -290,7 +290,7 @@ public class Repository extends CAutoCloseable {
     public Config config() {
         AtomicLong outCfg = new AtomicLong();
         Error.throwIfNeeded(jniConfig(outCfg, getRawPointer()));
-        return new Config(outCfg.get());
+        return new Config(false, outCfg.get());
     }
 
     /**
@@ -302,7 +302,7 @@ public class Repository extends CAutoCloseable {
     public Config configSnapshot() {
         AtomicLong outCfg = new AtomicLong();
         Error.throwIfNeeded(jniConfigSnapshot(outCfg, getRawPointer()));
-        return new Config(outCfg.get());
+        return new Config(false, outCfg.get());
     }
 
     /**
@@ -625,7 +625,7 @@ public class Repository extends CAutoCloseable {
 
     @Override
     public int hashCode() {
-        return Objects.hash(getPath());
+        return Objects.hashCode(getPath());
     }
 
     public enum Item {
