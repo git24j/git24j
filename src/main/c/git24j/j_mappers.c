@@ -218,7 +218,7 @@ unsigned char *j_unsigned_chars_from_java(JNIEnv *env, jbyteArray array, int *ou
     return buf;
 }
 
-/** Copy git_oid value to java Oid vis setter. */
+/** Copy git_oid value to java Oid via setter */
 void j_git_oid_to_java(JNIEnv *env, const git_oid *c_oid, jobject oid)
 {
     assert(oid && "receiving object must not be null");

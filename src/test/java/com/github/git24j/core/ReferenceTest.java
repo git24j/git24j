@@ -401,4 +401,13 @@ public class ReferenceTest extends TestBase {
             Assert.assertEquals("annotated_tag_3", shortHand);
         }
     }
+
+    @Test
+    public void target() {
+        try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {
+            Reference ref = Reference.lookup(testRepo, REF_NAME_DEV);
+            Assert.assertEquals(OID_STR_DEV, ref.target().toString());
+            Assert.assertEquals(OID_STR_DEV, ref.id().toString());
+        }
+    }
 }

@@ -15,7 +15,6 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
-@Ignore
 public class ConfigTest extends TestBase {
     private static final String MASTER_HASH = "476f0c95825ef4479cab580b71f8b85f9dea4ee4";
     private static final String MASTER_PARENT_HASH = "565ddbe0bd55687b43286889a8ead64f68301113";
@@ -107,6 +106,7 @@ public class ConfigTest extends TestBase {
         }
     }
 
+    @Ignore
     @Test
     public void openGlobal() throws IOException {
         Config parent = Config.newConfig();

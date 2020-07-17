@@ -66,3 +66,4 @@
 - [ ] Every DeleteLocalRef after NewStringUTF(...) must perform a null check! 
 - [ ] Rewrite the callbacks
 - [ ] All places that have `type foo(References **out)`, should return weak reference unless specified
+- [ ] Deprecate `j_git_oid_to_java`, return `byte[]` directly.
