@@ -1,17 +1,19 @@
 package com.github.git24j.core;
 
-import javax.annotation.CheckForNull;
-import javax.annotation.Nonnull;
+import static com.github.git24j.core.GitException.ErrorCode.ENOTFOUND;
+import static com.github.git24j.core.GitException.ErrorCode.ITEROVER;
+
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Map.Entry;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
-
-import static com.github.git24j.core.GitException.ErrorCode.ENOTFOUND;
+import javax.annotation.CheckForNull;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 /** Memory representation of a set of config files */
 public class Config extends CAutoReleasable {
@@ -238,6 +240,34 @@ public class Config extends CAutoReleasable {
             _code = code;
         }
     }
+
+    /**
+     * An opaque structure for a configuration iterator
+     *
+     * @implNote Prefer loop with callbacks like {@code foreach} and {@code foreachMatch} than using
+     *     iterator
+     */
+    public static class Iterator extends CAutoReleasable {
+        protected Iterator(boolean isWeak, long rawPtr) {
+            super(isWeak, rawPtr);
+        }
+
+        @Override
+        protected void freeOnce(long cPtr) {
+            jniIteratorFree(cPtr);
+        }
+
+        @CheckForNull
+        Entry next() {
+            Entry entry = new Entry(true, 0);
+            int e = jniNext(entry._rawPtr, getRawPointer());
+            if (e == ITEROVER.getCode()) {
+                return null;
+            }
+            Error.throwIfNeeded(e);
+            return entry;
+        }
+    }
     /**
      * Add an on-disk config file instance to an existing config
      *
@@ -431,13 +461,11 @@ public class Config extends CAutoReleasable {
     /**
      * Get the value of a path config variable.
      *
-     * A leading '~' will be expanded to the global search path (which
-     * defaults to the user's home directory but can be overridden via
-     * `git_libgit2_opts()`.
+     * <p>A leading '~' will be expanded to the global search path (which defaults to the user's
+     * home directory but can be overridden via `git_libgit2_opts()`.
      *
-     * All config files will be looked into, in the order of their
-     * defined level. A higher level means a higher priority. The
-     * first occurrence of the variable will be returned here.
+     * <p>All config files will be looked into, in the order of their defined level. A higher level
+     * means a higher priority. The first occurrence of the variable will be returned here.
      *
      * @param name the variable's name
      * @return path
@@ -459,6 +487,13 @@ public class Config extends CAutoReleasable {
 
     /**
      * Get the value of a string config variable.
+     *
+     * <p>This function can only be used on snapshot config objects. The string is owned by the
+     * config and should not be freed by the user. The pointer will be valid until the config is
+     * freed.
+     *
+     * <p>All config files will be looked into, in the order of their defined level. A higher level
+     * means a higher priority. The first occurrence of the variable will be returned here.
      *
      * @param name the variable's name
      * @return value of a string config variable
@@ -488,14 +523,14 @@ public class Config extends CAutoReleasable {
      * @return value of string config variable
      * @throws GitException git errors
      */
-    public Optional<Buf> getStringBuf(String name) {
+    public Optional<String> getStringBuf(String name) {
         Buf outBuf = new Buf();
         int e = jniGetStringBuf(outBuf, getRawPointer(), name);
         if (ENOTFOUND.getCode() == e) {
             return Optional.empty();
         }
         Error.throwIfNeeded(e);
-        return Optional.of(outBuf);
+        return outBuf.getString();
     }
     /**
      * int git_config_get_multivar_foreach(const git_config *cfg, const char *name, const char
@@ -507,20 +542,29 @@ public class Config extends CAutoReleasable {
     /**
      * Get each value of a multivar in a foreach callback
      *
-     * The callback will be called on each variable found
+     * <p>The callback will be called on each variable found
      *
-     * The regular expression is applied case-sensitively on the normalized form of
-     * the variable name: the section and variable parts are lower-cased. The
-     * subsection is left unchanged.
+     * <p>The regular expression is applied case-sensitively on the normalized form of the variable
+     * name: the section and variable parts are lower-cased. The subsection is left unchanged.
      *
      * @param name the variable's name
-     * @param regexp regular expression to filter which variables we're
-     * interested in. Use NULL to indicate all
+     * @param regexp regular expression to filter which variables we're interested in. Use NULL to
+     *     indicate all
      * @param cb the function to be called on each value of the variable
      * @throws GitException git errors
+     * @apiNote libgit2 api throws ENOTFOUND if name does not exist, this api does not.
      */
-    public void GetMultivarForeach(@Nonnull String name, @Nonnull String regexp, @Nonnull ForeachCb cb) {
-        int e = jniGetMultivarForeach(getRawPointer(), name, regexp, entryPtr -> cb.accept(new Entry(true, entryPtr)));
+    public void getMultivarForeach(
+            @Nonnull String name, @Nullable String regexp, @Nonnull ForeachCb cb) {
+        int e =
+                jniGetMultivarForeach(
+                        getRawPointer(),
+                        name,
+                        regexp,
+                        entryPtr -> cb.accept(new Entry(true, entryPtr)));
+        if (e == ENOTFOUND.getCode()) {
+            return;
+        }
         Error.throwIfNeeded(e);
     }
 
@@ -530,6 +574,25 @@ public class Config extends CAutoReleasable {
      */
     static native int jniMultivarIteratorNew(AtomicLong out, long cfg, String name, String regexp);
 
+    /**
+     * Get each value of a multivar
+     *
+     * <p>The regular expression is applied case-sensitively on the normalized form of the variable
+     * name: the section and variable parts are lower-cased. The subsection is left unchanged.
+     *
+     * @return Iterator
+     * @param name the variable's name
+     * @param regexp regular expression to filter which variables we're interested in. Use null to
+     *     indicate all
+     * @throws GitException git errors
+     */
+    @Nonnull
+    Iterator multivarIteratorNew(@Nonnull String name, @Nullable String regexp) {
+        Iterator out = new Iterator(false, 0);
+        int e = jniMultivarIteratorNew(out._rawPtr, getRawPointer(), name, regexp);
+        Error.throwIfNeeded(e);
+        return out;
+    }
 
     /** int git_config_next(git_config_entry **entry, git_config_iterator *iter); */
     static native int jniNext(AtomicLong entry, long iter);
@@ -540,14 +603,30 @@ public class Config extends CAutoReleasable {
     /** int git_config_set_int32(git_config *cfg, const char *name, int32_t value); */
     static native int jniSetInt32(long cfg, String name, int value);
 
+    public void setInt(@Nonnull String name, int value) {
+        Error.throwIfNeeded(jniSetInt32(getRawPointer(), name, value));
+    }
+
     /** int git_config_set_int64(git_config *cfg, const char *name, int64_t value); */
     static native int jniSetInt64(long cfg, String name, long value);
+
+    public void setLong(@Nonnull String name, long value) {
+        Error.throwIfNeeded(jniSetInt64(getRawPointer(), name, value));
+    }
 
     /** int git_config_set_bool(git_config *cfg, const char *name, int value); */
     static native int jniSetBool(long cfg, String name, int value);
 
+    public void setBool(@Nonnull String name, boolean value) {
+        Error.throwIfNeeded(jniSetBool(getRawPointer(), name, value ? 1 : 0));
+    }
+
     /** int git_config_set_string(git_config *cfg, const char *name, const char *value); */
     static native int jniSetString(long cfg, String name, String value);
+
+    public void setString(@Nonnull String name, @Nonnull String value) {
+        Error.throwIfNeeded(jniSetString(getRawPointer(), name, value));
+    }
 
     /**
      * int git_config_set_multivar(git_config *cfg, const char *name, const char *regexp, const char
@@ -555,25 +634,77 @@ public class Config extends CAutoReleasable {
      */
     static native int jniSetMultivar(long cfg, String name, String regexp, String value);
 
+    public void setMultivar(@Nonnull String name, @Nonnull String regexp, @Nonnull String value) {
+        Error.throwIfNeeded(jniSetMultivar(getRawPointer(), name, regexp, value));
+    }
+
+    /**
+     * get all values as set for multi valued config name
+     *
+     * @param name entry name
+     * @param regexp fiter that value should match
+     * @return list of values
+     */
+    public List<String> getMultivar(@Nonnull String name, @Nonnull String regexp) {
+        List<String> out = new ArrayList<>();
+        getMultivarForeach(
+                name,
+                regexp,
+                entry -> {
+                    out.add(entry.getValue());
+                    return 0;
+                });
+        return out;
+    }
+
     /** int git_config_delete_entry(git_config *cfg, const char *name); */
     static native int jniDeleteEntry(long cfg, String name);
 
+    public void deleteEntry(@Nonnull String name) {
+        Error.throwIfNeeded(jniDeleteEntry(getRawPointer(), name));
+    }
+
     /** int git_config_delete_multivar(git_config *cfg, const char *name, const char *regexp); */
     static native int jniDeleteMultivar(long cfg, String name, String regexp);
+
+    public void deleteMultivar(@Nonnull String name, @Nonnull String regexp) {
+        Error.throwIfNeeded(jniDeleteMultivar(getRawPointer(), name, regexp));
+    }
 
     /**
      * int git_config_foreach(const git_config *cfg, git_config_foreach_cb callback, void *payload);
      */
     static native int jniForeach(long cfg, CallbackJ callback);
 
+    public void foreach(ForeachCb cb) {
+        int e = jniForeach(getRawPointer(), entryPtr -> cb.accept(new Entry(true, entryPtr)));
+        Error.throwIfNeeded(e);
+    }
+
     /** int git_config_iterator_new(git_config_iterator **out, const git_config *cfg); */
     static native int jniIteratorNew(AtomicLong out, long cfg);
+
+    @Nonnull
+    public Iterator iteratorNew() {
+        Iterator out = new Iterator(false, 0);
+        int e = jniIteratorNew(out._rawPtr, getRawPointer());
+        Error.throwIfNeeded(e);
+        return out;
+    }
 
     /**
      * int git_config_iterator_glob_new(git_config_iterator **out, const git_config *cfg, const char
      * *regexp);
      */
     static native int jniIteratorGlobNew(AtomicLong out, long cfg, String regexp);
+
+    @Nonnull
+    public Iterator iteratorGlobalNew(@Nonnull String regexp) {
+        Iterator out = new Iterator(false, 0);
+        int e = jniIteratorGlobNew(out._rawPtr, getRawPointer(), regexp);
+        Error.throwIfNeeded(e);
+        return out;
+    }
 
     /**
      * int git_config_foreach_match(const git_config *cfg, const char *regexp, git_config_foreach_cb
@@ -584,14 +715,86 @@ public class Config extends CAutoReleasable {
     /** int git_config_parse_bool(int *out, const char *value); */
     static native int jniParseBool(AtomicInteger out, String value);
 
+    /**
+     * Parse a string value as a bool.
+     *
+     * <p>Valid values for true are: 'true', 'yes', 'on', 1 or any number different from 0 Valid
+     * values for false are: 'false', 'no', 'off', 0
+     *
+     * @return parsed boolean
+     * @param value value to parse
+     * @throws GitException parsing error
+     */
+    public static boolean parseBool(@Nonnull String value) {
+        AtomicInteger out = new AtomicInteger();
+        Error.throwIfNeeded(jniParseBool(out, value));
+        return out.get() != 0;
+    }
+
     /** int git_config_parse_int32(int32_t *out, const char *value); */
     static native int jniParseInt32(AtomicInteger out, String value);
+
+    /**
+     * Parse a string value as an int32.
+     *
+     * <p>An optional value suffix of 'k', 'm', or 'g' will cause the value to be multiplied by
+     * 1024, 1048576, or 1073741824 prior to output.
+     *
+     * @return the result of the parsing
+     * @param value value to parse
+     * @throws GitException parsing errors
+     */
+    public static int parseInt(@Nonnull String value) {
+        AtomicInteger out = new AtomicInteger();
+        Error.throwIfNeeded(jniParseInt32(out, value));
+        return out.get();
+    }
 
     /** int git_config_parse_int64(int64_t *out, const char *value); */
     static native int jniParseInt64(AtomicLong out, String value);
 
+    /**
+     * Parse a string value as an int64.
+     *
+     * <p>An optional value suffix of 'k', 'm', or 'g' will cause the value to be multiplied by
+     * 1024, 1048576, or 1073741824 prior to output.
+     *
+     * @return the result of the parsing
+     * @param value value to parse
+     * @throws GitException parsing error
+     */
+    public static long parseLong(@Nonnull String value) {
+        AtomicLong out = new AtomicLong();
+        Error.throwIfNeeded(jniParseInt64(out, value));
+        return out.get();
+    }
+
     /** int git_config_parse_path(git_buf *out, const char *value); */
     static native int jniParsePath(Buf out, String value);
+
+    /**
+     * Parse a string value as a path.
+     *
+     * <p>A leading '~' will be expanded to the global search path (which defaults to the user's
+     * home directory but can be overridden via `git_libgit2_opts()`.
+     *
+     * <p>If the value does not begin with a tilde, the input will be returned. @@return the result
+     * of parsing
+     *
+     * @param value the path to evaluate
+     * @throws GitException parsing error
+     */
+    public static Path parsePath(@Nonnull String value) {
+        Buf out = new Buf();
+        Error.throwIfNeeded(jniParsePath(out, value));
+        return Paths.get(
+                out.getString()
+                        .orElseThrow(
+                                () ->
+                                        new GitException(
+                                                GitException.ErrorClass.CONFIG,
+                                                "could not parse: " + value)));
+    }
 
     /**
      * int git_config_backend_foreach_match(git_config_backend *backend, const char *regexp,
@@ -601,4 +804,11 @@ public class Config extends CAutoReleasable {
 
     /** int git_config_lock(git_transaction **tx, git_config *cfg); */
     static native int jniLock(AtomicLong tx, long cfg);
+
+    @Nonnull
+    Transaction lock() {
+        Transaction out = new Transaction(true, 0);
+        Error.throwIfNeeded(jniLock(out._rawPtr, getRawPointer()));
+        return out;
+    }
 }

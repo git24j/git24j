@@ -2,6 +2,7 @@ package com.github.git24j.core;
 
 import org.apache.commons.io.FileUtils;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
@@ -11,10 +12,20 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 public class ConfigTest extends TestBase {
     private static final String MASTER_HASH = "476f0c95825ef4479cab580b71f8b85f9dea4ee4";
@@ -28,12 +39,27 @@ public class ConfigTest extends TestBase {
                     "; also a comment",
                     "[http]",
                     "\tsslVerify = false",
-                    "\tcookieFile = /tmp/cookie.txt");
+                    "\tcookieFile = /tmp/cookie.txt",
+                    "[core]",
+                    "\tgitproxy=proxy-command for kernel.org",
+                    "\tgitproxy=default-proxy ; for all the rest",
+                    "[sendemail]",
+                    "\tsmtpserverport = 587",
+                    "\n");
+    private static final String TEST_CFG_COOKIE_FILE = "/tmp/cookie.txt";
 
     @Rule public TemporaryFolder folder = new TemporaryFolder();
 
+    private File _testCfgFile;
+
     private void verifyConfigPath(Path p) {
-        Assert.assertTrue(Files.exists(p));
+        assertTrue(Files.exists(p));
+    }
+
+    @Before
+    public void setUp() throws IOException {
+        _testCfgFile = folder.newFile("ext.config");
+        FileUtils.writeLines(_testCfgFile, CONFIG_LINES);
     }
 
     @Test
@@ -67,50 +93,163 @@ public class ConfigTest extends TestBase {
     @Test
     public void openDefault() {
         Config cfg = Config.openDefault();
-        Assert.assertTrue(cfg.getRawPointer() > 0);
+        assertTrue(cfg.getRawPointer() > 0);
     }
 
     @Test
     public void newConfig() {
         Config cfg = Config.newConfig();
-        Assert.assertTrue(cfg.getRawPointer() > 0);
+        assertTrue(cfg.getRawPointer() > 0);
     }
 
     @Test
-    public void addFileOnDisk() throws IOException {
-        File f = folder.newFile("ext.config");
-        FileUtils.writeLines(f, CONFIG_LINES);
+    public void addFileOnDisk() {
         Config cfg = Config.newConfig();
-        cfg.addFileOndisk(f.toPath(), Config.ConfigLevel.LOCAL, null, false);
-        Assert.assertFalse(cfg.getBool("http.sslVerify").orElse(true));
+        cfg.addFileOndisk(_testCfgFile.toPath(), Config.ConfigLevel.LOCAL, null, false);
+        assertFalse(cfg.getBool("http.sslVerify").orElse(true));
     }
 
     @Test
-    public void openOnDisk() throws IOException {
-        File f = folder.newFile("ext.config");
-        FileUtils.writeLines(f, CONFIG_LINES);
-        Config cfg = Config.openOndisk(f.toPath());
-        Assert.assertFalse(cfg.getBool("http.sslVerify").orElse(true));
+    public void openOnDisk() {
+        Config cfg = Config.openOndisk(_testCfgFile.toPath());
+        assertFalse(cfg.getBool("http.sslVerify").orElse(true));
     }
 
     @Test
-    public void openLocal() throws IOException {
-        File f = folder.newFile("ext.config");
-        FileUtils.writeLines(f, CONFIG_LINES);
-        Config parent = Config.openOndisk(f.toPath());
-        Config.openLevel(Config.ConfigLevel.LOCAL, parent);
+    public void openLocal() {
+        Config parent = Config.openOndisk(_testCfgFile.toPath());
+        Config cfg = Config.openLevel(Config.ConfigLevel.LOCAL, parent);
+        assertNotNull(cfg);
+        assertEquals(TEST_CFG_COOKIE_FILE, cfg.getStringBuf("http.cookieFile").orElse(null));
     }
 
-    @Ignore
     @Test
-    public void openGlobal() throws IOException {
-        Config parent = Config.newConfig();
+    public void openGlobal() {
+        Config parent = Config.openOndisk(_testCfgFile.toPath());
         Config.openGlobal(parent);
     }
 
     @Test
     public void snapshot() {
-        Assert.assertFalse(
-                Config.openDefault().snapshot().getBool("does.not.exist.38yt1").isPresent());
+        Config cfg = Config.openOndisk(_testCfgFile.toPath());
+        Config snapshot = cfg.snapshot();
+        assertEquals(TEST_CFG_COOKIE_FILE, snapshot.getString("http.cookieFile").get());
+    }
+
+    @Test
+    public void getEntry() {
+        Config cfg = Config.openOndisk(_testCfgFile.toPath());
+        Config.Entry entry = cfg.getEntry("http.cookieFile").orElse(null);
+        assertNotNull(entry);
+        assertEquals(TEST_CFG_COOKIE_FILE, entry.getValue());
+        assertEquals("http.cookieFile".toLowerCase(), entry.getName().toLowerCase());
+
+        cfg.deleteEntry("http.cookieFile");
+        Config.Entry entry2 = cfg.getEntry("http.cookieFile").orElse(null);
+        Assert.assertNull(entry2);
+    }
+
+    @Test
+    public void gettersAndSetters() {
+        Config cfg = Config.openOndisk(_testCfgFile.toPath());
+        assertEquals(587, cfg.getInt("sendemail.smtpserverport").orElse(0).intValue());
+        // boolean
+        cfg.setBool("foo.bar.bool", true);
+        assertTrue(cfg.getBool("foo.bar.bool").get());
+        // integer
+        cfg.setInt("foo.bar.int", 123);
+        assertEquals(123, cfg.getInt("foo.bar.int").orElse(0).intValue());
+        // long
+        cfg.setLong("foo.bar.long", 12345L);
+        assertEquals(12345L, cfg.getLong("foo.bar.long").get().longValue());
+        // string
+        cfg.setString("foo.bar.string", "example-string");
+        assertEquals("example-string", cfg.getStringBuf("foo.bar.string").get());
+        // path
+        assertEquals(Paths.get(TEST_CFG_COOKIE_FILE), cfg.getPath("http.cookieFile").get());
+    }
+
+    @Test
+    public void getMultivarForeach() {
+        Config cfg = Config.openOndisk(_testCfgFile.toPath());
+        String key = "core.gitproxy";
+        Set<String> values = new HashSet<>();
+        cfg.getMultivarForeach(
+                key,
+                null,
+                entry -> {
+                    assertEquals(key, entry.getName());
+                    values.add(entry.getValue());
+                    return 0;
+                });
+        assertEquals(2, values.size());
+    }
+
+    @Test
+    public void multivarIterator() {
+        Config cfg = Config.openOndisk(_testCfgFile.toPath());
+        String key = "core.gitproxy";
+        Config.Iterator iterator = cfg.multivarIteratorNew(key, null);
+        Set<String> values = new HashSet<>();
+        for (Config.Entry entry = iterator.next(); entry != null; entry = iterator.next()) {
+            assertEquals(key, entry.getName());
+            values.add(entry.getValue());
+        }
+        assertEquals(2, values.size());
+    }
+
+    @Test
+    public void multivar() {
+        Config cfg = Config.openOndisk(_testCfgFile.toPath());
+        String key = "core.gitproxy";
+        cfg.setMultivar(key, "for kernel.org$", "ssh");
+        List<String> values = cfg.getMultivar(key, "h$");
+        assertEquals(values, Collections.singletonList("ssh"));
+
+        cfg.deleteMultivar(key, ".*");
+        assertTrue(cfg.getMultivar(key, ".*").isEmpty());
+    }
+
+    @Test
+    public void iterator() {
+        Config cfg = Config.openOndisk(_testCfgFile.toPath());
+        Config.Iterator iter1 = cfg.iteratorNew();
+        Map<String, List<String>> allValues = new HashMap<>();
+        for (Config.Entry entry = iter1.next(); entry != null; entry = iter1.next()) {
+            allValues
+                    .computeIfAbsent(entry.getName(), k -> new ArrayList<>())
+                    .add(entry.getValue());
+        }
+        assertEquals(2, allValues.get("core.gitproxy").size());
+    }
+
+    @Test
+    public void foreach() {
+        Config cfg = Config.openOndisk(_testCfgFile.toPath());
+        Map<String, List<String>> allValues = new HashMap<>();
+        cfg.foreach(
+                entry -> {
+                    allValues
+                            .computeIfAbsent(entry.getName(), k -> new ArrayList<>())
+                            .add(entry.getValue());
+                    return 0;
+                });
+        assertEquals(2, allValues.get("core.gitproxy").size());
+    }
+
+    @Test
+    public void parses() {
+        assertFalse(Config.parseBool("off"));
+        assertEquals(2048, Config.parseInt("2k"));
+        assertEquals(1073741824L, Config.parseLong("1g"));
+        Path p = Paths.get(System.getProperty("user.home"));
+        assertEquals(p.resolve("tmp"), Config.parsePath("~/tmp"));
+    }
+
+    @Test
+    public void lock() {
+        Config cfg = Config.openOndisk(_testCfgFile.toPath());
+        Transaction tx = cfg.lock();
+        assertTrue(tx.getRawPointer() > 0);
     }
 }

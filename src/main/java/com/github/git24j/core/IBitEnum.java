@@ -21,6 +21,10 @@ public interface IBitEnum {
         List<T> matched = new ArrayList<>();
         for (T x : clz.getEnumConstants()) {
             int b = x.getBit();
+            if (b == 0 && flags == 0) {
+                matched.add(x);
+                break;
+            }
             if ((b < 0 && flags > 0) || (b > 0 && flags < 0)) {
                 continue;
             }
@@ -28,7 +32,7 @@ public interface IBitEnum {
                 matched.add(x);
             }
         }
-        return EnumSet.copyOf(matched);
+        return matched.isEmpty() ? EnumSet.noneOf(clz) : EnumSet.copyOf(matched);
     }
 
     static <T extends Enum<T> & IBitEnum> T valueOf(int bit, Class<T> clz, T defaultVal) {
