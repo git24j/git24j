@@ -203,8 +203,13 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Tree_jniCreateUpdated)(JNIEnv *env, jclass 
     git_tree_update *c_updates = (git_tree_update *)malloc(sizeof(git_tree_update) * nupdates);
     for (jsize i = 0; i < nupdates; i++)
     {
-        git_tree_update *x = (git_tree_update *)(*env)->GetLongArrayElements(env, updates, 0);
+        long *pi = (*env)->GetLongArrayElements(env, updates, 0);
+        git_tree_update *x = (git_tree_update *)(*pi);
         c_updates[i] = (*x);
+        /* c_updates[i].action = x->action;
+        c_updates[i].filemode = x->filemode;
+        git_oid_cpy(&(c_updates[i].id), &(x->id));
+        c_updates[i].path = x->path; */
     }
     git_oid c_out;
     int r = git_tree_create_updated(&c_out, (git_repository *)repoPtr, (git_tree *)baselinePtr, nupdates, c_updates);
