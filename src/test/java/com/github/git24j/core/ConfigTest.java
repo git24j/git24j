@@ -123,7 +123,6 @@ public class ConfigTest extends TestBase {
         assertEquals(TEST_CFG_COOKIE_FILE, cfg.getStringBuf("http.cookieFile").orElse(null));
     }
 
-    @Ignore
     @Test
     public void openGlobal() {
         Config parent = Config.openOndisk(_testCfgFile.toPath());
