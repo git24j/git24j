@@ -360,7 +360,6 @@ void j_strarray_to_java_list(JNIEnv *env, git_strarray *src, jobject strList)
     assert(midAdd && "Could not get List.add method");
     for (size_t i = 0; i < src->count; i++)
     {
-        printf("qqqqq get pathspec[%ld] -> %s \n", i, src->strings[i]);
         jstring jVal = (*env)->NewStringUTF(env, src->strings[i]);
         (*env)->CallBooleanMethod(env, strList, midAdd, jVal);
         (*env)->DeleteLocalRef(env, jVal);
@@ -379,7 +378,6 @@ void j_strarray_from_java(JNIEnv *env, git_strarray *out, jobjectArray strArr)
     {
         jobject si = (*env)->GetObjectArrayElement(env, strArr, i);
         out->strings[i] = j_copy_of_jstring(env, (jstring)si, true);
-        printf("qqqqq string[%d] = %s \n", i, out->strings[i]);
     }
     out->count = len;
 }

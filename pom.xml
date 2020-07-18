@@ -44,12 +44,6 @@
                 <version>3.0.0-M4</version>
 
                 <configuration>
-                    <forkedProcessExitTimeoutInSeconds>120</forkedProcessExitTimeoutInSeconds>
-                    <forkCount>3</forkCount>
-                    <reuseForks>true</reuseForks>
-                    <argLine>-Xmx1024m -XX:MaxPermSize=256m</argLine>
-                    <argLine>-Dfile.encoding=UTF-8</argLine>
-                    <useSystemClassLoader>false</useSystemClassLoader>
                     <excludes>
 <!--                        <exclude>**/AnnotatedCommitTest.java</exclude>-->
 <!--                        <exclude>**/BasicOperationsTest.java</exclude>-->

@@ -279,7 +279,6 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Reference_jniDup)(JNIEnv *env, jclass obj, 
 /**void git_reference_free(git_reference *ref); */
 JNIEXPORT void JNICALL J_MAKE_METHOD(Reference_jniFree)(JNIEnv *env, jclass obj, jlong refPtr)
 {
-    fprintf(fopen("/tmp/deref", "a"), "qqqqq dereferrencing %ld \n", refPtr);
     git_reference_free((git_reference *)refPtr);
 }
 /**int git_reference_cmp(const git_reference *ref1, const git_reference *ref2); */

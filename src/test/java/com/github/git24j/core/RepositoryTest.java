@@ -1,10 +1,5 @@
 package com.github.git24j.core;
 
-import org.junit.Assert;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
-
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -13,6 +8,10 @@ import java.util.EnumSet;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
+import org.junit.Assert;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 
 public class RepositoryTest extends TestBase {
     @Rule public TemporaryFolder folder = new TemporaryFolder();
@@ -168,8 +167,7 @@ public class RepositoryTest extends TestBase {
         Path path = TestRepo.SIMPLE1.tempCopy(folder);
         try (Repository repository = Repository.open(path)) {
             Config cfg = repository.config();
-            Assert.assertEquals(
-                    "vim", cfg.getStringBuf("core.editor").flatMap(Buf::getString).orElse(""));
+            Assert.assertEquals("vim", cfg.getStringBuf("core.editor").orElse(""));
         }
     }
 
@@ -178,8 +176,7 @@ public class RepositoryTest extends TestBase {
         Path path = TestRepo.SIMPLE1.tempCopy(folder);
         try (Repository repository = Repository.open(path)) {
             Config cfg = repository.configSnapshot();
-            Assert.assertEquals(
-                    "vim", cfg.getStringBuf("core.editor").flatMap(Buf::getString).orElse(""));
+            Assert.assertEquals("vim", cfg.getStringBuf("core.editor").orElse(""));
         }
     }
 

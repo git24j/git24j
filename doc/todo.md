@@ -67,3 +67,4 @@
 - [ ] Rewrite the callbacks
 - [ ] All places that have `type foo(References **out)`, should return weak reference unless specified
 - [x] Deprecate `j_git_oid_to_java`, return `byte[]` directly.
+- [ ] Replace Buf with AtomicString for returning String through parameters.

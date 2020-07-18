@@ -54,9 +54,9 @@ public class Status {
      * @throws GitException error if ignore rules could not be processed for the file (regardless of
      *     whether it exists or not)
      */
-    public static boolean shouldIgnore(@Nonnull Repository repo, @Nonnull String path) {
+    public static boolean shouldIgnore(@Nonnull Repository repo, @Nonnull Path path) {
         AtomicInteger out = new AtomicInteger();
-        Error.throwIfNeeded(jniShouldIgnore(out, repo.getRawPointer(), path));
+        Error.throwIfNeeded(jniShouldIgnore(out, repo.getRawPointer(), path.toString()));
         return out.get() == 1;
     }
 
@@ -122,7 +122,7 @@ public class Status {
      *     tree, GIT_EAMBIGUOUS if `path` matches multiple files or if it refers to a folder, or
      *     other errors.
      */
-    public EnumSet<StatusT> file(@Nonnull Repository repo, @Nonnull Path path) {
+    public static EnumSet<StatusT> file(@Nonnull Repository repo, @Nonnull Path path) {
         AtomicInteger out = new AtomicInteger();
         Error.throwIfNeeded(jniFile(out, repo.getRawPointer(), path.toString()));
         return IBitEnum.parse(out.get(), StatusT.class);
