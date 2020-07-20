@@ -47,7 +47,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Tree_jniWalk)(JNIEnv *env, jclass obj, jlon
 /** int git_tree_lookup(git_tree **out, git_repository *repo, const git_oid *id); */
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Tree_jniLookup)(JNIEnv *env, jclass obj, jobject out, jlong repoPtr, jobject id)
 {
-    git_tree *c_out;
+    git_tree *c_out = 0;
     git_oid c_id;
     j_git_oid_from_java(env, id, &c_id);
     int r = git_tree_lookup(&c_out, (git_repository *)repoPtr, &c_id);
@@ -59,7 +59,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Tree_jniLookup)(JNIEnv *env, jclass obj, jo
 /** int git_tree_lookup_prefix(git_tree **out, git_repository *repo, const git_oid *id, size_t len); */
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Tree_jniLookupPrefix)(JNIEnv *env, jclass obj, jobject out, jlong repoPtr, jobject id, jint len)
 {
-    git_tree *c_out;
+    git_tree *c_out = 0;
     git_oid c_id;
     j_git_oid_from_java(env, id, &c_id);
     int r = git_tree_lookup_prefix(&c_out, (git_repository *)repoPtr, &c_id, len);
@@ -109,7 +109,7 @@ JNIEXPORT jlong JNICALL J_MAKE_METHOD(Tree_jniEntryByid)(JNIEnv *env, jclass obj
 /** int git_tree_entry_bypath(git_tree_entry **out, const git_tree *root, const char *path); */
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Tree_jniEntryBypath)(JNIEnv *env, jclass obj, jobject out, jlong rootPtr, jstring path)
 {
-    git_tree_entry *c_out;
+    git_tree_entry *c_out = 0;
     char *c_path = j_copy_of_jstring(env, path, true);
     int r = git_tree_entry_bypath(&c_out, (git_tree *)rootPtr, c_path);
     (*env)->CallVoidMethod(env, out, jniConstants->midAtomicLongSet, (long)c_out);
@@ -121,7 +121,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Tree_jniEntryBypath)(JNIEnv *env, jclass ob
 /** int git_tree_entry_dup(git_tree_entry **dest, const git_tree_entry *source); */
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Tree_jniEntryDup)(JNIEnv *env, jclass obj, jobject dest, jlong sourcePtr)
 {
-    git_tree_entry *c_dest;
+    git_tree_entry *c_dest = 0;
     int r = git_tree_entry_dup(&c_dest, (git_tree_entry *)sourcePtr);
     (*env)->CallVoidMethod(env, dest, jniConstants->midAtomicLongSet, (long)c_dest);
     /* git_tree_entry_free(c_dest); */
@@ -179,7 +179,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Tree_jniEntryCmp)(JNIEnv *env, jclass obj, 
 /** int git_tree_entry_to_object(git_object **object_out, git_repository *repo, const git_tree_entry *entry); */
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Tree_jniEntryToObject)(JNIEnv *env, jclass obj, jobject objectOut, jlong repoPtr, jlong entryPtr)
 {
-    git_object *c_object_out;
+    git_object *c_object_out = 0;
     int r = git_tree_entry_to_object(&c_object_out, (git_repository *)repoPtr, (git_tree_entry *)entryPtr);
     (*env)->CallVoidMethod(env, objectOut, jniConstants->midAtomicLongSet, (long)c_object_out);
     /* git_object_free(c_object_out); */
@@ -189,7 +189,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Tree_jniEntryToObject)(JNIEnv *env, jclass 
 /** int git_tree_dup(git_tree **out, git_tree *source); */
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Tree_jniDup)(JNIEnv *env, jclass obj, jobject out, jlong sourcePtr)
 {
-    git_tree *c_out;
+    git_tree *c_out = 0;
     int r = git_tree_dup(&c_out, (git_tree *)sourcePtr);
     (*env)->CallVoidMethod(env, out, jniConstants->midAtomicLongSet, (long)c_out);
     /* git_tree_free(c_out); */
@@ -254,7 +254,7 @@ JNIEXPORT void JNICALL J_MAKE_METHOD(Tree_jniBuilderFilter)(JNIEnv *env, jclass 
 /** int git_treebuilder_new(git_tree_builder **out, git_repository *repo, const git_tree *source); */
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Tree_jniBuilderNew)(JNIEnv *env, jclass obj, jobject out, jlong repoPtr, jlong sourcePtr)
 {
-    git_treebuilder *c_out;
+    git_treebuilder *c_out = 0;
     int r = git_treebuilder_new(&c_out, (git_repository *)repoPtr, (git_tree *)sourcePtr);
     (*env)->CallVoidMethod(env, out, jniConstants->midAtomicLongSet, (long)c_out);
     /* git_treebuilder_free(c_out); */
@@ -292,7 +292,7 @@ JNIEXPORT jlong JNICALL J_MAKE_METHOD(Tree_jniBuilderGet)(JNIEnv *env, jclass ob
 /** int git_treebuilder_insert(const git_tree_entry **out, git_treebuilder *bld, const char *filename, const git_oid *id, git_filemode_t filemode); */
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Tree_jniBuilderInsert)(JNIEnv *env, jclass obj, jobject out, jlong bldPtr, jstring filename, jobject id, jint filemode)
 {
-    const git_tree_entry *c_out;
+    const git_tree_entry *c_out = 0;
     char *c_filename = j_copy_of_jstring(env, filename, true);
     git_oid c_id;
     j_git_oid_from_java(env, id, &c_id);

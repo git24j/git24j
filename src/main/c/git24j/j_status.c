@@ -40,7 +40,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Status_jniFile)(JNIEnv *env, jclass obj, jo
 /** int git_status_list_new(git_status_list **out, git_repository *repo, const git_status_options *opts); */
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Status_jniListNew)(JNIEnv *env, jclass obj, jobject out, jlong repoPtr, jlong optsPtr)
 {
-    git_status_list *c_out;
+    git_status_list *c_out = 0;
     int r = git_status_list_new(&c_out, (git_repository *)repoPtr, (git_status_options *)optsPtr);
     (*env)->CallVoidMethod(env, out, jniConstants->midAtomicLongSet, (long)c_out);
     /* git_status_list_free(c_out); */

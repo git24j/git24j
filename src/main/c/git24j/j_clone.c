@@ -12,7 +12,7 @@ extern j_constants_t *jniConstants;
 /** int git_clone_clone(git_repository **out, const char *url, const char *local_path, const git_clone_options *options); */
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Clone_jniClone)(JNIEnv *env, jclass obj, jobject out, jstring url, jstring local_path, jlong optionsPtr)
 {
-    git_repository *c_out;
+    git_repository *c_out = 0;
     char *c_url = j_copy_of_jstring(env, url, true);
     char *c_local_path = j_copy_of_jstring(env, local_path, true);
     int r = git_clone(&c_out, c_url, c_local_path, (git_clone_options *)optionsPtr);

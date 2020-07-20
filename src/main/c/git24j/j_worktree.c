@@ -9,7 +9,7 @@
 /** int git_worktree_add(git_worktree **out, git_repository *repo, const char *name, const char *path, const git_worktree_add_options *opts); */
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Worktree_jniAdd)(JNIEnv *env, jclass obj, jobject out, jlong repoPtr, jstring name, jstring path, jlong optsPtr)
 {
-    git_worktree *c_out;
+    git_worktree *c_out = 0;
     char *c_name = j_copy_of_jstring(env, name, true);
     char *c_path = j_copy_of_jstring(env, path, true);
     int r = git_worktree_add(&c_out, (git_repository *)repoPtr, c_name, c_path, (git_worktree_add_options *)optsPtr);
@@ -72,7 +72,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Worktree_jniLock)(JNIEnv *env, jclass obj, 
 /** int git_worktree_lookup(git_worktree **out, git_repository *repo, const char *name); */
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Worktree_jniLookup)(JNIEnv *env, jclass obj, jobject out, jlong repoPtr, jstring name)
 {
-    git_worktree *c_out;
+    git_worktree *c_out = 0;
     char *c_name = j_copy_of_jstring(env, name, true);
     int r = git_worktree_lookup(&c_out, (git_repository *)repoPtr, c_name);
     (*env)->CallVoidMethod(env, out, jniConstants->midAtomicLongSet, (long)c_out);
@@ -90,7 +90,7 @@ JNIEXPORT jstring JNICALL J_MAKE_METHOD(Worktree_jniName)(JNIEnv *env, jclass ob
 /** int git_worktree_open_from_repository(git_worktree **out, git_repository *repo); */
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Worktree_jniOpenFromRepository)(JNIEnv *env, jclass obj, jobject out, jlong repoPtr)
 {
-    git_worktree *c_out;
+    git_worktree *c_out = 0;
     int r = git_worktree_open_from_repository(&c_out, (git_repository *)repoPtr);
     (*env)->CallVoidMethod(env, out, jniConstants->midAtomicLongSet, (long)c_out);
     return r;

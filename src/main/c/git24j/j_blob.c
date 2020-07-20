@@ -17,7 +17,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Blob_jniLookup)(JNIEnv *env, jclass obj, jo
 /** int git_blob_lookup_prefix(git_blob **blob, git_repository *repo, const git_oid *id, size_t len); */
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Blob_jniLookupPrefix)(JNIEnv *env, jclass obj, jobject outBlob, long repoPtr, jobject oid, jint len)
 {
-    git_blob *c_blob;
+    git_blob *c_blob = 0;
     git_oid c_oid;
     j_git_oid_from_java(env, oid, &c_oid);
     int e = git_blob_lookup_prefix(&c_blob, (git_repository *)repoPtr, &c_oid, len);
@@ -82,7 +82,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Blob_jniCreateFromDisk)(JNIEnv *env, jclass
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Blob_jniCreateFromStream)(JNIEnv *env, jclass obj, jobject outStream, long repoPtr, jstring hintPath)
 {
     char *hint_path = j_copy_of_jstring(env, hintPath, true);
-    git_writestream *out_stream;
+    git_writestream *out_stream = 0;
     int e = git_blob_create_fromstream(&out_stream, (git_repository *)repoPtr, hint_path);
     (*env)->CallVoidMethod(env, outStream, jniConstants->midAtomicLongSet, (long)out_stream);
     free(hint_path);
@@ -119,7 +119,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Blob_jniIsBinary)(JNIEnv *env, jclass obj, 
 /** int git_blob_dup(git_blob **out, git_blob *source); */
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Blob_jniDup)(JNIEnv *env, jclass obj, jobject outDest, jlong srcPtr)
 {
-    git_blob *out;
+    git_blob *out = 0;
     int e = git_blob_dup(&out, (git_blob *)srcPtr);
     (*env)->CallVoidMethod(env, outDest, jniConstants->midAtomicLongSet, (long)out);
     return e;

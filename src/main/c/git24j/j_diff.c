@@ -155,7 +155,7 @@ JNIEXPORT void JNICALL J_MAKE_METHOD(Diff_jniFree)(JNIEnv *env, jclass obj, jlon
 /** int git_diff_tree_to_tree(git_diff **diff, git_repository *repo, git_tree *old_tree, git_tree *new_tree, const git_diff_options *opts); */
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Diff_jniTreeToTree)(JNIEnv *env, jclass obj, jobject diff, jlong repoPtr, jlong oldTreePtr, jlong newTreePtr, jlong optsPtr)
 {
-    git_diff *c_diff;
+    git_diff *c_diff = 0;
     int r = git_diff_tree_to_tree(&c_diff, (git_repository *)repoPtr, (git_tree *)oldTreePtr, (git_tree *)newTreePtr, (git_diff_options *)optsPtr);
     (*env)->CallVoidMethod(env, diff, jniConstants->midAtomicLongSet, (long)c_diff);
     git_diff_free(c_diff);
@@ -165,7 +165,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Diff_jniTreeToTree)(JNIEnv *env, jclass obj
 /** int git_diff_tree_to_index(git_diff **diff, git_repository *repo, git_tree *old_tree, git_index *index, const git_diff_options *opts); */
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Diff_jniTreeToIndex)(JNIEnv *env, jclass obj, jobject diff, jlong repoPtr, jlong oldTreePtr, jlong indexPtr, jlong optsPtr)
 {
-    git_diff *c_diff;
+    git_diff *c_diff = 0;
     int r = git_diff_tree_to_index(&c_diff, (git_repository *)repoPtr, (git_tree *)oldTreePtr, (git_index *)indexPtr, (git_diff_options *)optsPtr);
     (*env)->CallVoidMethod(env, diff, jniConstants->midAtomicLongSet, (long)c_diff);
     git_diff_free(c_diff);
@@ -175,7 +175,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Diff_jniTreeToIndex)(JNIEnv *env, jclass ob
 /** int git_diff_index_to_workdir(git_diff **diff, git_repository *repo, git_index *index, const git_diff_options *opts); */
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Diff_jniIndexToWorkdir)(JNIEnv *env, jclass obj, jobject diff, jlong repoPtr, jlong indexPtr, jlong optsPtr)
 {
-    git_diff *c_diff;
+    git_diff *c_diff = 0;
     int r = git_diff_index_to_workdir(&c_diff, (git_repository *)repoPtr, (git_index *)indexPtr, (git_diff_options *)optsPtr);
     (*env)->CallVoidMethod(env, diff, jniConstants->midAtomicLongSet, (long)c_diff);
     git_diff_free(c_diff);
@@ -185,7 +185,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Diff_jniIndexToWorkdir)(JNIEnv *env, jclass
 /** int git_diff_tree_to_workdir(git_diff **diff, git_repository *repo, git_tree *old_tree, const git_diff_options *opts); */
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Diff_jniTreeToWorkdir)(JNIEnv *env, jclass obj, jobject diff, jlong repoPtr, jlong oldTreePtr, jlong optsPtr)
 {
-    git_diff *c_diff;
+    git_diff *c_diff = 0;
     int r = git_diff_tree_to_workdir(&c_diff, (git_repository *)repoPtr, (git_tree *)oldTreePtr, (git_diff_options *)optsPtr);
     (*env)->CallVoidMethod(env, diff, jniConstants->midAtomicLongSet, (long)c_diff);
     git_diff_free(c_diff);
@@ -195,7 +195,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Diff_jniTreeToWorkdir)(JNIEnv *env, jclass 
 /** int git_diff_tree_to_workdir_with_index(git_diff **diff, git_repository *repo, git_tree *old_tree, const git_diff_options *opts); */
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Diff_jniTreeToWorkdirWithIndex)(JNIEnv *env, jclass obj, jobject diff, jlong repoPtr, jlong oldTreePtr, jlong optsPtr)
 {
-    git_diff *c_diff;
+    git_diff *c_diff = 0;
     int r = git_diff_tree_to_workdir_with_index(&c_diff, (git_repository *)repoPtr, (git_tree *)oldTreePtr, (git_diff_options *)optsPtr);
     (*env)->CallVoidMethod(env, diff, jniConstants->midAtomicLongSet, (long)c_diff);
     git_diff_free(c_diff);
@@ -205,7 +205,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Diff_jniTreeToWorkdirWithIndex)(JNIEnv *env
 /** int git_diff_index_to_index(git_diff **diff, git_repository *repo, git_index *old_index, git_index *new_index, const git_diff_options *opts); */
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Diff_jniIndexToIndex)(JNIEnv *env, jclass obj, jobject diff, jlong repoPtr, jlong oldIndexPtr, jlong newIndexPtr, jlong optsPtr)
 {
-    git_diff *c_diff;
+    git_diff *c_diff = 0;
     int r = git_diff_index_to_index(&c_diff, (git_repository *)repoPtr, (git_index *)oldIndexPtr, (git_index *)newIndexPtr, (git_diff_options *)optsPtr);
     (*env)->CallVoidMethod(env, diff, jniConstants->midAtomicLongSet, (long)c_diff);
     git_diff_free(c_diff);
@@ -428,7 +428,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Diff_jniBuffers)(JNIEnv *env, jclass obj,
 /** int git_diff_from_buffer(git_diff **out, const char *content, size_t content_len); */
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Diff_jniFromBuffer)(JNIEnv *env, jclass obj, jobject out, jstring content, jint contentLen)
 {
-    git_diff *c_out;
+    git_diff *c_out = 0;
     char *c_content = j_copy_of_jstring(env, content, true);
     int r = git_diff_from_buffer(&c_out, c_content, contentLen);
     (*env)->CallVoidMethod(env, out, jniConstants->midAtomicLongSet, (long)c_out);
@@ -440,7 +440,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Diff_jniFromBuffer)(JNIEnv *env, jclass obj
 /** int git_diff_get_stats(git_diff_stats **out, git_diff *diff); */
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Diff_jniGetStats)(JNIEnv *env, jclass obj, jobject out, jlong diffPtr)
 {
-    git_diff_stats *c_out;
+    git_diff_stats *c_out = 0;
     int r = git_diff_get_stats(&c_out, (git_diff *)diffPtr);
     (*env)->CallVoidMethod(env, out, jniConstants->midAtomicLongSet, (long)c_out);
     git_diff_stats_free(c_out);

@@ -61,7 +61,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Repository_jniDiscover)(JNIEnv *env, jclass
 
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Repository_jniOpenExt)(JNIEnv *env, jclass obj, jobject ptrReceiver, jstring path, jint flags, jstring ceilingDirs)
 {
-    git_repository *repo;
+    git_repository *repo = 0;
     char *c_path = j_copy_of_jstring(env, path, false);
     char *c_ceilingDirs = j_copy_of_jstring(env, ceilingDirs, true);
     int error = git_repository_open_ext(&repo, c_path, flags, c_ceilingDirs);
@@ -232,7 +232,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Repository_jniInitOptionsNew)(JNIEnv *env, 
 
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Repository_jniInitExt)(JNIEnv *env, jclass obj, jobject outRepo, jstring repoPath, jobject initOpts)
 {
-    git_repository *repo;
+    git_repository *repo = 0;
 
     char *repo_path = j_copy_of_jstring(env, repoPath, false);
 
@@ -331,7 +331,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Repository_jniIsWorktree)(JNIEnv *env, jcla
 
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Repository_jniConfig)(JNIEnv *env, jclass obj, jobject outConfig, jlong repoPtr)
 {
-    git_config *c_config;
+    git_config *c_config = 0;
     int e = git_repository_config(&c_config, (git_repository *)repoPtr);
     (*env)->CallVoidMethod(env, outConfig, jniConstants->midAtomicLongSet, (long)c_config);
     return e;
@@ -339,7 +339,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Repository_jniConfig)(JNIEnv *env, jclass o
 
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Repository_jniConfigSnapshot)(JNIEnv *env, jclass obj, jobject outConfig, jlong repoPtr)
 {
-    git_config *c_config;
+    git_config *c_config = 0;
     int e = git_repository_config_snapshot(&c_config, (git_repository *)repoPtr);
     (*env)->CallVoidMethod(env, outConfig, jniConstants->midAtomicLongSet, (long)c_config);
     return e;
@@ -347,7 +347,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Repository_jniConfigSnapshot)(JNIEnv *env, 
 
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Repository_jniOdb)(JNIEnv *env, jclass obj, jobject outOdb, jlong repoPtr)
 {
-    git_odb *c_odb;
+    git_odb *c_odb = 0;
     int e = git_repository_odb(&c_odb, (git_repository *)repoPtr);
     (*env)->CallVoidMethod(env, outOdb, jniConstants->midAtomicLongSet, (long)c_odb);
     return e;
@@ -356,7 +356,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Repository_jniOdb)(JNIEnv *env, jclass obj,
 /** int git_repository_refdb(git_refdb **out, git_repository *repo); */
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Repository_jniRefdb)(JNIEnv *env, jclass obj, jobject outRefdb, jlong repoPtr)
 {
-    git_refdb *c_refdb;
+    git_refdb *c_refdb = 0;
     int e = git_repository_refdb(&c_refdb, (git_repository *)repoPtr);
     (*env)->CallVoidMethod(env, outRefdb, jniConstants->midAtomicLongSet, (long)c_refdb);
     return e;
@@ -365,7 +365,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Repository_jniRefdb)(JNIEnv *env, jclass ob
 /** int git_repository_index(git_index **out, git_repository *repo); */
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Repository_jniIndex)(JNIEnv *env, jclass obj, jobject outIndex, jlong repoPtr)
 {
-    git_index *c_index;
+    git_index *c_index = 0;
     int e = git_repository_index(&c_index, (git_repository *)repoPtr);
     (*env)->CallVoidMethod(env, outIndex, jniConstants->midAtomicLongSet, (long)c_index);
     return e;

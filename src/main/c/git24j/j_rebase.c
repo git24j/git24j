@@ -30,7 +30,7 @@ JNIEXPORT void JNICALL J_MAKE_METHOD(Rebase_jniOptionsFree)(JNIEnv *env, jclass 
 /** int git_rebase_init(git_rebase **out, git_repository *repo, const git_annotated_commit *branch, const git_annotated_commit *upstream, const git_annotated_commit *onto, const git_rebase_options *opts); */
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Rebase_jniInit)(JNIEnv *env, jclass obj, jobject out, jlong repoPtr, jlong branchPtr, jlong upstreamPtr, jlong ontoPtr, jlong optsPtr)
 {
-    git_rebase *c_out;
+    git_rebase *c_out = 0;
     int r = git_rebase_init(&c_out, (git_repository *)repoPtr, (git_annotated_commit *)branchPtr, (git_annotated_commit *)upstreamPtr, (git_annotated_commit *)ontoPtr, (git_rebase_options *)optsPtr);
     (*env)->CallVoidMethod(env, out, jniConstants->midAtomicLongSet, (long)c_out);
     return r;
@@ -39,7 +39,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Rebase_jniInit)(JNIEnv *env, jclass obj, jo
 /** int git_rebase_open(git_rebase **out, git_repository *repo, const git_rebase_options *opts); */
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Rebase_jniOpen)(JNIEnv *env, jclass obj, jobject out, jlong repoPtr, jlong optsPtr)
 {
-    git_rebase *c_out;
+    git_rebase *c_out = 0;
     int r = git_rebase_open(&c_out, (git_repository *)repoPtr, (git_rebase_options *)optsPtr);
     (*env)->CallVoidMethod(env, out, jniConstants->midAtomicLongSet, (long)c_out);
     return r;
@@ -69,7 +69,7 @@ JNIEXPORT jlong JNICALL J_MAKE_METHOD(Rebase_jniOperationByindex)(JNIEnv *env, j
 /** int git_rebase_next(git_rebase_operation **operation, git_rebase *rebase); */
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Rebase_jniNext)(JNIEnv *env, jclass obj, jobject operation, jlong rebasePtr)
 {
-    git_rebase_operation *c_operation;
+    git_rebase_operation *c_operation = 0;
     int r = git_rebase_next(&c_operation, (git_rebase *)rebasePtr);
     (*env)->CallVoidMethod(env, operation, jniConstants->midAtomicLongSet, (long)c_operation);
     return r;
@@ -78,7 +78,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Rebase_jniNext)(JNIEnv *env, jclass obj, jo
 /** int git_rebase_inmemory_index(git_index **index, git_rebase *rebase); */
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Rebase_jniInmemoryIndex)(JNIEnv *env, jclass obj, jobject index, jlong rebasePtr)
 {
-    git_index *c_index;
+    git_index *c_index = 0;
     int r = git_rebase_inmemory_index(&c_index, (git_rebase *)rebasePtr);
     (*env)->CallVoidMethod(env, index, jniConstants->midAtomicLongSet, (long)c_index);
     return r;

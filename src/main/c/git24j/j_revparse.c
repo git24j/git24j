@@ -35,7 +35,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Revparse_jniLookup)(JNIEnv *env, jclass obj
 
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Revparse_jniSingle)(JNIEnv *env, jclass obj, jobject outObj, jlong repoPtr, jstring spec)
 {
-    git_object *c_out;
+    git_object *c_out = 0;
     char *c_spec = j_copy_of_jstring(env, spec, false);
     int error = git_revparse_single(&c_out, (git_repository *)repoPtr, c_spec);
     (*env)->CallVoidMethod(env, outObj, jniConstants->midAtomicLongSet, (long)c_out);
@@ -45,8 +45,8 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Revparse_jniSingle)(JNIEnv *env, jclass obj
 
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Revparse_jniExt)(JNIEnv *env, jclass obj, jobject outObj, jobject outRef, jlong repoPtr, jstring spec)
 {
-    git_object *c_out_obj;
-    git_reference *c_out_ref;
+    git_object *c_out_obj = 0;
+    git_reference *c_out_ref = 0;
     char *c_spec = j_copy_of_jstring(env, spec, false);
     int error = git_revparse_ext(&c_out_obj, &c_out_ref, (git_repository *)repoPtr, c_spec);
     (*env)->CallVoidMethod(env, outObj, jniConstants->midAtomicLongSet, (long)c_out_obj);
