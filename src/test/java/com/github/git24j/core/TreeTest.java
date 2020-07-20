@@ -103,6 +103,7 @@ public class TreeTest extends TestBase {
         }
     }
 
+    @Ignore
     @Test
     public void update() {
         try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {
