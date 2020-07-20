@@ -1,0 +1,9 @@
+typedef struct {
+	char   origin;
+	int    old_lineno;
+	int    new_lineno;
+	int    num_lines;
+	size_t content_len;
+	size_t content_offset;
+	const char *content;
+} git_diff_line;

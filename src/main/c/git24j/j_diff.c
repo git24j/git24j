@@ -628,3 +628,83 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Diff_jniFileGetIdAbbrev)(JNIEnv *env, jclas
 {
     return ((git_diff_file *)filePtr)->id_abbrev;
 }
+
+/****** diff hunk *********/
+/** int    old_start*/
+JNIEXPORT jint JNICALL J_MAKE_METHOD(Diff_jniHunkGetOldStart)(JNIEnv *env, jclass obj, jlong hunkPtr)
+{
+    return ((git_diff_hunk *)hunkPtr)->old_start;
+}
+
+/** int    old_lines*/
+JNIEXPORT jint JNICALL J_MAKE_METHOD(Diff_jniHunkGetOldLines)(JNIEnv *env, jclass obj, jlong hunkPtr)
+{
+    return ((git_diff_hunk *)hunkPtr)->old_lines;
+}
+
+/** int    new_start*/
+JNIEXPORT jint JNICALL J_MAKE_METHOD(Diff_jniHunkGetNewStart)(JNIEnv *env, jclass obj, jlong hunkPtr)
+{
+    return ((git_diff_hunk *)hunkPtr)->new_start;
+}
+
+/** int    new_lines*/
+JNIEXPORT jint JNICALL J_MAKE_METHOD(Diff_jniHunkGetNewLines)(JNIEnv *env, jclass obj, jlong hunkPtr)
+{
+    return ((git_diff_hunk *)hunkPtr)->new_lines;
+}
+
+/** size_t header_len*/
+JNIEXPORT jint JNICALL J_MAKE_METHOD(Diff_jniHunkGetHeaderLen)(JNIEnv *env, jclass obj, jlong hunkPtr)
+{
+    return ((git_diff_hunk *)hunkPtr)->header_len;
+}
+
+/** const char*   header*/
+JNIEXPORT jstring JNICALL J_MAKE_METHOD(Diff_jniHunkGetHeader)(JNIEnv *env, jclass obj, jlong hunkPtr)
+{
+    return (*env)->NewStringUTF(env, ((git_diff_hunk *)hunkPtr)->header);
+}
+
+/************ diff line *************/
+/** char   origin*/
+JNIEXPORT jchar JNICALL J_MAKE_METHOD(Diff_jniLineGetOrigin)(JNIEnv *env, jclass obj, jlong linePtr)
+{
+    return ((git_diff_line *)linePtr)->origin;
+}
+
+/** int    old_lineno*/
+JNIEXPORT jint JNICALL J_MAKE_METHOD(Diff_jniLineGetOldLineno)(JNIEnv *env, jclass obj, jlong linePtr)
+{
+    return ((git_diff_line *)linePtr)->old_lineno;
+}
+
+/** int    new_lineno*/
+JNIEXPORT jint JNICALL J_MAKE_METHOD(Diff_jniLineGetNewLineno)(JNIEnv *env, jclass obj, jlong linePtr)
+{
+    return ((git_diff_line *)linePtr)->new_lineno;
+}
+
+/** int    num_lines*/
+JNIEXPORT jint JNICALL J_MAKE_METHOD(Diff_jniLineGetNumLines)(JNIEnv *env, jclass obj, jlong linePtr)
+{
+    return ((git_diff_line *)linePtr)->num_lines;
+}
+
+/** size_t content_len*/
+JNIEXPORT jint JNICALL J_MAKE_METHOD(Diff_jniLineGetContentLen)(JNIEnv *env, jclass obj, jlong linePtr)
+{
+    return ((git_diff_line *)linePtr)->content_len;
+}
+
+/** size_t content_offset*/
+JNIEXPORT jint JNICALL J_MAKE_METHOD(Diff_jniLineGetContentOffset)(JNIEnv *env, jclass obj, jlong linePtr)
+{
+    return ((git_diff_line *)linePtr)->content_offset;
+}
+
+/** const char *content*/
+JNIEXPORT jstring JNICALL J_MAKE_METHOD(Diff_jniLineGetContent)(JNIEnv *env, jclass obj, jlong linePtr)
+{
+    return (*env)->NewStringUTF(env, ((git_diff_line *)linePtr)->content);
+}

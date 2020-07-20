@@ -1,0 +1,8 @@
+typedef struct {
+	int    old_start;
+	int    old_lines;
+	int    new_start;
+	int    new_lines;
+	size_t header_len;
+	const char*   header;
+} git_diff_hunk;
