@@ -166,6 +166,36 @@ extern "C"
     /** uint16_t           id_abbrev*/
     JNIEXPORT jint JNICALL J_MAKE_METHOD(Diff_jniFileGetIdAbbrev)(JNIEnv *env, jclass obj, jlong filePtr);
 
+    /****** diff hunk *********/
+    /** int    old_start*/
+    JNIEXPORT jint JNICALL J_MAKE_METHOD(Diff_jniHunkGetOldStart)(JNIEnv *env, jclass obj, jlong hunkPtr);
+    /** int    old_lines*/
+    JNIEXPORT jint JNICALL J_MAKE_METHOD(Diff_jniHunkGetOldLines)(JNIEnv *env, jclass obj, jlong hunkPtr);
+    /** int    new_start*/
+    JNIEXPORT jint JNICALL J_MAKE_METHOD(Diff_jniHunkGetNewStart)(JNIEnv *env, jclass obj, jlong hunkPtr);
+    /** int    new_lines*/
+    JNIEXPORT jint JNICALL J_MAKE_METHOD(Diff_jniHunkGetNewLines)(JNIEnv *env, jclass obj, jlong hunkPtr);
+    /** size_t header_len*/
+    JNIEXPORT jint JNICALL J_MAKE_METHOD(Diff_jniHunkGetHeaderLen)(JNIEnv *env, jclass obj, jlong hunkPtr);
+    /** const char*   header*/
+    JNIEXPORT jstring JNICALL J_MAKE_METHOD(Diff_jniHunkGetHeader)(JNIEnv *env, jclass obj, jlong hunkPtr);
+
+    /************ diff line *************/
+    /** char   origin*/
+    JNIEXPORT jchar JNICALL J_MAKE_METHOD(Diff_jniLineGetOrigin)(JNIEnv *env, jclass obj, jlong linePtr);
+    /** int    old_lineno*/
+    JNIEXPORT jint JNICALL J_MAKE_METHOD(Diff_jniLineGetOldLineno)(JNIEnv *env, jclass obj, jlong linePtr);
+    /** int    new_lineno*/
+    JNIEXPORT jint JNICALL J_MAKE_METHOD(Diff_jniLineGetNewLineno)(JNIEnv *env, jclass obj, jlong linePtr);
+    /** int    num_lines*/
+    JNIEXPORT jint JNICALL J_MAKE_METHOD(Diff_jniLineGetNumLines)(JNIEnv *env, jclass obj, jlong linePtr);
+    /** size_t content_len*/
+    JNIEXPORT jint JNICALL J_MAKE_METHOD(Diff_jniLineGetContentLen)(JNIEnv *env, jclass obj, jlong linePtr);
+    /** size_t content_offset*/
+    JNIEXPORT jint JNICALL J_MAKE_METHOD(Diff_jniLineGetContentOffset)(JNIEnv *env, jclass obj, jlong linePtr);
+    /** const char *content*/
+    JNIEXPORT jstring JNICALL J_MAKE_METHOD(Diff_jniLineGetContent)(JNIEnv *env, jclass obj, jlong linePtr);
+
 #ifdef __cplusplus
 }
 #endif

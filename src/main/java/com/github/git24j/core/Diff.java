@@ -1,16 +1,16 @@
 package com.github.git24j.core;
 
-import static com.github.git24j.core.Internals.JFCallback;
-import static com.github.git24j.core.Internals.JJCallback;
-import static com.github.git24j.core.Internals.JJJCallback;
-
+import javax.annotation.CheckForNull;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.nio.file.Path;
 import java.util.EnumSet;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
-import javax.annotation.CheckForNull;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+
+import static com.github.git24j.core.Internals.JFCallback;
+import static com.github.git24j.core.Internals.JJCallback;
+import static com.github.git24j.core.Internals.JJJCallback;
 
 public class Diff extends CAutoReleasable {
     AtomicLong _rawPtr = new AtomicLong();
@@ -496,6 +496,30 @@ public class Diff extends CAutoReleasable {
             }
             return new Hunk(rawPtr);
         }
+
+        public int getOldStart() {
+            return jniHunkGetOldStart(getRawPointer());
+        }
+
+        public int getOldLines() {
+            return jniHunkGetOldLines(getRawPointer());
+        }
+
+        public int getNewStart() {
+            return jniHunkGetNewStart(getRawPointer());
+        }
+
+        public int getNewLines() {
+            return jniHunkGetNewLines(getRawPointer());
+        }
+
+        public int getHeaderLen() {
+            return jniHunkGetHeaderLen(getRawPointer());
+        }
+
+        public String getHeader() {
+            return jniHunkGetHeader(getRawPointer());
+        }
     }
 
     public static class File extends CAutoReleasable {
@@ -600,6 +624,34 @@ public class Diff extends CAutoReleasable {
                 return null;
             }
             return new Line(rawPtr);
+        }
+
+        public char getOrigin() {
+            return jniLineGetOrigin(getRawPointer());
+        }
+
+        public int getOldLineno() {
+            return jniLineGetOldLineno(getRawPointer());
+        }
+
+        public int getNewLineno() {
+            return jniLineGetNewLineno(getRawPointer());
+        }
+
+        public int getNumLines() {
+            return jniLineGetNumLines(getRawPointer());
+        }
+
+        public int getContentLen() {
+            return jniLineGetContentLen(getRawPointer());
+        }
+
+        public int getContentOffset() {
+            return jniLineGetContentOffset(getRawPointer());
+        }
+
+        public String getContent() {
+            return jniLineGetContent(getRawPointer());
         }
     }
 
@@ -1633,4 +1685,45 @@ public class Diff extends CAutoReleasable {
                 jniPatchid(oid, getRawPointer(), opts == null ? 0 : opts.getRawPointer()));
         return oid;
     }
+
+    /** -------- Jni Signature ---------- */
+    /** int old_start */
+    static native int jniHunkGetOldStart(long hunkPtr);
+
+    /** int old_lines */
+    static native int jniHunkGetOldLines(long hunkPtr);
+
+    /** int new_start */
+    static native int jniHunkGetNewStart(long hunkPtr);
+
+    /** int new_lines */
+    static native int jniHunkGetNewLines(long hunkPtr);
+
+    /** size_t header_len */
+    static native int jniHunkGetHeaderLen(long hunkPtr);
+
+    /** const char* header */
+    static native String jniHunkGetHeader(long hunkPtr);
+
+    /** -------- Jni Signature ---------- */
+    /**char   origin*/
+    static native char jniLineGetOrigin(long linePtr);
+
+    /**int    old_lineno*/
+    static native int jniLineGetOldLineno(long linePtr);
+
+    /**int    new_lineno*/
+    static native int jniLineGetNewLineno(long linePtr);
+
+    /**int    num_lines*/
+    static native int jniLineGetNumLines(long linePtr);
+
+    /**size_t content_len*/
+    static native int jniLineGetContentLen(long linePtr);
+
+    /**size_t content_offset*/
+    static native int jniLineGetContentOffset(long linePtr);
+
+    /**const char *content*/
+    static native String jniLineGetContent(long linePtr);
 }

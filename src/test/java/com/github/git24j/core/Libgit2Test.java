@@ -21,9 +21,7 @@ public class Libgit2Test {
     @Test
     public void version() {
         Version v = Libgit2.version();
-        Assert.assertEquals(1, v.major);
-        Assert.assertEquals(0, v.minor);
-        Assert.assertEquals(0, v.patch);
+        Assert.assertEquals(v, new Version(1, 0, 0));
     }
 
     @Test
