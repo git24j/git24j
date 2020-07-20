@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -102,6 +103,7 @@ public class TreeTest extends TestBase {
         }
     }
 
+    @Ignore
     @Test
     public void update() {
         try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {
