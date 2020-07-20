@@ -239,7 +239,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Remote_jniConnected)(JNIEnv *env, jclass ob
 /** int git_remote_create(git_remote **out, git_repository *repo, const char *name, const char *url); */
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Remote_jniCreate)(JNIEnv *env, jclass obj, jobject out, jlong repoPtr, jstring name, jstring url)
 {
-    git_remote *c_out;
+    git_remote *c_out = 0;
     char *c_name = j_copy_of_jstring(env, name, true);
     char *c_url = j_copy_of_jstring(env, url, true);
     int r = git_remote_create(&c_out, (git_repository *)repoPtr, c_name, c_url);
@@ -252,7 +252,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Remote_jniCreate)(JNIEnv *env, jclass obj, 
 /** int git_remote_create_anonymous(git_remote **out, git_repository *repo, const char *url); */
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Remote_jniCreateAnonymous)(JNIEnv *env, jclass obj, jobject out, jlong repoPtr, jstring url)
 {
-    git_remote *c_out;
+    git_remote *c_out = 0;
     char *c_url = j_copy_of_jstring(env, url, true);
     int r = git_remote_create_anonymous(&c_out, (git_repository *)repoPtr, c_url);
     (*env)->CallVoidMethod(env, out, jniConstants->midAtomicLongSet, (long)c_out);
@@ -263,7 +263,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Remote_jniCreateAnonymous)(JNIEnv *env, jcl
 /** int git_remote_create_detached(git_remote **out, const char *url); */
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Remote_jniCreateDetached)(JNIEnv *env, jclass obj, jobject out, jstring url)
 {
-    git_remote *c_out;
+    git_remote *c_out = 0;
     char *c_url = j_copy_of_jstring(env, url, true);
     int r = git_remote_create_detached(&c_out, c_url);
     (*env)->CallVoidMethod(env, out, jniConstants->midAtomicLongSet, (long)c_out);
@@ -289,7 +289,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Remote_jniCreateOptionsNew)(JNIEnv *env, jc
 /** int git_remote_create_with_fetchspec(git_remote **out, git_repository *repo, const char *name, const char *url, const char *fetch); */
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Remote_jniCreateWithFetchspec)(JNIEnv *env, jclass obj, jobject out, jlong repoPtr, jstring name, jstring url, jstring fetch)
 {
-    git_remote *c_out;
+    git_remote *c_out = 0;
     char *c_name = j_copy_of_jstring(env, name, true);
     char *c_url = j_copy_of_jstring(env, url, true);
     char *c_fetch = j_copy_of_jstring(env, fetch, true);
@@ -304,7 +304,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Remote_jniCreateWithFetchspec)(JNIEnv *env,
 /** int git_remote_create_with_opts(git_remote **out, const char *url, const git_remote_create_options *opts); */
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Remote_jniCreateWithOpts)(JNIEnv *env, jclass obj, jobject out, jstring url, jlong optsPtr)
 {
-    git_remote *c_out;
+    git_remote *c_out = 0;
     char *c_url = j_copy_of_jstring(env, url, true);
     int r = git_remote_create_with_opts(&c_out, c_url, (git_remote_create_options *)optsPtr);
     (*env)->CallVoidMethod(env, out, jniConstants->midAtomicLongSet, (long)c_out);
@@ -350,7 +350,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Remote_jniDownload)(JNIEnv *env, jclass obj
 /** int git_remote_dup(git_remote **dest, git_remote *source); */
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Remote_jniDup)(JNIEnv *env, jclass obj, jobject dest, jlong sourcePtr)
 {
-    git_remote *c_dest;
+    git_remote *c_dest = 0;
     int r = git_remote_dup(&c_dest, (git_remote *)sourcePtr);
     (*env)->CallVoidMethod(env, dest, jniConstants->midAtomicLongSet, (long)c_dest);
     return r;
@@ -460,7 +460,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Remote_jniList)(JNIEnv *env, jclass obj, jo
 /** int git_remote_lookup(git_remote **out, git_repository *repo, const char *name); */
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Remote_jniLookup)(JNIEnv *env, jclass obj, jobject out, jlong repoPtr, jstring name)
 {
-    git_remote *c_out;
+    git_remote *c_out = 0;
     char *c_name = j_copy_of_jstring(env, name, true);
     int r = git_remote_lookup(&c_out, (git_repository *)repoPtr, c_name);
     (*env)->CallVoidMethod(env, out, jniConstants->midAtomicLongSet, (long)c_out);

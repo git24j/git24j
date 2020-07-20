@@ -62,7 +62,7 @@ JNIEXPORT jstring JNICALL J_MAKE_METHOD(Credential_jniGetUsername)(JNIEnv *env, 
 /** int git_credential_userpass_plaintext_new(git_credential **out, const char *username, const char *password); */
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Credential_jniUserpassPlaintextNew)(JNIEnv *env, jclass obj, jobject out, jstring username, jstring password)
 {
-    git_credential *c_out;
+    git_credential *c_out = 0;
     char *c_username = j_copy_of_jstring(env, username, true);
     char *c_password = j_copy_of_jstring(env, password, true);
     int r = git_credential_userpass_plaintext_new(&c_out, c_username, c_password);
@@ -76,7 +76,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Credential_jniUserpassPlaintextNew)(JNIEnv 
 /** int git_credential_default_new(git_credential **out); */
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Credential_jniDefaultNew)(JNIEnv *env, jclass obj, jobject out)
 {
-    git_credential *c_out;
+    git_credential *c_out = 0;
     int r = git_credential_default_new(&c_out);
     (*env)->CallVoidMethod(env, out, jniConstants->midAtomicLongSet, (long)c_out);
     /* git_credential_free(c_out); */
@@ -86,7 +86,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Credential_jniDefaultNew)(JNIEnv *env, jcla
 /** int git_credential_username_new(git_credential **out, const char *username); */
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Credential_jniUsernameNew)(JNIEnv *env, jclass obj, jobject out, jstring username)
 {
-    git_credential *c_out;
+    git_credential *c_out = 0;
     char *c_username = j_copy_of_jstring(env, username, true);
     int r = git_credential_username_new(&c_out, c_username);
     (*env)->CallVoidMethod(env, out, jniConstants->midAtomicLongSet, (long)c_out);
@@ -98,7 +98,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Credential_jniUsernameNew)(JNIEnv *env, jcl
 /** int git_credential_ssh_key_new(git_credential **out, const char *username, const char *publickey, const char *privatekey, const char *passphrase); */
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Credential_jniSshKeyNew)(JNIEnv *env, jclass obj, jobject out, jstring username, jstring publickey, jstring privatekey, jstring passphrase)
 {
-    git_credential *c_out;
+    git_credential *c_out = 0;
     char *c_username = j_copy_of_jstring(env, username, true);
     char *c_publickey = j_copy_of_jstring(env, publickey, true);
     char *c_privatekey = j_copy_of_jstring(env, privatekey, true);
@@ -116,7 +116,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Credential_jniSshKeyNew)(JNIEnv *env, jclas
 /** int git_credential_ssh_key_memory_new(git_credential **out, const char *username, const char *publickey, const char *privatekey, const char *passphrase); */
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Credential_jniSshKeyMemoryNew)(JNIEnv *env, jclass obj, jobject out, jstring username, jstring publickey, jstring privatekey, jstring passphrase)
 {
-    git_credential *c_out;
+    git_credential *c_out = 0;
     char *c_username = j_copy_of_jstring(env, username, true);
     char *c_publickey = j_copy_of_jstring(env, publickey, true);
     char *c_privatekey = j_copy_of_jstring(env, privatekey, true);
@@ -134,7 +134,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Credential_jniSshKeyMemoryNew)(JNIEnv *env,
 /** int git_credential_ssh_key_from_agent(git_credential **out, const char *username); */
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Credential_jniSshKeyFromAgent)(JNIEnv *env, jclass obj, jobject out, jstring username)
 {
-    git_credential *c_out;
+    git_credential *c_out = 0;
     char *c_username = j_copy_of_jstring(env, username, true);
     int r = git_credential_ssh_key_from_agent(&c_out, c_username);
     (*env)->CallVoidMethod(env, out, jniConstants->midAtomicLongSet, (long)c_out);
@@ -146,7 +146,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Credential_jniSshKeyFromAgent)(JNIEnv *env,
 /** int git_credential_userpass(git_credential **out, const char *url, const char *user_from_url, unsigned int allowed_types, void *payload); */
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Credential_jniUserpass)(JNIEnv *env, jclass obj, jobject out, jstring url, jstring user_from_url, jint allowedTypes, jlong payload)
 {
-    git_credential *c_out;
+    git_credential *c_out = 0;
     char *c_url = j_copy_of_jstring(env, url, true);
     char *c_user_from_url = j_copy_of_jstring(env, user_from_url, true);
     int r = git_credential_userpass(&c_out, c_url, c_user_from_url, allowedTypes, (void *)payload);

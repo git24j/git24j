@@ -56,7 +56,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Note_jniForeach)(JNIEnv *env, jclass obj, j
 /** int git_note_iterator_new(git_note_iterator **out, git_repository *repo, const char *notes_ref); */
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Note_jniIteratorNew)(JNIEnv *env, jclass obj, jobject out, jlong repoPtr, jstring notes_ref)
 {
-    git_note_iterator *c_out;
+    git_note_iterator *c_out = 0;
     char *c_notes_ref = j_copy_of_jstring(env, notes_ref, true);
     int r = git_note_iterator_new(&c_out, (git_repository *)repoPtr, c_notes_ref);
     (*env)->CallVoidMethod(env, out, jniConstants->midAtomicLongSet, (long)c_out);
@@ -68,7 +68,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Note_jniIteratorNew)(JNIEnv *env, jclass ob
 /** int git_note_commit_iterator_new(git_note_iterator **out, git_commit *notes_commit); */
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Note_jniCommitIteratorNew)(JNIEnv *env, jclass obj, jobject out, jlong notesCommitPtr)
 {
-    git_note_iterator *c_out;
+    git_note_iterator *c_out = 0;
     int r = git_note_commit_iterator_new(&c_out, (git_commit *)notesCommitPtr);
     (*env)->CallVoidMethod(env, out, jniConstants->midAtomicLongSet, (long)c_out);
     /* git_note_iterator_free(c_out); */
@@ -95,7 +95,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Note_jniNext)(JNIEnv *env, jclass obj, jobj
 /** int git_note_read(git_note **out, git_repository *repo, const char *notes_ref, const git_oid *oid); */
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Note_jniRead)(JNIEnv *env, jclass obj, jobject out, jlong repoPtr, jstring notes_ref, jobject oid)
 {
-    git_note *c_out;
+    git_note *c_out = 0;
     char *c_notes_ref = j_copy_of_jstring(env, notes_ref, true);
     git_oid c_oid;
     j_git_oid_from_java(env, oid, &c_oid);
@@ -109,7 +109,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Note_jniRead)(JNIEnv *env, jclass obj, jobj
 /** int git_note_commit_read(git_note **out, git_repository *repo, git_commit *notes_commit, const git_oid *oid); */
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Note_jniCommitRead)(JNIEnv *env, jclass obj, jobject out, jlong repoPtr, jlong notesCommitPtr, jobject oid)
 {
-    git_note *c_out;
+    git_note *c_out = 0;
     git_oid c_oid;
     j_git_oid_from_java(env, oid, &c_oid);
     int r = git_note_commit_read(&c_out, (git_repository *)repoPtr, (git_commit *)notesCommitPtr, &c_oid);

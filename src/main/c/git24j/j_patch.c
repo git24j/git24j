@@ -11,7 +11,7 @@ extern j_constants_t *jniConstants;
 /** int git_patch_from_diff(git_patch **out, git_diff *diff, size_t idx); */
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Patch_jniFromDiff)(JNIEnv *env, jclass obj, jobject out, jlong diffPtr, jint idx)
 {
-    git_patch *c_out;
+    git_patch *c_out = 0;
     int r = git_patch_from_diff(&c_out, (git_diff *)diffPtr, idx);
     (*env)->CallVoidMethod(env, out, jniConstants->midAtomicLongSet, (long)c_out);
     return r;
@@ -20,7 +20,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Patch_jniFromDiff)(JNIEnv *env, jclass obj,
 /** int git_patch_from_blobs(git_patch **out, const git_blob *old_blob, const char *old_as_path, const git_blob *new_blob, const char *new_as_path, const git_diff_options *opts); */
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Patch_jniFromBlobs)(JNIEnv *env, jclass obj, jobject out, jlong oldBlobPtr, jstring old_as_path, jlong newBlobPtr, jstring new_as_path, jlong optsPtr)
 {
-    git_patch *c_out;
+    git_patch *c_out = 0;
     char *c_old_as_path = j_copy_of_jstring(env, old_as_path, true);
     char *c_new_as_path = j_copy_of_jstring(env, new_as_path, true);
     int r = git_patch_from_blobs(&c_out, (git_blob *)oldBlobPtr, c_old_as_path, (git_blob *)newBlobPtr, c_new_as_path, (git_diff_options *)optsPtr);
@@ -33,7 +33,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Patch_jniFromBlobs)(JNIEnv *env, jclass obj
 /** int git_patch_from_blob_and_buffer(git_patch **out, const git_blob *old_blob, const char *old_as_path, const void *buffer, size_t buffer_len, const char *buffer_as_path, const git_diff_options *opts); */
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Patch_jniFromBlobAndBuffer)(JNIEnv *env, jclass obj, jobject out, jlong oldBlobPtr, jstring old_as_path, jbyteArray buffer, jint bufferLen, jstring buffer_as_path, jlong optsPtr)
 {
-    git_patch *c_out;
+    git_patch *c_out = 0;
     char *c_old_as_path = j_copy_of_jstring(env, old_as_path, true);
     int buffer_len;
     unsigned char *c_buffer = j_unsigned_chars_from_java(env, buffer, &buffer_len);
@@ -49,7 +49,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Patch_jniFromBlobAndBuffer)(JNIEnv *env, jc
 /** int git_patch_from_buffers(git_patch **out, const void *old_buffer, size_t old_len, const char *old_as_path, const void *new_buffer, size_t new_len, const char *new_as_path, const git_diff_options *opts); */
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Patch_jniFromBuffers)(JNIEnv *env, jclass obj, jobject out, jbyteArray oldBuffer, jint oldLen, jstring old_as_path, jbyteArray newBuffer, jint newLen, jstring new_as_path, jlong optsPtr)
 {
-    git_patch *c_out;
+    git_patch *c_out = 0;
     int old_buffer_len;
     unsigned char *c_old_buffer = j_unsigned_chars_from_java(env, oldBuffer, &old_buffer_len);
     char *c_old_as_path = j_copy_of_jstring(env, old_as_path, true);
@@ -101,7 +101,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Patch_jniLineStats)(JNIEnv *env, jclass obj
 /** int git_patch_get_hunk(const git_diff_hunk **out, size_t *lines_in_hunk, git_patch *patch, size_t hunk_idx); */
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Patch_jniGetHunk)(JNIEnv *env, jclass obj, jobject out, jobject linesInHunk, jlong patchPtr, jint hunkIdx)
 {
-    const git_diff_hunk *c_out;
+    const git_diff_hunk *c_out = 0;
     size_t c_lines_in_hunk;
     int r = git_patch_get_hunk(&c_out, &c_lines_in_hunk, (git_patch *)patchPtr, hunkIdx);
     (*env)->CallVoidMethod(env, out, jniConstants->midAtomicLongSet, (long)c_out);
@@ -119,7 +119,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Patch_jniNumLinesInHunk)(JNIEnv *env, jclas
 /** int git_patch_get_line_in_hunk(const git_diff_line **out, git_patch *patch, size_t hunk_idx, size_t line_of_hunk); */
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Patch_jniGetLineInHunk)(JNIEnv *env, jclass obj, jobject out, jlong patchPtr, jint hunkIdx, jint lineOfHunk)
 {
-    const git_diff_line *c_out;
+    const git_diff_line *c_out = 0;
     int r = git_patch_get_line_in_hunk(&c_out, (git_patch *)patchPtr, hunkIdx, lineOfHunk);
     (*env)->CallVoidMethod(env, out, jniConstants->midAtomicLongSet, (long)c_out);
     return r;

@@ -12,7 +12,7 @@ extern j_constants_t *jniConstants;
 /** int git_signature_new(git_signature **out, const char *name, const char *email, git_time_t time, int offset); */
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Signature_jniNew)(JNIEnv *env, jclass obj, jobject out, jstring name, jstring email, jlong time, jint offset)
 {
-    git_signature *c_out;
+    git_signature *c_out = 0;
     char *c_name = j_copy_of_jstring(env, name, true);
     char *c_email = j_copy_of_jstring(env, email, true);
     int r = git_signature_new(&c_out, c_name, c_email, time, offset);
@@ -25,7 +25,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Signature_jniNew)(JNIEnv *env, jclass obj, 
 /** int git_signature_now(git_signature **out, const char *name, const char *email); */
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Signature_jniNow)(JNIEnv *env, jclass obj, jobject out, jstring name, jstring email)
 {
-    git_signature *c_out;
+    git_signature *c_out = 0;
     char *c_name = j_copy_of_jstring(env, name, true);
     char *c_email = j_copy_of_jstring(env, email, true);
 
@@ -39,7 +39,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Signature_jniNow)(JNIEnv *env, jclass obj, 
 /** int git_signature_default(git_signature **out, git_repository *repo); */
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Signature_jniDefault)(JNIEnv *env, jclass obj, jobject out, jlong repoPtr)
 {
-    git_signature *c_out;
+    git_signature *c_out = 0;
     int r = git_signature_default(&c_out, (git_repository *)repoPtr);
     (*env)->CallVoidMethod(env, out, jniConstants->midAtomicLongSet, (long)c_out);
     return r;
@@ -48,7 +48,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Signature_jniDefault)(JNIEnv *env, jclass o
 /** int git_signature_from_buffer(git_signature **out, const char *buf); */
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Signature_jniFromBuffer)(JNIEnv *env, jclass obj, jobject out, jstring buf)
 {
-    git_signature *c_out;
+    git_signature *c_out = 0;
     char *c_buf = j_copy_of_jstring(env, buf, true);
     int r = git_signature_from_buffer(&c_out, c_buf);
     (*env)->CallVoidMethod(env, out, jniConstants->midAtomicLongSet, (long)c_out);
@@ -59,7 +59,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Signature_jniFromBuffer)(JNIEnv *env, jclas
 /** int git_signature_dup(git_signature **dest, const git_signature *sig); */
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Signature_jniDup)(JNIEnv *env, jclass obj, jobject dest, jlong sigPtr)
 {
-    git_signature *c_dest;
+    git_signature *c_dest = 0;
     int r = git_signature_dup(&c_dest, (git_signature *)sigPtr);
     (*env)->CallVoidMethod(env, dest, jniConstants->midAtomicLongSet, (long)c_dest);
     return r;

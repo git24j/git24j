@@ -12,7 +12,7 @@ extern j_constants_t *jniConstants;
 /** int git_transaction_new(git_transaction **out, git_repository *repo); */
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Transaction_jniNew)(JNIEnv *env, jclass obj, jobject out, jlong repoPtr)
 {
-    git_transaction *c_out;
+    git_transaction *c_out = 0;
     int r = git_transaction_new(&c_out, (git_repository *)repoPtr);
     (*env)->CallVoidMethod(env, out, jniConstants->midAtomicLongSet, (long)c_out);
     /* git_transaction_free(c_out); */

@@ -37,7 +37,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Cred_jniHasUsername)(JNIEnv *env, jclass ob
 /** int git_cred_userpass_plaintext_new(git_cred **out, const char *username, const char *password); */
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Cred_jniUserpassPlaintextNew)(JNIEnv *env, jclass obj, jobject out, jstring username, jstring password)
 {
-    git_cred *c_out;
+    git_cred *c_out = 0;
     char *c_username = j_copy_of_jstring(env, username, true);
     char *c_password = j_copy_of_jstring(env, password, true);
     int r = git_cred_userpass_plaintext_new(&c_out, c_username, c_password);
@@ -50,7 +50,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Cred_jniUserpassPlaintextNew)(JNIEnv *env, 
 /** int git_cred_ssh_key_new(git_cred **out, const char *username, const char *publickey, const char *privatekey, const char *passphrase); */
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Cred_jniSshKeyNew)(JNIEnv *env, jclass obj, jobject out, jstring username, jstring publickey, jstring privatekey, jstring passphrase)
 {
-    git_cred *c_out;
+    git_cred *c_out = 0;
     char *c_username = j_copy_of_jstring(env, username, true);
     char *c_publickey = j_copy_of_jstring(env, publickey, true);
     char *c_privatekey = j_copy_of_jstring(env, privatekey, true);
@@ -67,7 +67,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Cred_jniSshKeyNew)(JNIEnv *env, jclass obj,
 /** int git_cred_ssh_key_from_agent(git_cred **out, const char *username); */
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Cred_jniSshKeyFromAgent)(JNIEnv *env, jclass obj, jobject out, jstring username)
 {
-    git_cred *c_out;
+    git_cred *c_out = 0;
     char *c_username = j_copy_of_jstring(env, username, true);
     int r = git_cred_ssh_key_from_agent(&c_out, c_username);
     (*env)->CallVoidMethod(env, out, jniConstants->midAtomicLongSet, (long)c_out);
@@ -78,7 +78,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Cred_jniSshKeyFromAgent)(JNIEnv *env, jclas
 /** int git_cred_default_new(git_cred **out); */
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Cred_jniDefaultNew)(JNIEnv *env, jclass obj, jobject out)
 {
-    git_cred *c_out;
+    git_cred *c_out = 0;
     int r = git_cred_default_new(&c_out);
     (*env)->CallVoidMethod(env, out, jniConstants->midAtomicLongSet, (long)c_out);
     return r;
@@ -87,7 +87,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Cred_jniDefaultNew)(JNIEnv *env, jclass obj
 /** int git_cred_username_new(git_cred **cred, const char *username); */
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Cred_jniUsernameNew)(JNIEnv *env, jclass obj, jobject cred, jstring username)
 {
-    git_cred *c_cred;
+    git_cred *c_cred = 0;
     char *c_username = j_copy_of_jstring(env, username, true);
     int r = git_cred_username_new(&c_cred, c_username);
     (*env)->CallVoidMethod(env, cred, jniConstants->midAtomicLongSet, (long)c_cred);
@@ -98,7 +98,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Cred_jniUsernameNew)(JNIEnv *env, jclass ob
 /** int git_cred_ssh_key_memory_new(git_cred **out, const char *username, const char *publickey, const char *privatekey, const char *passphrase); */
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Cred_jniSshKeyMemoryNew)(JNIEnv *env, jclass obj, jobject out, jstring username, jstring publickey, jstring privatekey, jstring passphrase)
 {
-    git_cred *c_out;
+    git_cred *c_out = 0;
     char *c_username = j_copy_of_jstring(env, username, true);
     char *c_publickey = j_copy_of_jstring(env, publickey, true);
     char *c_privatekey = j_copy_of_jstring(env, privatekey, true);

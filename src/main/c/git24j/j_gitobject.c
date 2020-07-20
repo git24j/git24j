@@ -31,7 +31,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(GitObject_jniShortId)(JNIEnv *env, jclass o
 
 JNIEXPORT jint JNICALL J_MAKE_METHOD(GitObject_jniLookup)(JNIEnv *env, jclass obj, jobject outObj, jlong repoPtr, jobject oid, jint objType)
 {
-    git_object *out_obj;
+    git_object *out_obj = 0;
     git_oid c_oid;
     j_git_oid_from_java(env, oid, &c_oid);
     int error = git_object_lookup(&out_obj, (git_repository *)repoPtr, &c_oid, (git_object_t)objType);
@@ -41,7 +41,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(GitObject_jniLookup)(JNIEnv *env, jclass ob
 
 JNIEXPORT jint JNICALL J_MAKE_METHOD(GitObject_jniLookupPrefix)(JNIEnv *env, jclass obj, jobject outObj, jlong repoPtr, jobject oid, jint len, jint objType)
 {
-    git_object *out_obj;
+    git_object *out_obj = 0;
     git_oid c_oid;
     j_git_oid_from_java(env, oid, &c_oid);
     int error = git_object_lookup_prefix(&out_obj, (git_repository *)repoPtr, &c_oid, (size_t)len, (git_object_t)objType);
@@ -56,7 +56,7 @@ JNIEXPORT jlong JNICALL J_MAKE_METHOD(GitObject_jniOwner)(JNIEnv *env, jclass ob
 
 JNIEXPORT jint JNICALL J_MAKE_METHOD(GitObject_jniPeel)(JNIEnv *env, jclass obj, jobject outObj, jlong objPtr, jint objType)
 {
-    git_object *out_obj;
+    git_object *out_obj = 0;
     int error = git_object_peel(&out_obj, (git_object *)objPtr, (git_object_t)objType);
     (*env)->CallVoidMethod(env, outObj, jniConstants->midAtomicLongSet, (long)out_obj);
     return error;
@@ -64,7 +64,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(GitObject_jniPeel)(JNIEnv *env, jclass obj,
 
 JNIEXPORT jint JNICALL J_MAKE_METHOD(GitObject_jniDup)(JNIEnv *env, jclass obj, jobject outObj, jlong objPtr)
 {
-    git_object *out_obj;
+    git_object *out_obj = 0;
     int error = git_object_dup(&out_obj, (git_object *)objPtr);
     (*env)->CallVoidMethod(env, outObj, jniConstants->midAtomicLongSet, (long)out_obj);
     return error;

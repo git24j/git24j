@@ -11,7 +11,7 @@ extern j_constants_t *jniConstants;
 
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Branch_jniCreate)(JNIEnv *env, jclass obj, jobject outRef, jlong repoPtr, jstring branchName, jlong targetPtr, jint force)
 {
-    git_reference *c_ref;
+    git_reference *c_ref = 0;
     char *c_branch_name = j_copy_of_jstring(env, branchName, false);
     int error = git_branch_create(&c_ref, (git_repository *)repoPtr, c_branch_name, (const git_commit *)targetPtr, force);
     free(c_branch_name);
@@ -22,7 +22,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Branch_jniCreate)(JNIEnv *env, jclass obj, 
 /**int git_branch_create_from_annotated(git_reference **ref_out, git_repository *repository, const char *branch_name, const git_annotated_commit *commit, int force); */
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Branch_jniCreateFromAnnotated)(JNIEnv *env, jclass obj, jobject outRef, jlong repoPtr, jstring branchName, jlong annoCommitPtr, jint force)
 {
-    git_reference *c_ref;
+    git_reference *c_ref = 0;
     char *branch_name = j_copy_of_jstring(env, branchName, false);
     int e = git_branch_create_from_annotated(&c_ref, (git_repository *)repoPtr, branch_name, (git_annotated_commit *)annoCommitPtr, force);
     (*env)->CallVoidMethod(env, outRef, jniConstants->midAtomicLongSet, (long)c_ref);
@@ -39,7 +39,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Branch_jniDelete)(JNIEnv *env, jclass obj, 
 /**int git_branch_iterator_new(git_branch_iterator **out, git_repository *repo, git_branch_t list_flags); */
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Branch_jniIteratorNew)(JNIEnv *env, jclass obj, jobject outBranchIter, jlong repoPtr, jint listFlags)
 {
-    git_branch_iterator *c_branch_iter;
+    git_branch_iterator *c_branch_iter = 0;
     int e = git_branch_iterator_new(&c_branch_iter, (git_repository *)repoPtr, (git_branch_t)listFlags);
     (*env)->CallVoidMethod(env, outBranchIter, jniConstants->midAtomicLongSet, (long)c_branch_iter);
     return e;
@@ -49,7 +49,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Branch_jniIteratorNew)(JNIEnv *env, jclass 
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Branch_jniNext)(JNIEnv *env, jclass obj, jobject outRef, jobject outType, jlong branchIterPtr)
 {
     assert(outRef && "receiving object must not be null");
-    git_reference *c_out_ref;
+    git_reference *c_out_ref = 0;
     git_branch_t c_out_branch_type;
     int e = git_branch_next(&c_out_ref, &c_out_branch_type, (git_branch_iterator *)branchIterPtr);
     (*env)->CallVoidMethod(env, outRef, jniConstants->midAtomicLongSet, (long)c_out_ref);
@@ -69,7 +69,7 @@ JNIEXPORT void JNICALL J_MAKE_METHOD(Branch_jniIteratorFree)(JNIEnv *env, jclass
 /**int git_branch_move(git_reference **out, git_reference *branch, const char *new_branch_name, int force); */
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Branch_jniMove)(JNIEnv *env, jclass obj, jobject outRef, jlong branchPtr, jstring branchName, jint force)
 {
-    git_reference *c_out_ref;
+    git_reference *c_out_ref = 0;
     char *branch_name = j_copy_of_jstring(env, branchName, false);
     int e = git_branch_move(&c_out_ref, (git_reference *)branchPtr, branch_name, force);
     (*env)->CallVoidMethod(env, outRef, jniConstants->midAtomicLongSet, (long)c_out_ref);
@@ -79,7 +79,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Branch_jniMove)(JNIEnv *env, jclass obj, jo
 /**int git_branch_lookup(git_reference **out, git_repository *repo, const char *branch_name, git_branch_t branch_type); */
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Branch_jniLookup)(JNIEnv *env, jclass obj, jobject outRef, jlong repoPtr, jstring branchName, jint branchType)
 {
-    git_reference *c_out_ref;
+    git_reference *c_out_ref = 0;
     char *branch_name = j_copy_of_jstring(env, branchName, false);
     int e = git_branch_lookup(&c_out_ref, (git_repository *)repoPtr, branch_name, (git_branch_t)branchType);
     (*env)->CallVoidMethod(env, outRef, jniConstants->midAtomicLongSet, (long)c_out_ref);
@@ -104,7 +104,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Branch_jniName)(JNIEnv *env, jclass obj, jo
 /**int git_branch_upstream(git_reference **out, const git_reference *branch); */
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Branch_jniUpstream)(JNIEnv *env, jclass obj, jobject outRef, jlong branchPtr)
 {
-    git_reference *out_ref;
+    git_reference *out_ref = 0;
     int e = git_branch_upstream(&out_ref, (git_reference *)branchPtr);
     (*env)->CallVoidMethod(env, outRef, jniConstants->midAtomicLongSet, (long)out_ref);
     return e;

@@ -26,7 +26,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Odb_jniStreamRead)(JNIEnv *env, jclass obj,
 /** int git_odb_new(git_odb **out); */
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Odb_jniNew)(JNIEnv *env, jclass obj, jobject out)
 {
-    git_odb *c_out;
+    git_odb *c_out = 0;
     int r = git_odb_new(&c_out);
     (*env)->CallVoidMethod(env, out, jniConstants->midAtomicLongSet, (long)c_out);
     /* git_odb_free(c_out); */
@@ -36,7 +36,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Odb_jniNew)(JNIEnv *env, jclass obj, jobjec
 /** int git_odb_open(git_odb **out, const char *objects_dir); */
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Odb_jniOpen)(JNIEnv *env, jclass obj, jobject out, jstring objects_dir)
 {
-    git_odb *c_out;
+    git_odb *c_out = 0;
     char *c_objects_dir = j_copy_of_jstring(env, objects_dir, true);
     int r = git_odb_open(&c_out, c_objects_dir);
     (*env)->CallVoidMethod(env, out, jniConstants->midAtomicLongSet, (long)c_out);
@@ -63,7 +63,7 @@ JNIEXPORT void JNICALL J_MAKE_METHOD(Odb_jniFree)(JNIEnv *env, jclass obj, jlong
 /** int git_odb_read(git_odb_object **out, git_odb *db, const git_oid *id); */
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Odb_jniRead)(JNIEnv *env, jclass obj, jobject out, jlong dbPtr, jobject id)
 {
-    git_odb_object *c_out;
+    git_odb_object *c_out = 0;
     git_oid c_id;
     j_git_oid_from_java(env, id, &c_id);
     int r = git_odb_read(&c_out, (git_odb *)dbPtr, &c_id);
@@ -75,7 +75,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Odb_jniRead)(JNIEnv *env, jclass obj, jobje
 /** int git_odb_read_prefix(git_odb_object **out, git_odb *db, const git_oid *short_id, size_t len); */
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Odb_jniReadPrefix)(JNIEnv *env, jclass obj, jobject out, jlong dbPtr, jobject shortId, jint len)
 {
-    git_odb_object *c_out;
+    git_odb_object *c_out = 0;
     git_oid c_short_id;
     j_git_oid_from_java(env, shortId, &c_short_id);
     int r = git_odb_read_prefix(&c_out, (git_odb *)dbPtr, &c_short_id, len);
@@ -172,7 +172,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Odb_jniWrite)(JNIEnv *env, jclass obj, jobj
 /** int git_odb_open_wstream(git_odb_stream **out, git_odb *db, git_off_t size, git_object_t type); */
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Odb_jniOpenWstream)(JNIEnv *env, jclass obj, jobject out, jlong dbPtr, jint size, jint type)
 {
-    git_odb_stream *c_out;
+    git_odb_stream *c_out = 0;
     int r = git_odb_open_wstream(&c_out, (git_odb *)dbPtr, size, type);
     (*env)->CallVoidMethod(env, out, jniConstants->midAtomicLongSet, (long)c_out);
     /* git_odb_stream_free(c_out); */
@@ -206,7 +206,7 @@ JNIEXPORT void JNICALL J_MAKE_METHOD(Odb_jniStreamFree)(JNIEnv *env, jclass obj,
 /** int git_odb_open_rstream(git_odb_stream **out, size_t *len, git_object_t *type, git_odb *db, const git_oid *oid); */
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Odb_jniOpenRstream)(JNIEnv *env, jclass obj, jobject out, jobject len, jobject outType, jlong dbPtr, jobject oid)
 {
-    git_odb_stream *c_out;
+    git_odb_stream *c_out = 0;
     size_t c_len;
     git_oid c_oid;
     git_object_t c_type;
@@ -245,7 +245,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Odb_jniHashfile)(JNIEnv *env, jclass obj, j
 /** int git_odb_object_dup(git_odb_object **dest, git_odb_object *source); */
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Odb_jniObjectDup)(JNIEnv *env, jclass obj, jobject dest, jlong sourcePtr)
 {
-    git_odb_object *c_dest;
+    git_odb_object *c_dest = 0;
     int r = git_odb_object_dup(&c_dest, (git_odb_object *)sourcePtr);
     (*env)->CallVoidMethod(env, dest, jniConstants->midAtomicLongSet, (long)c_dest);
     /* git_odb_object_free(c_dest); */
@@ -310,7 +310,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Odb_jniNumBackends)(JNIEnv *env, jclass obj
 /** int git_odb_get_backend(git_odb_backend **out, git_odb *odb, size_t pos); */
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Odb_jniGetBackend)(JNIEnv *env, jclass obj, jobject out, jlong odbPtr, jint pos)
 {
-    git_odb_backend *c_out;
+    git_odb_backend *c_out = 0;
     int r = git_odb_get_backend(&c_out, (git_odb *)odbPtr, pos);
     (*env)->CallVoidMethod(env, out, jniConstants->midAtomicLongSet, (long)c_out);
     /* git_odb_backend_free(c_out); */
@@ -320,7 +320,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Odb_jniGetBackend)(JNIEnv *env, jclass obj,
 /** int git_odb_backend_pack(git_odb_backend **out, const char *objects_dir); */
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Odb_jniBackendPack)(JNIEnv *env, jclass obj, jobject out, jstring objects_dir)
 {
-    git_odb_backend *c_out;
+    git_odb_backend *c_out = 0;
     char *c_objects_dir = j_copy_of_jstring(env, objects_dir, true);
     int r = git_odb_backend_pack(&c_out, c_objects_dir);
     (*env)->CallVoidMethod(env, out, jniConstants->midAtomicLongSet, (long)c_out);
@@ -332,7 +332,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Odb_jniBackendPack)(JNIEnv *env, jclass obj
 /** int git_odb_backend_loose(git_odb_backend **out, const char *objects_dir, int compression_level, int do_fsync, unsigned int dir_mode, unsigned int file_mode); */
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Odb_jniBackendLoose)(JNIEnv *env, jclass obj, jobject out, jstring objects_dir, jint compression_level, jint do_fsync, jint dirMode, jint fileMode)
 {
-    git_odb_backend *c_out;
+    git_odb_backend *c_out = 0;
     char *c_objects_dir = j_copy_of_jstring(env, objects_dir, true);
     int r = git_odb_backend_loose(&c_out, c_objects_dir, compression_level, do_fsync, dirMode, fileMode);
     (*env)->CallVoidMethod(env, out, jniConstants->midAtomicLongSet, (long)c_out);
@@ -344,7 +344,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Odb_jniBackendLoose)(JNIEnv *env, jclass ob
 /** int git_odb_backend_one_pack(git_odb_backend **out, const char *index_file); */
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Odb_jniBackendOnePack)(JNIEnv *env, jclass obj, jobject out, jstring index_file)
 {
-    git_odb_backend *c_out;
+    git_odb_backend *c_out = 0;
     char *c_index_file = j_copy_of_jstring(env, index_file, true);
     int r = git_odb_backend_one_pack(&c_out, c_index_file);
     (*env)->CallVoidMethod(env, out, jniConstants->midAtomicLongSet, (long)c_out);

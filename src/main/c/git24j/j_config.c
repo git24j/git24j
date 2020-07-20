@@ -103,7 +103,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Config_jniFindProgramdata)(JNIEnv *env, jcl
 /** int git_config_open_default(git_config **out); */
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Config_jniOpenDefault)(JNIEnv *env, jclass obj, jobject out)
 {
-    git_config *c_out;
+    git_config *c_out = 0;
     int r = git_config_open_default(&c_out);
     (*env)->CallVoidMethod(env, out, jniConstants->midAtomicLongSet, (long)c_out);
     return r;
@@ -112,7 +112,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Config_jniOpenDefault)(JNIEnv *env, jclass 
 /** int git_config_new(git_config **out); */
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Config_jniNew)(JNIEnv *env, jclass obj, jobject out)
 {
-    git_config *c_out;
+    git_config *c_out = 0;
     int r = git_config_new(&c_out);
     (*env)->CallVoidMethod(env, out, jniConstants->midAtomicLongSet, (long)c_out);
     return r;
@@ -130,7 +130,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Config_jniAddFileOndisk)(JNIEnv *env, jclas
 /** int git_config_open_ondisk(git_config **out, const char *path); */
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Config_jniOpenOndisk)(JNIEnv *env, jclass obj, jobject out, jstring path)
 {
-    git_config *c_out;
+    git_config *c_out = 0;
     char *c_path = j_copy_of_jstring(env, path, true);
     int r = git_config_open_ondisk(&c_out, c_path);
     (*env)->CallVoidMethod(env, out, jniConstants->midAtomicLongSet, (long)c_out);
@@ -141,7 +141,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Config_jniOpenOndisk)(JNIEnv *env, jclass o
 /** int git_config_open_level(git_config **out, const git_config *parent, git_config_level_t level); */
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Config_jniOpenLevel)(JNIEnv *env, jclass obj, jobject out, jlong parentPtr, jint level)
 {
-    git_config *c_out;
+    git_config *c_out = 0;
     int r = git_config_open_level(&c_out, (git_config *)parentPtr, (git_config_level_t)level);
     (*env)->CallVoidMethod(env, out, jniConstants->midAtomicLongSet, (long)c_out);
     return r;
@@ -150,7 +150,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Config_jniOpenLevel)(JNIEnv *env, jclass ob
 /** int git_config_open_global(git_config **out, git_config *config); */
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Config_jniOpenGlobal)(JNIEnv *env, jclass obj, jobject out, jlong configPtr)
 {
-    git_config *c_out;
+    git_config *c_out = 0;
     int r = git_config_open_global(&c_out, (git_config *)configPtr);
     (*env)->CallVoidMethod(env, out, jniConstants->midAtomicLongSet, (long)c_out);
     return r;
@@ -159,7 +159,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Config_jniOpenGlobal)(JNIEnv *env, jclass o
 /** int git_config_snapshot(git_config **out, git_config *config); */
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Config_jniSnapshot)(JNIEnv *env, jclass obj, jobject out, jlong configPtr)
 {
-    git_config *c_out;
+    git_config *c_out = 0;
     int r = git_config_snapshot(&c_out, (git_config *)configPtr);
     (*env)->CallVoidMethod(env, out, jniConstants->midAtomicLongSet, (long)c_out);
     return r;
@@ -174,7 +174,7 @@ JNIEXPORT void JNICALL J_MAKE_METHOD(Config_jniFree)(JNIEnv *env, jclass obj, jl
 /** int git_config_get_entry(git_config_entry **out, const git_config *cfg, const char *name); */
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Config_jniGetEntry)(JNIEnv *env, jclass obj, jobject out, jlong cfgPtr, jstring name)
 {
-    git_config_entry *c_out;
+    git_config_entry *c_out = 0;
     char *c_name = j_copy_of_jstring(env, name, true);
     int r = git_config_get_entry(&c_out, (git_config *)cfgPtr, c_name);
     (*env)->CallVoidMethod(env, out, jniConstants->midAtomicLongSet, (long)c_out);
@@ -185,7 +185,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Config_jniGetEntry)(JNIEnv *env, jclass obj
 /** int git_config_get_int32(int32_t *out, const git_config *cfg, const char *name); */
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Config_jniGetInt32)(JNIEnv *env, jclass obj, jobject out, jlong cfgPtr, jstring name)
 {
-    int32_t c_out;
+    int32_t c_out = 0;
     char *c_name = j_copy_of_jstring(env, name, true);
     int r = git_config_get_int32(&c_out, (git_config *)cfgPtr, c_name);
     (*env)->CallVoidMethod(env, out, jniConstants->midAtomicIntSet, c_out);
@@ -196,7 +196,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Config_jniGetInt32)(JNIEnv *env, jclass obj
 /** int git_config_get_int64(int64_t *out, const git_config *cfg, const char *name); */
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Config_jniGetInt64)(JNIEnv *env, jclass obj, jobject out, jlong cfgPtr, jstring name)
 {
-    int64_t c_out;
+    int64_t c_out = 0;
     char *c_name = j_copy_of_jstring(env, name, true);
     int r = git_config_get_int64(&c_out, (git_config *)cfgPtr, c_name);
     (*env)->CallVoidMethod(env, out, jniConstants->midAtomicLongSet, c_out);
@@ -207,7 +207,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Config_jniGetInt64)(JNIEnv *env, jclass obj
 /** int git_config_get_bool(int *out, const git_config *cfg, const char *name); */
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Config_jniGetBool)(JNIEnv *env, jclass obj, jobject out, jlong cfgPtr, jstring name)
 {
-    int c_out;
+    int c_out = 0;
     char *c_name = j_copy_of_jstring(env, name, true);
     int r = git_config_get_bool(&c_out, (git_config *)cfgPtr, c_name);
     (*env)->CallVoidMethod(env, out, jniConstants->midAtomicIntSet, c_out);
@@ -230,7 +230,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Config_jniGetPath)(JNIEnv *env, jclass obj,
 /** int git_config_get_string(const char **out, const git_config *cfg, const char *name); */
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Config_jniGetString)(JNIEnv *env, jclass obj, jobject out, jlong cfgPtr, jstring name)
 {
-    const char *c_out;
+    const char *c_out = 0;
     char *c_name = j_copy_of_jstring(env, name, true);
     int r = git_config_get_string(&c_out, (git_config *)cfgPtr, c_name);
     jstring j_out = (*env)->NewStringUTF(env, c_out);
@@ -280,7 +280,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Config_jniGetMultivarForeach)(JNIEnv *env, 
 /** int git_config_multivar_iterator_new(git_config_iterator **out, const git_config *cfg, const char *name, const char *regexp); */
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Config_jniMultivarIteratorNew)(JNIEnv *env, jclass obj, jobject out, jlong cfgPtr, jstring name, jstring regexp)
 {
-    git_config_iterator *c_out;
+    git_config_iterator *c_out = 0;
     char *c_name = j_copy_of_jstring(env, name, true);
     char *c_regexp = j_copy_of_jstring(env, regexp, true);
     int r = git_config_multivar_iterator_new(&c_out, (git_config *)cfgPtr, c_name, c_regexp);
@@ -293,7 +293,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Config_jniMultivarIteratorNew)(JNIEnv *env,
 /** int git_config_next(git_config_entry **entry, git_config_iterator *iter); */
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Config_jniNext)(JNIEnv *env, jclass obj, jobject entry, jlong iterPtr)
 {
-    git_config_entry *c_entry;
+    git_config_entry *c_entry = 0;
     int r = git_config_next(&c_entry, (git_config_iterator *)iterPtr);
     (*env)->CallVoidMethod(env, entry, jniConstants->midAtomicLongSet, (long)c_entry);
     return r;
@@ -393,7 +393,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Config_jniForeach)(JNIEnv *env, jclass obj,
 /** int git_config_iterator_new(git_config_iterator **out, const git_config *cfg); */
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Config_jniIteratorNew)(JNIEnv *env, jclass obj, jobject out, jlong cfgPtr)
 {
-    git_config_iterator *c_out;
+    git_config_iterator *c_out = 0;
     int r = git_config_iterator_new(&c_out, (git_config *)cfgPtr);
     (*env)->CallVoidMethod(env, out, jniConstants->midAtomicLongSet, (long)c_out);
     return r;
@@ -402,7 +402,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Config_jniIteratorNew)(JNIEnv *env, jclass 
 /** int git_config_iterator_glob_new(git_config_iterator **out, const git_config *cfg, const char *regexp); */
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Config_jniIteratorGlobNew)(JNIEnv *env, jclass obj, jobject out, jlong cfgPtr, jstring regexp)
 {
-    git_config_iterator *c_out;
+    git_config_iterator *c_out = 0;
     char *c_regexp = j_copy_of_jstring(env, regexp, true);
     int r = git_config_iterator_glob_new(&c_out, (git_config *)cfgPtr, c_regexp);
     (*env)->CallVoidMethod(env, out, jniConstants->midAtomicLongSet, (long)c_out);
@@ -490,7 +490,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Config_jniBackendForeachMatch)(JNIEnv *env,
 /** int git_config_lock(git_transaction **tx, git_config *cfg); */
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Config_jniLock)(JNIEnv *env, jclass obj, jobject tx, jlong cfgPtr)
 {
-    git_transaction *c_tx;
+    git_transaction *c_tx = 0;
     int r = git_config_lock(&c_tx, (git_config *)cfgPtr);
     (*env)->CallVoidMethod(env, tx, jniConstants->midAtomicLongSet, (long)c_tx);
     return r;

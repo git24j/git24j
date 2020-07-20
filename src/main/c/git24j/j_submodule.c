@@ -39,7 +39,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Submodule_jniAddFinalize)(JNIEnv *env, jcla
 /** int git_submodule_add_setup(git_submodule **out, git_repository *repo, const char *url, const char *path, int use_gitlink); */
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Submodule_jniAddSetup)(JNIEnv *env, jclass obj, jobject out, jlong repoPtr, jstring url, jstring path, jint use_gitlink)
 {
-    git_submodule *c_out;
+    git_submodule *c_out = 0;
     char *c_url = j_copy_of_jstring(env, url, true);
     char *c_path = j_copy_of_jstring(env, path, true);
     int r = git_submodule_add_setup(&c_out, (git_repository *)repoPtr, c_url, c_path, use_gitlink);
@@ -116,7 +116,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Submodule_jniLocation)(JNIEnv *env, jclass 
 /** int git_submodule_lookup(git_submodule **out, git_repository *repo, const char *name); */
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Submodule_jniLookup)(JNIEnv *env, jclass obj, jobject out, jlong repoPtr, jstring name)
 {
-    git_submodule *c_out;
+    git_submodule *c_out = 0;
     char *c_name = j_copy_of_jstring(env, name, true);
     int r = git_submodule_lookup(&c_out, (git_repository *)repoPtr, c_name);
     (*env)->CallVoidMethod(env, out, jniConstants->midAtomicLongSet, (long)c_out);
@@ -134,7 +134,7 @@ JNIEXPORT jstring JNICALL J_MAKE_METHOD(Submodule_jniName)(JNIEnv *env, jclass o
 /** int git_submodule_open(git_repository **repo, git_submodule *submodule); */
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Submodule_jniOpen)(JNIEnv *env, jclass obj, jobject repo, jlong submodulePtr)
 {
-    git_repository *c_repo;
+    git_repository *c_repo = 0;
     int r = git_submodule_open(&c_repo, (git_submodule *)submodulePtr);
     (*env)->CallVoidMethod(env, repo, jniConstants->midAtomicLongSet, (long)c_repo);
     return r;
@@ -164,7 +164,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Submodule_jniReload)(JNIEnv *env, jclass ob
 /** int git_submodule_repo_init(git_repository **out, const git_submodule *sm, int use_gitlink); */
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Submodule_jniRepoInit)(JNIEnv *env, jclass obj, jobject out, jlong smPtr, jint use_gitlink)
 {
-    git_repository *c_out;
+    git_repository *c_out = 0;
     int r = git_submodule_repo_init(&c_out, (git_submodule *)smPtr, use_gitlink);
     (*env)->CallVoidMethod(env, out, jniConstants->midAtomicLongSet, (long)c_out);
     return r;
