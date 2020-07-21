@@ -22,7 +22,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Checkout_jniInitOptions)(JNIEnv *env, jclas
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Checkout_jniOptionsNew)(JNIEnv *env, jclass obj, jobject outPtr, jint version)
 {
     git_checkout_options *opts = (git_checkout_options *)malloc(sizeof(git_checkout_options));
-    int r = git_checkout_init_options((git_checkout_options *)outPtr, version);
+    int r = git_checkout_init_options(opts, version);
     (*env)->CallVoidMethod(env, outPtr, jniConstants->midAtomicLongSet, (long)opts);
     return r;
 }

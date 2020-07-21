@@ -15,6 +15,8 @@ public class Checkout {
      * `git_checkout_init_options`.
      */
     public static class Options extends CAutoReleasable {
+        public static int GIT_CHECKOUT_OPTIONS_VERSION = 1;
+
         protected Options(boolean isWeak, long rawPtr) {
             super(isWeak, rawPtr);
         }
@@ -25,10 +27,14 @@ public class Checkout {
         }
 
         @Nonnull
-        public Options create(int version) {
+        public static Options create(int version) {
             Options opts = new Options(false, 0);
             Error.throwIfNeeded(jniOptionsNew(opts._rawPtr, version));
             return opts;
+        }
+
+        public static Options defaultOptions() {
+            return create(GIT_CHECKOUT_OPTIONS_VERSION);
         }
 
         public int getVersion() {
