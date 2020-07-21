@@ -1,0 +1,5 @@
+typedef struct {
+	unsigned int contains_data;
+	git_diff_binary_file old_file;
+	git_diff_binary_file new_file;
+} git_diff_binary;

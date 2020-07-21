@@ -7,6 +7,8 @@ import org.junit.rules.TemporaryFolder;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.HashMap;
+import java.util.Map;
 
 public class DiffTest extends TestBase {
     // git rev-parse HEAD^{tree}
@@ -37,50 +39,75 @@ public class DiffTest extends TestBase {
             Blob blob1 = Blob.lookup(testRepo, Oid.of(README_BLOB1));
             Blob blob2 = Blob.lookup(testRepo, Oid.of(README_BLOB2));
             Path p = Paths.get("README.md");
+            Map<Long, String> trace = new HashMap<>();
             Diff.blobs(
                     blob1,
                     p,
                     blob2,
                     p,
                     Diff.Options.create(Diff.Options.CURRENT_VERSION),
-                    new Diff.FileCb() {
-                        @Override
-                        public int accept(Diff.Delta delta, float progress) {
-                            System.out.println(delta.getOldFile());
-                            System.out.println(delta.getNewFile());
-                            System.out.println(delta.getFlags());
-                            System.out.println(delta.getNfiles());
-                            System.out.println(delta.getStatus());
-                            System.out.println(delta.getSimilarity());
-                            return 0;
-                        }
-                    },
+                    (Diff.FileCb)
+                            (delta, progress) -> {
+                                trace.put(
+                                        delta.getRawPointer(),
+                                        String.format(
+                                                "\toldfile = %s\n\tnewfile = %s\n\tflags = %s\n\tnfiles = %d\n\tstatus = %s\n\tsimilarity = %d\n",
+                                                delta.getOldFile(),
+                                                delta.getNewFile(),
+                                                delta.getFlags(),
+                                                delta.getNfiles(),
+                                                delta.getStatus(),
+                                                delta.getSimilarity()));
+                                return 0;
+                            },
                     new Diff.BinaryCb() {
                         @Override
                         public int accept(Diff.Delta delta, Diff.Binary binary) {
-                            // TODO: implement binary getters
+                            trace.put(
+                                    binary.getRawPointer(),
+                                    String.format(
+                                            "\tcontdata = %d\n\tdata = %s\n\tdatalen = %d\n\tinflen = %d\n\tfiletype = %d\n"
+                                                    + "\tdata = %s\n\tdatalen = %d\n\tinflen = %d\n\tfiletype = %d\n",
+                                            binary.getContainsData(),
+                                            binary.getNewFile().getData(),
+                                            binary.getNewFile().getDatalen(),
+                                            binary.getNewFile().getInflatedlen(),
+                                            binary.getNewFile().getType(),
+                                            binary.getOldFile().getData(),
+                                            binary.getOldFile().getDatalen(),
+                                            binary.getOldFile().getInflatedlen(),
+                                            binary.getOldFile().getType()));
                             return 0;
                         }
                     },
-                    (Diff.HunkCb) (delta, hunk) -> {
-                        System.out.println(hunk.getNewLines());
-                        System.out.println(hunk.getOldLines());
-                        System.out.println(hunk.getHeader());
-                        System.out.println(hunk.getHeaderLen());
-                        System.out.println(hunk.getNewStart());
-                        System.out.println(hunk.getOldStart());
-                        return 0;
-                    },
+                    (Diff.HunkCb)
+                            (delta, hunk) -> {
+                                trace.put(
+                                        hunk.getRawPointer(),
+                                        String.format(
+                                                "\tnewlines = %d\n\toldlines = %d\n\theader = %s\n\theaderlen = %d\n\tnewstart = %d\n\toldstart = %d\n\t",
+                                                hunk.getNewLines(),
+                                                hunk.getOldLines(),
+                                                hunk.getHeader(),
+                                                hunk.getHeaderLen(),
+                                                hunk.getNewStart(),
+                                                hunk.getOldStart()));
+                                return 0;
+                            },
                     (delta, hunk, line) -> {
-                        System.out.println(line.getNumLines());
-                        System.out.println(line.getNewLineno());
-                        System.out.println(line.getOldLineno());
-                        System.out.println(line.getContentLen());
-                        System.out.println(line.getContent());
-                        System.out.println(line.getContentOffset());
-                        System.out.println(line.getOrigin());
+                        trace.put(
+                                line.getRawPointer(),
+                                String.format(
+                                        "\tnumlines = %d\n\tnewlineno = %d\n\toldlineno = %d\n\tcontentlen = %d\n\tcontentoffset = %d\n\torigin = %c",
+                                        line.getNumLines(),
+                                        line.getNewLineno(),
+                                        line.getOldLineno(),
+                                        line.getContentLen(),
+                                        line.getContentOffset(),
+                                        line.getOrigin()));
                         return 0;
                     });
+            System.out.println(trace);
         }
     }
 }

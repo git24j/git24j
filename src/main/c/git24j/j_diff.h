@@ -196,6 +196,24 @@ extern "C"
     /** const char *content*/
     JNIEXPORT jstring JNICALL J_MAKE_METHOD(Diff_jniLineGetContent)(JNIEnv *env, jclass obj, jlong linePtr);
 
+    /************ diff binary *************/
+    /** unsigned int contains_data*/
+    JNIEXPORT jint JNICALL J_MAKE_METHOD(Diff_jniBinaryGetContainsData)(JNIEnv *env, jclass obj, jlong binaryPtr);
+    /** git_diff_binary_file old_file*/
+    JNIEXPORT jlong JNICALL J_MAKE_METHOD(Diff_jniBinaryGetOldFile)(JNIEnv *env, jclass obj, jlong binaryPtr);
+    /** git_diff_binary_file new_file*/
+    JNIEXPORT jlong JNICALL J_MAKE_METHOD(Diff_jniBinaryGetNewFile)(JNIEnv *env, jclass obj, jlong binaryPtr);
+
+    /************ diff binary file *************/
+    /** size_t type*/
+    JNIEXPORT jint JNICALL J_MAKE_METHOD(Diff_jniBinaryFileGetType)(JNIEnv *env, jclass obj, jlong binaryFilePtr);
+    /** const char *data*/
+    JNIEXPORT jstring JNICALL J_MAKE_METHOD(Diff_jniBinaryFileGetData)(JNIEnv *env, jclass obj, jlong binaryFilePtr);
+    /** size_t datalen*/
+    JNIEXPORT jint JNICALL J_MAKE_METHOD(Diff_jniBinaryFileGetDatalen)(JNIEnv *env, jclass obj, jlong binaryFilePtr);
+    /** size_t inflatedlen*/
+    JNIEXPORT jint JNICALL J_MAKE_METHOD(Diff_jniBinaryFileGetInflatedlen)(JNIEnv *env, jclass obj, jlong binaryFilePtr);
+
 #ifdef __cplusplus
 }
 #endif

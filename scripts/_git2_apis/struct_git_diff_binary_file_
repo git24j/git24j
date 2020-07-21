@@ -1,0 +1,6 @@
+typedef struct {
+	size_t type;
+	const char *data;
+	size_t datalen;
+	size_t inflatedlen;
+} git_diff_binary_file;

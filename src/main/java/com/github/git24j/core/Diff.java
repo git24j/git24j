@@ -443,6 +443,34 @@ public class Diff extends CAutoReleasable {
     /** git_diff_file new_file */
     static native long jniDeltaGetNewFile(long deltaPtr);
 
+    public static class BinaryFile extends CAutoReleasable {
+        protected BinaryFile(boolean isWeak, long rawPtr) {
+            super(isWeak, rawPtr);
+        }
+
+        @Override
+        protected void freeOnce(long cPtr) {
+            Libgit2.jniShadowFree(cPtr);
+        }
+
+        public int getType() {
+            return jniBinaryFileGetType(getRawPointer());
+        }
+
+        public String getData() {
+            return jniBinaryFileGetData(getRawPointer());
+        }
+
+        public int getDatalen() {
+            return jniBinaryFileGetDatalen(getRawPointer());
+        }
+
+        public int getInflatedlen() {
+            return jniBinaryFileGetInflatedlen(getRawPointer());
+        }
+
+    }
+
     /**
      * Structure describing the binary contents of a diff.
      *
@@ -469,6 +497,19 @@ public class Diff extends CAutoReleasable {
             }
             return new Binary(rawPtr);
         }
+        public int getContainsData() {
+            return jniBinaryGetContainsData(getRawPointer());
+        }
+
+        public BinaryFile getOldFile() {
+            return new BinaryFile(true, jniBinaryGetOldFile(getRawPointer()));
+        }
+
+        public BinaryFile getNewFile() {
+            return new BinaryFile(true, jniBinaryGetNewFile(getRawPointer()));
+        }
+
+
     }
     /**
      * Structure describing a hunk of a diff.
@@ -1726,4 +1767,25 @@ public class Diff extends CAutoReleasable {
 
     /**const char *content*/
     static native String jniLineGetContent(long linePtr);
+
+    /**unsigned int contains_data*/
+    static native int jniBinaryGetContainsData(long binaryPtr);
+
+    /**git_diff_binary_file old_file*/
+    static native long jniBinaryGetOldFile(long binaryPtr);
+
+    /**git_diff_binary_file new_file*/
+    static native long jniBinaryGetNewFile(long binaryPtr);
+
+    /**size_t type*/
+    static native int jniBinaryFileGetType(long binary_filePtr);
+
+    /**const char *data*/
+    static native String jniBinaryFileGetData(long binary_filePtr);
+
+    /**size_t datalen*/
+    static native int jniBinaryFileGetDatalen(long binary_filePtr);
+
+    /**size_t inflatedlen*/
+    static native int jniBinaryFileGetInflatedlen(long binary_filePtr);
 }

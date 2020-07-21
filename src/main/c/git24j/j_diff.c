@@ -708,3 +708,46 @@ JNIEXPORT jstring JNICALL J_MAKE_METHOD(Diff_jniLineGetContent)(JNIEnv *env, jcl
 {
     return (*env)->NewStringUTF(env, ((git_diff_line *)linePtr)->content);
 }
+
+/** -------- Wrapper Body ---------- */
+/** unsigned int contains_data*/
+JNIEXPORT jint JNICALL J_MAKE_METHOD(Diff_jniBinaryGetContainsData)(JNIEnv *env, jclass obj, jlong binaryPtr)
+{
+    return ((git_diff_binary *)binaryPtr)->contains_data;
+}
+
+/** git_diff_binary_file old_file*/
+JNIEXPORT jlong JNICALL J_MAKE_METHOD(Diff_jniBinaryGetOldFile)(JNIEnv *env, jclass obj, jlong binaryPtr)
+{
+    return (jlong)(&(((git_diff_binary *)binaryPtr)->old_file));
+}
+
+/** git_diff_binary_file new_file*/
+JNIEXPORT jlong JNICALL J_MAKE_METHOD(Diff_jniBinaryGetNewFile)(JNIEnv *env, jclass obj, jlong binaryPtr)
+{
+    return (jlong)(&((git_diff_binary *)binaryPtr)->new_file);
+}
+
+/** size_t type*/
+JNIEXPORT jint JNICALL J_MAKE_METHOD(Diff_jniBinaryFileGetType)(JNIEnv *env, jclass obj, jlong binaryFilePtr)
+{
+    return ((git_diff_binary_file *)binaryFilePtr)->type;
+}
+
+/** const char *data*/
+JNIEXPORT jstring JNICALL J_MAKE_METHOD(Diff_jniBinaryFileGetData)(JNIEnv *env, jclass obj, jlong binaryFilePtr)
+{
+    return (*env)->NewStringUTF(env, ((git_diff_binary_file *)binaryFilePtr)->data);
+}
+
+/** size_t datalen*/
+JNIEXPORT jint JNICALL J_MAKE_METHOD(Diff_jniBinaryFileGetDatalen)(JNIEnv *env, jclass obj, jlong binaryFilePtr)
+{
+    return ((git_diff_binary_file *)binaryFilePtr)->datalen;
+}
+
+/** size_t inflatedlen*/
+JNIEXPORT jint JNICALL J_MAKE_METHOD(Diff_jniBinaryFileGetInflatedlen)(JNIEnv *env, jclass obj, jlong binaryFilePtr)
+{
+    return ((git_diff_binary_file *)binaryFilePtr)->inflatedlen;
+}
