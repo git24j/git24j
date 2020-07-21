@@ -32,7 +32,7 @@ public class Odb extends CAutoCloseable {
      * @throws GitException git errors
      */
     @Nonnull
-    public static Odb open() {
+    public static Odb create() {
         Odb out = new Odb(0);
         Error.throwIfNeeded(jniNew(out._rawPtr));
         if (out.isNull()) {
@@ -55,7 +55,7 @@ public class Odb extends CAutoCloseable {
      * @throws GitException fail to open odb error
      */
     @Nonnull
-    public static Odb open(@Nonnull Path objectsDir) {
+    public static Odb create(@Nonnull Path objectsDir) {
         Odb out = new Odb(0);
         Error.throwIfNeeded(jniOpen(out._rawPtr, objectsDir.toString()));
         if (out.isNull()) {

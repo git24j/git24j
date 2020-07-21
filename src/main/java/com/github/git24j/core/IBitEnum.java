@@ -37,11 +37,7 @@ public interface IBitEnum {
 
     static <T extends Enum<T> & IBitEnum> T valueOf(int bit, Class<T> clz, T defaultVal) {
         for (T x : clz.getEnumConstants()) {
-            int b = x.getBit();
-            if ((b < 0 && bit > 0) || (b > 0 && bit < 0)) {
-                continue;
-            }
-            if ((b & bit) != 0) {
+            if (x.getBit() == bit) {
                 return x;
             }
         }
