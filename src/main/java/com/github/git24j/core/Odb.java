@@ -192,7 +192,7 @@ public class Odb extends CAutoCloseable {
         Error.throwIfNeeded(e);
         return Optional.of(
                 new OdbObject.Header(
-                        lenOut.get(), IBitEnum.valueOf(typeOut.get(), OdbObject.Type.class)));
+                        lenOut.get(), IBitEnum.valueOf(typeOut.get(), GitObject.Type.class)));
     }
 
     /** int git_odb_exists(git_odb *db, const git_oid *id); */
@@ -233,9 +233,9 @@ public class Odb extends CAutoCloseable {
 
     public static class ExpandId {
         private final Oid _oid;
-        private final OdbObject.Type _type;
+        private final GitObject.Type _type;
 
-        public ExpandId(@Nullable Oid oid, @Nullable OdbObject.Type type) {
+        public ExpandId(@Nullable Oid oid, @Nullable GitObject.Type type) {
             _oid = oid;
             _type = type;
         }
@@ -244,7 +244,7 @@ public class Odb extends CAutoCloseable {
             return _oid;
         }
 
-        public OdbObject.Type getType() {
+        public GitObject.Type getType() {
             return _type;
         }
 
@@ -271,9 +271,11 @@ public class Odb extends CAutoCloseable {
 
     static native long jniExpandIdsNew(Oid[] shortIds);
 
-    static native void jniExpandIdsGetId(Oid outId, long expandIdsPtr, int idx);
+    static native byte[] jniExpandIdsGetId(long expandIdsPtr, int idx);
 
     static native int jniExpandIdsGetType(long expandIdsPtr, int idx);
+
+    static native int jniExpandIdsGetLength(long expandIdsPtr);
 
     /**
      * Determine if one or more objects can be found in the object database by their abbreviated
@@ -295,11 +297,10 @@ public class Odb extends CAutoCloseable {
         long cIdArr = jniExpandIdsNew(ids.toArray(new Oid[0]));
         Error.throwIfNeeded(jniExpandIds(getRawPointer(), cIdArr, len));
         List<ExpandId> expandIds = new ArrayList<>(len);
-        for (int i = 0; i < ids.size(); i++) {
-            Oid oid = new Oid();
-            jniExpandIdsGetId(oid, cIdArr, i);
-            OdbObject.Type t =
-                    IBitEnum.valueOf(jniExpandIdsGetType(cIdArr, i), OdbObject.Type.class);
+        for (int i = 0; i < jniExpandIdsGetLength(cIdArr); i++) {
+            Oid oid = Oid.of(jniExpandIdsGetId(cIdArr, i));
+            GitObject.Type t =
+                    IBitEnum.valueOf(jniExpandIdsGetType(cIdArr, i), GitObject.Type.class);
             expandIds.add(new ExpandId(oid, t));
         }
         return expandIds;
@@ -343,13 +344,16 @@ public class Odb extends CAutoCloseable {
      * <p>This method is provided for compatibility with custom backends which are not able to
      * support streaming writes
      *
-     * @param out pointer to store the OID result of the write
      * @param data buffer with the data to store
      * @param type type of the data to store
+     * @return out oid
      * @throws GitException git errors
      */
-    public void write(@Nonnull Oid out, byte[] data, GitObject.Type type) {
-        Error.throwIfNeeded(jniWrite(out, getRawPointer(), data, data.length, type.getCode()));
+    @Nonnull
+    public Oid write( byte[] data, GitObject.Type type) {
+        Oid out = new Oid();
+        Error.throwIfNeeded(jniWrite(out, getRawPointer(), data, data.length, type.getBit()));
+        return out;
     }
 
     public static class Stream extends CAutoCloseable {
@@ -404,9 +408,9 @@ public class Odb extends CAutoCloseable {
 
     public static class RStream extends Stream {
         private final int _size;
-        private final OdbObject.Type _type;
+        private final GitObject.Type _type;
 
-        protected RStream(long rawPointer, int size, OdbObject.Type type) {
+        protected RStream(long rawPointer, int size, GitObject.Type type) {
             super(rawPointer);
             _size = size;
             _type = type;
@@ -416,7 +420,7 @@ public class Odb extends CAutoCloseable {
             return _size;
         }
 
-        public OdbObject.Type getType() {
+        public GitObject.Type getType() {
             return _type;
         }
     }
@@ -446,7 +450,7 @@ public class Odb extends CAutoCloseable {
     @Nonnull
     public Stream openWstream(int size, @Nonnull GitObject.Type type) {
         Stream ws = new Stream(0);
-        Error.throwIfNeeded(jniOpenWstream(ws._rawPtr, getRawPointer(), size, type.getCode()));
+        Error.throwIfNeeded(jniOpenWstream(ws._rawPtr, getRawPointer(), size, type.getBit()));
         return ws;
     }
 
@@ -493,7 +497,7 @@ public class Odb extends CAutoCloseable {
         AtomicInteger outType = new AtomicInteger();
         Error.throwIfNeeded(jniOpenRstream(out, outLen, outType, getRawPointer(), oid));
         return new RStream(
-                out.get(), outLen.get(), IBitEnum.valueOf(outType.get(), OdbObject.Type.class));
+                out.get(), outLen.get(), IBitEnum.valueOf(outType.get(), GitObject.Type.class));
     }
     /** int git_odb_hash(git_oid *out, const void *data, size_t len, git_object_t type); */
     static native int jniHash(Oid out, byte[] data, int len, int type);
@@ -511,7 +515,7 @@ public class Odb extends CAutoCloseable {
     @Nonnull
     public static Oid hash(@Nonnull byte[] data, @Nonnull GitObject.Type type) {
         Oid oid = new Oid();
-        Error.throwIfNeeded(jniHash(oid, data, data.length, type.getCode()));
+        Error.throwIfNeeded(jniHash(oid, data, data.length, type.getBit()));
         return oid;
     }
 
@@ -531,7 +535,7 @@ public class Odb extends CAutoCloseable {
      */
     public static Oid hashfile(@Nonnull Path path, @Nonnull GitObject.Type type) {
         Oid out = new Oid();
-        Error.throwIfNeeded(jniHashfile(out, path.toString(), type.getCode()));
+        Error.throwIfNeeded(jniHashfile(out, path.toString(), type.getBit()));
         return out;
     }
 
@@ -651,7 +655,7 @@ public class Odb extends CAutoCloseable {
      * @throws GitException git errors
      */
     @Nonnull
-    public OdbBackend backendLoose(
+    public static OdbBackend backendLoose(
             @Nonnull Path objectsDir,
             int compressionLevel,
             boolean doFsync,
@@ -681,7 +685,7 @@ public class Odb extends CAutoCloseable {
      * @throws GitException git errors
      */
     @Nonnull
-    public OdbBackend backendOnePack(@Nonnull Path indexFile) {
+    public static OdbBackend backendOnePack(@Nonnull Path indexFile) {
         OdbBackend out = new OdbBackend(false, 0);
         Error.throwIfNeeded(jniBackendOnePack(out._rawPtr, indexFile.toString()));
         return out;

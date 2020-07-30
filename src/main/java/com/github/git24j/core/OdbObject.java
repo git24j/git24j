@@ -2,37 +2,9 @@ package com.github.git24j.core;
 
 import java.util.Objects;
 import javax.annotation.Nonnull;
+import com.github.git24j.core.GitObject.Type;
 
 public class OdbObject extends CAutoReleasable {
-    public enum Type implements IBitEnum {
-        /** < Object can be any of the following */
-        ANY(-2),
-        /** < Object is invalid. */
-        INVALID(-1),
-        /** < A commit object. */
-        COMMIT(1),
-        /** < A tree (directory listing) object. */
-        TREE(2),
-        /** < A file revision object. */
-        BLOB(3),
-        /** < An annotated tag object. */
-        TAG(4),
-        /** < A delta),base is given by an offset. */
-        OFS_DELTA(6),
-        /** < A delta),base is given by object id. */
-        REF_DELTA(7);
-        private final int _bit;
-
-        Type(int bit) {
-            _bit = bit;
-        }
-
-        @Override
-        public int getBit() {
-            return _bit;
-        }
-    }
-
     public static class Header {
         private final int _len;
         private final Type _type;

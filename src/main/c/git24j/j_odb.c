@@ -120,7 +120,10 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Odb_jniExistsPrefix)(JNIEnv *env, jclass ob
 /** int git_odb_expand_ids(git_odb *db, git_odb_expand_id *ids, size_t count); */
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Odb_jniExpandIds)(JNIEnv *env, jclass obj, jlong dbPtr, jlong idsPtr, jint count)
 {
+    git_odb_expand_id *ids = (git_odb_expand_id *)idsPtr;
+    printf("qqqqq expand_ids = %p; ids[0] = %s, len = %d \n", ids, git_oid_tostr_s(&(ids[0].id)), ids->length);
     int r = git_odb_expand_ids((git_odb *)dbPtr, (git_odb_expand_id *)idsPtr, count);
+    printf("qqqqq expand_ids = %p; ids[0] = %s, len = %d \n", ids, git_oid_tostr_s(&(ids[0].id)), ids->length);
     return r;
 }
 
@@ -129,25 +132,34 @@ JNIEXPORT jlong JNICALL J_MAKE_METHOD(Odb_jniExpandIdsNew)(JNIEnv *env, jclass o
 {
     jsize len = (*env)->GetArrayLength(env, shortIds);
     git_odb_expand_id *expand_ids = (git_odb_expand_id *)malloc(sizeof(git_odb_expand_id) * len);
+    expand_ids->length = len;
     for (jsize i = 0; i < len; i++)
     {
         jobject oid = (*env)->GetObjectArrayElement(env, shortIds, i);
         j_git_oid_from_java(env, oid, &(expand_ids[i].id));
-        expand_ids[i].length = (*env)->CallIntMethod(env, oid, jniConstants->oid.midGetESize);
+        printf("142 qqqqq expand_ids = %p; expand_ids[%d] = %s, expand_ids->length = %d, len = %d \n", expand_ids, i, git_oid_tostr_s(&(expand_ids[i].id)), expand_ids->length, len);
         (*env)->DeleteLocalRef(env, oid);
     }
     return (jlong)expand_ids;
 }
 
-JNIEXPORT void JNICALL J_MAKE_METHOD(Odb_jniExpandIdsGetId)(JNIEnv *env, jclass obj, jobject outId, jlong expandIdsPtr, jint idx)
+JNIEXPORT jbyteArray JNICALL J_MAKE_METHOD(Odb_jniExpandIdsGetId)(JNIEnv *env, jclass obj, jlong expandIdsPtr, jint idx)
 {
     git_odb_expand_id *ids = (git_odb_expand_id *)expandIdsPtr;
-    j_git_short_id_to_java(env, &(ids[idx].id), outId, ids[idx].length);
+    git_oid *c_oid = &(ids[idx].id);
+    return j_git_oid_to_bytearray(env, c_oid);
 }
+
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Odb_jniExpandIdsGetType)(JNIEnv *env, jclass obj, jlong expandIdsPtr, jint idx)
 {
     git_odb_expand_id *ids = (git_odb_expand_id *)expandIdsPtr;
     return (jint)ids[idx].type;
+}
+
+JNIEXPORT jint JNICALL J_MAKE_METHOD(Odb_jniExpandIdsGetLength)(JNIEnv *env, jclass obj, jlong expandIdsPtr)
+{
+    git_odb_expand_id *ids = (git_odb_expand_id *)expandIdsPtr;
+    return (jint)ids->length;
 }
 
 /** int git_odb_refresh(const git_odb *db); */

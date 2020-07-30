@@ -48,8 +48,9 @@ extern "C"
     JNIEXPORT jint JNICALL J_MAKE_METHOD(Odb_jniExpandIds)(JNIEnv *env, jclass obj, jlong dbPtr, jlong idsPtr, jint count);
     /** create an array of git_odb_expand_id objects from java oid array (Oid []). */
     JNIEXPORT jlong JNICALL J_MAKE_METHOD(Odb_jniExpandIdsNew)(JNIEnv *env, jclass obj, jobjectArray shortIds);
-    JNIEXPORT void JNICALL J_MAKE_METHOD(Odb_jniExpandIdsGetId)(JNIEnv *env, jclass obj, jobject outId, jlong expandIdsPtr, jint idx);
+    JNIEXPORT jbyteArray JNICALL J_MAKE_METHOD(Odb_jniExpandIdsGetId)(JNIEnv *env, jclass obj, jlong expandIdsPtr, jint idx);
     JNIEXPORT jint JNICALL J_MAKE_METHOD(Odb_jniExpandIdsGetType)(JNIEnv *env, jclass obj, jlong expandIdsPtr, jint idx);
+    JNIEXPORT jint JNICALL J_MAKE_METHOD(Odb_jniExpandIdsGetLength)(JNIEnv *env, jclass obj, jlong expandIdsPtr);
 
     /** int git_odb_refresh(const git_odb *db); */
     JNIEXPORT jint JNICALL J_MAKE_METHOD(Odb_jniRefresh)(JNIEnv *env, jclass obj, jlong dbPtr);
