@@ -394,7 +394,7 @@ public class Repository extends CAutoCloseable {
     public Oid hashfile(Path path, GitObject.Type type, String asPath) {
         Oid oid = new Oid();
         Error.throwIfNeeded(
-                jniHashfile(oid, getRawPointer(), path.toString(), type.getCode(), asPath));
+                jniHashfile(oid, getRawPointer(), path.toString(), type.getBit(), asPath));
         return oid;
     }
 

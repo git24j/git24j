@@ -81,9 +81,9 @@ public class GitObject extends CAutoReleasable {
                             repository.getRawPointer(),
                             oid,
                             oid.getEffectiveSize(),
-                            type.value));
+                            type._bit));
         } else {
-            Error.throwIfNeeded(jniLookup(outObj, repository.getRawPointer(), oid, type.value));
+            Error.throwIfNeeded(jniLookup(outObj, repository.getRawPointer(), oid, type._bit));
         }
         return GitObject.create(outObj.get(), type);
     }
@@ -102,7 +102,7 @@ public class GitObject extends CAutoReleasable {
     public static GitObject lookupPrefix(Repository repository, Oid oid, int len, Type type) {
         AtomicLong outObj = new AtomicLong();
         Error.throwIfNeeded(
-                jniLookupPrefix(outObj, repository.getRawPointer(), oid, len, type.value));
+                jniLookupPrefix(outObj, repository.getRawPointer(), oid, len, type._bit));
         return GitObject.create(outObj.get(), type);
     }
 
@@ -146,7 +146,7 @@ public class GitObject extends CAutoReleasable {
      */
     public GitObject peel(Type targetType) {
         AtomicLong outPtr = new AtomicLong();
-        Error.throwIfNeeded(jniPeel(outPtr, getRawPointer(), targetType.value));
+        Error.throwIfNeeded(jniPeel(outPtr, getRawPointer(), targetType._bit));
         return new GitObject(false, outPtr.get());
     }
 
@@ -171,7 +171,7 @@ public class GitObject extends CAutoReleasable {
         return Repository.ofRaw(jniOwner(_rawPtr.get()));
     }
 
-    public enum Type {
+    public enum Type implements IBitEnum {
         ANY(-2),
         INVALID(-1),
         COMMIT(1),
@@ -181,15 +181,15 @@ public class GitObject extends CAutoReleasable {
         OFS_DELTA(6),
         ERF_DELTA(7),
         ;
-        private final int value;
+        private final int _bit;
 
-        private Type(int value) {
-            this.value = value;
+        private Type(int _bit) {
+            this._bit = _bit;
         }
 
         static Type valueOf(int iVal) {
             for (Type x : Type.values()) {
-                if (x.value == iVal) {
+                if (x._bit == iVal) {
                     return x;
                 }
             }
@@ -197,8 +197,9 @@ public class GitObject extends CAutoReleasable {
         }
 
         /** Get associated value. */
-        public int getCode() {
-            return value;
+        @Override
+        public int getBit() {
+            return _bit;
         }
     }
 }
