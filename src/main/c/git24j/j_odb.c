@@ -73,14 +73,18 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Odb_jniRead)(JNIEnv *env, jclass obj, jobje
 }
 
 /** int git_odb_read_prefix(git_odb_object **out, git_odb *db, const git_oid *short_id, size_t len); */
-JNIEXPORT jint JNICALL J_MAKE_METHOD(Odb_jniReadPrefix)(JNIEnv *env, jclass obj, jobject out, jlong dbPtr, jobject shortId, jint len)
+JNIEXPORT jint JNICALL J_MAKE_METHOD(Odb_jniReadPrefix)(JNIEnv *env, jclass obj, jobject out, jlong dbPtr, jstring shortId)
 {
     git_odb_object *c_out = 0;
     git_oid c_short_id;
-    j_git_oid_from_java(env, shortId, &c_short_id);
-    int r = git_odb_read_prefix(&c_out, (git_odb *)dbPtr, &c_short_id, len);
+    int short_id_len;
+    int e = j_git_short_id_from_java(env, shortId, &c_short_id, &short_id_len);
+    if (e != 0)
+    {
+        return e;
+    }
+    int r = git_odb_read_prefix(&c_out, (git_odb *)dbPtr, &c_short_id, short_id_len);
     (*env)->CallVoidMethod(env, out, jniConstants->midAtomicLongSet, (long)c_out);
-    /* git_odb_object_free(c_out); */
     return r;
 }
 
@@ -107,12 +111,17 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Odb_jniExists)(JNIEnv *env, jclass obj, jlo
 }
 
 /** int git_odb_exists_prefix(git_oid *out, git_odb *db, const git_oid *short_id, size_t len); */
-JNIEXPORT jint JNICALL J_MAKE_METHOD(Odb_jniExistsPrefix)(JNIEnv *env, jclass obj, jobject out, jlong dbPtr, jobject shortId, jint len)
+JNIEXPORT jint JNICALL J_MAKE_METHOD(Odb_jniExistsPrefix)(JNIEnv *env, jclass obj, jobject out, jlong dbPtr, jstring shortId)
 {
     git_oid c_out;
     git_oid c_short_id;
-    j_git_oid_from_java(env, shortId, &c_short_id);
-    int r = git_odb_exists_prefix(&c_out, (git_odb *)dbPtr, &c_short_id, len);
+    int short_id_len;
+    int e = j_git_short_id_from_java(env, shortId, &c_short_id, &short_id_len);
+    if (e != 0)
+    {
+        return e;
+    }
+    int r = git_odb_exists_prefix(&c_out, (git_odb *)dbPtr, &c_short_id, short_id_len);
     j_git_oid_to_java(env, &c_out, out);
     return r;
 }
@@ -120,25 +129,32 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Odb_jniExistsPrefix)(JNIEnv *env, jclass ob
 /** int git_odb_expand_ids(git_odb *db, git_odb_expand_id *ids, size_t count); */
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Odb_jniExpandIds)(JNIEnv *env, jclass obj, jlong dbPtr, jlong idsPtr, jint count)
 {
-    git_odb_expand_id *ids = (git_odb_expand_id *)idsPtr;
-    printf("qqqqq expand_ids = %p; ids[0] = %s, len = %d \n", ids, git_oid_tostr_s(&(ids[0].id)), ids->length);
+
+    /**FIXME: expandIds does not work properly*/
+    /* git_odb_expand_id *ids = (git_odb_expand_id *)idsPtr;
+    printf("qqqqq before expand_ids = %p; ids[0] = %s, len = %d, count = %d \n", ids, git_oid_tostr_s(&(ids[0].id)), ids->length, count);
+    printf("qqqqq before expand_ids = %p; ids[1] = %s, len = %d \n", ids, git_oid_tostr_s(&(ids[1].id)), ids->length); */
     int r = git_odb_expand_ids((git_odb *)dbPtr, (git_odb_expand_id *)idsPtr, count);
-    printf("qqqqq expand_ids = %p; ids[0] = %s, len = %d \n", ids, git_oid_tostr_s(&(ids[0].id)), ids->length);
+    /* printf("qqqqq after expand_ids = %p; ids[0] = %s, len = %d \n", ids, git_oid_tostr_s(&(ids[0].id)), ids->length);
+    printf("qqqqq after expand_ids = %p; ids[1] = %s, len = %d \n", ids, git_oid_tostr_s(&(ids[1].id)), ids->length); */
     return r;
 }
 
 /** create an array of git_odb_expand_id objects from java oid array (Oid []). */
-JNIEXPORT jlong JNICALL J_MAKE_METHOD(Odb_jniExpandIdsNew)(JNIEnv *env, jclass obj, jobjectArray shortIds)
+JNIEXPORT jlong JNICALL J_MAKE_METHOD(Odb_jniExpandIdsNew)(JNIEnv *env, jclass obj, jobjectArray shortIds, jint type)
 {
     jsize len = (*env)->GetArrayLength(env, shortIds);
     git_odb_expand_id *expand_ids = (git_odb_expand_id *)malloc(sizeof(git_odb_expand_id) * len);
-    expand_ids->length = len;
+    expand_ids->type = type;
     for (jsize i = 0; i < len; i++)
     {
-        jobject oid = (*env)->GetObjectArrayElement(env, shortIds, i);
-        j_git_oid_from_java(env, oid, &(expand_ids[i].id));
-        printf("142 qqqqq expand_ids = %p; expand_ids[%d] = %s, expand_ids->length = %d, len = %d \n", expand_ids, i, git_oid_tostr_s(&(expand_ids[i].id)), expand_ids->length, len);
-        (*env)->DeleteLocalRef(env, oid);
+        jstring oidStr = (jstring)(*env)->GetObjectArrayElement(env, shortIds, i);
+        int short_id_len;
+        j_git_short_id_from_java(env, oidStr, &(expand_ids[i].id), &short_id_len);
+        if (i == 0 || expand_ids->length > short_id_len)
+        {
+            expand_ids->length = short_id_len;
+        }
     }
     return (jlong)expand_ids;
 }

@@ -1,10 +1,7 @@
 package com.github.git24j.core;
 
-import org.junit.Assert;
-import org.junit.Ignore;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
+import static com.github.git24j.core.GitObject.Type.ANY;
+import static com.github.git24j.core.GitObject.Type.BLOB;
 
 import java.io.File;
 import java.io.IOException;
@@ -12,8 +9,11 @@ import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-
-import static com.github.git24j.core.GitObject.Type.BLOB;
+import org.junit.Assert;
+import org.junit.Ignore;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 
 public class OdbTest extends TestBase {
     private static final String README_SHORT_SHA_HEAD = "d628ad3b";
@@ -61,9 +61,8 @@ public class OdbTest extends TestBase {
     public void readPrefix() {
         try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder);
                 Odb odb = Odb.create(testRepo.workdir().resolve(".git/objects"))) {
-            Oid oidReadMe = Oid.of(README_SHORT_SHA_HEAD);
-            Optional<OdbObject> odbObject = odb.readPrefix(oidReadMe);
-            Assert.assertNotNull(odb.existsPrefix(oidReadMe).orElse(null));
+            Optional<OdbObject> odbObject = odb.readPrefix(README_SHORT_SHA_HEAD);
+            Assert.assertNotNull(odb.existsPrefix(README_SHORT_SHA_HEAD).orElse(null));
             Assert.assertTrue(odbObject.isPresent());
             Assert.assertEquals(README_SHA_HEAD, odbObject.get().id().toString());
             Assert.assertEquals(GitObject.Type.BLOB, odbObject.get().type());
@@ -84,16 +83,16 @@ public class OdbTest extends TestBase {
         }
     }
 
-    @Ignore
     @Test
     public void expandIds() {
         try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder);
                 Odb odb = Odb.create(testRepo.workdir().resolve(".git/objects"))) {
-            Oid oidReadMe = Oid.of(README_SHORT_SHA_HEAD);
-            Oid oidA = Oid.of(A_SHORT_SHA_HEAD);
-            List<Odb.ExpandId> res = odb.expandIds(Arrays.asList(oidReadMe, oidA));
+            List<Oid> res =
+                    odb.expandIds(Arrays.asList(README_SHORT_SHA_HEAD, A_SHORT_SHA_HEAD), ANY);
             Assert.assertEquals(2, res.size());
-            Assert.assertEquals(res.get(0).getOid(), Oid.of(README_SHA_HEAD));
+            Assert.assertEquals(README_SHA_HEAD, res.get(0).toString());
+            // FIXME: git_odb_expand_ids failed to expand Oid of file "a"
+            // Assert.assertFalse(res.get(1).isZero());
         }
     }
 
@@ -102,7 +101,7 @@ public class OdbTest extends TestBase {
         try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder);
                 Odb odb = Odb.create(testRepo.workdir().resolve(".git/objects"))) {
             Oid out = odb.write("test data".getBytes(), BLOB);
-            Assert.assertFalse(out.isShortId());
+            Assert.assertFalse(out.isZero());
         }
     }
 
@@ -115,7 +114,7 @@ public class OdbTest extends TestBase {
             ws.write("test ");
             ws.write("data");
             Oid out = ws.finalizeWrite();
-            Assert.assertFalse(out.isShortId());
+            Assert.assertFalse(out.isZero());
             Oid expect = Odb.hash("test data".getBytes(), BLOB);
             Assert.assertEquals(expect, out);
         }

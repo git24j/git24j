@@ -15,14 +15,20 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Blob_jniLookup)(JNIEnv *env, jclass obj, jo
 }
 
 /** int git_blob_lookup_prefix(git_blob **blob, git_repository *repo, const git_oid *id, size_t len); */
-JNIEXPORT jint JNICALL J_MAKE_METHOD(Blob_jniLookupPrefix)(JNIEnv *env, jclass obj, jobject outBlob, long repoPtr, jobject oid, jint len)
+JNIEXPORT jint JNICALL J_MAKE_METHOD(Blob_jniLookupPrefix)(JNIEnv *env, jclass obj, jobject outBlob, long repoPtr, jstring shortId)
 {
     git_blob *c_blob = 0;
     git_oid c_oid;
-    j_git_oid_from_java(env, oid, &c_oid);
-    int e = git_blob_lookup_prefix(&c_blob, (git_repository *)repoPtr, &c_oid, len);
+    int short_id_len;
+    int e = j_git_short_id_from_java(env, shortId, &c_oid, &short_id_len);
+    if (e != 0)
+    {
+        return e;
+    }
+
+    int r = git_blob_lookup_prefix(&c_blob, (git_repository *)repoPtr, &c_oid, short_id_len);
     (*env)->CallVoidMethod(env, outBlob, jniConstants->midAtomicLongSet, (long)c_blob);
-    return e;
+    return r;
 }
 
 /** void git_blob_free(git_blob *blob); */

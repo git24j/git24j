@@ -236,6 +236,23 @@ void j_git_short_id_to_java(JNIEnv *env, const git_oid *c_oid, jobject oid, int 
     (*env)->DeleteLocalRef(env, raw);
 }
 
+/** convert short id (java string) to git_oid and get effective oid len*/
+int j_git_short_id_from_java(JNIEnv *env, jstring oidStr, git_oid *c_oid, int *out_len)
+{
+    assert(c_oid && "receiving oid must not be null");
+    assert(out_len && "receiving oid length must not be null");
+    if (oidStr == NULL)
+    {
+        *out_len = 0;
+        return 0;
+    }
+    jsize oidLen = (*env)->GetStringLength(env, oidStr);
+    const char *oid_str = (*env)->GetStringUTFChars(env, oidStr, 0);
+    int e = git_oid_fromstrn(c_oid, oid_str, (size_t)oidLen);
+    *out_len = oidLen;
+    return e;
+}
+
 /** create byte[] that can be accessed directly by java. */
 jbyteArray j_git_oid_to_bytearray(JNIEnv *env, const git_oid *c_oid)
 {

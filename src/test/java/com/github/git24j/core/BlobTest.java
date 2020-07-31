@@ -20,11 +20,9 @@ public class BlobTest extends TestBase {
     public void lookup() {
         try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {
             Blob blob1 = Blob.lookup(testRepo, Oid.of(BLOB_A));
-            Blob blob2 = Blob.lookup(testRepo, Oid.of(BLOB_A.substring(0, 8)));
-            Blob blob3 = Blob.lookupPrefix(testRepo, Oid.of(BLOB_A.substring(0, 8)));
+            Blob blob3 = Blob.lookupPrefix(testRepo, BLOB_A.substring(0, 8));
             Assert.assertNotNull(blob1);
-            Assert.assertNotNull(blob2);
-            Assert.assertEquals(blob2.id(), blob3.id());
+            Assert.assertEquals(blob1.id(), blob3.id());
         }
     }
 
@@ -98,7 +96,7 @@ public class BlobTest extends TestBase {
             WriteStream ws = Blob.createFromStream(testRepo, null);
             ws.write("a".getBytes());
             Oid oid = Blob.createFromStreamCommit(ws);
-            Assert.assertTrue(oid.getEffectiveSize() > 0);
+            Assert.assertFalse(oid.isEmpty());
         }
     }
 

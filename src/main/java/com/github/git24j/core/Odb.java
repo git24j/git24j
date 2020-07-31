@@ -135,7 +135,7 @@ public class Odb extends CAutoCloseable {
      * int git_odb_read_prefix(git_odb_object **out, git_odb *db, const git_oid *short_id, size_t
      * len);
      */
-    static native int jniReadPrefix(AtomicLong out, long db, Oid shortId, int len);
+    static native int jniReadPrefix(AtomicLong out, long db, String shortId);
 
     /**
      * Read an object from the database, given a prefix of its identifier.
@@ -153,9 +153,9 @@ public class Odb extends CAutoCloseable {
      *     GIT_EAMBIGUOUS if the prefix is ambiguous (several objects match the prefix)
      */
     @Nonnull
-    public Optional<OdbObject> readPrefix(Oid shortId) {
+    public Optional<OdbObject> readPrefix(String shortId) {
         OdbObject out = new OdbObject(false, 0);
-        int e = jniReadPrefix(out._rawPtr, getRawPointer(), shortId, shortId.getEffectiveSize());
+        int e = jniReadPrefix(out._rawPtr, getRawPointer(), shortId);
         if (e == ENOTFOUND.getCode()) {
             return Optional.empty();
         }
@@ -211,7 +211,7 @@ public class Odb extends CAutoCloseable {
     /**
      * int git_odb_exists_prefix(git_oid *out, git_odb *db, const git_oid *short_id, size_t len);
      */
-    static native int jniExistsPrefix(Oid out, long db, Oid shortId, int len);
+    static native int jniExistsPrefix(Oid out, long db, String shortId);
 
     /**
      * Determine if an object can be found in the object database by an abbreviated object ID.
@@ -221,9 +221,9 @@ public class Odb extends CAutoCloseable {
      * @throws GitException GIT_EAMBIGUOUS if multiple or other read errors
      */
     @Nonnull
-    public Optional<Oid> existsPrefix(@Nonnull Oid shortId) {
+    public Optional<Oid> existsPrefix(@Nonnull String shortId) {
         Oid fullId = new Oid();
-        int e = jniExistsPrefix(fullId, getRawPointer(), shortId, shortId.getEffectiveSize());
+        int e = jniExistsPrefix(fullId, getRawPointer(), shortId);
         if (e == ENOTFOUND.getCode()) {
             return Optional.empty();
         }
@@ -269,7 +269,7 @@ public class Odb extends CAutoCloseable {
     /** int git_odb_expand_ids(git_odb *db, git_odb_expand_id *ids, size_t count); */
     static native int jniExpandIds(long db, long ids, int count);
 
-    static native long jniExpandIdsNew(Oid[] shortIds);
+    static native long jniExpandIdsNew(String[] shortIds, int type);
 
     static native byte[] jniExpandIdsGetId(long expandIdsPtr, int idx);
 
@@ -288,20 +288,20 @@ public class Odb extends CAutoCloseable {
      * not be asked to be reloaded if an object is not found (which is unlike other object database
      * operations.)
      *
-     * @param ids An array of short object IDs to search for
+     * @param shortIds An array of short object IDs to search for
      * @throws GitException git errors
+     * @apiNote Use with caution, {@code git_odb_expand_ids} failed to expand all ids, see unit
+     *     tests for more details.
      */
     @Nonnull
-    public List<ExpandId> expandIds(@Nonnull List<Oid> ids) {
-        int len = ids.size();
-        long cIdArr = jniExpandIdsNew(ids.toArray(new Oid[0]));
-        Error.throwIfNeeded(jniExpandIds(getRawPointer(), cIdArr, len));
-        List<ExpandId> expandIds = new ArrayList<>(len);
-        for (int i = 0; i < jniExpandIdsGetLength(cIdArr); i++) {
+    public List<Oid> expandIds(@Nonnull List<String> shortIds, @Nonnull GitObject.Type type) {
+        int idsCount = shortIds.size();
+        long cIdArr = jniExpandIdsNew(shortIds.toArray(new String[0]), type.getBit());
+        Error.throwIfNeeded(jniExpandIds(getRawPointer(), cIdArr, idsCount));
+        List<Oid> expandIds = new ArrayList<>(idsCount);
+        for (int i = 0; i < idsCount; i++) {
             Oid oid = Oid.of(jniExpandIdsGetId(cIdArr, i));
-            GitObject.Type t =
-                    IBitEnum.valueOf(jniExpandIdsGetType(cIdArr, i), GitObject.Type.class);
-            expandIds.add(new ExpandId(oid, t));
+            expandIds.add(oid);
         }
         return expandIds;
     }
@@ -350,7 +350,7 @@ public class Odb extends CAutoCloseable {
      * @throws GitException git errors
      */
     @Nonnull
-    public Oid write( byte[] data, GitObject.Type type) {
+    public Oid write(byte[] data, GitObject.Type type) {
         Oid out = new Oid();
         Error.throwIfNeeded(jniWrite(out, getRawPointer(), data, data.length, type.getBit()));
         return out;

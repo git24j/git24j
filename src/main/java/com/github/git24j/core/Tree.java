@@ -34,8 +34,8 @@ public class Tree extends GitObject {
     }
 
     @Nonnull
-    public static Tree lookupPrefix(@Nonnull Repository repo, @Nonnull Oid oid) {
-        return lookup(repo, oid);
+    public static Tree lookupPrefix(@Nonnull Repository repo, @Nonnull String shortId) {
+        return (Tree) GitObject.lookupPrefix(repo, shortId, Type.TREE);
     }
 
     /** size_t git_tree_entrycount(const git_tree *tree); */
@@ -418,7 +418,8 @@ public class Tree extends GitObject {
                 @Nullable Oid oid,
                 @Nonnull FileMode fileModeType,
                 @Nonnull Path path) {
-            long ptr = jniUpdateNew(updateType.ordinal(), oid, fileModeType.getBit(), path.toString());
+            long ptr =
+                    jniUpdateNew(updateType.ordinal(), oid, fileModeType.getBit(), path.toString());
             return new Update(false, ptr);
         }
 

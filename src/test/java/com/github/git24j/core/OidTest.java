@@ -21,16 +21,7 @@ public class OidTest {
     }
 
     @Test
-    public void shortId() {
-        // "c" -> "", because every two hexidecimal digits are translated into one byte
-        Assert.assertEquals("", Oid.of("c").toString());
-        Assert.assertEquals("c3", Oid.of("c3").toString());
-        Assert.assertEquals("c3", Oid.of("c3d").toString());
-        Assert.assertEquals("c3df", Oid.of("c3df").toString());
-    }
-
-    @Test
     public void fromByteArray() {
-        Assert.assertEquals(Oid.of("a1a2"), Oid.of(new byte[] {(byte) 161, (byte) 162}));
+        Assert.assertEquals(Oid.of(SHA_A), Oid.of(Oid.hexStringToByteArray(SHA_A)));
     }
 }

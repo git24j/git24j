@@ -16,9 +16,8 @@ public class Tag extends GitObject {
         return (Tag) GitObject.lookup(repo, oid, Type.TAG);
     }
 
-    /** @deprecated in preference to {@link Tag::lookup} */
-    public static Tag lookupPrefix(Repository repo, Oid oid) {
-        return (Tag) GitObject.lookup(repo, oid, Type.TAG);
+    public static Tag lookupPrefix(Repository repo, String shortId) {
+        return (Tag) GitObject.lookupPrefix(repo, shortId, Type.TAG);
     }
 
     static native int jniTarget(AtomicLong outTargetPtr, long tagPtr);

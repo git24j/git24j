@@ -22,7 +22,7 @@ public class TagTest extends TestBase {
             Assert.assertEquals(TAG_V01_TARGET, v01.target().id().toString());
             Assert.assertEquals(TAG_V01_TARGET, v01.targetId().toString());
             Assert.assertEquals(GitObject.Type.COMMIT, v01.targetType());
-            Tag v02 = Tag.lookupPrefix(testRepo, Oid.of("d9420a0ba5cbe"));
+            Tag v02 = Tag.lookupPrefix(testRepo, "d9420a0ba5cbe");
             Assert.assertEquals(v01.id(), v02.id());
         }
     }

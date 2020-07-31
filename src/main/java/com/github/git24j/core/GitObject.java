@@ -21,8 +21,7 @@ public class GitObject extends CAutoReleasable {
 
     static native int jniLookup(AtomicLong outObj, long repoPtr, Oid oid, int objType);
 
-    static native int jniLookupPrefix(
-            AtomicLong outObj, long repoPtr, Oid oid, int len, int objType);
+    static native int jniLookupPrefix(AtomicLong outObj, long repoPtr, String shortId, int objType);
 
     static native long jniOwner(long objPtr);
 
@@ -74,17 +73,7 @@ public class GitObject extends CAutoReleasable {
     public static GitObject lookup(
             @Nonnull Repository repository, @Nonnull Oid oid, @Nonnull Type type) {
         AtomicLong outObj = new AtomicLong();
-        if (oid.isShortId()) {
-            Error.throwIfNeeded(
-                    jniLookupPrefix(
-                            outObj,
-                            repository.getRawPointer(),
-                            oid,
-                            oid.getEffectiveSize(),
-                            type._bit));
-        } else {
-            Error.throwIfNeeded(jniLookup(outObj, repository.getRawPointer(), oid, type._bit));
-        }
+        Error.throwIfNeeded(jniLookup(outObj, repository.getRawPointer(), oid, type._bit));
         return GitObject.create(outObj.get(), type);
     }
 
@@ -93,16 +82,15 @@ public class GitObject extends CAutoReleasable {
      * (short id).
      *
      * @param repository the repository to look up the object
-     * @param oid a short identifier for the object
-     * @param len the length of the short identifier
+     * @param shortId a short identifier for the object
      * @param type the type of the object
      * @return looked-up object
-     * @deprecated in preference to {@code lookup} which already handles the short oid case.
      */
-    public static GitObject lookupPrefix(Repository repository, Oid oid, int len, Type type) {
+    public static GitObject lookupPrefix(
+            Repository repository, @Nonnull String shortId, Type type) {
         AtomicLong outObj = new AtomicLong();
         Error.throwIfNeeded(
-                jniLookupPrefix(outObj, repository.getRawPointer(), oid, len, type._bit));
+                jniLookupPrefix(outObj, repository.getRawPointer(), shortId, type._bit));
         return GitObject.create(outObj.get(), type);
     }
 

@@ -27,7 +27,7 @@ public class CommitTest extends TestBase {
     @Test
     public void lookupPrefix() {
         try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {
-            Commit commit = Commit.lookupPrefix(testRepo, Oid.of(MASTER_HASH.substring(0, 9)));
+            Commit commit = Commit.lookupPrefix(testRepo, MASTER_HASH.substring(0, 9));
             Assert.assertEquals(MASTER_HASH, commit.id().toString());
         }
     }
@@ -53,7 +53,7 @@ public class CommitTest extends TestBase {
     @Test
     public void id() {
         try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {
-            Commit commit = Commit.lookup(testRepo, Oid.of(MASTER_HASH.substring(0, 9)));
+            Commit commit = Commit.lookup(testRepo, Oid.of(MASTER_HASH));
             Assert.assertEquals(MASTER_HASH, commit.id().toString());
         }
     }
@@ -61,7 +61,7 @@ public class CommitTest extends TestBase {
     @Test
     public void messageEncoding() {
         try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {
-            Commit commit = Commit.lookup(testRepo, Oid.of(MASTER_HASH.substring(0, 9)));
+            Commit commit = Commit.lookup(testRepo, Oid.of(MASTER_HASH));
             String encoding = commit.messageEncoding();
             Assert.assertNull(encoding);
         }
