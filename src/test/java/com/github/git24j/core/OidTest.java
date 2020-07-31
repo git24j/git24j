@@ -33,11 +33,4 @@ public class OidTest {
     public void fromByteArray() {
         Assert.assertEquals(Oid.of("a1a2"), Oid.of(new byte[] {(byte) 161, (byte) 162}));
     }
-
-    @Test
-    public void setEffectiveSize() {
-        Oid oid = Oid.of(SHA_A);
-        oid.setEffectiveSize(6);
-        Assert.assertTrue(oid.isShortId());
-    }
 }

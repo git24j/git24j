@@ -1,5 +1,6 @@
 package com.github.git24j.core;
 
+import java.util.Arrays;
 import java.util.Objects;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
@@ -11,23 +12,20 @@ import javax.annotation.Nullable;
  */
 public class Oid {
     public static final int RAWSZ = 20;
-    public static final int HEXSZ = RAWSZ * 2;
     private static final char[] HEX_ARRAY = "0123456789abcdef".toCharArray();
 
     /** in case of short sha, only up to {@code eSize} bytes are effective */
-    private int eSize = RAWSZ;
 
-    private byte[] id = new byte[RAWSZ];
+    private byte[] id = null;
 
     Oid() {}
 
     Oid(byte[] bytes) {
-        eSize = bytes.length;
-        if (eSize > RAWSZ) {
+        id = bytes;
+        if (bytes.length > RAWSZ) {
             throw new IllegalArgumentException(
                     "Invalid Oid data, length must be <=20 for bytes or <=40 for hex string");
         }
-        System.arraycopy(bytes, 0, this.id, 0, eSize);
     }
 
     @CheckForNull
@@ -85,12 +83,12 @@ public class Oid {
     }
 
     boolean isEmpty() {
-        return id == null || eSize == 0;
+        return id == null || id.length == 0;
     }
 
     @Override
     public String toString() {
-        return id == null ? "" : bytesToHex(id, eSize);
+        return id == null ? "" : bytesToHex(id, id.length);
     }
 
     /**
@@ -98,16 +96,7 @@ public class Oid {
      * case of short sha.
      */
     public int getEffectiveSize() {
-        return eSize;
-    }
-
-    /** Set effective size of the oid, called by jni c code */
-    void setEffectiveSize(int eSize) {
-        if (eSize > RAWSZ) {
-            throw new IllegalArgumentException(
-                    "effective size should smaller than " + RAWSZ + ", but " + eSize + " is given");
-        }
-        this.eSize = eSize;
+        return id.length;
     }
 
     @Override
@@ -119,21 +108,11 @@ public class Oid {
             return false;
         }
         Oid oid = (Oid) o;
-        if (eSize != oid.eSize) {
-            return false;
-        }
-        for (int i = 0; i < eSize; i++) {
-            if (id[i] != oid.id[i]) {
-                return false;
-            }
-        }
-        return true;
+        return Arrays.equals(this.id, oid.id);
     }
 
     @Override
     public int hashCode() {
-        int result = Objects.hash(eSize);
-        result = 31 * result + Objects.hash(toString());
-        return result;
+        return Arrays.hashCode(id);
     }
 }

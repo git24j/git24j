@@ -65,6 +65,7 @@ public class TagTest extends TestBase {
                                     + "second tag\n",
                             false);
             Assert.assertFalse(id.isEmpty());
+            Assert.assertEquals(id, GitObject.lookup(testRepo, id, GitObject.Type.ANY).id());
         }
     }
 
@@ -92,6 +93,7 @@ public class TagTest extends TestBase {
                             Commit.lookup(testRepo, Oid.of(TAG_V01_TARGET)),
                             false);
             Assert.assertFalse(id.isEmpty());
+            Assert.assertEquals(id, GitObject.lookup(testRepo, id, GitObject.Type.ANY).id());
         }
     }
 
