@@ -24,7 +24,7 @@ extern "C"
     JNIEXPORT jint JNICALL J_MAKE_METHOD(GitObject_jniLookup)(JNIEnv *env, jclass obj, jobject outObj, jlong repoPtr, jobject oid, jint objType);
 
     /**int git_object_lookup_prefix(git_object **object_out, git_repository *repo, const git_oid *id, size_t len, git_object_t type);*/
-    JNIEXPORT jint JNICALL J_MAKE_METHOD(GitObject_jniLookupPrefix)(JNIEnv *env, jclass obj, jobject outObj, jlong repoPtr, jobject oid, jint len, jint objType);
+    JNIEXPORT jint JNICALL J_MAKE_METHOD(GitObject_jniLookupPrefix)(JNIEnv *env, jclass obj, jobject outObj, jlong repoPtr, jstring oidStr, jint objType);
 
     /**git_repository * git_object_owner(const git_object *obj); */
     JNIEXPORT jlong JNICALL J_MAKE_METHOD(GitObject_jniOwner)(JNIEnv *env, jclass obj, jlong objPtr);

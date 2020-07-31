@@ -22,7 +22,7 @@ public class TreeTest extends TestBase {
         Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder);
         Tree t1 = Tree.lookup(testRepo, Oid.of(MASTER_TREE_SHA));
         Assert.assertEquals(MASTER_TREE_SHA, t1.id().toString());
-        Tree t2 = Tree.lookupPrefix(testRepo, Oid.of("8c5f4d727b"));
+        Tree t2 = Tree.lookupPrefix(testRepo, "8c5f4d727b");
         Assert.assertEquals(MASTER_TREE_SHA, t2.id().toString());
     }
 
@@ -73,7 +73,7 @@ public class TreeTest extends TestBase {
 
     @Test
     public void dup() {
-        try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)){
+        try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {
             Tree t1 = Tree.lookup(testRepo, Oid.of(MASTER_TREE_SHA));
             Tree t2 = t1.dup();
             Assert.assertEquals(t1.id(), t2.id());
@@ -82,7 +82,7 @@ public class TreeTest extends TestBase {
 
     @Test
     public void entry() {
-        try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)){
+        try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {
             Tree t1 = Tree.lookup(testRepo, Oid.of(MASTER_TREE_SHA));
             Tree.Entry e1 = t1.entryById(Oid.of(README_SHA_IN_MASTER)).orElse(null);
             Tree.Entry e2 = t1.entryByPath(Paths.get("README.md")).orElse(null);
@@ -109,7 +109,12 @@ public class TreeTest extends TestBase {
         try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {
             Path readme = Paths.get("README.md");
             Tree t1 = Tree.lookup(testRepo, Oid.of(MASTER_TREE_SHA));
-            Tree.Update update = Tree.Update.create(Tree.UpdateT.REMOVE, Oid.of(README_SHA_IN_MASTER), FileMode.BLOB, readme);
+            Tree.Update update =
+                    Tree.Update.create(
+                            Tree.UpdateT.REMOVE,
+                            Oid.of(README_SHA_IN_MASTER),
+                            FileMode.BLOB,
+                            readme);
             Assert.assertNotNull(update);
             Oid o2 = t1.createUpdated(testRepo, t1, Collections.singletonList(update));
             Assert.assertNotNull(o2);

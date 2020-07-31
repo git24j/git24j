@@ -18,7 +18,7 @@ public class GitObjectTest extends TestBase {
         Assert.assertEquals(GitObject.Type.COMMIT, searched.type());
         Assert.assertEquals(searched.getRawPointer(), obj.getRawPointer());
         try {
-            GitObject.lookup(testRepo, Oid.of("123456abcde"), GitObject.Type.COMMIT);
+            GitObject.lookupPrefix(testRepo, "123456abcde", GitObject.Type.COMMIT);
             Assert.fail("should have thrown ENOTFOUND error");
         } catch (GitException e) {
             Assert.assertEquals(GitException.ErrorCode.ENOTFOUND, e.getCode());
@@ -29,7 +29,9 @@ public class GitObjectTest extends TestBase {
     public void lookup() {
         Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder);
         GitObject obj = Revparse.single(testRepo, "HEAD");
-        GitObject lookedUp = GitObject.lookupPrefix(testRepo, obj.id(), 7, GitObject.Type.COMMIT);
+        GitObject lookedUp =
+                GitObject.lookupPrefix(
+                        testRepo, obj.id().toString().substring(0, 10), GitObject.Type.COMMIT);
         Assert.assertEquals(GitObject.Type.COMMIT, lookedUp.type());
         Assert.assertEquals(lookedUp.getRawPointer(), obj.getRawPointer());
     }

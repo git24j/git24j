@@ -1,7 +1,6 @@
 package com.github.git24j.core;
 
 import java.util.Arrays;
-import java.util.Objects;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -13,19 +12,19 @@ import javax.annotation.Nullable;
 public class Oid {
     public static final int RAWSZ = 20;
     private static final char[] HEX_ARRAY = "0123456789abcdef".toCharArray();
+    private static final String ZERO_HEX = "0000000000000000000000000000000000000000";
+    private static final byte[] ZERO_SHA = ZERO_HEX.getBytes();
 
     /** in case of short sha, only up to {@code eSize} bytes are effective */
-
-    private byte[] id = null;
+    private byte[] id = new byte[RAWSZ];
 
     Oid() {}
 
     Oid(byte[] bytes) {
-        id = bytes;
-        if (bytes.length > RAWSZ) {
-            throw new IllegalArgumentException(
-                    "Invalid Oid data, length must be <=20 for bytes or <=40 for hex string");
+        if (bytes.length != RAWSZ) {
+            throw new IllegalArgumentException("Invalid Oid data, length must be 20");
         }
+        id = bytes;
     }
 
     @CheckForNull
@@ -70,10 +69,6 @@ public class Oid {
         return data;
     }
 
-    public boolean isShortId() {
-        return getEffectiveSize() < RAWSZ;
-    }
-
     byte[] getId() {
         return id;
     }
@@ -86,17 +81,13 @@ public class Oid {
         return id == null || id.length == 0;
     }
 
-    @Override
-    public String toString() {
-        return id == null ? "" : bytesToHex(id, id.length);
+    boolean isZero() {
+        return Arrays.equals(id, ZERO_SHA);
     }
 
-    /**
-     * Get effective size of the oid. Normally, it should be {@code RAWSZ} but can be smaller in
-     * case of short sha.
-     */
-    public int getEffectiveSize() {
-        return id.length;
+    @Override
+    public String toString() {
+        return bytesToHex(id, id.length);
     }
 
     @Override

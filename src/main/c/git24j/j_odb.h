@@ -33,7 +33,7 @@ extern "C"
     JNIEXPORT jint JNICALL J_MAKE_METHOD(Odb_jniRead)(JNIEnv *env, jclass obj, jobject out, jlong dbPtr, jobject id);
 
     /** int git_odb_read_prefix(git_odb_object **out, git_odb *db, const git_oid *short_id, size_t len); */
-    JNIEXPORT jint JNICALL J_MAKE_METHOD(Odb_jniReadPrefix)(JNIEnv *env, jclass obj, jobject out, jlong dbPtr, jobject shortId, jint len);
+    JNIEXPORT jint JNICALL J_MAKE_METHOD(Odb_jniReadPrefix)(JNIEnv *env, jclass obj, jobject out, jlong dbPtr, jstring shortId);
 
     /** int git_odb_read_header(size_t *len_out, git_object_t *type_out, git_odb *db, const git_oid *id); */
     JNIEXPORT jint JNICALL J_MAKE_METHOD(Odb_jniReadHeader)(JNIEnv *env, jclass obj, jobject lenOut, jobject typeOut, jlong dbPtr, jobject id);
@@ -42,12 +42,12 @@ extern "C"
     JNIEXPORT jint JNICALL J_MAKE_METHOD(Odb_jniExists)(JNIEnv *env, jclass obj, jlong dbPtr, jobject id);
 
     /** int git_odb_exists_prefix(git_oid *out, git_odb *db, const git_oid *short_id, size_t len); */
-    JNIEXPORT jint JNICALL J_MAKE_METHOD(Odb_jniExistsPrefix)(JNIEnv *env, jclass obj, jobject out, jlong dbPtr, jobject shortId, jint len);
+    JNIEXPORT jint JNICALL J_MAKE_METHOD(Odb_jniExistsPrefix)(JNIEnv *env, jclass obj, jobject out, jlong dbPtr, jstring shortId);
 
     /** int git_odb_expand_ids(git_odb *db, git_odb_expand_id *ids, size_t count); */
     JNIEXPORT jint JNICALL J_MAKE_METHOD(Odb_jniExpandIds)(JNIEnv *env, jclass obj, jlong dbPtr, jlong idsPtr, jint count);
     /** create an array of git_odb_expand_id objects from java oid array (Oid []). */
-    JNIEXPORT jlong JNICALL J_MAKE_METHOD(Odb_jniExpandIdsNew)(JNIEnv *env, jclass obj, jobjectArray shortIds);
+    JNIEXPORT jlong JNICALL J_MAKE_METHOD(Odb_jniExpandIdsNew)(JNIEnv *env, jclass obj, jobjectArray shortIds, jint type);
     JNIEXPORT jbyteArray JNICALL J_MAKE_METHOD(Odb_jniExpandIdsGetId)(JNIEnv *env, jclass obj, jlong expandIdsPtr, jint idx);
     JNIEXPORT jint JNICALL J_MAKE_METHOD(Odb_jniExpandIdsGetType)(JNIEnv *env, jclass obj, jlong expandIdsPtr, jint idx);
     JNIEXPORT jint JNICALL J_MAKE_METHOD(Odb_jniExpandIdsGetLength)(JNIEnv *env, jclass obj, jlong expandIdsPtr);

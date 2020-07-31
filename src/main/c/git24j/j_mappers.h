@@ -43,7 +43,6 @@ extern "C"
         jclass clzOid;
         jmethodID midSetId;
         jmethodID midGetId;
-        jmethodID midGetESize;
     } j_oid_constants;
 
     typedef struct
@@ -119,6 +118,9 @@ extern "C"
 
     /** Copy git_oid bytes (all 20 bytes) to java and set effective size*/
     void j_git_short_id_to_java(JNIEnv *env, const git_oid *c_oid, jobject oid, int effectiveSize);
+
+    /** convert short id (java string) to git_oid and get effective oid len*/
+    int j_git_short_id_from_java(JNIEnv *env, jstring oidStr, git_oid *c_oid, int *out_len);
 
     /** Copy value of java Oid to git_oid struct in c. */
     void j_git_oid_from_java(JNIEnv *env, jobject oid, git_oid *c_oid);

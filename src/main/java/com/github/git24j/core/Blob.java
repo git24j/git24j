@@ -13,7 +13,7 @@ public class Blob extends GitObject {
 
     static native int jniLookup(AtomicLong outBlob, long repoPtr, Oid oid);
 
-    static native int jniLookupPrefix(AtomicLong outBlob, long repoPtr, Oid oid, int len);
+    static native int jniLookupPrefix(AtomicLong outBlob, long repoPtr, String shortId);
 
     static native byte[] jniId(long blobPtr);
 
@@ -130,12 +130,7 @@ public class Blob extends GitObject {
     @CheckForNull
     public static Blob lookup(@Nonnull Repository repo, @Nonnull Oid oid) {
         AtomicLong out = new AtomicLong();
-        if (oid.isShortId()) {
-            Error.throwIfNeeded(
-                    jniLookupPrefix(out, repo.getRawPointer(), oid, oid.getEffectiveSize()));
-        } else {
-            Error.throwIfNeeded(jniLookup(out, repo.getRawPointer(), oid));
-        }
+        Error.throwIfNeeded(jniLookup(out, repo.getRawPointer(), oid));
         return out.get() == 0 ? null : new Blob(false, out.get());
     }
 
@@ -149,10 +144,9 @@ public class Blob extends GitObject {
      * @throws GitException git error
      */
     @CheckForNull
-    public static Blob lookupPrefix(@Nonnull Repository repo, @Nonnull Oid oid) {
+    public static Blob lookupPrefix(@Nonnull Repository repo, @Nonnull String shortId) {
         AtomicLong outBlob = new AtomicLong();
-        Error.throwIfNeeded(
-                jniLookupPrefix(outBlob, repo.getRawPointer(), oid, oid.getEffectiveSize()));
+        Error.throwIfNeeded(jniLookupPrefix(outBlob, repo.getRawPointer(), shortId));
         return outBlob.get() == 0 ? null : new Blob(false, outBlob.get());
     }
 

@@ -9,8 +9,6 @@ extern "C"
 {
 #endif
     /** int git_tag_lookup_prefix(git_tag **out, git_repository *repo, const git_oid *id, size_t len); */
-    /* JNIEXPORT jint JNICALL J_MAKE_METHOD(Tag_jniLookupPrefix)(JNIEnv *env, jclass obj, jobject outTagPtr, jlong repoPtr, jobject oid); */
-
     /** void git_tag_free(git_tag *tag); */
     /* JNIEXPORT jint JNICALL J_MAKE_METHOD(Tag_jniFree)(JNIEnv *env, jclass obj, jlong tagPtr); */
     /** const git_oid * git_tag_id(const git_tag *tag); */

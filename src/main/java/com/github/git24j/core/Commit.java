@@ -35,14 +35,13 @@ public class Commit extends GitObject {
      * <p>The returned object should be released with `git_commit_free` when no longer needed.
      *
      * @param repo the repo to use when locating the commit.
-     * @param oid identity of the commit to locate. If the object is an annotated tag it will be
-     *     peeled back to the commit.
+     * @param shortOid of the commit to locate. If the object is an annotated tag it will be peeled
+     *     back to the commit.
      * @return found commit
      * @throws GitException git errors
-     * @deprecated in preference to {@code lookup} which handles if oid is short id already.
      */
-    public static Commit lookupPrefix(@Nonnull Repository repo, @Nonnull Oid oid) {
-        return lookup(repo, oid);
+    public static Commit lookupPrefix(@Nonnull Repository repo, @Nonnull String shortOid) {
+        return (Commit) GitObject.lookupPrefix(repo, shortOid, Type.COMMIT);
     }
 
     static native String jniMessageEncoding(long commitPtr);

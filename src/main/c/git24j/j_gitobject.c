@@ -39,12 +39,18 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(GitObject_jniLookup)(JNIEnv *env, jclass ob
     return error;
 }
 
-JNIEXPORT jint JNICALL J_MAKE_METHOD(GitObject_jniLookupPrefix)(JNIEnv *env, jclass obj, jobject outObj, jlong repoPtr, jobject oid, jint len, jint objType)
+JNIEXPORT jint JNICALL J_MAKE_METHOD(GitObject_jniLookupPrefix)(JNIEnv *env, jclass obj, jobject outObj, jlong repoPtr, jstring oidStr, jint objType)
 {
     git_object *out_obj = 0;
     git_oid c_oid;
-    j_git_oid_from_java(env, oid, &c_oid);
-    int error = git_object_lookup_prefix(&out_obj, (git_repository *)repoPtr, &c_oid, (size_t)len, (git_object_t)objType);
+    int short_id_len;
+    int e = j_git_short_id_from_java(env, oidStr, &c_oid, &short_id_len);
+    if (e != 0)
+    {
+        return e;
+    }
+
+    int error = git_object_lookup_prefix(&out_obj, (git_repository *)repoPtr, &c_oid, (size_t)short_id_len, (git_object_t)objType);
     (*env)->CallVoidMethod(env, outObj, jniConstants->midAtomicLongSet, (long)out_obj);
     return error;
 }

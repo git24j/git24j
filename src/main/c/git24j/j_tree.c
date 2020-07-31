@@ -56,18 +56,6 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Tree_jniLookup)(JNIEnv *env, jclass obj, jo
     return r;
 }
 
-/** int git_tree_lookup_prefix(git_tree **out, git_repository *repo, const git_oid *id, size_t len); */
-JNIEXPORT jint JNICALL J_MAKE_METHOD(Tree_jniLookupPrefix)(JNIEnv *env, jclass obj, jobject out, jlong repoPtr, jobject id, jint len)
-{
-    git_tree *c_out = 0;
-    git_oid c_id;
-    j_git_oid_from_java(env, id, &c_id);
-    int r = git_tree_lookup_prefix(&c_out, (git_repository *)repoPtr, &c_id, len);
-    (*env)->CallVoidMethod(env, out, jniConstants->midAtomicLongSet, (long)c_out);
-    /* git_tree_free(c_out); */
-    return r;
-}
-
 /** void git_tree_free(git_tree *tree); */
 JNIEXPORT void JNICALL J_MAKE_METHOD(Tree_jniFree)(JNIEnv *env, jclass obj, jlong treePtr)
 {

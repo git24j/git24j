@@ -19,7 +19,6 @@ extern "C"
     JNIEXPORT jint JNICALL J_MAKE_METHOD(Tree_jniLookup)(JNIEnv *env, jclass obj, jobject out, jlong repoPtr, jobject id);
 
     /** int git_tree_lookup_prefix(git_tree **out, git_repository *repo, const git_oid *id, size_t len); */
-    JNIEXPORT jint JNICALL J_MAKE_METHOD(Tree_jniLookupPrefix)(JNIEnv *env, jclass obj, jobject out, jlong repoPtr, jobject id, jint len);
 
     /** void git_tree_free(git_tree *tree); */
     JNIEXPORT void JNICALL J_MAKE_METHOD(Tree_jniFree)(JNIEnv *env, jclass obj, jlong treePtr);
