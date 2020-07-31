@@ -109,7 +109,6 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Tag_jniAnnotationCreate)(JNIEnv *env, jclas
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Tag_jniCreateFromBuffer)(JNIEnv *env, jclass obj, jobject oid, jlong repoPtr, jstring buffer, jint force)
 {
     git_oid c_oid;
-    j_git_oid_from_java(env, oid, &c_oid);
     char *c_buffer = j_copy_of_jstring(env, buffer, true);
     int e = git_tag_create_frombuffer(&c_oid, (git_repository *)repoPtr, c_buffer, force);
     j_git_oid_to_java(env, &c_oid, oid);
@@ -121,9 +120,9 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Tag_jniCreateFromBuffer)(JNIEnv *env, jclas
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Tag_jniCreateLightWeight)(JNIEnv *env, jclass obj, jobject oid, jlong repoPtr, jstring tagName, jlong targetPtr, jint force)
 {
     git_oid c_oid;
-    j_git_oid_from_java(env, oid, &c_oid);
     char *tag_name = j_copy_of_jstring(env, tagName, true);
     int e = git_tag_create_lightweight(&c_oid, (git_repository *)repoPtr, tag_name, (const git_object *)targetPtr, force);
+    j_git_oid_to_java(env, &c_oid, oid);
     free(tag_name);
     return e;
 }

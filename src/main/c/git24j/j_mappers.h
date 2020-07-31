@@ -44,7 +44,6 @@ extern "C"
         jmethodID midSetId;
         jmethodID midGetId;
         jmethodID midGetESize;
-        jmethodID midSetESize;
     } j_oid_constants;
 
     typedef struct

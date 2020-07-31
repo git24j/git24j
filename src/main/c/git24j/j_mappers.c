@@ -233,7 +233,6 @@ void j_git_short_id_to_java(JNIEnv *env, const git_oid *c_oid, jobject oid, int 
     assert(oid && "receiving object must not be null");
     jbyteArray raw = j_byte_array_from_c(env, c_oid->id, GIT_OID_RAWSZ);
     (*env)->CallVoidMethod(env, oid, jniConstants->oid.midSetId, raw);
-    (*env)->CallVoidMethod(env, oid, jniConstants->oid.midSetESize, effectiveSize);
     (*env)->DeleteLocalRef(env, raw);
 }
 
