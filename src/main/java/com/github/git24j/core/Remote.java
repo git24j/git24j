@@ -74,6 +74,8 @@ public class Remote extends CAutoReleasable {
     }
 
     public static class CreateOptions extends CAutoReleasable {
+        public static final int VERSION = 1;
+
         protected CreateOptions(boolean isWeak, long rawPtr) {
             super(isWeak, rawPtr);
         }
@@ -88,6 +90,11 @@ public class Remote extends CAutoReleasable {
             CreateOptions opts = new CreateOptions(false, 0);
             Error.throwIfNeeded(jniCreateOptionsNew(opts._rawPtr, version));
             return opts;
+        }
+
+        @Nonnull
+        public static CreateOptions createDefault() {
+            return create(VERSION);
         }
     }
 
@@ -241,6 +248,7 @@ public class Remote extends CAutoReleasable {
     static native void jniCallbacksSetCallbackObject(long cbsPtr, Callbacks cbsObject);
 
     public static final class Callbacks extends CAutoReleasable {
+        public static final int VERSION = 1;
         private CredAcquireCb _credAcquireCb;
         private TransportMessageCb _transportMsg;
         private TransportCertificateCheckCb _certificateCheckCb;
@@ -308,7 +316,7 @@ public class Remote extends CAutoReleasable {
 
         @Override
         protected void freeOnce(long cPtr) {
-            Libgit2.jniShadowFree(cPtr);
+            jniCallbacksFree(cPtr);
         }
 
         @Nonnull
@@ -316,6 +324,10 @@ public class Remote extends CAutoReleasable {
             Callbacks cb = new Callbacks(false, 0);
             Error.throwIfNeeded(jniCallbacksNew(cb._rawPtr, version));
             return cb;
+        }
+
+        public static Callbacks createDefault() {
+            return create(VERSION);
         }
 
         /**
@@ -453,7 +465,8 @@ public class Remote extends CAutoReleasable {
      * @param refspec the new push refspec
      * @throws GitException GIT_EINVALIDSPEC if refspec is invalid or an error value
      */
-    public void addPush(@Nonnull Repository repo, @Nonnull String remote, @Nonnull String refspec) {
+    public static void addPush(
+            @Nonnull Repository repo, @Nonnull String remote, @Nonnull String refspec) {
         Error.throwIfNeeded(jniAddPush(repo.getRawPointer(), remote, refspec));
     }
 
@@ -508,17 +521,19 @@ public class Remote extends CAutoReleasable {
      * @throws GitException git errors
      */
     public void connect(
-            Direction direction,
-            Callbacks callbacks,
-            Proxy.Options proxyOpts,
-            List<String> customHeaders) {
+            @Nonnull Direction direction,
+            @Nullable Callbacks callbacks,
+            @Nullable Proxy.Options proxyOpts,
+            @Nullable List<String> customHeaders) {
         Error.throwIfNeeded(
                 jniConnect(
                         getRawPointer(),
                         direction.ordinal(),
-                        callbacks.getRawPointer(),
-                        proxyOpts.getRawPointer(),
-                        customHeaders.toArray(new String[0])));
+                        callbacks == null ? 0 : Callbacks.createDefault().getRawPointer(),
+                        proxyOpts == null ? 0 : proxyOpts.getRawPointer(),
+                        customHeaders == null
+                                ? new String[0]
+                                : customHeaders.toArray(new String[0])));
     }
 
     /** int git_remote_connected(const git_remote *remote); */
@@ -602,11 +617,6 @@ public class Remote extends CAutoReleasable {
         return remote;
     }
 
-    /**
-     * int git_remote_create_init_options(git_remote_create_options *opts, unsigned int version);
-     */
-    static native int jniCreateInitOptions(long opts, int version);
-
     static native int jniCreateOptionsNew(AtomicLong outOpts, int version);
 
     /**
@@ -632,7 +642,7 @@ public class Remote extends CAutoReleasable {
             @Nonnull Repository repo,
             @Nonnull String name,
             @Nonnull URI url,
-            @Nonnull String fetch) {
+            @Nullable String fetch) {
         Remote remote = new Remote(false, 0);
         Error.throwIfNeeded(
                 jniCreateWithFetchspec(
@@ -774,17 +784,20 @@ public class Remote extends CAutoReleasable {
      * <p>Convenience function to connect to a remote, download the data, disconnect and update the
      * remote-tracking branches.
      *
-     * @param refspecs the refspecs to use for this fetch. Pass NULL or an empty array to use the
-     *     base refspecs.
+     * @param refspecs the refspecs to use for this fetch. Pass an empty array to use the base
+     *     refspecs.
      * @param opts options to use for this fetch
      * @param reflogMessage The message to insert into the reflogs. If NULL, the default is "fetch"
      * @throws GitException git errors
      */
-    public void fetch(@Nonnull String[] refspecs, FetchOptions opts, String reflogMessage) {
+    public void fetch(
+            @Nullable String[] refspecs,
+            @Nullable FetchOptions opts,
+            @Nullable String reflogMessage) {
         Error.throwIfNeeded(
                 jniFetch(
                         getRawPointer(),
-                        refspecs,
+                        refspecs == null ? new String[0] : refspecs,
                         opts == null ? 0 : opts.getRawPointer(),
                         reflogMessage));
     }
@@ -876,8 +889,9 @@ public class Remote extends CAutoReleasable {
      * @throws GitException , GIT_ENOTFOUND, GIT_EINVALIDSPEC or an error code
      */
     @Nonnull
-    public Remote lookup(@Nonnull Repository repo, @Nonnull String name) {
-        Remote out = new Remote(false, 0);
+    public static Remote lookup(@Nonnull Repository repo, @Nonnull String name) {
+        // FIXME: jniLookup returns a weak reference, a bug?
+        Remote out = new Remote(true, 0);
         Error.throwIfNeeded(jniLookup(out._rawPtr, repo.getRawPointer(), name));
         return out;
     }
