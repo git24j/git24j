@@ -303,6 +303,7 @@ public class Odb extends CAutoCloseable {
             Oid oid = Oid.of(jniExpandIdsGetId(cIdArr, i));
             expandIds.add(oid);
         }
+        // FIXME: free expand IDs
         return expandIds;
     }
 
