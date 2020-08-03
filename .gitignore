@@ -66,3 +66,7 @@ atlassian-ide-plugin.xml
 .nbattrs
 
 # core dump
+
+# mvn settings 
+settings.xml
+

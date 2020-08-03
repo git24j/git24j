@@ -8,12 +8,35 @@
     </properties>
     <groupId>com.github.git24j</groupId>
     <artifactId>git24j</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.0.0</version>
+    <packaging>jar</packaging>
+    <name>git24j</name>
+    <description>A java bindings of the libgit2 project.</description>
+    <url>https://github.com/git24j/git24j</url>
+
+    <licenses>
+        <license>
+            <name>The Apache Software License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+        </license>
+    </licenses>
+
+    <developers>
+        <developer>
+            <name>Shijing Lu</name>
+            <email>shijing.lu@gmail.com</email>
+            <organizationUrl>https://github.com/shijinglu</organizationUrl>
+        </developer>
+    </developers>
+
+    <scm>
+        <connection>scm:git:git://github.com/git24j/git24j.git</connection>
+        <developerConnection>scm:git:ssh://github.com:git24j/git24j.git</developerConnection>
+        <url>http://github.com/git24j/git24j/tree/master</url>
+    </scm>
 
     <reporting>
         <plugins>
-            <!-- https://spotbugs.github.io/ -->
-            <!-- https://spotbugs.github.io/spotbugs-maven-plugin/usage.html -->
             <plugin>
                 <groupId>com.github.spotbugs</groupId>
                 <artifactId>spotbugs-maven-plugin</artifactId>
@@ -34,6 +57,31 @@
                 </configuration>
             </plugin>
             <plugin>
+                <groupId>org.sonatype.plugins</groupId>
+                <artifactId>nexus-staging-maven-plugin</artifactId>
+                <version>1.6.8</version>
+                <extensions>true</extensions>
+                <configuration>
+                    <serverId>ossrh</serverId>
+                    <nexusUrl>https://oss.sonatype.org/</nexusUrl>
+                    <autoReleaseAfterClose>true</autoReleaseAfterClose>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-gpg-plugin</artifactId>
+                <version>1.6</version>
+                <executions>
+                    <execution>
+                        <id>sign-artifacts</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>sign</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-project-info-reports-plugin</artifactId>
                 <version>3.0.0</version>
@@ -45,31 +93,7 @@
 
                 <configuration>
                     <excludes>
-<!--                        <exclude>**/AnnotatedCommitTest.java</exclude>-->
-<!--                        <exclude>**/BasicOperationsTest.java</exclude>-->
-<!--                        <exclude>**/BlameTest.java</exclude>-->
-<!--                        <exclude>**/BlobTest.java</exclude>-->
-<!--                        <exclude>**/BranchTest.java</exclude>-->
-<!--                        <exclude>**/CommitTest.java</exclude>-->
-<!--                        <exclude>**/ConfigTest.java</exclude>-->
-<!--                        <exclude>**/DiffTest.java</exclude>-->
-<!--                        <exclude>**/ErrorTest.java</exclude>-->
-<!--                        <exclude>**/GitObjectTest.java</exclude>-->
-<!--                        <exclude>**/IBitEnumTest.java</exclude>-->
-<!--                        <exclude>**/IndexTest.java</exclude>-->
-<!--                        <exclude>**/Libgit2Test.java</exclude>-->
-<!--                        <exclude>**/MailmapTest.java</exclude>-->
-<!--                        <exclude>**/MainTest.java</exclude>-->
-<!--                        <exclude>**/MergeTest.java</exclude>-->
-<!--                        <exclude>**/OidTest.java</exclude>-->
-<!--                        <exclude>**/ReferenceTest.java</exclude>-->
-<!--                        <exclude>**/RepositoryTest.java</exclude>-->
-<!--                        <exclude>**/RevparseTest.java</exclude>-->
-<!--                        <exclude>**/TagTest.java</exclude>-->
-<!--                        <exclude>**/TreeTest.java</exclude>-->
-<!--                        <exclude>**/CredTest.java</exclude>-->
-<!--                        <exclude>**/RefspecTest.java</exclude>-->
-<!--                        <exclude>**/RevwalkTest.java</exclude>-->
+                        <!-- <exclude>**/AnnotatedCommitTest.java</exclude> -->
                     </excludes>
                 </configuration>
             </plugin>
@@ -77,6 +101,19 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-site-plugin</artifactId>
                 <version>3.7.1</version>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <version>3.1.0</version>
+                <executions>
+                    <execution>
+                        <id>attach-sources</id>
+                        <goals>
+                            <goal>jar-no-fork</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -89,6 +126,14 @@
                     <testWindowtitle>Test API for ${project.name} ${project.version}</testWindowtitle>
                     <doclint>none</doclint>
                 </configuration>
+                <executions>
+                    <execution>
+                        <id>attach-javadocs</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
             <plugin>
                 <groupId>org.jacoco</groupId>
@@ -113,7 +158,6 @@
     </build>
 
     <dependencies>
-
         <dependency>
             <groupId>com.google.code.findbugs</groupId>
             <artifactId>jsr305</artifactId>
@@ -134,10 +178,21 @@
     </dependencies>
 
     <distributionManagement>
+        <snapshotRepository>
+            <id>ossrh</id>
+            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+        </snapshotRepository>
         <repository>
-            <id>github</id>
-            <name>GitHub Git24J Apache Maven Packages</name>
-            <url>https://maven.pkg.github.com/git24j/git24j</url>
+            <id>ossrh</id>
+            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
         </repository>
     </distributionManagement>
+
+    <!--<distributionManagement>-->
+    <!--    <repository>-->
+    <!--        <id>github</id>-->
+    <!--        <name>GitHub Git24J Apache Maven Packages</name>-->
+    <!--        <url>https://maven.pkg.github.com/git24j/git24j</url>-->
+    <!--    </repository>-->
+    <!--</distributionManagement>-->
 </project>
