@@ -1,5 +1,6 @@
 package com.github.git24j.core;
 
+import java.nio.file.Paths;
 import java.util.EnumSet;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -9,7 +10,7 @@ import org.junit.Test;
 public class Libgit2Test {
     @BeforeClass
     public static void setUpClass() {
-        Init.loadLibraries();
+        Init.loadLibraries(Paths.get("target/git2"), Paths.get("target/git24j"));
         Libgit2.init();
     }
 

@@ -8,7 +8,7 @@ import org.junit.Test;
 public class ErrorTest {
     @BeforeClass
     public static void setUpClass() {
-        Init.loadLibraries();
+        Init.loadLibraries(null, null);
         Libgit2.init();
     }
 
