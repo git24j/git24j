@@ -19,7 +19,7 @@ public class TestBase {
     private static final String RESOURCE_ROOT = "";
 
     public TestBase() {
-        Init.loadLibraries();
+        Init.loadLibraries(null, null);
         Libgit2.init();
     }
 

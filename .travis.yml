@@ -12,4 +12,4 @@ before_install:
   - rm -rf target/
   - make
 
-install: /bin/true
+install: true

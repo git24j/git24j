@@ -5,12 +5,12 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.concurrent.atomic.AtomicBoolean;
+import javax.annotation.Nullable;
 
 /** @author shijing Setup functions */
 public class Init {
 
-    // TODD: change me
-    private static final String CUSTOM_LIB_PATH_PROP = "com.github.git24j.lg24j.library_path";
+    private static final String CUSTOM_LIB_PATH_PROP = "com.github.git24j.library_path";
     private static final String JAVA_LIB_PATH_PROP = "java.library.path";
     private static final String DEFAULT_LIB_PATH = "target";
     private static AtomicBoolean _loaded = new AtomicBoolean(false);
@@ -20,7 +20,7 @@ public class Init {
      * not.
      *
      * <ul>
-     *   <li>paths defined in {@code com.github.git24j.lg24j.library_path}
+     *   <li>paths defined in {@code com.github.git24j.library_path}
      *   <li>paths defined in {@code java.library.path}
      *   <li>hard coded path in ${project.dir}/target/${lib}/
      * </ul>
@@ -28,7 +28,15 @@ public class Init {
      * @param lib library to load
      * @throws FileNotFoundException could not load the shared library
      */
-    static synchronized void loadLibrary(NativeLib lib) throws FileNotFoundException {
+    static synchronized void loadLibrary(NativeLib lib, @Nullable Path searchPath)
+            throws FileNotFoundException {
+        Path libPath;
+        if (searchPath != null) {
+            libPath = searchPath.resolve(lib.mappedLibraryName());
+            if (Files.exists(libPath)) {
+                System.load(libPath.toAbsolutePath().toString());
+            }
+        }
         String customPath = System.getProperty(CUSTOM_LIB_PATH_PROP, null);
         if (customPath != null) {
             System.setProperty(
@@ -40,7 +48,7 @@ public class Init {
         } catch (UnsatisfiedLinkError ignore) {
             // ignore and try next candidate location
         }
-        Path libPath = Paths.get(DEFAULT_LIB_PATH, lib.shortName(), lib.mappedLibraryName());
+        libPath = Paths.get(DEFAULT_LIB_PATH, lib.shortName(), lib.mappedLibraryName());
         if (!Files.exists(libPath)) {
             throw new FileNotFoundException("Could not load library: " + lib.mappedLibraryName());
         }
@@ -48,17 +56,29 @@ public class Init {
     }
 
     /**
-     * Load necessary libraries.
+     * Load necessary libraries from specific folders or from default paths which are:
      *
-     * @throws RuntimeException if
+     * <ul>
+     *   <li>paths defined in {@code com.github.git24j.library_path}
+     *   <li>paths defined in {@code java.library.path}
+     *   <li>hard coded path in ${project.dir}/target/${lib}/
+     * </ul>
+     *
+     * NOTE: The first two properties must be specified * through jvm option before JVM
+     * initialization (aka cannot be reset at runtime).
+     *
+     * @throws GitException if loading fails
+     * @param git2Path path to search for libgit2 shared lib, pass NULL if search from
      */
-    public static void loadLibraries() {
+    public static synchronized void loadLibraries(
+            @Nullable Path git2Path, @Nullable Path git24jPath) {
         if (!_loaded.get()) {
             try {
-                loadLibrary(NativeLib.GIT2);
-                loadLibrary(NativeLib.GIT24J);
+                loadLibrary(NativeLib.GIT2, git2Path);
+                loadLibrary(NativeLib.GIT24J, git24jPath);
             } catch (FileNotFoundException e) {
-                throw new RuntimeException(e);
+                throw new GitException(
+                        GitException.ErrorClass.ZLIB, "Could not load native libraries");
             }
             _loaded.set(true);
         }
