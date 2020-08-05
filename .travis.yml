@@ -13,3 +13,4 @@ before_install:
   - make
 
 install: true
+

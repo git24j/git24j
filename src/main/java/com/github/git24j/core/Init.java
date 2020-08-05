@@ -35,6 +35,7 @@ public class Init {
             libPath = searchPath.resolve(lib.mappedLibraryName());
             if (Files.exists(libPath)) {
                 System.load(libPath.toAbsolutePath().toString());
+                return;
             }
         }
         String customPath = System.getProperty(CUSTOM_LIB_PATH_PROP, null);
