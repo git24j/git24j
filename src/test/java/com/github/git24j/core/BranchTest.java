@@ -88,7 +88,6 @@ public class BranchTest extends TestBase {
         }
     }
 
-    /** TODO: test set upstream */
     @Test
     public void upstream() {
         try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {

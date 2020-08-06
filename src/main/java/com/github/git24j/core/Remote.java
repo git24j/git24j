@@ -1,7 +1,8 @@
 package com.github.git24j.core;
 
-import static com.github.git24j.core.GitException.ErrorCode.ENOTFOUND;
-
+import javax.annotation.CheckForNull;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -9,9 +10,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
-import javax.annotation.CheckForNull;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+
+import static com.github.git24j.core.GitException.ErrorCode.ENOTFOUND;
 
 public class Remote extends CAutoReleasable {
     protected Remote(boolean isWeak, long rawPtr) {
@@ -95,6 +95,46 @@ public class Remote extends CAutoReleasable {
         @Nonnull
         public static CreateOptions createDefault() {
             return create(VERSION);
+        }
+
+        public int getVersion() {
+            return jniCreateOptionsGetVersion(getRawPointer());
+        }
+
+        public long getRepository() {
+            return jniCreateOptionsGetRepository(getRawPointer());
+        }
+
+        public String getName() {
+            return jniCreateOptionsGetName(getRawPointer());
+        }
+
+        public String getFetchspec() {
+            return jniCreateOptionsGetFetchspec(getRawPointer());
+        }
+
+        public int getFlags() {
+            return jniCreateOptionsGetFlags(getRawPointer());
+        }
+
+        public void setVersion(int version) {
+            jniCreateOptionsSetVersion(getRawPointer(), version);
+        }
+
+        public void setRepository(long repository) {
+            jniCreateOptionsSetRepository(getRawPointer(), repository);
+        }
+
+        public void setName(String name) {
+            jniCreateOptionsSetName(getRawPointer(), name);
+        }
+
+        public void setFetchspec(String fetchspec) {
+            jniCreateOptionsSetFetchspec(getRawPointer(), fetchspec);
+        }
+
+        public void setFlags(int flags) {
+            jniCreateOptionsSetFlags(getRawPointer(), flags);
         }
     }
 
@@ -625,6 +665,36 @@ public class Remote extends CAutoReleasable {
      */
     static native int jniCreateWithFetchspec(
             AtomicLong out, long repoPtr, String name, String url, String fetch);
+
+    /** unsigned int version */
+    static native int jniCreateOptionsGetVersion(long create_optionsPtr);
+
+    /** git_repository *repository */
+    static native long jniCreateOptionsGetRepository(long create_optionsPtr);
+
+    /** const char *name */
+    static native String jniCreateOptionsGetName(long create_optionsPtr);
+
+    /** const char *fetchspec */
+    static native String jniCreateOptionsGetFetchspec(long create_optionsPtr);
+
+    /** unsigned int flags */
+    static native int jniCreateOptionsGetFlags(long create_optionsPtr);
+
+    /** unsigned int version */
+    static native void jniCreateOptionsSetVersion(long create_optionsPtr, int version);
+
+    /** git_repository *repository */
+    static native void jniCreateOptionsSetRepository(long create_optionsPtr, long repository);
+
+    /** const char *name */
+    static native void jniCreateOptionsSetName(long create_optionsPtr, String name);
+
+    /** const char *fetchspec */
+    static native void jniCreateOptionsSetFetchspec(long create_optionsPtr, String fetchspec);
+
+    /** unsigned int flags */
+    static native void jniCreateOptionsSetFlags(long create_optionsPtr, int flags);
 
     /**
      * Add a remote with the provided fetch refspec (or default if NULL) to the repository's
