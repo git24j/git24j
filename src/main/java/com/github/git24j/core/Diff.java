@@ -232,6 +232,10 @@ public class Diff extends CAutoReleasable {
             return opts;
         }
 
+        public static Options create() {
+            return create(CURRENT_VERSION);
+        }
+
         @Override
         protected void freeOnce(long cPtr) {
             jniFreeOptions(cPtr);

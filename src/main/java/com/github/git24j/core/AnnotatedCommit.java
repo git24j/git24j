@@ -58,7 +58,7 @@ public class AnnotatedCommit extends CAutoReleasable {
             @Nonnull String branchName,
             @Nonnull String remoteUrl,
             @Nonnull Oid oid) {
-        AnnotatedCommit commit = new AnnotatedCommit(false, 0);
+        AnnotatedCommit commit = new AnnotatedCommit(true, 0);
         Error.throwIfNeeded(
                 jniFromFetchHead(commit._rawPtr, repo.getRawPointer(), branchName, remoteUrl, oid));
         return commit;
@@ -75,7 +75,7 @@ public class AnnotatedCommit extends CAutoReleasable {
      */
     @Nonnull
     public static AnnotatedCommit lookup(@Nonnull Repository repo, @Nonnull Oid oid) {
-        AnnotatedCommit commit = new AnnotatedCommit(false, 0);
+        AnnotatedCommit commit = new AnnotatedCommit(true, 0);
         Error.throwIfNeeded(jniLookup(commit._rawPtr, repo.getRawPointer(), oid));
         return commit;
     }
@@ -96,7 +96,7 @@ public class AnnotatedCommit extends CAutoReleasable {
      */
     @Nonnull
     public static AnnotatedCommit fromRevspec(@Nonnull Repository repo, @Nonnull String revspec) {
-        AnnotatedCommit commit = new AnnotatedCommit(false, 0);
+        AnnotatedCommit commit = new AnnotatedCommit(true, 0);
         Error.throwIfNeeded(jniFromRevspec(commit._rawPtr, repo.getRawPointer(), revspec));
         return commit;
     }

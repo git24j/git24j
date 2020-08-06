@@ -170,6 +170,7 @@ public class IndexTest extends TestBase {
                 Assert.assertEquals(originalCount - 1, idx.entryCount());
                 idx.removeDirectory("non-exist", 0);
                 Assert.assertEquals(originalCount - 1, idx.entryCount());
+
             }
         }
     }
