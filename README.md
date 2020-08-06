@@ -1,5 +1,7 @@
 
 # Git24J 
+[![Travis CI Status](https://api.travis-ci.org/git24j/git24j.svg?branch=master)](https://travis-ci.com/github/git24j/git24j/branches)
+
 > Git24J, (git2 library for java) is a java bindings to the [libgit2](http://libgit2.github.com/) project.
 
 Still in active development, pull requests are welcomed.

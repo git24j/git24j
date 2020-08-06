@@ -5,6 +5,8 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
+import java.net.URI;
+
 public class RemoteTest extends TestBase {
     @Rule public TemporaryFolder folder = new TemporaryFolder();
 
@@ -119,7 +121,13 @@ public class RemoteTest extends TestBase {
     public void setPushurl() {}
 
     @Test
-    public void setUrl() {}
+    public void setUrl() {
+        try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {
+            Remote.setUrl(testRepo, "test", URI.create("https://example.com/test.git"));
+            Remote r = Remote.lookup(testRepo,"test");
+            Assert.assertEquals(URI.create("https://example.com/test.git"), r.url());
+        }
+    }
 
     @Test
     public void stats() {}
