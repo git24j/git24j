@@ -5,7 +5,6 @@ import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-// TODO: change this class to immutable java object
 /**
  * An Oid is a 20 bytes array (each byte coded 32bit), or a 40 hex characters string (16 bit coded)
  */

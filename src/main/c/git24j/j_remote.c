@@ -612,3 +612,65 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Remote_jniFetchOptionsNew)(JNIEnv *env, jcl
     (*env)->CallVoidMethod(env, outPtr, jniConstants->midAtomicLongSet, (long)opts);
     return r;
 }
+
+/** -------- Wrapper Body ---------- */
+/** unsigned int version*/
+JNIEXPORT jint JNICALL J_MAKE_METHOD(Remote_jniCreateOptionsGetVersion)(JNIEnv *env, jclass obj, jlong createOptionsPtr)
+{
+    return ((git_remote_create_options *)createOptionsPtr)->version;
+}
+
+/** git_repository *repository*/
+JNIEXPORT jlong JNICALL J_MAKE_METHOD(Remote_jniCreateOptionsGetRepository)(JNIEnv *env, jclass obj, jlong createOptionsPtr)
+{
+    return (jlong)((git_remote_create_options *)createOptionsPtr)->repository;
+}
+
+/** const char *name*/
+JNIEXPORT jstring JNICALL J_MAKE_METHOD(Remote_jniCreateOptionsGetName)(JNIEnv *env, jclass obj, jlong createOptionsPtr)
+{
+    const char *name = ((git_remote_create_options *)createOptionsPtr)->name;
+    return (*env)->NewStringUTF(env, name);
+}
+
+/** const char *fetchspec*/
+JNIEXPORT jstring JNICALL J_MAKE_METHOD(Remote_jniCreateOptionsGetFetchspec)(JNIEnv *env, jclass obj, jlong createOptionsPtr)
+{
+    return (*env)->NewStringUTF(env, ((git_remote_create_options *)createOptionsPtr)->fetchspec);
+}
+
+/** unsigned int flags*/
+JNIEXPORT jint JNICALL J_MAKE_METHOD(Remote_jniCreateOptionsGetFlags)(JNIEnv *env, jclass obj, jlong createOptionsPtr)
+{
+    return ((git_remote_create_options *)createOptionsPtr)->flags;
+}
+
+/** unsigned int version*/
+JNIEXPORT void JNICALL J_MAKE_METHOD(Remote_jniCreateOptionsSetVersion)(JNIEnv *env, jclass obj, jlong createOptionsPtr, jint version)
+{
+    ((git_remote_create_options *)createOptionsPtr)->version = (unsigned int)version;
+}
+
+/** git_repository *repository*/
+JNIEXPORT void JNICALL J_MAKE_METHOD(Remote_jniCreateOptionsSetRepository)(JNIEnv *env, jclass obj, jlong createOptionsPtr, jlong repository)
+{
+    ((git_remote_create_options *)createOptionsPtr)->repository = (git_repository *)repository;
+}
+
+/** const char *name*/
+JNIEXPORT void JNICALL J_MAKE_METHOD(Remote_jniCreateOptionsSetName)(JNIEnv *env, jclass obj, jlong createOptionsPtr, jstring name)
+{
+    ((git_remote_create_options *)createOptionsPtr)->name = (const char *)name;
+}
+
+/** const char *fetchspec*/
+JNIEXPORT void JNICALL J_MAKE_METHOD(Remote_jniCreateOptionsSetFetchspec)(JNIEnv *env, jclass obj, jlong createOptionsPtr, jstring fetchspec)
+{
+    ((git_remote_create_options *)createOptionsPtr)->fetchspec = (const char *)fetchspec;
+}
+
+/** unsigned int flags*/
+JNIEXPORT void JNICALL J_MAKE_METHOD(Remote_jniCreateOptionsSetFlags)(JNIEnv *env, jclass obj, jlong createOptionsPtr, jint flags)
+{
+    ((git_remote_create_options *)createOptionsPtr)->flags = (unsigned int)flags;
+}

@@ -1,30 +1,66 @@
 # Plan of work
 
 ## Core APIs
-- [x] GitObject
-- [x] Repository
-- [x] Reference
-- [x] Commit
-- [x] Branch
-- [x] Config (half done?)
-- [x] Index
-- [x] Diff
-- [x] Merge (no test)
-- [x] Rebase
-- [x] Remote
-- [x] Revwalk  (lack of public interface)
-- [x] Submodule  (lack of public interface)
-- [x] Worktree  (lack of public interface)
-- [x] Note (lack of public interface)
-- [x] Tag (tested)
-- [x] Status
-- [ ] Odb (prioritize)
-- [ ] Cred
-- [x] Patch
-- [x] Checkout
-- [x] Signature
-- [x] Refspec
+- [x] Annotated
+- [ ] Apply
+- [ ] Attr
 - [x] Blame
+- [x] Blob
+- [x] Branch
+- [x] Buf
+- [x] Checkout
+- [ ] Cherrypick
+- [x] Clone
+- [x] Commit
+- [x] Config
+- [x] Credential
+- [ ] Describe
+- [x] Diff
+- [x] Error
+- [ ] Fetch
+- [ ] Filter
+- [ ] Giterr
+- [ ] Graph
+- [ ] Ignore
+- [x] Index
+- [ ] Indexer
+- [x] Libgit2
+- [ ] Mailmap
+- [x] Merge
+- [ ] Message
+- [x] Note
+- [x] Object (GitObject)
+- [x] Odb
+- [x] Oid
+- [ ] Oidarray
+- [ ] Packbuilder
+- [x] Patch
+- [ ] Pathspec
+- [ ] Proxy
+- [ ] Push
+- [x] Rebase
+- [ ] Refdb
+- [x] Reference
+- [ ] Reflog
+- [x] Refspec
+- [x] Remote
+- [x] Repository
+- [ ] Reset
+- [ ] Revert
+- [x] Revparse
+- [x] Revwalk
+- [x] Signature
+- [ ] Stash
+- [x] Status
+- [x] Strarray
+- [x] Submodule
+- [x] Tag
+- [ ] Trace
+- [x] Transaction
+- [x] Tree
+- [ ] Treebuilder
+- [x] Worktree
+
 
 
 ## API polishing
@@ -45,7 +81,7 @@
 
 
 ## Future
-- [ ] API for for customized backend
+- [ ] Customized backend
 
 ## House Keeping
 - [ ] Avoid calling `getObjectClass` excessively by promoting classes of AtomicLong, AtomicReference to constant.

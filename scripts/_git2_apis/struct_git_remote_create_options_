@@ -1,0 +1,7 @@
+typedef struct git_remote_create_options {
+	unsigned int version;
+	git_repository *repository;
+	const char *name;
+	const char *fetchspec;
+	unsigned int flags;
+} git_remote_create_options;

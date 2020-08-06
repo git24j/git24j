@@ -85,11 +85,6 @@ public class BlobTest extends TestBase {
         }
     }
 
-    // TODO: unit test following
-    //    git_blob_create_fromstream	function
-    //    git_blob_create_fromstream_commit	function
-    //    git_blob_create_frombuffer	function
-
     @Test
     public void createFromStream() {
         try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {
