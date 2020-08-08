@@ -159,24 +159,6 @@ public class Remote extends CAutoReleasable {
         }
     }
 
-    public static class FetchOptions extends CAutoReleasable {
-        protected FetchOptions(boolean isWeak, long rawPtr) {
-            super(isWeak, rawPtr);
-        }
-
-        @Override
-        protected void freeOnce(long cPtr) {
-            Libgit2.jniShadowFree(cPtr);
-        }
-
-        @Nonnull
-        public static FetchOptions of(int version) {
-            FetchOptions opts = new FetchOptions(false, 0);
-            Error.throwIfNeeded(jniFetchOptionsNew(opts._rawPtr, version));
-            return opts;
-        }
-    }
-
     public static class PushOptions extends CAutoReleasable {
         protected PushOptions(boolean isWeak, long rawPtr) {
             super(isWeak, rawPtr);
@@ -807,7 +789,7 @@ public class Remote extends CAutoReleasable {
      * @param name the name of the remote to delete
      * @throws GitException an error code.
      */
-    public void delete(@Nonnull Repository repo, @Nonnull String name) {
+    public static void delete(@Nonnull Repository repo, @Nonnull String name) {
         Error.throwIfNeeded(jniDelete(repo.getRawPointer(), name));
     }
 
@@ -980,11 +962,15 @@ public class Remote extends CAutoReleasable {
      * @return remote object
      * @throws GitException , GIT_ENOTFOUND, GIT_EINVALIDSPEC or an error code
      */
-    @Nonnull
+    @Nullable
     public static Remote lookup(@Nonnull Repository repo, @Nonnull String name) {
         // FIXME: jniLookup returns a weak reference, a bug?
         Remote out = new Remote(true, 0);
-        Error.throwIfNeeded(jniLookup(out._rawPtr, repo.getRawPointer(), name));
+        int e = jniLookup(out._rawPtr, repo.getRawPointer(), name);
+        if (e == ENOTFOUND.getCode()) {
+            return null;
+        }
+        Error.throwIfNeeded(e);
         return out;
     }
 
@@ -1286,4 +1272,33 @@ public class Remote extends CAutoReleasable {
     }
 
     static native int jniFetchOptionsNew(AtomicLong outPtr, int version);
+
+    /** -------- Jni Signature ---------- */
+    /**int version*/
+    static native int jniFetchOptionsGetVersion(long fetch_optionsPtr);
+    /**git_remote_callbacks callbacks*/
+    static native long jniFetchOptionsGetCallbacks(long fetch_optionsPtr);
+    /**git_fetch_prune_t prune*/
+    static native int jniFetchOptionsGetPrune(long fetch_optionsPtr);
+    /**int update_fetchhead*/
+    static native int jniFetchOptionsGetUpdateFetchhead(long fetch_optionsPtr);
+    /**git_remote_autotag_option_t download_tags*/
+    static native int jniFetchOptionsGetDownloadTags(long fetch_optionsPtr);
+    /**git_proxy_options proxy_opts*/
+    static native long jniFetchOptionsGetProxyOpts(long fetch_optionsPtr);
+    /**git_strarray custom_headers*/
+    static native void jniFetchOptionsGetCustomHeaders(long fetch_optionsPtr, List<String> customHeaders);
+    /**int version*/
+    static native void jniFetchOptionsSetVersion(long fetch_optionsPtr, int version);
+    /**git_remote_callbacks callbacks*/
+    /**git_fetch_prune_t prune*/
+    static native void jniFetchOptionsSetPrune(long fetch_optionsPtr, int prune);
+    /**int update_fetchhead*/
+    static native void jniFetchOptionsSetUpdateFetchhead(long fetch_optionsPtr, int updateFetchhead);
+    /**git_remote_autotag_option_t download_tags*/
+    static native void jniFetchOptionsSetDownloadTags(long fetch_optionsPtr, int downloadTags);
+    /**git_proxy_options proxy_opts*/
+    /**git_strarray custom_headers*/
+    static native void jniFetchOptionsSetCustomHeaders(long fetch_optionsPtr, String[] customHeaders);
+
 }

@@ -104,8 +104,8 @@ public class Clone {
 
         /** @return reference to fetch options that can be used to set up fetch options */
         @Nonnull
-        public Remote.FetchOptions getFetchOpts() {
-            return new Remote.FetchOptions(true, jniOptionsGetFetchOpts(getRawPointer()));
+        public FetchOptions getFetchOpts() {
+            return new FetchOptions(true, jniOptionsGetFetchOpts(getRawPointer()));
         }
 
         public boolean getBare() {

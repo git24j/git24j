@@ -383,9 +383,14 @@ void j_strarray_to_java_list(JNIEnv *env, git_strarray *src, jobject strList)
     (*env)->DeleteLocalRef(env, clz);
 }
 
-/**Copy values from String[] to git_strarray*/
+/**Copy values from `String[] strArr` to `git_strarray *out`*/
 void j_strarray_from_java(JNIEnv *env, git_strarray *out, jobjectArray strArr)
 {
+    if (strArr == NULL)
+    {
+        return;
+    }
+
     assert(out && "receiving git_strarray must not be null");
     jsize len = (*env)->GetArrayLength(env, strArr);
     git_strarray_free(out);

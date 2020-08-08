@@ -684,3 +684,79 @@ JNIEXPORT void JNICALL J_MAKE_METHOD(Remote_jniCreateOptionsSetFlags)(JNIEnv *en
     printf("qqqqq flags = %d \n", flags);
     ((git_remote_create_options *)createOptionsPtr)->flags = (unsigned int)flags;
 }
+
+/** -------- git_remote_fetch_options ---------- */
+/** int version*/
+JNIEXPORT jint JNICALL J_MAKE_METHOD(Remote_jniFetchOptionsGetVersion)(JNIEnv *env, jclass obj, jlong fetchOptionsPtr)
+{
+    return ((git_fetch_options *)fetchOptionsPtr)->version;
+}
+
+/** git_remote_callbacks callbacks*/
+JNIEXPORT jlong JNICALL J_MAKE_METHOD(Remote_jniFetchOptionsGetCallbacks)(JNIEnv *env, jclass obj, jlong fetchOptionsPtr)
+{
+    return (jlong) & (((git_fetch_options *)fetchOptionsPtr)->callbacks);
+}
+
+/** git_fetch_prune_t prune*/
+JNIEXPORT jint JNICALL J_MAKE_METHOD(Remote_jniFetchOptionsGetPrune)(JNIEnv *env, jclass obj, jlong fetchOptionsPtr)
+{
+    return ((git_fetch_options *)fetchOptionsPtr)->prune;
+}
+
+/** int update_fetchhead*/
+JNIEXPORT jint JNICALL J_MAKE_METHOD(Remote_jniFetchOptionsGetUpdateFetchhead)(JNIEnv *env, jclass obj, jlong fetchOptionsPtr)
+{
+    return ((git_fetch_options *)fetchOptionsPtr)->update_fetchhead;
+}
+
+/** git_remote_autotag_option_t download_tags*/
+JNIEXPORT jint JNICALL J_MAKE_METHOD(Remote_jniFetchOptionsGetDownloadTags)(JNIEnv *env, jclass obj, jlong fetchOptionsPtr)
+{
+    return ((git_fetch_options *)fetchOptionsPtr)->download_tags;
+}
+
+/** git_proxy_options proxy_opts*/
+JNIEXPORT jlong JNICALL J_MAKE_METHOD(Remote_jniFetchOptionsGetProxyOpts)(JNIEnv *env, jclass obj, jlong fetchOptionsPtr)
+{
+    return (jlong) & (((git_fetch_options *)fetchOptionsPtr)->proxy_opts);
+}
+
+/** git_strarray custom_headers*/
+JNIEXPORT void JNICALL J_MAKE_METHOD(Remote_jniFetchOptionsGetCustomHeaders)(JNIEnv *env, jclass obj, jlong fetchOptionsPtr, jobject outHeaderList)
+{
+    j_strarray_to_java_list(env, &(((git_fetch_options *)fetchOptionsPtr)->custom_headers), outHeaderList);
+}
+
+/** int version*/
+JNIEXPORT void JNICALL J_MAKE_METHOD(Remote_jniFetchOptionsSetVersion)(JNIEnv *env, jclass obj, jlong fetchOptionsPtr, jint version)
+{
+    ((git_fetch_options *)fetchOptionsPtr)->version = (int)version;
+}
+
+/** git_remote_callbacks callbacks*/
+
+/** git_fetch_prune_t prune*/
+JNIEXPORT void JNICALL J_MAKE_METHOD(Remote_jniFetchOptionsSetPrune)(JNIEnv *env, jclass obj, jlong fetchOptionsPtr, jint prune)
+{
+    ((git_fetch_options *)fetchOptionsPtr)->prune = (git_fetch_prune_t)prune;
+}
+
+/** int update_fetchhead*/
+JNIEXPORT void JNICALL J_MAKE_METHOD(Remote_jniFetchOptionsSetUpdateFetchhead)(JNIEnv *env, jclass obj, jlong fetchOptionsPtr, jint updateFetchhead)
+{
+    ((git_fetch_options *)fetchOptionsPtr)->update_fetchhead = (int)updateFetchhead;
+}
+
+/** git_remote_autotag_option_t download_tags*/
+JNIEXPORT void JNICALL J_MAKE_METHOD(Remote_jniFetchOptionsSetDownloadTags)(JNIEnv *env, jclass obj, jlong fetchOptionsPtr, jint downloadTags)
+{
+    ((git_fetch_options *)fetchOptionsPtr)->download_tags = (git_remote_autotag_option_t)downloadTags;
+}
+
+/** git_proxy_options proxy_opts*/
+/** git_strarray custom_headers*/
+JNIEXPORT void JNICALL J_MAKE_METHOD(Remote_jniFetchOptionsSetCustomHeaders)(JNIEnv *env, jclass obj, jlong fetchOptionsPtr, jobjectArray customHeaders)
+{
+    j_strarray_from_java(env, &(((git_fetch_options *)fetchOptionsPtr)->custom_headers), customHeaders);
+}
