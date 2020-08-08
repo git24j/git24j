@@ -34,6 +34,9 @@ public class RemoteTest extends TestBase {
             Remote.Callbacks callbacks = Remote.Callbacks.createDefault();
             r.connect(Remote.Direction.FETCH, callbacks, null, null);
             Assert.assertTrue(r.connected());
+
+            r.disconnect();
+            Assert.assertFalse(r.connected());
         }
     }
 
@@ -78,16 +81,21 @@ public class RemoteTest extends TestBase {
     }
 
     @Test
-    public void createWithOpts() {}
+    public void createWithOpts() {
+        URI url = URI.create("https://github.com/git24j/git24j.git");
+        Remote r = Remote.createWithOpts(url, null);
+        Assert.assertEquals(url, r.url());
+        Assert.assertFalse(r.defaultBranch().isPresent());
+    }
 
     @Test
-    public void defaultBranch() {}
-
-    @Test
-    public void delete() {}
-
-    @Test
-    public void disconnect() {}
+    public void delete() {
+        try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {
+            Remote.delete(testRepo, "origin");
+            Remote r2 = Remote.lookup(testRepo, "origin");
+            Assert.assertNull(r2);
+        }
+    }
 
     @Test
     public void download() {}
