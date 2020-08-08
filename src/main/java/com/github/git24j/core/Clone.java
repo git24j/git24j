@@ -127,8 +127,8 @@ public class Clone {
             jniOptionsSetVersion(getRawPointer(), version);
         }
 
-        public void setBare(int bare) {
-            jniOptionsSetBare(getRawPointer(), bare);
+        public void setBare(boolean bare) {
+            jniOptionsSetBare(getRawPointer(), bare ? 1 : 0);
         }
 
         public void setLocal(LocalT local) {

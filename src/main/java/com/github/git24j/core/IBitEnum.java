@@ -1,9 +1,10 @@
 package com.github.git24j.core;
 
+import javax.annotation.CheckForNull;
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
-import javax.annotation.CheckForNull;
 
 public interface IBitEnum {
     static <T extends Enum<T> & IBitEnum> int bitOrAll(EnumSet<T> enums) {
@@ -33,6 +34,27 @@ public interface IBitEnum {
             }
         }
         return matched.isEmpty() ? EnumSet.noneOf(clz) : EnumSet.copyOf(matched);
+    }
+
+    /** Parse bit enums from candidates */
+    @Nullable
+    static <T extends Enum<T> & IBitEnum> EnumSet<T> parse(int flags, EnumSet<T> candidates) {
+        List<T> matched = new ArrayList<>();
+
+        for (T x : candidates) {
+            int b = x.getBit();
+            if (b == 0 && flags == 0) {
+                matched.add(x);
+                break;
+            }
+            if ((b < 0 && flags > 0) || (b > 0 && flags < 0)) {
+                continue;
+            }
+            if ((b & flags) != 0) {
+                matched.add(x);
+            }
+        }
+        return matched.isEmpty() ? null : EnumSet.copyOf(matched);
     }
 
     static <T extends Enum<T> & IBitEnum> T valueOf(int bit, Class<T> clz, T defaultVal) {

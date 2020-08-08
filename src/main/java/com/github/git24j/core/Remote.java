@@ -6,6 +6,7 @@ import javax.annotation.Nullable;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
@@ -74,6 +75,20 @@ public class Remote extends CAutoReleasable {
     }
 
     public static class CreateOptions extends CAutoReleasable {
+        public enum Flag implements IBitEnum {
+            SKIP_INSTEADOF(1<<0),
+            SKIP_DEFAULT_FETCHSPEC (1 << 1);
+            private final int _bit;
+
+            Flag(int bit) {
+                _bit = bit;
+            }
+
+            @Override
+            public int getBit() {
+                return _bit;
+            }
+        }
         public static final int VERSION = 1;
 
         protected CreateOptions(boolean isWeak, long rawPtr) {
@@ -82,7 +97,7 @@ public class Remote extends CAutoReleasable {
 
         @Override
         protected void freeOnce(long cPtr) {
-            Libgit2.jniShadowFree(cPtr);
+            jniCreateOptionsFree(cPtr);
         }
 
         @Nonnull
@@ -101,10 +116,16 @@ public class Remote extends CAutoReleasable {
             return jniCreateOptionsGetVersion(getRawPointer());
         }
 
-        public long getRepository() {
-            return jniCreateOptionsGetRepository(getRawPointer());
+        @Nullable
+        public Repository getRepository() {
+            long repoPtr = jniCreateOptionsGetRepository(getRawPointer());
+            if (repoPtr <= 0) {
+                return null;
+            }
+            return new Repository(repoPtr);
         }
 
+        @Nullable
         public String getName() {
             return jniCreateOptionsGetName(getRawPointer());
         }
@@ -113,16 +134,16 @@ public class Remote extends CAutoReleasable {
             return jniCreateOptionsGetFetchspec(getRawPointer());
         }
 
-        public int getFlags() {
-            return jniCreateOptionsGetFlags(getRawPointer());
+        public EnumSet<Flag> getFlags() {
+            return IBitEnum.parse(jniCreateOptionsGetFlags(getRawPointer()), Flag.class);
         }
 
         public void setVersion(int version) {
             jniCreateOptionsSetVersion(getRawPointer(), version);
         }
 
-        public void setRepository(long repository) {
-            jniCreateOptionsSetRepository(getRawPointer(), repository);
+        public void setRepository(@Nullable Repository repository) {
+            jniCreateOptionsSetRepository(getRawPointer(), repository == null ? 0 : repository.getRawPointer());
         }
 
         public void setName(String name) {
@@ -133,8 +154,8 @@ public class Remote extends CAutoReleasable {
             jniCreateOptionsSetFetchspec(getRawPointer(), fetchspec);
         }
 
-        public void setFlags(int flags) {
-            jniCreateOptionsSetFlags(getRawPointer(), flags);
+        public void setFlags(EnumSet<Flag> flags) {
+            jniCreateOptionsSetFlags(getRawPointer(), IBitEnum.bitOrAll(flags));
         }
     }
 
@@ -659,6 +680,7 @@ public class Remote extends CAutoReleasable {
 
     static native int jniCreateOptionsNew(AtomicLong outOpts, int version);
 
+    static native int jniCreateOptionsFree(long optsPtr);
     /**
      * int git_remote_create_with_fetchspec(git_remote **out, git_repository *repo, const char
      * *name, const char *url, const char *fetch);

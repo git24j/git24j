@@ -6,6 +6,10 @@ import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
 import java.net.URI;
+import java.util.EnumSet;
+
+import static com.github.git24j.core.Remote.CreateOptions.Flag.SKIP_DEFAULT_FETCHSPEC;
+import static com.github.git24j.core.Remote.CreateOptions.Flag.SKIP_INSTEADOF;
 
 public class RemoteTest extends TestBase {
     @Rule public TemporaryFolder folder = new TemporaryFolder();
@@ -58,6 +62,19 @@ public class RemoteTest extends TestBase {
             Assert.assertNotNull(r5);
             // r5.fetch(null, null, null);
         }
+    }
+
+    @Test
+    public void createOptions() {
+        Remote.CreateOptions opts = Remote.CreateOptions.createDefault();
+        opts.setFetchspec("fetch-spec");
+        Assert.assertEquals("fetch-spec", opts.getFetchspec());
+        opts.setFlags(EnumSet.of(SKIP_INSTEADOF, SKIP_DEFAULT_FETCHSPEC));
+        Assert.assertEquals(EnumSet.of(SKIP_INSTEADOF, SKIP_DEFAULT_FETCHSPEC), opts.getFlags());
+        opts.setName("test-name");
+        Assert.assertEquals("test-name", opts.getName());
+        opts.setRepository(null);
+        Assert.assertNull(opts.getRepository());
     }
 
     @Test
@@ -124,7 +141,7 @@ public class RemoteTest extends TestBase {
     public void setUrl() {
         try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {
             Remote.setUrl(testRepo, "test", URI.create("https://example.com/test.git"));
-            Remote r = Remote.lookup(testRepo,"test");
+            Remote r = Remote.lookup(testRepo, "test");
             Assert.assertEquals(URI.create("https://example.com/test.git"), r.url());
         }
     }

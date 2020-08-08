@@ -1,6 +1,9 @@
 package com.github.git24j.core;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.EnumSet;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
@@ -93,7 +96,18 @@ public class Checkout {
 
         /** see `git_checkout_notify_t` above */
         public EnumSet<NotifyT> getNotifyFlags() {
-            return IBitEnum.parse(jniOptionsGetNotifyFlags(getRawPointer()), NotifyT.class);
+            int flags = jniOptionsGetNotifyFlags(getRawPointer());
+            EnumSet<NotifyT> candidates = EnumSet.allOf(NotifyT.class);
+            candidates.remove(NotifyT.NONE);
+            candidates.remove(NotifyT.ALL);
+            EnumSet<NotifyT> res = IBitEnum.parse(flags, candidates);
+            if (res == null) {
+                return EnumSet.of(NotifyT.NONE);
+            }
+            if (res.size() == candidates.size()) {
+                return EnumSet.of(NotifyT.ALL);
+            }
+            return res;
         }
 
         public void setNotifyFlags(EnumSet<NotifyT> flags) {
@@ -124,28 +138,61 @@ public class Checkout {
             jniOptionsSetPaths(getRawPointer(), paths);
         }
 
+        public List<String> getPaths() {
+            List<String> out = new ArrayList<>();
+            jniOptionsGetPaths(getRawPointer(), out);
+            return out;
+        }
+
         public void setBaseline(@Nonnull Tree baseline) {
             jniOptionsSetBaseline(getRawPointer(), baseline.getRawPointer());
+        }
+
+        @Nullable
+        public Tree getBaseline() {
+            long ptr = jniOptionsGetBaseline(getRawPointer());
+            return ptr == 0 ? null : new Tree(true, ptr);
         }
 
         public void setBaselineIndex(@Nonnull Index baselineIndex) {
             jniOptionsSetBaselineIndex(getRawPointer(), baselineIndex.getRawPointer());
         }
 
+        @Nullable
+        public Index getBaselineIndex() {
+            long ptr = jniOptionsGetBaselineIndex(getRawPointer());
+            return ptr == 0 ? null : new Index(ptr);
+        }
+
         public void setTargetDirectory(@Nonnull String targetDirectory) {
             jniOptionsSetTargetDirectory(getRawPointer(), targetDirectory);
+        }
+
+        public String getTargetDirectory() {
+             return jniOptionsGetTargetDirectory(getRawPointer());
         }
 
         public void setAncestorLabel(@Nonnull String ancestorLabel) {
             jniOptionsSetAncestorLabel(getRawPointer(), ancestorLabel);
         }
 
+        public String getAncestorLabel() {
+            return jniOptionsGetAncestorLabel(getRawPointer());
+        }
+
         public void setOurLabel(@Nonnull String ourLabel) {
             jniOptionsSetOurLabel(getRawPointer(), ourLabel);
         }
 
+        public String getOurLabel() {
+            return jniOptionsGetOurLabel(getRawPointer());
+        }
+
         public void setTheirLabel(@Nonnull String theirLabel) {
             jniOptionsSetTheirLable(getRawPointer(), theirLabel);
+        }
+        public String getTheirLabel() {
+            return jniOptionsGetTheirLable(getRawPointer());
         }
     }
 
@@ -423,38 +470,46 @@ public class Checkout {
      */
     static native void jniOptionsSetPaths(long opts, String[] paths);
 
+    static native void jniOptionsGetPaths(long opts, List<String> outPathList);
+
     /**
      * void git_checkout_options_set_baseline(const git_checkout_options *opts, git_tree *baseline);
      */
     static native void jniOptionsSetBaseline(long opts, long baseline);
+    static native long jniOptionsGetBaseline(long opts);
 
     /**
      * void git_checkout_options_set_baseline_index(const git_checkout_options *opts, git_index
      * *baseline_index);
      */
     static native void jniOptionsSetBaselineIndex(long opts, long baselineIndex);
+    static native long jniOptionsGetBaselineIndex(long opts);
 
     /**
      * void git_checkout_options_set_target_directory(const git_checkout_options *opts, const char
      * *target_directory);
      */
     static native void jniOptionsSetTargetDirectory(long opts, String targetDirectory);
+    static native String jniOptionsGetTargetDirectory(long opts);
 
     /**
      * void git_checkout_options_set_ancestor_label(const git_checkout_options *opts, const char
      * *ancestor_label);
      */
     static native void jniOptionsSetAncestorLabel(long opts, String ancestorLabel);
+    static native String jniOptionsGetAncestorLabel(long opts);
 
     /**
      * void git_checkout_options_set_our_label(const git_checkout_options *opts, const char
      * *our_label);
      */
     static native void jniOptionsSetOurLabel(long opts, String ourLabel);
+    static native String jniOptionsGetOurLabel(long opts);
 
     /**
      * void git_checkout_options_set_their_lable(const git_checkout_options *opts, const char
      * *their_label);
      */
     static native void jniOptionsSetTheirLable(long opts, String theirLabel);
+    static native String jniOptionsGetTheirLable(long opts);
 }
