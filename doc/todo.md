@@ -88,10 +88,10 @@
 - [ ] Consider simplify `Oid` to just bytes, find out all return (const oid *) cases and have it return jbyteArray instead.
 - [x] jni::GetObjectClass segfaults if object is null, so make sure every call is protected.
 - [ ] Replace `assert` with better alternatives (many build system disables assert by default).
-- [ ] Rename `consumer` in callbacks to `callback`
+- [x] Rename `consumer` in callbacks to `callback`
 - [ ] Buf is a stupid idea, replace it with plain String or a POJO
-- [ ] Unify all enums
-- [ ] Formalize CAutoReleaseable vs CAutoClosable
+- [x] Unify all enums
+- [x] Formalize CAutoReleaseable vs CAutoClosable
 - [x] Unify behavior of git objects, aka {@code Commit}, {@code Tag}, {@code Tree} or {@code Blob} 
 - [x] Make sure git objects are free-ed with `git_object_free`, make sure they all 
 - [ ] *All callbacks should immediately return if consumer is null*
@@ -104,3 +104,4 @@
 - [ ] All places that have `type foo(References **out)`, should return weak reference unless specified
 - [x] Deprecate `j_git_oid_to_java`, return `byte[]` directly.
 - [ ] Replace Buf with AtomicString for returning String through parameters.
+- [ ] Change Index to `CAutoReleasable`

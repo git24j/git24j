@@ -1,5 +1,7 @@
 package com.github.git24j.core;
 
+import java.util.EnumSet;
+
 public class Cert extends CAutoReleasable {
     protected Cert(boolean isWeak, long rawPtr) {
         super(isWeak, rawPtr);
@@ -58,8 +60,8 @@ public class Cert extends CAutoReleasable {
             return new Cert(true, ptr);
         }
 
-        public int getType() {
-            return jniHostkeyGetType(getRawPointer());
+        public EnumSet<SshT> getType() {
+            return IBitEnum.parse(jniHostkeyGetType(getRawPointer()), SshT.class);
         }
 
         public byte[] getHashMd5() {

@@ -86,23 +86,34 @@ extern "C"
     /** void git_checkout_options_set_paths(const git_checkout_options *opts, git_strarray paths); */
     JNIEXPORT void JNICALL J_MAKE_METHOD(Checkout_jniOptionsSetPaths)(JNIEnv *env, jclass obj, jlong optsPtr, jobjectArray paths);
 
+    /** void git_checkout_options_get_paths(const git_checkout_options *opts, git_strarray paths); */
+    JNIEXPORT void JNICALL J_MAKE_METHOD(Checkout_jniOptionsGetPaths)(JNIEnv *env, jclass obj, jlong optsPtr, jobject outPathsList);
+
+    /** void git_checkout_options_get_baseline(const git_checkout_options *opts); */
+    JNIEXPORT jlong JNICALL J_MAKE_METHOD(Checkout_jniOptionsGetBaseline)(JNIEnv *env, jclass obj, jlong optsPtr);
     /** void git_checkout_options_set_baseline(const git_checkout_options *opts, git_tree *baseline); */
     JNIEXPORT void JNICALL J_MAKE_METHOD(Checkout_jniOptionsSetBaseline)(JNIEnv *env, jclass obj, jlong optsPtr, jlong baselinePtr);
 
+    /** void git_checkout_options_set_baseline_index(const git_checkout_options *opts); */
+    JNIEXPORT jlong JNICALL J_MAKE_METHOD(Checkout_jniOptionsGetBaselineIndex)(JNIEnv *env, jclass obj, jlong optsPtr);
     /** void git_checkout_options_set_baseline_index(const git_checkout_options *opts, git_index *baseline_index); */
     JNIEXPORT void JNICALL J_MAKE_METHOD(Checkout_jniOptionsSetBaselineIndex)(JNIEnv *env, jclass obj, jlong optsPtr, jlong baselineIndexPtr);
 
     /** void git_checkout_options_set_target_directory(const git_checkout_options *opts, const char *target_directory); */
     JNIEXPORT void JNICALL J_MAKE_METHOD(Checkout_jniOptionsSetTargetDirectory)(JNIEnv *env, jclass obj, jlong optsPtr, jstring target_directory);
+    JNIEXPORT jstring JNICALL J_MAKE_METHOD(Checkout_jniOptionsGetTargetDirectory)(JNIEnv *env, jclass obj, jlong optsPtr);
 
     /** void git_checkout_options_set_ancestor_label(const git_checkout_options *opts, const char *ancestor_label); */
     JNIEXPORT void JNICALL J_MAKE_METHOD(Checkout_jniOptionsSetAncestorLabel)(JNIEnv *env, jclass obj, jlong optsPtr, jstring ancestor_label);
+    JNIEXPORT jstring JNICALL J_MAKE_METHOD(Checkout_jniOptionsGetAncestorLabel)(JNIEnv *env, jclass obj, jlong optsPtr);
 
     /** void git_checkout_options_set_our_label(const git_checkout_options *opts, const char *our_label); */
     JNIEXPORT void JNICALL J_MAKE_METHOD(Checkout_jniOptionsSetOurLabel)(JNIEnv *env, jclass obj, jlong optsPtr, jstring our_label);
+    JNIEXPORT jstring JNICALL J_MAKE_METHOD(Checkout_jniOptionsGetOurLabel)(JNIEnv *env, jclass obj, jlong optsPtr);
 
     /** void git_checkout_options_set_their_lable(const git_checkout_options *opts, const char *their_label); */
     JNIEXPORT void JNICALL J_MAKE_METHOD(Checkout_jniOptionsSetTheirLable)(JNIEnv *env, jclass obj, jlong optsPtr, jstring their_label);
+    JNIEXPORT jstring JNICALL J_MAKE_METHOD(Checkout_jniOptionsGetTheirLable)(JNIEnv *env, jclass obj, jlong optsPtr);
 
 #ifdef __cplusplus
 }

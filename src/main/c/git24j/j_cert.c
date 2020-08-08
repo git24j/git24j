@@ -25,7 +25,6 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Cert_jniHostkeyGetType)(JNIEnv *env, jclass
 JNIEXPORT jbyteArray JNICALL J_MAKE_METHOD(Cert_jniHostkeyGetHashMd5)(JNIEnv *env, jclass obj, jlong hostkeyPtr)
 {
     return j_byte_array_from_c(env, ((git_cert_hostkey *)hostkeyPtr)->hash_md5, 16);
-    // return ((git_cert_hostkey *)hostkeyPtr)->hash_md5[16];
 }
 
 /** unsigned char hash_sha1[20]*/

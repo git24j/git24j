@@ -286,6 +286,14 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Remote_jniCreateOptionsNew)(JNIEnv *env, jc
     return r;
 }
 
+JNIEXPORT void JNICALL J_MAKE_METHOD(Remote_jniCreateOptionsFree)(JNIEnv *env, jclass obj, jlong optsPtr)
+{
+    git_remote_create_options *opts = (git_remote_create_options *)optsPtr;
+    free((char *)opts->name);
+    free((char *)opts->fetchspec);
+    free(opts);
+}
+
 /** int git_remote_create_with_fetchspec(git_remote **out, git_repository *repo, const char *name, const char *url, const char *fetch); */
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Remote_jniCreateWithFetchspec)(JNIEnv *env, jclass obj, jobject out, jlong repoPtr, jstring name, jstring url, jstring fetch)
 {
@@ -660,17 +668,19 @@ JNIEXPORT void JNICALL J_MAKE_METHOD(Remote_jniCreateOptionsSetRepository)(JNIEn
 /** const char *name*/
 JNIEXPORT void JNICALL J_MAKE_METHOD(Remote_jniCreateOptionsSetName)(JNIEnv *env, jclass obj, jlong createOptionsPtr, jstring name)
 {
-    ((git_remote_create_options *)createOptionsPtr)->name = (const char *)name;
+
+    ((git_remote_create_options *)createOptionsPtr)->name = j_copy_of_jstring(env, name, true);
 }
 
 /** const char *fetchspec*/
 JNIEXPORT void JNICALL J_MAKE_METHOD(Remote_jniCreateOptionsSetFetchspec)(JNIEnv *env, jclass obj, jlong createOptionsPtr, jstring fetchspec)
 {
-    ((git_remote_create_options *)createOptionsPtr)->fetchspec = (const char *)fetchspec;
+    ((git_remote_create_options *)createOptionsPtr)->fetchspec = j_copy_of_jstring(env, fetchspec, true);
 }
 
 /** unsigned int flags*/
 JNIEXPORT void JNICALL J_MAKE_METHOD(Remote_jniCreateOptionsSetFlags)(JNIEnv *env, jclass obj, jlong createOptionsPtr, jint flags)
 {
+    printf("qqqqq flags = %d \n", flags);
     ((git_remote_create_options *)createOptionsPtr)->flags = (unsigned int)flags;
 }
