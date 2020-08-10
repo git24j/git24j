@@ -6,6 +6,7 @@ import javax.annotation.Nullable;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Optional;
@@ -37,6 +38,22 @@ public class Remote extends CAutoReleasable {
 
         AutotagOptionT(int bit) {
             this._bit = bit;
+        }
+
+        @Override
+        public int getBit() {
+            return _bit;
+        }
+    }
+
+    public enum CompletionT implements IBitEnum {
+        DOWNLOAD(0),
+        INDEXING(1),
+        ERROR(2);
+        private final int _bit;
+
+        CompletionT(int bit) {
+            _bit = bit;
         }
 
         @Override
@@ -207,6 +224,14 @@ public class Remote extends CAutoReleasable {
     }
 
     @FunctionalInterface
+    public interface CompletionCb {
+        /**
+         * int (*)(git_remote_completion_t, void *) completion
+         */
+        int accept(CompletionT completionT);
+    }
+
+    @FunctionalInterface
     public interface TransportCertificateCheckCb {
         /**
          * Callback for the user's custom certificate checks.
@@ -236,7 +261,7 @@ public class Remote extends CAutoReleasable {
     @FunctionalInterface
     public interface UpdateTipsCb {
         /** Callback when a reference is updated locally */
-        int accept(String refname, Oid a, Oid b);
+        int accept(@Nullable String refname, @Nullable Oid a, @Nullable Oid b);
     }
 
     @FunctionalInterface
@@ -252,7 +277,7 @@ public class Remote extends CAutoReleasable {
     }
 
     @FunctionalInterface
-    public interface UpdateReferenceCb {
+    public interface PushUpdateReferenceCb {
         /**
          * Callback used to inform of the update status from the remote.
          *
@@ -274,7 +299,7 @@ public class Remote extends CAutoReleasable {
          * @param updates an array containing the updates which will be sent as commands to the
          *     destination.
          */
-        int accept(List<PushUpdate> updates);
+        int accept(@Nonnull List<PushUpdate> updates);
     }
 
     @FunctionalInterface
@@ -283,25 +308,35 @@ public class Remote extends CAutoReleasable {
          * Callback that can create the transport to use for this operation. Leave empty to
          * auto-detect.
          */
-        Optional<Transport> accept(@Nonnull Remote owner);
+        Optional<Transport> accept(Remote owner);
+    }
+
+    @FunctionalInterface
+    public interface UrlResolveCb {
+        /**
+         * Callback to resolve URLs before connecting to remote
+         */
+        int accept(String urlResolved, String url, @Nonnull Direction direction);
     }
 
     static native void jniCallbacksFree(long cbsPtr);
-
+    static native void jniCallbacksTest(long cbsPtr, Callbacks callbacks);
     static native void jniCallbacksSetCallbackObject(long cbsPtr, Callbacks cbsObject);
 
     public static final class Callbacks extends CAutoReleasable {
         public static final int VERSION = 1;
         private CredAcquireCb _credAcquireCb;
         private TransportMessageCb _transportMsg;
+        private CompletionCb _completionCb;
         private TransportCertificateCheckCb _certificateCheckCb;
         private TransferProgressCb _transferProgressCb;
         private UpdateTipsCb _updateTipsCb;
         private PackProgressCb _packProgressCb;
         private PushTransferProgressCb _pushTransferProgressCb;
-        private UpdateReferenceCb _updateReferenceCb;
+        private PushUpdateReferenceCb _pushUpdateReferenceCb;
         private PushNegotiationCb _pushNegotiationCb;
         private TransportCb _transportCb;
+        private UrlResolveCb _urlResolveCb;
 
         public void setCredAcquireCb(CredAcquireCb credAcquireCb) {
             jniCallbacksSetCallbackObject(getRawPointer(), this);
@@ -311,6 +346,16 @@ public class Remote extends CAutoReleasable {
         public void setTransportMsg(TransportMessageCb transportMsg) {
             jniCallbacksSetCallbackObject(getRawPointer(), this);
             _transportMsg = transportMsg;
+        }
+
+        /** Alias for {@code setTransportMsg}. */
+        public void setSidebandProgress(TransportMessageCb transportMsg) {
+            setTransportMsg(transportMsg);
+        }
+
+        public void setCompletionCb(CompletionCb completion) {
+            jniCallbacksSetCallbackObject(getRawPointer(), this);
+            _completionCb = completion;
         }
 
         public void setCertificateCheckCb(TransportCertificateCheckCb certificateCheckCb) {
@@ -338,9 +383,9 @@ public class Remote extends CAutoReleasable {
             _pushTransferProgressCb = pushTransferProgressCb;
         }
 
-        public void setUpdateReferenceCb(UpdateReferenceCb updateReferenceCb) {
+        public void setPushUpdateReferenceCb(PushUpdateReferenceCb pushUpdateReferenceCb) {
             jniCallbacksSetCallbackObject(getRawPointer(), this);
-            _updateReferenceCb = updateReferenceCb;
+            _pushUpdateReferenceCb = pushUpdateReferenceCb;
         }
 
         public void setPushNegotiationCb(PushNegotiationCb pushNegotiationCb) {
@@ -351,6 +396,11 @@ public class Remote extends CAutoReleasable {
         public void setTransportCb(TransportCb transportCb) {
             jniCallbacksSetCallbackObject(getRawPointer(), this);
             _transportCb = transportCb;
+        }
+
+        public void setUrlResolveCbCb(UrlResolveCb urlResolveCbCb) {
+            jniCallbacksSetCallbackObject(getRawPointer(), this);
+            _urlResolveCb = urlResolveCbCb;
         }
 
         protected Callbacks(boolean isWeak, long rawPtr) {
@@ -396,23 +446,35 @@ public class Remote extends CAutoReleasable {
             return 0;
         }
 
+        int complete(int type) {
+            if (_completionCb != null) {
+                CompletionT completionT = type == 0 ? CompletionT.DOWNLOAD : (type == 1 ? CompletionT.INDEXING : CompletionT.ERROR);
+                return _completionCb.accept(completionT);
+            }
+            return 0;
+        }
+
         int transportMessageCheck(long certPtr, int valid, String host) {
             if (_certificateCheckCb != null) {
-                return _certificateCheckCb.accept(new Cert(true, 0), valid == 1, host);
+                Cert cert = certPtr == 0 ? null : new Cert(true, certPtr);
+                return _certificateCheckCb.accept(cert, valid != 0, host);
             }
             return 0;
         }
 
         int transferProgress(long progressPtr) {
             if (_transferProgressCb != null) {
-                return _transferProgressCb.accept(new TransferProgress(true, progressPtr));
+                TransferProgress progress = progressPtr == 0 ? null : new TransferProgress(true, progressPtr);
+                return _transferProgressCb.accept(progress);
             }
             return 0;
         }
 
         int updateTips(String refname, byte[] ida, byte[] idb) {
             if (_updateTipsCb != null) {
-                return _updateTipsCb.accept(refname, Oid.of(ida), Oid.of(idb));
+                Oid oida = ida == null ? null : Oid.of(ida);
+                Oid oidb = idb == null ? null : Oid.of(idb);
+                return _updateTipsCb.accept(refname, oida, oidb);
             }
             return 0;
         }
@@ -432,18 +494,32 @@ public class Remote extends CAutoReleasable {
         }
 
         int pushUpdateReference(String refname, String status) {
-            if (_updateReferenceCb != null) {
-                return _updateReferenceCb.accept(refname, status);
+            if (_pushUpdateReferenceCb != null) {
+                return _pushUpdateReferenceCb.accept(refname, status);
             }
             return 0;
         }
 
         int pushNegotiation(long[] updates) {
             if (_pushNegotiationCb != null) {
+                if (updates == null) {
+                    return _pushNegotiationCb.accept(Collections.emptyList());
+                }
                 return _pushNegotiationCb.accept(
                         Arrays.stream(updates)
                                 .mapToObj(p -> new PushUpdate(true, p))
                                 .collect(Collectors.toList()));
+            }
+            return 0;
+        }
+
+        int resolveUrl(String resolvedUrl, String url, int direction) {
+            if (_urlResolveCb != null) {
+                return _urlResolveCb.accept(
+                        resolvedUrl,
+                        url,
+                        direction == 0 ? Direction.FETCH : Direction.PUSH
+                );
             }
             return 0;
         }
@@ -464,8 +540,9 @@ public class Remote extends CAutoReleasable {
          */
         long transport(long ownerPtr) {
             if (_transportCb != null) {
+                Remote remote = ownerPtr == 0 ? null : new Remote(true, ownerPtr);
                 return _transportCb
-                        .accept(new Remote(true, ownerPtr))
+                        .accept(remote)
                         .map(CAutoReleasable::getRawPointer)
                         .orElse(0L);
             }

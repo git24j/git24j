@@ -45,6 +45,7 @@ void git24j_init(JNIEnv *env)
     assert(clz && "Remote.Callbacks class not found");
     jniConstants->remote.clzCallbacks = clz;
     jniConstants->remote.midAcquireCred = (*env)->GetMethodID(env, clz, "acquireCred", "(Ljava/lang/String;Ljava/lang/String;I)J");
+    jniConstants->remote.midCompletion = (*env)->GetMethodID(env, clz, "complete", "(I)I");
     jniConstants->remote.midTransportMessage = (*env)->GetMethodID(env, clz, "transportMessage", "(Ljava/lang/String;)I");
     jniConstants->remote.midTransportCertificateCheck = (*env)->GetMethodID(env, clz, "transportMessageCheck", "(JILjava/lang/String;)I");
     jniConstants->remote.midTransferProgress = (*env)->GetMethodID(env, clz, "transferProgress", "(J)I");
@@ -54,6 +55,7 @@ void git24j_init(JNIEnv *env)
     jniConstants->remote.midPushUpdateReference = (*env)->GetMethodID(env, clz, "pushUpdateReference", "(Ljava/lang/String;Ljava/lang/String;)I");
     jniConstants->remote.midPushNegotiation = (*env)->GetMethodID(env, clz, "pushNegotiation", "([J)I");
     jniConstants->remote.midTransport = (*env)->GetMethodID(env, clz, "transport", "(J)J");
+    jniConstants->remote.midResolveUrl = (*env)->GetMethodID(env, clz, "resolveUrl", "(Ljava/lang/String;Ljava/lang/String;I)I");
     /* java/util/List<?> */
 
     /* clz = j_find_and_hold_clz(env, "java/util/List");

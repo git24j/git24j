@@ -70,6 +70,21 @@ void j_git_buf_to_java(JNIEnv *env, git_buf *c_buf, jobject buf)
     (*env)->DeleteLocalRef(env, jclz);
 }
 
+jstring j_git_buf_to_jstring(JNIEnv *env, const git_buf *c_buf)
+{
+    if (c_buf == NULL)
+    {
+        return NULL;
+    }
+    size_t n = c_buf->size;
+    char *copy = (char *)malloc(sizeof(char) * (n + 1));
+    strncpy(copy, c_buf->ptr, n);
+    copy[n] = '\0';
+    jstring res = (*env)->NewStringUTF(env, copy);
+    free(copy);
+    return res;
+}
+
 char *j_call_getter_string(JNIEnv *env, jclass clz, jobject obj, const char *methodName)
 {
     jmethodID method = (*env)->GetMethodID(env, clz, methodName, "()Ljava/lang/String;");
