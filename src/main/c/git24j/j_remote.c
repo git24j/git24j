@@ -14,11 +14,20 @@ int j_git_transport_message_cb(const char *str, int len, void *payload)
         return 0;
     }
     JNIEnv *env = getEnv();
-    char *buf = new_substr(str, len);
-    jstring message = (*env)->NewStringUTF(env, buf);
+    jstring message = (*env)->NewStringUTF(env, str);
     int r = (*env)->CallIntMethod(env, (jobject)payload, jniConstants->remote.midTransportMessage, message);
     (*env)->DeleteLocalRef(env, message);
-    free(buf);
+    return r;
+}
+
+int j_git_remote_completion_cb(git_remote_completion_t completion_type, void *payload)
+{
+    if (!payload)
+    {
+        return 0;
+    }
+    JNIEnv *env = getEnv();
+    int r = (*env)->CallIntMethod(env, (jobject)payload, jniConstants->remote.midCompletion, completion_type);
     return r;
 }
 
@@ -48,12 +57,16 @@ int j_git_cred_acquire_cb(git_cred **cred, const char *url, const char *username
     int r;
     if (ptr >= 0)
     {
-        *cred = (git_cred *)ptr;
+        if (ptr > 0)
+        {
+            *cred = (git_cred *)ptr;
+            return 0;
+        }
+        return 1;
         /*
         ptr > 0 => success
         ptr == 0 => no credential was accquired
         */
-        r = (ptr == 0) ? 1 : 0;
     }
     else
     {
@@ -185,6 +198,21 @@ int j_git_transport_cb(git_transport **out, git_remote *owner, void *payload)
         return 0;
     }
     return res;
+}
+
+int j_git_url_resolve_cb(git_buf *url_resolved, const char *url, int direction, void *payload)
+{
+    if (!payload)
+    {
+        return 0;
+    }
+    JNIEnv *env = getEnv();
+    jstring urlResolved = j_git_buf_to_jstring(env, url_resolved);
+    jstring jUrl = (*env)->NewStringUTF(env, url);
+    int r = (*env)->CallIntMethod(env, (jobject)payload, jniConstants->remote.midResolveUrl, urlResolved, jUrl, direction);
+    (*env)->DeleteLocalRef(env, urlResolved);
+    (*env)->DeleteLocalRef(env, jUrl);
+    return r;
 }
 
 // no matching type found for 'const git_remote_head ***out'
@@ -422,6 +450,18 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Remote_jniCallbacksNew)(JNIEnv *env, jclass
 {
     git_remote_callbacks *cb = (git_remote_callbacks *)malloc(sizeof(git_remote_callbacks));
     int r = git_remote_init_callbacks((git_remote_callbacks *)cb, version);
+    cb->sideband_progress = j_git_transport_message_cb;
+    cb->completion = j_git_remote_completion_cb;
+    cb->credentials = j_git_cred_acquire_cb;
+    cb->certificate_check = j_git_transport_certificate_check_cb;
+    cb->transfer_progress = j_git_transfer_progress_cb;
+    cb->update_tips = j_git_remote_update_tips_cb;
+    cb->pack_progress = j_git_packbuilder_progress_cb;
+    cb->push_transfer_progress = j_git_push_transfer_progress_cb;
+    cb->push_update_reference = j_git_push_update_reference_cb;
+    cb->push_negotiation = j_git_push_negotiation_cb;
+    cb->transport = j_git_transport_cb;
+    cb->resolve_url = j_git_url_resolve_cb;
     (*env)->CallVoidMethod(env, outCb, jniConstants->midAtomicLongSet, (long)cb);
     return r;
 }
@@ -434,6 +474,31 @@ JNIEXPORT void JNICALL J_MAKE_METHOD(Remote_jniCallbacksFree)(JNIEnv *env, jclas
         (*env)->DeleteGlobalRef(env, (jobject)c_ptr->payload);
     }
     free(c_ptr);
+}
+
+/** A helper function for callbacks testing. */
+JNIEXPORT void JNICALL J_MAKE_METHOD(Remote_jniCallbacksTest)(JNIEnv *env, jclass obj, jlong cbsPtr, jobject cbsObject)
+{
+    git_remote_callbacks *cb = (git_remote_callbacks *)cbsPtr;
+    void *payload = (void *)cbsObject;
+    cb->sideband_progress("sideband_progress.str", 1, payload);
+    cb->completion(1, payload);
+    cb->credentials(NULL, "credentials.url", "credentials.user_name_from_url", 1, payload);
+    cb->certificate_check(NULL, 1, "certificate_check.host", payload);
+    cb->transfer_progress(NULL, payload);
+    cb->update_tips("update_tips.refname", NULL, NULL, payload);
+    cb->pack_progress(1, 2, 3, payload);
+    cb->push_transfer_progress(1, 2, 3, payload);
+    cb->push_update_reference("push_update_reference.refname", "push_update_reference.status", payload);
+    git_push_update pu1;
+    git_push_update pu2;
+    git_push_update **fake = (git_push_update **)malloc(sizeof(git_push_update *) * 2);
+    fake[0] = &pu1;
+    fake[1] = &pu2;
+    cb->push_negotiation((const git_push_update **)fake, 2, payload);
+    free(fake);
+    cb->transport(NULL, NULL, payload);
+    cb->resolve_url(NULL, "resolve_url.url", 1, payload);
 }
 
 JNIEXPORT void JNICALL J_MAKE_METHOD(Remote_jniCallbacksSetCallbackObject)(JNIEnv *env, jclass obj, jlong cbsPtr, jobject cbsObject)
@@ -681,7 +746,6 @@ JNIEXPORT void JNICALL J_MAKE_METHOD(Remote_jniCreateOptionsSetFetchspec)(JNIEnv
 /** unsigned int flags*/
 JNIEXPORT void JNICALL J_MAKE_METHOD(Remote_jniCreateOptionsSetFlags)(JNIEnv *env, jclass obj, jlong createOptionsPtr, jint flags)
 {
-    printf("qqqqq flags = %d \n", flags);
     ((git_remote_create_options *)createOptionsPtr)->flags = (unsigned int)flags;
 }
 

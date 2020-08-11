@@ -19,6 +19,7 @@ extern "C"
     {
         jclass clzCallbacks;
         jmethodID midTransportMessage;
+        jmethodID midCompletion;
         jmethodID midAcquireCred;
         jmethodID midTransportCertificateCheck;
         jmethodID midTransferProgress;
@@ -28,6 +29,7 @@ extern "C"
         jmethodID midPushUpdateReference;
         jmethodID midPushNegotiation;
         jmethodID midTransport;
+        jmethodID midResolveUrl;
     } j_remote_constants;
 
     typedef struct
@@ -87,6 +89,9 @@ extern "C"
 
     /** Copy values of git_buf to java::Buf */
     void j_git_buf_to_java(JNIEnv *env, git_buf *c_buf, jobject buf);
+
+    /* Create jstring object from git_buf. */
+    jstring j_git_buf_to_jstring(JNIEnv *env, const git_buf *c_buf);
 
     /** copy values of java Index.Entry object to git_index_entry struct. */
     void index_entry_from_java(JNIEnv *env, git_index_entry *c_entry, jobject entry);

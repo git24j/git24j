@@ -1,12 +1,17 @@
 package com.github.git24j.core;
 
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
+import javax.annotation.Nonnull;
 import java.net.URI;
 import java.util.EnumSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.github.git24j.core.Remote.CreateOptions.Flag.SKIP_DEFAULT_FETCHSPEC;
 import static com.github.git24j.core.Remote.CreateOptions.Flag.SKIP_INSTEADOF;
@@ -27,6 +32,7 @@ public class RemoteTest extends TestBase {
         }
     }
 
+    @Ignore(value = "requires ssh2 support")
     @Test
     public void connect() {
         try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {
@@ -168,4 +174,121 @@ public class RemoteTest extends TestBase {
 
     @Test
     public void url() {}
+
+    @Test
+    public void callbacks() {
+        AtomicInteger counter = new AtomicInteger();
+        Remote.Callbacks cb = Remote.Callbacks.createDefault();
+        // cb->sideband_progress("sideband_progress.str", 1, payload);
+        cb.setSidebandProgress(
+                message -> {
+                    Assert.assertEquals(message, "sideband_progress.str");
+                    counter.incrementAndGet();
+                    return 0;
+                });
+        // cb->completion(1, payload);
+        cb.setCompletionCb(
+                type -> {
+                    Assert.assertEquals(1, type.getBit());
+                    counter.incrementAndGet();
+                    return 0;
+                });
+        // cb->credentials(NULL, "credentials.url", "credentials.user_name_from_url", 1, payload);
+        cb.setCredAcquireCb(
+                (url, usernameFromUrl, allowedTypes) -> {
+                    Assert.assertEquals("credentials.url", url);
+                    Assert.assertEquals("credentials.user_name_from_url", usernameFromUrl);
+                    Assert.assertEquals(1, allowedTypes);
+                    counter.incrementAndGet();
+                    return Optional.empty();
+                });
+        // cb->certificate_check(NULL, 1, "certificate_check.host", payload);
+        cb.setCertificateCheckCb(
+                (cert, valid, host) -> {
+                    Assert.assertNull(cert);
+                    Assert.assertTrue(valid);
+                    Assert.assertEquals("certificate_check.host", host);
+                    counter.incrementAndGet();
+                    return 0;
+                });
+        // cb->transfer_progress(NULL, payload);
+        cb.setTransferProgressCb(
+                stats -> {
+                    Assert.assertNull(stats);
+                    counter.incrementAndGet();
+                    return 0;
+                });
+        // cb->update_tips("update_tips.refname", NULL, NULL, payload);
+        cb.setUpdateTipsCb(
+                (refname, a, b) -> {
+                    Assert.assertEquals("update_tips.refname", refname);
+                    Assert.assertNull(a);
+                    Assert.assertNull(b);
+                    counter.incrementAndGet();
+                    return 0;
+                });
+        //        cb->pack_progress(1, 2, 3, payload);
+        cb.setPackProgressCb(
+                (stage, current, total) -> {
+                    Assert.assertEquals(1, stage);
+                    Assert.assertEquals(2, current);
+                    Assert.assertEquals(3, total);
+                    counter.incrementAndGet();
+                    return 0;
+                });
+        // cb->push_transfer_progress(1, 2, 3, payload);
+        cb.setPushTransferProgressCb(
+                (current, total, bytes) -> {
+                    Assert.assertEquals(1, current);
+                    Assert.assertEquals(2, total);
+                    Assert.assertEquals(3, bytes);
+                    counter.incrementAndGet();
+                    return 0;
+                });
+        // cb->push_update_reference("push_update_reference.refname",
+        //                            "push_update_reference.status", payload);
+        cb.setPushUpdateReferenceCb(
+                new Remote.PushUpdateReferenceCb() {
+                    @Override
+                    public int accept(String refname, String status) {
+                        Assert.assertEquals("push_update_reference.refname", refname);
+                        Assert.assertEquals("push_update_reference.status", status);
+                        counter.incrementAndGet();
+                        return 0;
+                    }
+                });
+        // cb->push_negotiation(NULL, 1, payload);
+        cb.setPushNegotiationCb(
+                new Remote.PushNegotiationCb() {
+                    @Override
+                    public int accept(List<Remote.PushUpdate> updates) {
+                        Assert.assertEquals(2, updates.size());
+                        counter.incrementAndGet();
+                        return 0;
+                    }
+                });
+        // cb->transport(NULL, NULL, payload);
+        cb.setTransportCb(
+                new Remote.TransportCb() {
+                    @Override
+                    public Optional<Transport> accept(Remote owner) {
+                        Assert.assertNull(owner);
+                        counter.incrementAndGet();
+                        return Optional.empty();
+                    }
+                });
+        // cb->resolve_url(NULL, "resolve_url.url", 1, payload);
+        cb.setUrlResolveCbCb(new Remote.UrlResolveCb() {
+            @Override
+            public int accept(String urlResolved, String url, @Nonnull Remote.Direction direction) {
+                Assert.assertNull(urlResolved);
+                Assert.assertEquals("resolve_url.url", url);
+                Assert.assertEquals(1, direction.ordinal());
+                counter.incrementAndGet();
+                return 0;
+            }
+        });
+        Remote.jniCallbacksTest(cb.getRawPointer(), cb);
+        Assert.assertEquals(12, counter.get());
+    }
 }
