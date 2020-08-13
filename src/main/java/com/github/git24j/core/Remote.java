@@ -176,17 +176,6 @@ public class Remote extends CAutoReleasable {
         }
     }
 
-    public static class PushOptions extends CAutoReleasable {
-        protected PushOptions(boolean isWeak, long rawPtr) {
-            super(isWeak, rawPtr);
-        }
-
-        @Override
-        protected void freeOnce(long cPtr) {
-            Libgit2.jniShadowFree(cPtr);
-        }
-    }
-
     public static class PushUpdate extends CAutoReleasable {
         protected PushUpdate(boolean isWeak, long rawPtr) {
             super(isWeak, rawPtr);
@@ -1348,9 +1337,9 @@ public class Remote extends CAutoReleasable {
         return URI.create(jniUrl(getRawPointer()));
     }
 
+    /** -------- Fetch Options---------- */
     static native int jniFetchOptionsNew(AtomicLong outPtr, int version);
-
-    /** -------- Jni Signature ---------- */
+    static native int jniFetchOptionsFree(long ptr);
     /**int version*/
     static native int jniFetchOptionsGetVersion(long fetch_optionsPtr);
     /**git_remote_callbacks callbacks*/
@@ -1368,6 +1357,7 @@ public class Remote extends CAutoReleasable {
     /**int version*/
     static native void jniFetchOptionsSetVersion(long fetch_optionsPtr, int version);
     /**git_remote_callbacks callbacks*/
+    static native void jniFetchOptionsSetCallbacks(long fetch_optionsPtr, Callbacks callbacks);
     /**git_fetch_prune_t prune*/
     static native void jniFetchOptionsSetPrune(long fetch_optionsPtr, int prune);
     /**int update_fetchhead*/
@@ -1378,4 +1368,23 @@ public class Remote extends CAutoReleasable {
     /**git_strarray custom_headers*/
     static native void jniFetchOptionsSetCustomHeaders(long fetch_optionsPtr, String[] customHeaders);
 
+    /** -------- Push Options ---------- */
+    /**unsigned int version*/
+    static native int jniPushOptionsNew(AtomicLong outPtr, int version);
+    static native void jniPushOptionsFree(long optsPtr);
+    static native int jniPushOptionsGetVersion(long push_optionsPtr);
+    /**unsigned int pb_parallelism*/
+    static native int jniPushOptionsGetPbParallelism(long push_optionsPtr);
+    /**git_remote_callbacks callbacks*/
+    static native long jniPushOptionsGetCallbacks(long push_optionsPtr);
+    /**git_proxy_options proxy_opts*/
+    static native long jniPushOptionsGetProxyOpts(long push_optionsPtr);
+    /**git_strarray custom_headers*/
+    static native void jniPushOptionsGetCustomHeaders(long push_optionsPtr, List<String> outHeaders);
+    /**unsigned int version*/
+    static native void jniPushOptionsSetVersion(long push_optionsPtr, int version);
+    /**unsigned int pb_parallelism*/
+    static native void jniPushOptionsSetPbParallelism(long push_optionsPtr, int pbParallelism);
+    /**git_strarray custom_headers*/
+    static native void jniPushOptionsSetCustomHeaders(long push_optionsPtr, String[] customHeaders);
 }
