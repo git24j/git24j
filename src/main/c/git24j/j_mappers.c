@@ -41,6 +41,7 @@ void j_cb_payload_release(JNIEnv *env, j_cb_payload *payload)
     if (payload && payload->callback)
     {
         (*env)->DeleteGlobalRef(env, payload->callback);
+        payload->callback = NULL;
     }
 }
 
