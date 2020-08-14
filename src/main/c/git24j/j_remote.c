@@ -181,7 +181,7 @@ int j_git_push_negotiation_cb(const git_push_update **updates, size_t len, void 
  *		(error = transport(&t, remote, payload)) < 0)
  *		return error;
  * </pre>
- * 
+ *
  * git_transport_cb returns <0 for error
  */
 int j_git_transport_cb(git_transport **out, git_remote *owner, void *payload)
@@ -351,7 +351,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Remote_jniCreateWithOpts)(JNIEnv *env, jcla
 /** int git_remote_default_branch(git_buf *out, git_remote *remote); */
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Remote_jniDefaultBranch)(JNIEnv *env, jclass obj, jobject out, jlong remotePtr)
 {
-    git_buf c_out = {0};
+    git_buf c_out ={ 0 };
     int r = git_remote_default_branch(&c_out, (git_remote *)remotePtr);
     j_git_buf_to_java(env, &c_out, out);
     git_buf_dispose(&c_out);
@@ -678,14 +678,6 @@ JNIEXPORT jstring JNICALL J_MAKE_METHOD(Remote_jniUrl)(JNIEnv *env, jclass obj, 
     return (*env)->NewStringUTF(env, r);
 }
 
-JNIEXPORT jint JNICALL J_MAKE_METHOD(Remote_jniFetchOptionsNew)(JNIEnv *env, jclass obj, jobject outPtr, jint version)
-{
-    git_fetch_options *opts = (git_fetch_options *)malloc(sizeof(git_fetch_options));
-    int r = git_fetch_init_options(opts, version);
-    (*env)->CallVoidMethod(env, outPtr, jniConstants->midAtomicLongSet, (long)opts);
-    return r;
-}
-
 /** -------- Wrapper Body ---------- */
 /** unsigned int version*/
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Remote_jniCreateOptionsGetVersion)(JNIEnv *env, jclass obj, jlong createOptionsPtr)
@@ -750,6 +742,22 @@ JNIEXPORT void JNICALL J_MAKE_METHOD(Remote_jniCreateOptionsSetFlags)(JNIEnv *en
 }
 
 /** -------- git_remote_fetch_options ---------- */
+JNIEXPORT jint JNICALL J_MAKE_METHOD(Remote_jniFetchOptionsNew)(JNIEnv *env, jclass obj, jobject outPtr, jint version)
+{
+    git_fetch_options *opts = (git_fetch_options *)malloc(sizeof(git_fetch_options));
+    int r = git_fetch_init_options(opts, version);
+    (*env)->CallVoidMethod(env, outPtr, jniConstants->midAtomicLongSet, (long)opts);
+    return r;
+}
+JNIEXPORT void JNICALL J_MAKE_METHOD(Remote_jniFetchOptionsFree)(JNIEnv *env, jclass obj, jobject optsPtr)
+{
+    git_remote_callbacks *c_ptr = (git_remote_callbacks *)optsPtr;
+    if (c_ptr->payload != NULL)
+    {
+        (*env)->DeleteGlobalRef(env, (jobject)c_ptr->payload);
+    }
+    free(c_ptr);
+}
 /** int version*/
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Remote_jniFetchOptionsGetVersion)(JNIEnv *env, jclass obj, jlong fetchOptionsPtr)
 {
@@ -799,6 +807,14 @@ JNIEXPORT void JNICALL J_MAKE_METHOD(Remote_jniFetchOptionsSetVersion)(JNIEnv *e
 }
 
 /** git_remote_callbacks callbacks*/
+JNIEXPORT void JNICALL J_MAKE_METHOD(Remote_jniFetchOptionsSetCallbacks)(JNIEnv *env, jclass obj, jlong fetchOptionsPtr, jobject cbObj)
+{
+    git_remote_callbacks *cb = (git_remote_callbacks *)fetchOptionsPtr;
+    if (cb->payload == NULL)
+    {
+        cb->payload = (*env)->NewGlobalRef(env, cbObj);
+    }
+}
 
 /** git_fetch_prune_t prune*/
 JNIEXPORT void JNICALL J_MAKE_METHOD(Remote_jniFetchOptionsSetPrune)(JNIEnv *env, jclass obj, jlong fetchOptionsPtr, jint prune)
@@ -823,4 +839,81 @@ JNIEXPORT void JNICALL J_MAKE_METHOD(Remote_jniFetchOptionsSetDownloadTags)(JNIE
 JNIEXPORT void JNICALL J_MAKE_METHOD(Remote_jniFetchOptionsSetCustomHeaders)(JNIEnv *env, jclass obj, jlong fetchOptionsPtr, jobjectArray customHeaders)
 {
     j_strarray_from_java(env, &(((git_fetch_options *)fetchOptionsPtr)->custom_headers), customHeaders);
+}
+
+/** -------- git_push_options ---------- */
+JNIEXPORT jint JNICALL J_MAKE_METHOD(Remote_jniPushOptionsNew)(JNIEnv *env, jclass obj, jobject outPtr, jint version)
+{
+    git_push_options *opts = (git_push_options *)malloc(sizeof(git_push_options));
+    int r = git_push_options_init(opts, version);
+    (*env)->CallVoidMethod(env, outPtr, jniConstants->midAtomicLongSet, (long)opts);
+    return r;
+}
+JNIEXPORT void JNICALL J_MAKE_METHOD(Remote_jniPushOptionsFree)(JNIEnv *env, jclass obj, jobject optsPtr)
+{
+    git_remote_callbacks *c_ptr = (git_remote_callbacks *)optsPtr;
+    if (c_ptr->payload != NULL)
+    {
+        (*env)->DeleteGlobalRef(env, (jobject)c_ptr->payload);
+    }
+    free(c_ptr);
+}
+/** git_remote_callbacks callbacks*/
+JNIEXPORT void JNICALL J_MAKE_METHOD(Remote_jniPushOptionsSetCallbacks)(JNIEnv *env, jclass obj, jlong optPtr, jobject cbObj)
+{
+    git_remote_callbacks *cb = (git_remote_callbacks *)optPtr;
+    if (cb->payload == NULL)
+    {
+        cb->payload = (*env)->NewGlobalRef(env, cbObj);
+    }
+}
+
+/** unsigned int version*/
+JNIEXPORT jint JNICALL J_MAKE_METHOD(Remote_jniPushOptionsGetVersion)(JNIEnv *env, jclass obj, jlong pushOptionsPtr)
+{
+    return ((git_push_options *)pushOptionsPtr)->version;
+}
+
+/** unsigned int pb_parallelism*/
+JNIEXPORT jint JNICALL J_MAKE_METHOD(Remote_jniPushOptionsGetPbParallelism)(JNIEnv *env, jclass obj, jlong pushOptionsPtr)
+{
+    return ((git_push_options *)pushOptionsPtr)->pb_parallelism;
+}
+
+/** git_remote_callbacks callbacks*/
+JNIEXPORT jlong JNICALL J_MAKE_METHOD(Remote_jniPushOptionsGetCallbacks)(JNIEnv *env, jclass obj, jlong pushOptionsPtr)
+{
+    return (jlong) & (((git_push_options *)pushOptionsPtr)->callbacks);
+}
+
+/** git_proxy_options proxy_opts*/
+JNIEXPORT jlong JNICALL J_MAKE_METHOD(Remote_jniPushOptionsGetProxyOpts)(JNIEnv *env, jclass obj, jlong pushOptionsPtr)
+{
+    return (jlong) & (((git_push_options *)pushOptionsPtr)->proxy_opts);
+}
+
+/** git_strarray custom_headers*/
+JNIEXPORT void JNICALL J_MAKE_METHOD(Remote_jniPushOptionsGetCustomHeaders)(JNIEnv *env, jclass obj, jlong pushOptionsPtr, jobject outHeadersList)
+{
+    git_strarray * c_array = &(((git_push_options *)pushOptionsPtr)->custom_headers);
+    j_strarray_to_java_list(env, c_array, outHeadersList);
+}
+
+/** unsigned int version*/
+JNIEXPORT void JNICALL J_MAKE_METHOD(Remote_jniPushOptionsSetVersion)(JNIEnv *env, jclass obj, jlong pushOptionsPtr, jint version)
+{
+    ((git_push_options *)pushOptionsPtr)->version = (unsigned int)version;
+}
+
+/** unsigned int pb_parallelism*/
+JNIEXPORT void JNICALL J_MAKE_METHOD(Remote_jniPushOptionsSetPbParallelism)(JNIEnv *env, jclass obj, jlong pushOptionsPtr, jint pbParallelism)
+{
+    ((git_push_options *)pushOptionsPtr)->pb_parallelism = (unsigned int)pbParallelism;
+}
+
+/** git_strarray custom_headers*/
+JNIEXPORT void JNICALL J_MAKE_METHOD(Remote_jniPushOptionsSetCustomHeaders)(JNIEnv *env, jclass obj, jlong pushOptionsPtr, jobjectArray customHeaders)
+{
+    git_strarray * c_array = &(((git_push_options *)pushOptionsPtr)->custom_headers);
+    j_strarray_from_java(env, c_array, customHeaders);
 }
