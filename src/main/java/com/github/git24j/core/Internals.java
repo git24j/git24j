@@ -60,6 +60,16 @@ class Internals {
         int accept(AtomicLong outRemote, long repoPtr, String name, String url);
     }
 
+    @FunctionalInterface
+    interface SSIJCallback {
+        long accept(String s1, String s2, int i);
+    }
+
+    @FunctionalInterface
+    interface JISCallback {
+        int accept(long ptr, int i, String s);
+    }
+
     /** Class to hold */
     static class OidArray {
         private final List<Oid> _oids = new ArrayList<>();

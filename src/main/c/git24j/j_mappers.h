@@ -6,7 +6,7 @@
 #ifdef __cplusplus
 extern "C"
 {
-#endif
+    #endif
 
     /** Save jni objects to be passed to async callbacks. */
     typedef struct
@@ -80,7 +80,7 @@ extern "C"
      * */
     char *j_strdup(const char *src);
 
-    /** 
+    /**
      * Cast jstring to const char*, throw java error if failed.
      * throw java NullPointer error if not nullable, but jstr is null.
      * returned pointer needs to be free-ed.
@@ -96,8 +96,8 @@ extern "C"
     /** copy values of java Index.Entry object to git_index_entry struct. */
     void index_entry_from_java(JNIEnv *env, git_index_entry *c_entry, jobject entry);
 
-    /** 
-     * Create jni jbyteArray from c unsigned char array. 
+    /**
+     * Create jni jbyteArray from c unsigned char array.
      * Returned jbyteArray should be copied and then released.
      * Don't try to retain jni objects unless you know what you are doing.
      * */
@@ -109,8 +109,8 @@ extern "C"
     /** get array of pointers from long[] */
     void **j_long_array_to_pointers(JNIEnv *env, jlongArray pointers, size_t *out_len);
 
-    /** 
-     * Copy jni jbyteArray to unsigned char array. 
+    /**
+     * Copy jni jbyteArray to unsigned char array.
      * @param array jni array from which content is copied.
      * @param out_len length of the output array.
      * @return pointer to the output array.
@@ -137,7 +137,7 @@ extern "C"
     jbyteArray j_git_oid_to_bytearray(JNIEnv *env, const git_oid *c_oid);
 
     /**
-     * call `String obj.getXXX()` and get the result string. 
+     * call `String obj.getXXX()` and get the result string.
      * Note: User must free the returned string.
      */
     char *j_call_getter_string(JNIEnv *env, jclass clz, jobject obj, const char *methodName);
@@ -193,7 +193,7 @@ extern "C"
     /** FOR DEBUG: inspect object class */
     void __debug_inspect(JNIEnv *env, jobject obj);
     void __debug_inspect2(JNIEnv *env, jobject obj, const char *message, const char *fname);
-#ifdef __cplusplus
+    #ifdef __cplusplus
 }
 #endif
 #endif

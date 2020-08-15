@@ -50,6 +50,22 @@ public class Credential extends CAutoReleasable {
         }
     }
 
+    @FunctionalInterface
+    public interface AcquireCb {
+        /**
+         * Acquire credential call back
+         *
+         * @param url The resource for which we are demanding a credential.
+         * @param usernameFromUrl The username that was embedded in a "user @ host" remote url, or
+         *     NULL if not included.
+         * @param allowedTypes A bitmask stating which credential types are OK to return.
+         * @return Credential
+         * @throws GitException exception if failed to create credential
+         */
+        @Nonnull
+        Credential accept(@Nonnull String url, @Nullable String usernameFromUrl, int allowedTypes) throws GitException;
+    }
+
     protected Credential(boolean isWeak, long rawPtr) {
         super(isWeak, rawPtr);
     }
