@@ -1,0 +1,6 @@
+typedef struct {
+	char *src_refname;
+	char *dst_refname;
+	git_oid src;
+	git_oid dst;
+} git_push_update;

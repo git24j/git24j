@@ -183,7 +183,48 @@ public class Remote extends CAutoReleasable {
 
         @Override
         protected void freeOnce(long cPtr) {
-            Libgit2.jniShadowFree(cPtr);
+            jniPushUpdateFree(cPtr);
+        }
+
+        public static PushUpdate create() {
+            long ptr = jniPushUpdateNew();
+            return new PushUpdate(true, ptr);
+        }
+
+        public String getSrcRefname() {
+            return jniPushUpdateGetSrcRefname(getRawPointer());
+        }
+
+        public String getDstRefname() {
+            return jniPushUpdateGetDstRefname(getRawPointer());
+        }
+
+        @CheckForNull
+        public Oid getSrc() {
+            byte[] src = jniPushUpdateGetSrc(getRawPointer());
+            return src == null ? null : Oid.of(src);
+        }
+
+        @CheckForNull
+        public Oid getDst() {
+            byte[] dst = jniPushUpdateGetDst(getRawPointer());
+            return dst == null ? null : Oid.of(dst);
+        }
+
+        public void setSrcRefname(@Nonnull String srcRefname) {
+            jniPushUpdateSetSrcRefname(getRawPointer(), srcRefname);
+        }
+
+        public void setDstRefname(@Nonnull String dstRefname) {
+            jniPushUpdateSetDstRefname(getRawPointer(), dstRefname);
+        }
+
+        public void setSrc(@Nonnull Oid src) {
+            jniPushUpdateSetSrc(getRawPointer(), src);
+        }
+
+        public void setDst(@Nonnull Oid dst) {
+            jniPushUpdateSetDst(getRawPointer(), dst);
         }
     }
 
@@ -1387,4 +1428,24 @@ public class Remote extends CAutoReleasable {
     static native void jniPushOptionsSetPbParallelism(long push_optionsPtr, int pbParallelism);
     /**git_strarray custom_headers*/
     static native void jniPushOptionsSetCustomHeaders(long push_optionsPtr, String[] customHeaders);
+
+    /** -------- Jni Signature ---------- */
+    static native long jniPushUpdateNew();
+    static native char jniPushUpdateFree(long push_updatePtr);
+    /**char *src_refname*/
+    static native String jniPushUpdateGetSrcRefname(long push_updatePtr);
+    /**char *dst_refname*/
+    static native String jniPushUpdateGetDstRefname(long push_updatePtr);
+    /**git_oid src*/
+    static native byte[] jniPushUpdateGetSrc(long push_updatePtr);
+    /**git_oid dst*/
+    static native byte[] jniPushUpdateGetDst(long push_updatePtr);
+    /**char *src_refname*/
+    static native void jniPushUpdateSetSrcRefname(long push_updatePtr, String srcRefname);
+    /**char *dst_refname*/
+    static native void jniPushUpdateSetDstRefname(long push_updatePtr, String dstRefname);
+    /**git_oid src*/
+    static native void jniPushUpdateSetSrc(long push_updatePtr, Oid src);
+    /**git_oid dst*/
+    static native void jniPushUpdateSetDst(long push_updatePtr, Oid dst);
 }

@@ -291,4 +291,18 @@ public class RemoteTest extends TestBase {
         Remote.jniCallbacksTest(cb.getRawPointer(), cb);
         Assert.assertEquals(12, counter.get());
     }
+
+    @Test
+    public void pushUpdate() {
+        Remote.PushUpdate pushUpdate = Remote.PushUpdate.create();
+        Oid x = Oid.of("0123456789012345678901234567890123456789");
+        pushUpdate.setDst(x);
+        Assert.assertEquals(x, pushUpdate.getDst());
+        pushUpdate.setSrc(x);
+        Assert.assertEquals(x, pushUpdate.getSrc());
+        pushUpdate.setSrcRefname("src-test");
+        Assert.assertEquals("src-test", pushUpdate.getSrcRefname());
+        pushUpdate.setDstRefname("dst-test");
+        Assert.assertEquals("dst-test", pushUpdate.getDstRefname());
+    }
 }
