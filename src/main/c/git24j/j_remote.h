@@ -218,6 +218,27 @@ extern "C"
     /** git_strarray custom_headers*/
     JNIEXPORT void JNICALL J_MAKE_METHOD(Remote_jniPushOptionsSetCustomHeaders)(JNIEnv *env, jclass obj, jlong pushOptionsPtr, jobjectArray customHeaders);
 
+    /** -------- Signature of the header ---------- */
+    JNIEXPORT jlong JNICALL J_MAKE_METHOD(Remote_jniPushUpdateNew)(JNIEnv *env, jclass obj);
+    JNIEXPORT void JNICALL J_MAKE_METHOD(Remote_jniPushUpdateFree)(JNIEnv *env, jclass obj, jlong pushUpdatePtr);
+    /** char *src_refname*/
+    JNIEXPORT jstring JNICALL J_MAKE_METHOD(Remote_jniPushUpdateGetSrcRefname)(JNIEnv *env, jclass obj, jlong pushUpdatePtr);
+    /** char *dst_refname*/
+    JNIEXPORT jstring JNICALL J_MAKE_METHOD(Remote_jniPushUpdateGetDstRefname)(JNIEnv *env, jclass obj, jlong pushUpdatePtr);
+    /** git_oid src*/
+    JNIEXPORT jbyteArray JNICALL J_MAKE_METHOD(Remote_jniPushUpdateGetSrc)(JNIEnv *env, jclass obj, jlong pushUpdatePtr);
+    /** git_oid dst*/
+    JNIEXPORT jbyteArray JNICALL J_MAKE_METHOD(Remote_jniPushUpdateGetDst)(JNIEnv *env, jclass obj, jlong pushUpdatePtr);
+    /** char *src_refname*/
+    JNIEXPORT void JNICALL J_MAKE_METHOD(Remote_jniPushUpdateSetSrcRefname)(JNIEnv *env, jclass obj, jlong pushUpdatePtr, jstring srcRefname);
+    /** char *dst_refname*/
+    JNIEXPORT void JNICALL J_MAKE_METHOD(Remote_jniPushUpdateSetDstRefname)(JNIEnv *env, jclass obj, jlong pushUpdatePtr, jstring dstRefname);
+    /** git_oid src*/
+    JNIEXPORT void JNICALL J_MAKE_METHOD(Remote_jniPushUpdateSetSrc)(JNIEnv *env, jclass obj, jlong pushUpdatePtr, jobject src);
+    /** git_oid dst*/
+    JNIEXPORT void JNICALL J_MAKE_METHOD(Remote_jniPushUpdateSetDst)(JNIEnv *env, jclass obj, jlong pushUpdatePtr, jobject dst);
+
+
     #ifdef __cplusplus
 }
 #endif

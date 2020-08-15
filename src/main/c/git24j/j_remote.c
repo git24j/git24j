@@ -917,3 +917,74 @@ JNIEXPORT void JNICALL J_MAKE_METHOD(Remote_jniPushOptionsSetCustomHeaders)(JNIE
     git_strarray * c_array = &(((git_push_options *)pushOptionsPtr)->custom_headers);
     j_strarray_from_java(env, c_array, customHeaders);
 }
+
+
+/** -------- Wrapper Body ---------- */
+JNIEXPORT jlong JNICALL J_MAKE_METHOD(Remote_jniPushUpdateNew)(JNIEnv *env, jclass obj)
+{
+    git_push_update *ptr = (git_push_update *)malloc(sizeof(git_push_update));
+    ptr->dst_refname = NULL;
+    ptr->src_refname = NULL;
+    return (jlong)ptr;
+}
+
+JNIEXPORT void JNICALL J_MAKE_METHOD(Remote_jniPushUpdateFree)(JNIEnv *env, jclass obj, jlong pushUpdatePtr)
+{
+    git_push_update *ptr = (git_push_update *)pushUpdatePtr;
+    free(ptr->dst_refname);
+    free(ptr->src_refname);
+    free(ptr);
+}
+
+/** char *src_refname*/
+JNIEXPORT jstring JNICALL J_MAKE_METHOD(Remote_jniPushUpdateGetSrcRefname)(JNIEnv *env, jclass obj, jlong pushUpdatePtr)
+{
+    return (*env)->NewStringUTF(env, ((git_push_update *)pushUpdatePtr)->src_refname);
+}
+
+/** char *dst_refname*/
+JNIEXPORT jstring JNICALL J_MAKE_METHOD(Remote_jniPushUpdateGetDstRefname)(JNIEnv *env, jclass obj, jlong pushUpdatePtr)
+{
+    return (*env)->NewStringUTF(env, ((git_push_update *)pushUpdatePtr)->dst_refname);
+}
+
+/** git_oid src*/
+JNIEXPORT jbyteArray JNICALL J_MAKE_METHOD(Remote_jniPushUpdateGetSrc)(JNIEnv *env, jclass obj, jlong pushUpdatePtr)
+{
+    return j_git_oid_to_bytearray(env, &(((git_push_update *)pushUpdatePtr)->src));
+}
+
+/** git_oid dst*/
+JNIEXPORT jbyteArray JNICALL J_MAKE_METHOD(Remote_jniPushUpdateGetDst)(JNIEnv *env, jclass obj, jlong pushUpdatePtr)
+{
+    return j_git_oid_to_bytearray(env, &(((git_push_update *)pushUpdatePtr)->dst));
+}
+
+/** char *src_refname*/
+JNIEXPORT void JNICALL J_MAKE_METHOD(Remote_jniPushUpdateSetSrcRefname)(JNIEnv *env, jclass obj, jlong pushUpdatePtr, jstring srcRefname)
+{
+    git_push_update * ptr = (git_push_update *)pushUpdatePtr;
+    ptr->src_refname = j_copy_of_jstring(env, srcRefname, true);
+}
+
+/** char *dst_refname*/
+JNIEXPORT void JNICALL J_MAKE_METHOD(Remote_jniPushUpdateSetDstRefname)(JNIEnv *env, jclass obj, jlong pushUpdatePtr, jstring dstRefname)
+{
+    git_push_update * ptr = (git_push_update *)pushUpdatePtr;
+    ptr->dst_refname = j_copy_of_jstring(env, dstRefname, true);
+}
+
+/** git_oid src*/
+JNIEXPORT void JNICALL J_MAKE_METHOD(Remote_jniPushUpdateSetSrc)(JNIEnv *env, jclass obj, jlong pushUpdatePtr, jobject src)
+{
+    git_push_update * ptr = (git_push_update *)pushUpdatePtr;
+    j_git_oid_from_java(env, src, &ptr->src);
+}
+
+/** git_oid dst*/
+JNIEXPORT void JNICALL J_MAKE_METHOD(Remote_jniPushUpdateSetDst)(JNIEnv *env, jclass obj, jlong pushUpdatePtr, jobject dst)
+{
+    git_push_update * ptr = (git_push_update *)pushUpdatePtr;
+    j_git_oid_from_java(env, dst, &ptr->dst);
+}
+
