@@ -30,3 +30,6 @@ int git_submodule_update_init_options(git_submodule_update_options *opts, unsign
 git_submodule_update_t git_submodule_update_strategy(git_submodule *submodule);
 const char * git_submodule_url(git_submodule *submodule);
 const git_oid * git_submodule_wd_id(git_submodule *submodule);
+
+int git_submodule_clone(git_repository **out, git_submodule *submodule, const git_submodule_update_options *opts);
+int git_submodule_update_options_init(git_submodule_update_options *opts, unsigned int version);

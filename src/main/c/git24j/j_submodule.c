@@ -21,7 +21,7 @@ int j_git_submodule_cb(git_submodule *sm, const char *name, void *payload)
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Submodule_jniForeach)(JNIEnv *env, jclass obj, jlong repoPtr, jobject foreachCb)
 {
     assert(foreachCb && "Call Submodule::foreach with empty callback does not make any sense");
-    j_cb_payload payload = {0};
+    j_cb_payload payload ={ 0 };
     j_cb_payload_init(env, &payload, foreachCb, "(Ljava/lang/String;J)I");
     int r = git_submodule_foreach((git_repository *)repoPtr, j_git_submodule_cb, &payload);
     j_cb_payload_release(env, &payload);
@@ -173,7 +173,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Submodule_jniRepoInit)(JNIEnv *env, jclass 
 /** int git_submodule_resolve_url(git_buf *out, git_repository *repo, const char *url); */
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Submodule_jniResolveUrl)(JNIEnv *env, jclass obj, jobject out, jlong repoPtr, jstring url)
 {
-    git_buf c_out = {0};
+    git_buf c_out ={ 0 };
     char *c_url = j_copy_of_jstring(env, url, true);
     int r = git_submodule_resolve_url(&c_out, (git_repository *)repoPtr, c_url);
     j_git_buf_to_java(env, &c_out, out);
@@ -266,8 +266,40 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Submodule_jniUpdateInitOptions)(JNIEnv *env
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Submodule_jniUpdateOptionsNew)(JNIEnv *env, jclass obj, jobject outOpt, jint version)
 {
     git_submodule_update_options *opts = (git_submodule_update_options *)malloc(sizeof(git_submodule_update_options));
-    return git_submodule_update_init_options(opts, version);
+    int r = git_submodule_update_init_options(opts, version);
+    (*env)->CallVoidMethod(env, outOpt, jniConstants->midAtomicLongSet, (long)opts);
+    return r;
 }
+/** unsigned int version*/
+JNIEXPORT jint JNICALL J_MAKE_METHOD(Submodule_jniUpdateOptionsGetVersion)(JNIEnv *env, jclass obj, jlong updateOptionsPtr)
+{
+    return ((git_submodule_update_options *)updateOptionsPtr)->version;
+}
+
+/** git_checkout_options *checkout_opts*/
+JNIEXPORT jlong JNICALL J_MAKE_METHOD(Submodule_jniUpdateOptionsGetCheckoutOpts)(JNIEnv *env, jclass obj, jlong updateOptionsPtr)
+{
+    return (jlong) & (((git_submodule_update_options *)updateOptionsPtr)->checkout_opts);
+}
+
+/** git_fetch_options *fetch_opts*/
+JNIEXPORT jlong JNICALL J_MAKE_METHOD(Submodule_jniUpdateOptionsGetFetchOpts)(JNIEnv *env, jclass obj, jlong updateOptionsPtr)
+{
+    return (jlong) & (((git_submodule_update_options *)updateOptionsPtr)->fetch_opts);
+}
+
+/** int allow_fetch*/
+JNIEXPORT jint JNICALL J_MAKE_METHOD(Submodule_jniUpdateOptionsGetAllowFetch)(JNIEnv *env, jclass obj, jlong updateOptionsPtr)
+{
+    return ((git_submodule_update_options *)updateOptionsPtr)->allow_fetch;
+}
+
+/** int allow_fetch*/
+JNIEXPORT void JNICALL J_MAKE_METHOD(Submodule_jniUpdateOptionsSetAllowFetch)(JNIEnv *env, jclass obj, jlong updateOptionsPtr, jint allowFetch)
+{
+    ((git_submodule_update_options *)updateOptionsPtr)->allow_fetch = (int)allowFetch;
+}
+
 
 /** git_submodule_update_t git_submodule_update_strategy(git_submodule *submodule); */
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Submodule_jniUpdateStrategy)(JNIEnv *env, jclass obj, jlong submodulePtr)
@@ -288,4 +320,13 @@ JNIEXPORT jbyteArray JNICALL J_MAKE_METHOD(Submodule_jniWdId)(JNIEnv *env, jclas
 {
     const git_oid *c_oid = git_submodule_wd_id((git_submodule *)submodulePtr);
     return j_git_oid_to_bytearray(env, c_oid);
+}
+
+/** int git_submodule_clone(git_repository **out, git_submodule *submodule, const git_submodule_update_options *opts); */
+JNIEXPORT jint JNICALL J_MAKE_METHOD(Submodule_jniClone)(JNIEnv *env, jclass obj, jobject out, jlong submodulePtr, jlong optsPtr)
+{
+    git_repository *c_out;
+    int r = git_submodule_clone(&c_out, (git_submodule *)submodulePtr, (git_submodule_update_options *)optsPtr);
+    (*env)->CallVoidMethod(env, out, jniConstants->midAtomicLongSet, (long)c_out);
+    return r;
 }

@@ -227,7 +227,7 @@ public class Submodule extends CAutoReleasable {
     }
 
     public static class UpdateOptions extends CAutoReleasable {
-        public static final int CURRENT_VERSIOn = 1;
+        public static final int VERSION = 1;
 
         protected UpdateOptions(boolean isWeak, long rawPtr) {
             super(isWeak, rawPtr);
@@ -243,6 +243,38 @@ public class Submodule extends CAutoReleasable {
             UpdateOptions opts = new UpdateOptions(false, 0);
             Error.throwIfNeeded(jniUpdateOptionsNew(opts._rawPtr, version));
             return opts;
+        }
+        public static UpdateOptions createDefault() {
+            return create(VERSION);
+        }
+
+        /**unsigned int version*/
+        public int getVersion() {
+            return jniUpdateOptionsGetVersion(getRawPointer());
+        }
+
+        /**git_checkout_options *checkout_opts*/
+        @Nonnull
+        public Checkout.Options getCheckoutOpts() {
+            long ptr = jniUpdateOptionsGetCheckoutOpts(getRawPointer());
+            return new Checkout.Options(true, ptr);
+        }
+
+        /**git_fetch_options *fetch_opts*/
+        @Nonnull
+        public FetchOptions getFetchOpts() {
+            long ptr = jniUpdateOptionsGetFetchOpts(getRawPointer());
+            return new FetchOptions(true, ptr);
+        }
+
+        /**int allow_fetch*/
+        public boolean getAllowFetch() {
+            return jniUpdateOptionsGetAllowFetch(getRawPointer()) != 0;
+        }
+
+        /**int allow_fetch*/
+        public void setAllowFetch(boolean allowFetch) {
+            jniUpdateOptionsSetAllowFetch(getRawPointer(), allowFetch ? 1 : 0);
         }
     }
 
@@ -852,6 +884,19 @@ public class Submodule extends CAutoReleasable {
     }
 
     static native int jniUpdateOptionsNew(AtomicLong outPtr, int version);
+
+    /**unsigned int version*/
+    static native int jniUpdateOptionsGetVersion(long update_optionsPtr);
+    /**git_checkout_options *checkout_opts*/
+    static native long jniUpdateOptionsGetCheckoutOpts(long update_optionsPtr);
+    /**git_fetch_options *fetch_opts*/
+    static native long jniUpdateOptionsGetFetchOpts(long update_optionsPtr);
+    /**int allow_fetch*/
+    static native int jniUpdateOptionsGetAllowFetch(long update_optionsPtr);
+    /**git_checkout_options *checkout_opts*/
+    static native void jniUpdateOptionsSetCheckoutOpts(long update_optionsPtr, long checkoutOpts);
+    /**int allow_fetch*/
+    static native void jniUpdateOptionsSetAllowFetch(long update_optionsPtr, int allowFetch);
 
     /** git_submodule_update_t git_submodule_update_strategy(git_submodule *submodule); */
     static native int jniUpdateStrategy(long submodule);
