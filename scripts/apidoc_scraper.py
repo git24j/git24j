@@ -19,12 +19,25 @@ def get_all_functions(api_json: dict, module_name: str) -> List[str]:
             return x[1]
 
 
+def get_non_documented_function(scrapped: List[str], api_doc_path: str):
+    c = open(api_doc_path).read()
+    not_documented = []
+    for x in scrapped:
+        if x not in c:
+            not_documented.append(x)
+    if not_documented:
+        print("----------- following functions are not documented ------------ ")
+        print("\n".join(not_documented))
+
+
 def get_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog='scrap')
     parser.add_argument('-m', '--module', help='which module to scrap')
     parser.add_argument(
         '-o', '--outtype', default='all',
         help='choose output type', choices=['modules', 'functions'])
+    parser.add_argument('-d', '--diff-doc', 
+        help='find out functions that are not documented (likely not implemented) in the _git2_apis')
     return parser
 
 
@@ -40,7 +53,10 @@ def main(args):
         if not ns.module:
             print("ERROR: module name must be provided to scrap functions")
         functions = get_all_functions(api_json, ns.module)
-        print('\n'.join(functions))
+        if ns.diff_doc:
+            get_non_documented_function(functions, ns.diff_doc)
+        else:
+            print('\n'.join(functions))
 
 
 if __name__ == "__main__":

@@ -9,7 +9,7 @@
 #ifdef __cplusplus
 extern "C"
 {
-#endif
+    #endif
 
     int j_git_submodule_cb(git_submodule *sm, const char *name, void *payload);
     // no matching type found for 'git_submodule_cb callback'
@@ -101,6 +101,14 @@ extern "C"
     /** int git_submodule_update_init_options(git_submodule_update_options *opts, unsigned int version); */
     JNIEXPORT jint JNICALL J_MAKE_METHOD(Submodule_jniUpdateInitOptions)(JNIEnv *env, jclass obj, jlong optsPtr, jint version);
     JNIEXPORT jint JNICALL J_MAKE_METHOD(Submodule_jniUpdateOptionsNew)(JNIEnv *env, jclass obj, jobject outOpt, jint version);
+    /** git_checkout_options *checkout_opts*/
+    JNIEXPORT jlong JNICALL J_MAKE_METHOD(Submodule_jniUpdateOptionsGetCheckoutOpts)(JNIEnv *env, jclass obj, jlong updateOptionsPtr);
+    /** git_fetch_options *fetch_opts*/
+    JNIEXPORT jlong JNICALL J_MAKE_METHOD(Submodule_jniUpdateOptionsGetFetchOpts)(JNIEnv *env, jclass obj, jlong updateOptionsPtr);
+    /** int allow_fetch*/
+    JNIEXPORT jint JNICALL J_MAKE_METHOD(Submodule_jniUpdateOptionsGetAllowFetch)(JNIEnv *env, jclass obj, jlong updateOptionsPtr);
+    /** int allow_fetch*/
+    JNIEXPORT void JNICALL J_MAKE_METHOD(Submodule_jniUpdateOptionsSetAllowFetch)(JNIEnv *env, jclass obj, jlong updateOptionsPtr, jint allowFetch);
 
     /** git_submodule_update_t git_submodule_update_strategy(git_submodule *submodule); */
     JNIEXPORT jint JNICALL J_MAKE_METHOD(Submodule_jniUpdateStrategy)(JNIEnv *env, jclass obj, jlong submodulePtr);
@@ -111,7 +119,11 @@ extern "C"
     /** const git_oid * git_submodule_wd_id(git_submodule *submodule); */
     JNIEXPORT jbyteArray JNICALL J_MAKE_METHOD(Submodule_jniWdId)(JNIEnv *env, jclass obj, jlong submodulePtr);
 
-#ifdef __cplusplus
+    /** int git_submodule_clone(git_repository **out, git_submodule *submodule, const git_submodule_update_options *opts); */
+    JNIEXPORT jint JNICALL J_MAKE_METHOD(Submodule_jniClone)(JNIEnv *env, jclass obj, jobject out, jlong submodulePtr, jlong optsPtr);
+
+
+    #ifdef __cplusplus
 }
 #endif
 #endif

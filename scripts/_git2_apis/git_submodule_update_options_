@@ -1,0 +1,6 @@
+typedef struct git_submodule_update_options {
+	unsigned int version;
+	git_checkout_options *checkout_opts;
+	git_fetch_options *fetch_opts;
+	int allow_fetch;
+} git_submodule_update_options;
