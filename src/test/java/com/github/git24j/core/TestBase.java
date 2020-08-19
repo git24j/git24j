@@ -102,7 +102,8 @@ public class TestBase {
         CONFLICT("conflict"),
         MERGE1("merge1"),
         MAILMAP("mailmap"),
-        WORKTREE1("worktree1");
+        WORKTREE1("worktree1"),
+        SUBMODULE("submodule");
         private final String name;
 
         TestRepo(String name) {
