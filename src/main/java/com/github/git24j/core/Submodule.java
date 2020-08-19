@@ -1,7 +1,8 @@
 package com.github.git24j.core;
 
-import static com.github.git24j.core.GitException.ErrorCode.ENOTFOUND;
-
+import javax.annotation.CheckForNull;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.net.URI;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -9,9 +10,8 @@ import java.util.EnumSet;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
-import javax.annotation.CheckForNull;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+
+import static com.github.git24j.core.GitException.ErrorCode.ENOTFOUND;
 
 public class Submodule extends CAutoReleasable {
     protected Submodule(boolean isWeak, long rawPtr) {
@@ -244,35 +244,36 @@ public class Submodule extends CAutoReleasable {
             Error.throwIfNeeded(jniUpdateOptionsNew(opts._rawPtr, version));
             return opts;
         }
+
         public static UpdateOptions createDefault() {
             return create(VERSION);
         }
 
-        /**unsigned int version*/
+        /** unsigned int version */
         public int getVersion() {
             return jniUpdateOptionsGetVersion(getRawPointer());
         }
 
-        /**git_checkout_options *checkout_opts*/
+        /** git_checkout_options *checkout_opts */
         @Nonnull
         public Checkout.Options getCheckoutOpts() {
             long ptr = jniUpdateOptionsGetCheckoutOpts(getRawPointer());
             return new Checkout.Options(true, ptr);
         }
 
-        /**git_fetch_options *fetch_opts*/
+        /** git_fetch_options *fetch_opts */
         @Nonnull
         public FetchOptions getFetchOpts() {
             long ptr = jniUpdateOptionsGetFetchOpts(getRawPointer());
             return new FetchOptions(true, ptr);
         }
 
-        /**int allow_fetch*/
+        /** int allow_fetch */
         public boolean getAllowFetch() {
             return jniUpdateOptionsGetAllowFetch(getRawPointer()) != 0;
         }
 
-        /**int allow_fetch*/
+        /** int allow_fetch */
         public void setAllowFetch(boolean allowFetch) {
             jniUpdateOptionsSetAllowFetch(getRawPointer(), allowFetch ? 1 : 0);
         }
@@ -312,6 +313,8 @@ public class Submodule extends CAutoReleasable {
      * @param callback Function to be called with the name of each submodule. Return a non-zero
      *     value to terminate the iteration.
      * @throws GitException git errors
+     * @apiNote {@code Submodule} captured in the callback is a weak reference and become unusable
+     *     outside of the callback closure.
      */
     public static void foreach(@Nonnull Repository repo, @Nonnull Callback callback) {
         Error.throwIfNeeded(
@@ -570,7 +573,7 @@ public class Submodule extends CAutoReleasable {
      *     other errors.
      */
     @Nonnull
-    public Optional<Submodule> lookup(@Nonnull Repository repo, @Nonnull String name) {
+    public static Optional<Submodule> lookup(@Nonnull Repository repo, @Nonnull String name) {
         Submodule out = new Submodule(false, 0);
         int e = jniLookup(out._rawPtr, repo.getRawPointer(), name);
         if (ENOTFOUND.getCode() == e) {
@@ -834,9 +837,14 @@ public class Submodule extends CAutoReleasable {
      * @throws GitException git errors
      */
     public static EnumSet<StatusT> status(
-            @Nonnull Repository repo, @Nonnull String name, @Nonnull IgnoreT ignore) {
+            @Nonnull Repository repo, @Nonnull String name, @Nullable IgnoreT ignore) {
         AtomicInteger out = new AtomicInteger();
-        Error.throwIfNeeded(jniStatus(out, repo.getRawPointer(), name, ignore.getBit()));
+        Error.throwIfNeeded(
+                jniStatus(
+                        out,
+                        repo.getRawPointer(),
+                        name,
+                        ignore == null ? IgnoreT.UNSPECIFIED.getBit() : ignore.getBit()));
         return IBitEnum.parse(out.get(), StatusT.class);
     }
 
@@ -885,17 +893,17 @@ public class Submodule extends CAutoReleasable {
 
     static native int jniUpdateOptionsNew(AtomicLong outPtr, int version);
 
-    /**unsigned int version*/
+    /** unsigned int version */
     static native int jniUpdateOptionsGetVersion(long update_optionsPtr);
-    /**git_checkout_options *checkout_opts*/
+    /** git_checkout_options *checkout_opts */
     static native long jniUpdateOptionsGetCheckoutOpts(long update_optionsPtr);
-    /**git_fetch_options *fetch_opts*/
+    /** git_fetch_options *fetch_opts */
     static native long jniUpdateOptionsGetFetchOpts(long update_optionsPtr);
-    /**int allow_fetch*/
+    /** int allow_fetch */
     static native int jniUpdateOptionsGetAllowFetch(long update_optionsPtr);
-    /**git_checkout_options *checkout_opts*/
+    /** git_checkout_options *checkout_opts */
     static native void jniUpdateOptionsSetCheckoutOpts(long update_optionsPtr, long checkoutOpts);
-    /**int allow_fetch*/
+    /** int allow_fetch */
     static native void jniUpdateOptionsSetAllowFetch(long update_optionsPtr, int allowFetch);
 
     /** git_submodule_update_t git_submodule_update_strategy(git_submodule *submodule); */
@@ -942,5 +950,31 @@ public class Submodule extends CAutoReleasable {
      */
     public Optional<Oid> wdId() {
         return Optional.ofNullable(jniWdId(getRawPointer())).map(Oid::of);
+    }
+
+    /**
+     * int git_submodule_clone(git_repository **out, git_submodule *submodule, const
+     * git_submodule_update_options *opts);
+     */
+    static native int jniClone(AtomicLong out, long submodule, long opts);
+
+    /**
+     * Perform the clone step for a newly created submodule.
+     *
+     * <p>This performs the necessary `git_clone` to setup a newly-created submodule.
+     *
+     * @param updateOptions The options to use.
+     * @return The newly created repository object. Optional.
+     */
+    @Nonnull
+    public Repository clone(@Nullable UpdateOptions updateOptions) {
+        Repository out = new Repository(0);
+        int e =
+                jniClone(
+                        out._rawPtr,
+                        getRawPointer(),
+                        updateOptions == null ? 0 : updateOptions.getRawPointer());
+        Error.throwIfNeeded(e);
+        return out;
     }
 }

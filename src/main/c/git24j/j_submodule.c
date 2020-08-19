@@ -127,7 +127,8 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Submodule_jniLookup)(JNIEnv *env, jclass ob
 /** const char * git_submodule_name(git_submodule *submodule); */
 JNIEXPORT jstring JNICALL J_MAKE_METHOD(Submodule_jniName)(JNIEnv *env, jclass obj, jlong submodulePtr)
 {
-    const char *r = git_submodule_name((git_submodule *)submodulePtr);
+    git_submodule *sm = (git_submodule *)submodulePtr;
+    const char *r = git_submodule_name(sm);
     return (*env)->NewStringUTF(env, r);
 }
 
