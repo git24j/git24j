@@ -20,6 +20,13 @@ extern "C"
     /** unsigned char hash_sha256[32]*/
     JNIEXPORT jbyteArray JNICALL J_MAKE_METHOD(Cert_jniHostkeyGetHashSha256)(JNIEnv *env, jclass obj, jlong hostkeyPtr);
 
+    /** create empty hostkey struct for testing*/
+    JNIEXPORT jlong JNICALL J_MAKE_METHOD(Cert_jniHostkeyCreateEmptyForTesting)(JNIEnv *env, jclass obj);
+
+    /** -------- X509 ---------- */
+    /** git_cert parent*/
+    JNIEXPORT jlong JNICALL J_MAKE_METHOD(Cert_jniX509GetParent)(JNIEnv *env, jclass obj, jlong x509Ptr);
+
 #ifdef __cplusplus
 }
 #endif

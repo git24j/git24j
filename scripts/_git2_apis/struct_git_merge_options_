@@ -1,0 +1,11 @@
+typedef struct {
+	unsigned int version;
+	uint32_t flags;
+	unsigned int rename_threshold;
+	unsigned int target_limit;
+	git_diff_similarity_metric *metric;
+	unsigned int recursion_limit;
+	const char *default_driver;
+	git_merge_file_favor_t file_favor;
+	uint32_t file_flags;
+} git_merge_options;

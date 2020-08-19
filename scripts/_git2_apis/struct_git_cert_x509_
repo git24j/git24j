@@ -1,0 +1,5 @@
+typedef struct {
+	git_cert parent;
+	void *data;
+	size_t len;
+} git_cert_x509;

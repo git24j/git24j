@@ -1,0 +1,9 @@
+typedef struct {
+	unsigned int version;
+	const char *ancestor_label;
+	const char *our_label;
+	const char *their_label;
+	git_merge_file_favor_t favor;
+	uint32_t flags;
+	int marker_size;
+} git_merge_file_options;
