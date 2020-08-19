@@ -14,3 +14,6 @@ void git_merge_file_result_free(git_merge_file_result *result);
 int git_merge_trees(git_index **out, git_repository *repo, const git_tree *ancestor_tree, const git_tree *our_tree, const git_tree *their_tree, const git_merge_options *opts);
 int git_merge_commits(git_index **out, git_repository *repo, const git_commit *our_commit, const git_commit *their_commit, const git_merge_options *opts);
 int git_merge_create(git_repository *repo, const git_annotated_commit **their_heads, size_t their_heads_len, const git_merge_options *merge_opts, const git_checkout_options *checkout_opts);
+int git_merge_file_input_init(git_merge_file_input *opts, unsigned int version);
+int git_merge_file_options_init(git_merge_file_options *opts, unsigned int version);
+int git_merge_options_init(git_merge_options *opts, unsigned int version);

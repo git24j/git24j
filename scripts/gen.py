@@ -43,6 +43,7 @@ if __name__ == "__main__":
         sig_str = [ns.string.strip()]
     elif ns.file:
         sig_str = [s.strip() for s in open(ns.file).readlines() if '#' not in s]
+        sig_str = [s for s in sig_str if s]
 
     output = generate(sig_str)
     if ns.outtype == 'header' or ns.outtype == 'all':

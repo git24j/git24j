@@ -38,3 +38,16 @@ JNIEXPORT jbyteArray JNICALL J_MAKE_METHOD(Cert_jniHostkeyGetHashSha256)(JNIEnv 
 {
     return j_byte_array_from_c(env, ((git_cert_hostkey *)hostkeyPtr)->hash_sha256, 32);
 }
+
+/** create empty hostkey struct for testing*/
+JNIEXPORT jlong JNICALL J_MAKE_METHOD(Cert_jniHostkeyCreateEmptyForTesting)(JNIEnv *env, jclass obj)
+{
+    git_cert *cert = (git_cert *)malloc(sizeof(git_cert));
+    return (jlong)cert;
+}
+
+/** git_cert parent*/
+JNIEXPORT jlong JNICALL J_MAKE_METHOD(Cert_jniX509GetParent)(JNIEnv *env, jclass obj, jlong x509Ptr)
+{
+    return (jlong) & (((git_cert_x509 *)x509Ptr)->parent);
+}

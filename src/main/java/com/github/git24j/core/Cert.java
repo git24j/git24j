@@ -1,5 +1,7 @@
 package com.github.git24j.core;
 
+import javax.annotation.CheckForNull;
+import javax.annotation.Nonnull;
 import java.util.EnumSet;
 
 public class Cert extends CAutoReleasable {
@@ -55,9 +57,10 @@ public class Cert extends CAutoReleasable {
         }
 
         /** Note: returned Cert only valid when HostKey is not freed */
+        @CheckForNull
         public Cert getParent() {
             long ptr = jniHostkeyGetParent(getRawPointer());
-            return new Cert(true, ptr);
+            return ptr == 0 ? null : new Cert(true, ptr);
         }
 
         public EnumSet<SshT> getType() {
@@ -75,6 +78,28 @@ public class Cert extends CAutoReleasable {
         public byte[] getHashSha256() {
             return jniHostkeyGetHashSha256(getRawPointer());
         }
+
+        @Nonnull
+        static HostKey createEmpty() {
+            return new HostKey(false, jniHostkeyCreateEmptyForTesting());
+        }
+    }
+
+    public static class X509 extends CAutoReleasable {
+        protected X509(boolean isWeak, long rawPtr) {
+            super(isWeak, rawPtr);
+        }
+
+        @Override
+        protected void freeOnce(long cPtr) {
+            Libgit2.jniShadowFree(cPtr);
+        }
+
+        @CheckForNull
+        public Cert getParent() {
+            long ptr = jniX509GetParent(getRawPointer());
+            return ptr == 0 ? null : new Cert(true, ptr);
+        }
     }
 
     /** git_cert parent */
@@ -87,6 +112,12 @@ public class Cert extends CAutoReleasable {
     static native byte[] jniHostkeyGetHashSha1(long hostkeyPtr);
     /** unsigned char hash_sha256[32] */
     static native byte[] jniHostkeyGetHashSha256(long hostkeyPtr);
+
+    /** create empty hostkey struct for testing */
+    static native long jniHostkeyCreateEmptyForTesting();
+
+    /** git_cert parent */
+    static native long jniX509GetParent(long x509Ptr);
 
     @Override
     protected void freeOnce(long cPtr) {

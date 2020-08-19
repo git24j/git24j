@@ -1,15 +1,15 @@
 package com.github.git24j.core;
 
-import static com.github.git24j.core.GitException.ErrorCode.ENOTFOUND;
-import static com.github.git24j.core.Internals.OidArray;
-
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+
+import static com.github.git24j.core.GitException.ErrorCode.ENOTFOUND;
+import static com.github.git24j.core.Internals.OidArray;
 
 /** Git merge util functions, all are static */
 public class Merge {
@@ -36,6 +36,45 @@ public class Merge {
             FileInput out = new FileInput(false, 0);
             Error.throwIfNeeded(jniFileInputNew(out._rawPtr, version));
             return out;
+        }
+        public int getVersion() {
+            return jniFileInputGetVersion(getRawPointer());
+        }
+
+        public String getPtr() {
+            return jniFileInputGetPtr(getRawPointer());
+        }
+
+        public int getSize() {
+            return jniFileInputGetSize(getRawPointer());
+        }
+
+        public String getPath() {
+            return jniFileInputGetPath(getRawPointer());
+        }
+
+        public int getMode() {
+            return jniFileInputGetMode(getRawPointer());
+        }
+
+        public void setVersion(int version) {
+            jniFileInputSetVersion(getRawPointer(), version);
+        }
+
+        public void setPtr(String ptr) {
+            jniFileInputSetPtr(getRawPointer(), ptr);
+        }
+
+        public void setSize(int size) {
+            jniFileInputSetSize(getRawPointer(), size);
+        }
+
+        public void setPath(String path) {
+            jniFileInputSetPath(getRawPointer(), path);
+        }
+
+        public void setMode(int mode) {
+            jniFileInputSetMode(getRawPointer(), mode);
         }
     }
 
@@ -174,6 +213,62 @@ public class Merge {
             Error.throwIfNeeded(jniFileOptionsNew(opts._rawPtr, version));
             return opts;
         }
+
+        public int getVersion() {
+            return jniFileOptionsGetVersion(getRawPointer());
+        }
+
+        public String getAncestorLabel() {
+            return jniFileOptionsGetAncestorLabel(getRawPointer());
+        }
+
+        public String getOurLabel() {
+            return jniFileOptionsGetOurLabel(getRawPointer());
+        }
+
+        public String getTheirLabel() {
+            return jniFileOptionsGetTheirLabel(getRawPointer());
+        }
+
+        public int getFavor() {
+            return jniFileOptionsGetFavor(getRawPointer());
+        }
+
+        public int getFlags() {
+            return jniFileOptionsGetFlags(getRawPointer());
+        }
+
+        public int getMarkerSize() {
+            return jniFileOptionsGetMarkerSize(getRawPointer());
+        }
+
+        public void setVersion(int version) {
+            jniFileOptionsSetVersion(getRawPointer(), version);
+        }
+
+        public void setAncestorLabel(String ancestorLabel) {
+            jniFileOptionsSetAncestorLabel(getRawPointer(), ancestorLabel);
+        }
+
+        public void setOurLabel(String ourLabel) {
+            jniFileOptionsSetOurLabel(getRawPointer(), ourLabel);
+        }
+
+        public void setTheirLabel(String theirLabel) {
+            jniFileOptionsSetTheirLabel(getRawPointer(), theirLabel);
+        }
+
+        public void setFavor(int favor) {
+            jniFileOptionsSetFavor(getRawPointer(), favor);
+        }
+
+        public void setFlags(int flags) {
+            jniFileOptionsSetFlags(getRawPointer(), flags);
+        }
+
+        public void setMarkerSize(int markerSize) {
+            jniFileOptionsSetMarkerSize(getRawPointer(), markerSize);
+        }
     }
 
     public static class FileResult extends CAutoReleasable {
@@ -206,6 +301,78 @@ public class Merge {
             Options out = new Options(false, 0);
             Error.throwIfNeeded(jniOptionsNew(out._rawPtr, version));
             return out;
+        }
+
+        public int getVersion() {
+            return jniOptionsGetVersion(getRawPointer());
+        }
+
+        public int getFlags() {
+            return jniOptionsGetFlags(getRawPointer());
+        }
+
+        public int getRenameThreshold() {
+            return jniOptionsGetRenameThreshold(getRawPointer());
+        }
+
+        public int getTargetLimit() {
+            return jniOptionsGetTargetLimit(getRawPointer());
+        }
+
+        public long getMetric() {
+            return jniOptionsGetMetric(getRawPointer());
+        }
+
+        public int getRecursionLimit() {
+            return jniOptionsGetRecursionLimit(getRawPointer());
+        }
+
+        public String getDefaultDriver() {
+            return jniOptionsGetDefaultDriver(getRawPointer());
+        }
+
+        public int getFileFavor() {
+            return jniOptionsGetFileFavor(getRawPointer());
+        }
+
+        public int getFileFlags() {
+            return jniOptionsGetFileFlags(getRawPointer());
+        }
+
+        public void setVersion(int version) {
+            jniOptionsSetVersion(getRawPointer(), version);
+        }
+
+        public void setFlags(int flags) {
+            jniOptionsSetFlags(getRawPointer(), flags);
+        }
+
+        public void setRenameThreshold(int renameThreshold) {
+            jniOptionsSetRenameThreshold(getRawPointer(), renameThreshold);
+        }
+
+        public void setTargetLimit(int targetLimit) {
+            jniOptionsSetTargetLimit(getRawPointer(), targetLimit);
+        }
+
+        public void setMetric(long metric) {
+            jniOptionsSetMetric(getRawPointer(), metric);
+        }
+
+        public void setRecursionLimit(int recursionLimit) {
+            jniOptionsSetRecursionLimit(getRawPointer(), recursionLimit);
+        }
+
+        public void setDefaultDriver(String defaultDriver) {
+            jniOptionsSetDefaultDriver(getRawPointer(), defaultDriver);
+        }
+
+        public void setFileFavor(int fileFavor) {
+            jniOptionsSetFileFavor(getRawPointer(), fileFavor);
+        }
+
+        public void setFileFlags(int fileFlags) {
+            jniOptionsSetFileFlags(getRawPointer(), fileFlags);
         }
     }
 
@@ -688,4 +855,94 @@ public class Merge {
                         CAutoReleasable.rawPtr(mergeOpts),
                         CAutoReleasable.rawPtr(checkoutOpts)));
     }
+
+    /** -------- Jni Signature ---------- */
+    /** unsigned int version */
+    static native int jniOptionsGetVersion(long optionsPtr);
+    /** uint32_t flags */
+    static native int jniOptionsGetFlags(long optionsPtr);
+    /** unsigned int rename_threshold */
+    static native int jniOptionsGetRenameThreshold(long optionsPtr);
+    /** unsigned int target_limit */
+    static native int jniOptionsGetTargetLimit(long optionsPtr);
+    /** git_diff_similarity_metric *metric */
+    static native long jniOptionsGetMetric(long optionsPtr);
+    /** unsigned int recursion_limit */
+    static native int jniOptionsGetRecursionLimit(long optionsPtr);
+    /** const char *default_driver */
+    static native String jniOptionsGetDefaultDriver(long optionsPtr);
+    /** git_merge_file_favor_t file_favor */
+    static native int jniOptionsGetFileFavor(long optionsPtr);
+    /** uint32_t file_flags */
+    static native int jniOptionsGetFileFlags(long optionsPtr);
+    /** unsigned int version */
+    static native void jniOptionsSetVersion(long optionsPtr, int version);
+    /** uint32_t flags */
+    static native void jniOptionsSetFlags(long optionsPtr, int flags);
+    /** unsigned int rename_threshold */
+    static native void jniOptionsSetRenameThreshold(long optionsPtr, int renameThreshold);
+    /** unsigned int target_limit */
+    static native void jniOptionsSetTargetLimit(long optionsPtr, int targetLimit);
+    /** git_diff_similarity_metric *metric */
+    static native void jniOptionsSetMetric(long optionsPtr, long metric);
+    /** unsigned int recursion_limit */
+    static native void jniOptionsSetRecursionLimit(long optionsPtr, int recursionLimit);
+    /** const char *default_driver */
+    static native void jniOptionsSetDefaultDriver(long optionsPtr, String defaultDriver);
+    /** git_merge_file_favor_t file_favor */
+    static native void jniOptionsSetFileFavor(long optionsPtr, int fileFavor);
+    /** uint32_t file_flags */
+    static native void jniOptionsSetFileFlags(long optionsPtr, int fileFlags);
+
+    /** -------- Jni Signature ---------- */
+    /** unsigned int version */
+    static native int jniFileOptionsGetVersion(long file_optionsPtr);
+    /** const char *ancestor_label */
+    static native String jniFileOptionsGetAncestorLabel(long file_optionsPtr);
+    /** const char *our_label */
+    static native String jniFileOptionsGetOurLabel(long file_optionsPtr);
+    /** const char *their_label */
+    static native String jniFileOptionsGetTheirLabel(long file_optionsPtr);
+    /** git_merge_file_favor_t favor */
+    static native int jniFileOptionsGetFavor(long file_optionsPtr);
+    /** uint32_t flags */
+    static native int jniFileOptionsGetFlags(long file_optionsPtr);
+    /** int marker_size */
+    static native int jniFileOptionsGetMarkerSize(long file_optionsPtr);
+    /** unsigned int version */
+    static native void jniFileOptionsSetVersion(long file_optionsPtr, int version);
+    /** const char *ancestor_label */
+    static native void jniFileOptionsSetAncestorLabel(long file_optionsPtr, String ancestorLabel);
+    /** const char *our_label */
+    static native void jniFileOptionsSetOurLabel(long file_optionsPtr, String ourLabel);
+    /** const char *their_label */
+    static native void jniFileOptionsSetTheirLabel(long file_optionsPtr, String theirLabel);
+    /** git_merge_file_favor_t favor */
+    static native void jniFileOptionsSetFavor(long file_optionsPtr, int favor);
+    /** uint32_t flags */
+    static native void jniFileOptionsSetFlags(long file_optionsPtr, int flags);
+    /** int marker_size */
+    static native void jniFileOptionsSetMarkerSize(long file_optionsPtr, int markerSize);
+
+    /** -------- Jni Signature ---------- */
+    /** unsigned int version */
+    static native int jniFileInputGetVersion(long file_inputPtr);
+    /** const char *ptr */
+    static native String jniFileInputGetPtr(long file_inputPtr);
+    /** size_t size */
+    static native int jniFileInputGetSize(long file_inputPtr);
+    /** const char *path */
+    static native String jniFileInputGetPath(long file_inputPtr);
+    /** int mode */
+    static native int jniFileInputGetMode(long file_inputPtr);
+    /** unsigned int version */
+    static native void jniFileInputSetVersion(long file_inputPtr, int version);
+    /** const char *ptr */
+    static native void jniFileInputSetPtr(long file_inputPtr, String ptr);
+    /** size_t size */
+    static native void jniFileInputSetSize(long file_inputPtr, int size);
+    /** const char *path */
+    static native void jniFileInputSetPath(long file_inputPtr, String path);
+    /** int mode */
+    static native void jniFileInputSetMode(long file_inputPtr, int mode);
 }

@@ -14,6 +14,13 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Merge_jniFileInitInput)(JNIEnv *env, jclass
     return r;
 }
 
+/** int git_merge_file_input_init(git_merge_file_input *opts, unsigned int version); */
+JNIEXPORT jint JNICALL J_MAKE_METHOD(Merge_jniFileInputInit)(JNIEnv *env, jclass obj, jlong optsPtr, jint version)
+{
+    int r = git_merge_file_input_init((git_merge_file_input *)optsPtr, version);
+    return r;
+}
+
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Merge_jniFileInputNew)(JNIEnv *env, jclass obj, jobject outOpts, jint version)
 {
     git_merge_file_input *opts = (git_merge_file_input *)malloc(sizeof(git_merge_file_input));
@@ -27,6 +34,66 @@ JNIEXPORT void JNICALL J_MAKE_METHOD(Merge_jniFileInputFree)(JNIEnv *env, jclass
     free((git_merge_file_input *)optsPtr);
 }
 
+/** unsigned int version*/
+JNIEXPORT jint JNICALL J_MAKE_METHOD(Merge_jniFileInputGetVersion)(JNIEnv *env, jclass obj, jlong fileInputPtr)
+{
+    return ((git_merge_file_input *)fileInputPtr)->version;
+}
+
+/** const char *ptr*/
+JNIEXPORT jstring JNICALL J_MAKE_METHOD(Merge_jniFileInputGetPtr)(JNIEnv *env, jclass obj, jlong fileInputPtr)
+{
+    return (*env)->NewStringUTF(env, ((git_merge_file_input *)fileInputPtr)->ptr);
+}
+
+/** size_t size*/
+JNIEXPORT jint JNICALL J_MAKE_METHOD(Merge_jniFileInputGetSize)(JNIEnv *env, jclass obj, jlong fileInputPtr)
+{
+    return ((git_merge_file_input *)fileInputPtr)->size;
+}
+
+/** const char *path*/
+JNIEXPORT jstring JNICALL J_MAKE_METHOD(Merge_jniFileInputGetPath)(JNIEnv *env, jclass obj, jlong fileInputPtr)
+{
+    return (*env)->NewStringUTF(env, ((git_merge_file_input *)fileInputPtr)->path);
+}
+
+/** int mode*/
+JNIEXPORT jint JNICALL J_MAKE_METHOD(Merge_jniFileInputGetMode)(JNIEnv *env, jclass obj, jlong fileInputPtr)
+{
+    return ((git_merge_file_input *)fileInputPtr)->mode;
+}
+
+/** unsigned int version*/
+JNIEXPORT void JNICALL J_MAKE_METHOD(Merge_jniFileInputSetVersion)(JNIEnv *env, jclass obj, jlong fileInputPtr, jint version)
+{
+    ((git_merge_file_input *)fileInputPtr)->version = (unsigned int)version;
+}
+
+/** const char *ptr*/
+JNIEXPORT void JNICALL J_MAKE_METHOD(Merge_jniFileInputSetPtr)(JNIEnv *env, jclass obj, jlong fileInputPtr, jstring ptr)
+{
+    ((git_merge_file_input *)fileInputPtr)->ptr = j_copy_of_jstring(env, ptr, false);
+}
+
+/** size_t size*/
+JNIEXPORT void JNICALL J_MAKE_METHOD(Merge_jniFileInputSetSize)(JNIEnv *env, jclass obj, jlong fileInputPtr, jint size)
+{
+    ((git_merge_file_input *)fileInputPtr)->size = (size_t)size;
+}
+
+/** const char *path*/
+JNIEXPORT void JNICALL J_MAKE_METHOD(Merge_jniFileInputSetPath)(JNIEnv *env, jclass obj, jlong fileInputPtr, jstring path)
+{
+    ((git_merge_file_input *)fileInputPtr)->path = j_copy_of_jstring(env, path, false);
+}
+
+/** int mode*/
+JNIEXPORT void JNICALL J_MAKE_METHOD(Merge_jniFileInputSetMode)(JNIEnv *env, jclass obj, jlong fileInputPtr, jint mode)
+{
+    ((git_merge_file_input *)fileInputPtr)->mode = (int)mode;
+}
+
 /** int git_merge_file_init_options(git_merge_file_options *opts, unsigned int version); */
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Merge_jniFileInitOptions)(JNIEnv *env, jclass obj, jlong optsPtr, jint version)
 {
@@ -34,15 +101,114 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Merge_jniFileInitOptions)(JNIEnv *env, jcla
     return r;
 }
 
+/** int git_merge_file_options_init(git_merge_file_options *opts, unsigned int version); */
+JNIEXPORT jint JNICALL J_MAKE_METHOD(Merge_jniFileOptionsInit)(JNIEnv *env, jclass obj, jlong optsPtr, jint version)
+{
+    int r = git_merge_file_options_init((git_merge_file_options *)optsPtr, version);
+    return r;
+}
+
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Merge_jniFileOptionsNew)(JNIEnv *env, jclass obj, jobject outOpts, jint version)
 {
     git_merge_file_options *opts = (git_merge_file_options *)malloc(sizeof(git_merge_file_options));
+    opts->ancestor_label = NULL;
+    opts->our_label = NULL;
+    opts->their_label = NULL;
     int r = git_merge_file_init_options((git_merge_file_options *)opts, version);
     (*env)->CallVoidMethod(env, outOpts, jniConstants->midAtomicLongSet, (long)opts);
     return r;
 }
+
+/** unsigned int version*/
+JNIEXPORT jint JNICALL J_MAKE_METHOD(Merge_jniFileOptionsGetVersion)(JNIEnv *env, jclass obj, jlong fileOptionsPtr)
+{
+    return ((git_merge_file_options *)fileOptionsPtr)->version;
+}
+
+/** const char *ancestor_label*/
+JNIEXPORT jstring JNICALL J_MAKE_METHOD(Merge_jniFileOptionsGetAncestorLabel)(JNIEnv *env, jclass obj, jlong fileOptionsPtr)
+{
+    return (*env)->NewStringUTF(env, ((git_merge_file_options *)fileOptionsPtr)->ancestor_label);
+}
+
+/** const char *our_label*/
+JNIEXPORT jstring JNICALL J_MAKE_METHOD(Merge_jniFileOptionsGetOurLabel)(JNIEnv *env, jclass obj, jlong fileOptionsPtr)
+{
+    return (*env)->NewStringUTF(env, ((git_merge_file_options *)fileOptionsPtr)->our_label);
+}
+
+/** const char *their_label*/
+JNIEXPORT jstring JNICALL J_MAKE_METHOD(Merge_jniFileOptionsGetTheirLabel)(JNIEnv *env, jclass obj, jlong fileOptionsPtr)
+{
+    return (*env)->NewStringUTF(env, ((git_merge_file_options *)fileOptionsPtr)->their_label);
+}
+
+/** git_merge_file_favor_t favor*/
+JNIEXPORT jint JNICALL J_MAKE_METHOD(Merge_jniFileOptionsGetFavor)(JNIEnv *env, jclass obj, jlong fileOptionsPtr)
+{
+    return ((git_merge_file_options *)fileOptionsPtr)->favor;
+}
+
+/** uint32_t flags*/
+JNIEXPORT jint JNICALL J_MAKE_METHOD(Merge_jniFileOptionsGetFlags)(JNIEnv *env, jclass obj, jlong fileOptionsPtr)
+{
+    return ((git_merge_file_options *)fileOptionsPtr)->flags;
+}
+
+/** int marker_size*/
+JNIEXPORT jint JNICALL J_MAKE_METHOD(Merge_jniFileOptionsGetMarkerSize)(JNIEnv *env, jclass obj, jlong fileOptionsPtr)
+{
+    return ((git_merge_file_options *)fileOptionsPtr)->marker_size;
+}
+
+/** unsigned int version*/
+JNIEXPORT void JNICALL J_MAKE_METHOD(Merge_jniFileOptionsSetVersion)(JNIEnv *env, jclass obj, jlong fileOptionsPtr, jint version)
+{
+    ((git_merge_file_options *)fileOptionsPtr)->version = (unsigned int)version;
+}
+
+/** const char *ancestor_label*/
+JNIEXPORT void JNICALL J_MAKE_METHOD(Merge_jniFileOptionsSetAncestorLabel)(JNIEnv *env, jclass obj, jlong fileOptionsPtr, jstring ancestorLabel)
+{
+    ((git_merge_file_options *)fileOptionsPtr)->ancestor_label = j_copy_of_jstring(env, ancestorLabel, true);
+}
+
+/** const char *our_label*/
+JNIEXPORT void JNICALL J_MAKE_METHOD(Merge_jniFileOptionsSetOurLabel)(JNIEnv *env, jclass obj, jlong fileOptionsPtr, jstring ourLabel)
+{
+    ((git_merge_file_options *)fileOptionsPtr)->our_label = j_copy_of_jstring(env, ourLabel, true);
+}
+
+/** const char *their_label*/
+JNIEXPORT void JNICALL J_MAKE_METHOD(Merge_jniFileOptionsSetTheirLabel)(JNIEnv *env, jclass obj, jlong fileOptionsPtr, jstring theirLabel)
+{
+    ((git_merge_file_options *)fileOptionsPtr)->their_label = j_copy_of_jstring(env, theirLabel, true);
+}
+
+/** git_merge_file_favor_t favor*/
+JNIEXPORT void JNICALL J_MAKE_METHOD(Merge_jniFileOptionsSetFavor)(JNIEnv *env, jclass obj, jlong fileOptionsPtr, jint favor)
+{
+    ((git_merge_file_options *)fileOptionsPtr)->favor = (git_merge_file_favor_t)favor;
+}
+
+/** uint32_t flags*/
+JNIEXPORT void JNICALL J_MAKE_METHOD(Merge_jniFileOptionsSetFlags)(JNIEnv *env, jclass obj, jlong fileOptionsPtr, jint flags)
+{
+    ((git_merge_file_options *)fileOptionsPtr)->flags = (uint32_t)flags;
+}
+
+/** int marker_size*/
+JNIEXPORT void JNICALL J_MAKE_METHOD(Merge_jniFileOptionsSetMarkerSize)(JNIEnv *env, jclass obj, jlong fileOptionsPtr, jint markerSize)
+{
+    ((git_merge_file_options *)fileOptionsPtr)->marker_size = (int)markerSize;
+}
+
 JNIEXPORT void JNICALL J_MAKE_METHOD(Merge_jniFileOptionsFree)(JNIEnv *env, jclass obj, jlong optsPtr)
 {
+    git_merge_file_options *ptr = (git_merge_file_options *)optsPtr;
+    free((char *)ptr->ancestor_label);
+    free((char *)ptr->our_label);
+    free((char *)ptr->their_label);
     free((git_merge_file_options *)optsPtr);
 }
 
@@ -53,16 +219,139 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Merge_jniInitOptions)(JNIEnv *env, jclass o
     return r;
 }
 
+/** int git_merge_options_init(git_merge_options *opts, unsigned int version); */
+JNIEXPORT jint JNICALL J_MAKE_METHOD(Merge_jniOptionsInit)(JNIEnv *env, jclass obj, jlong optsPtr, jint version)
+{
+    int r = git_merge_options_init((git_merge_options *)optsPtr, version);
+    return r;
+}
+
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Merge_jniOptionsNew)(JNIEnv *env, jclass obj, jobject outOpts, jint version)
 {
     git_merge_options *opts = (git_merge_options *)malloc(sizeof(git_merge_options));
+    opts->default_driver = NULL;
     int r = git_merge_init_options((git_merge_options *)opts, version);
     (*env)->CallVoidMethod(env, outOpts, jniConstants->midAtomicLongSet, (long)opts);
     return r;
 }
 JNIEXPORT void JNICALL J_MAKE_METHOD(Merge_jniOptionsFree)(JNIEnv *env, jclass obj, jlong opts)
 {
-    free((git_merge_options *)opts);
+    git_merge_options *ptr = (git_merge_options *)opts;
+    free((char *)ptr->default_driver);
+    free(ptr);
+}
+
+/** unsigned int version*/
+JNIEXPORT jint JNICALL J_MAKE_METHOD(Merge_jniOptionsGetVersion)(JNIEnv *env, jclass obj, jlong optionsPtr)
+{
+    return ((git_merge_options *)optionsPtr)->version;
+}
+
+/** uint32_t flags*/
+JNIEXPORT jint JNICALL J_MAKE_METHOD(Merge_jniOptionsGetFlags)(JNIEnv *env, jclass obj, jlong optionsPtr)
+{
+    return ((git_merge_options *)optionsPtr)->flags;
+}
+
+/** unsigned int rename_threshold*/
+JNIEXPORT jint JNICALL J_MAKE_METHOD(Merge_jniOptionsGetRenameThreshold)(JNIEnv *env, jclass obj, jlong optionsPtr)
+{
+    return ((git_merge_options *)optionsPtr)->rename_threshold;
+}
+
+/** unsigned int target_limit*/
+JNIEXPORT jint JNICALL J_MAKE_METHOD(Merge_jniOptionsGetTargetLimit)(JNIEnv *env, jclass obj, jlong optionsPtr)
+{
+    return ((git_merge_options *)optionsPtr)->target_limit;
+}
+
+/** git_diff_similarity_metric *metric*/
+JNIEXPORT jlong JNICALL J_MAKE_METHOD(Merge_jniOptionsGetMetric)(JNIEnv *env, jclass obj, jlong optionsPtr)
+{
+    return (jlong)((git_merge_options *)optionsPtr)->metric;
+}
+
+/** unsigned int recursion_limit*/
+JNIEXPORT jint JNICALL J_MAKE_METHOD(Merge_jniOptionsGetRecursionLimit)(JNIEnv *env, jclass obj, jlong optionsPtr)
+{
+    return ((git_merge_options *)optionsPtr)->recursion_limit;
+}
+
+/** const char *default_driver*/
+JNIEXPORT jstring JNICALL J_MAKE_METHOD(Merge_jniOptionsGetDefaultDriver)(JNIEnv *env, jclass obj, jlong optionsPtr)
+{
+    return (*env)->NewStringUTF(env, ((git_merge_options *)optionsPtr)->default_driver);
+}
+
+/** git_merge_file_favor_t file_favor*/
+JNIEXPORT jint JNICALL J_MAKE_METHOD(Merge_jniOptionsGetFileFavor)(JNIEnv *env, jclass obj, jlong optionsPtr)
+{
+    return ((git_merge_options *)optionsPtr)->file_favor;
+}
+
+/** uint32_t file_flags*/
+JNIEXPORT jint JNICALL J_MAKE_METHOD(Merge_jniOptionsGetFileFlags)(JNIEnv *env, jclass obj, jlong optionsPtr)
+{
+    return ((git_merge_options *)optionsPtr)->file_flags;
+}
+
+/** unsigned int version*/
+JNIEXPORT void JNICALL J_MAKE_METHOD(Merge_jniOptionsSetVersion)(JNIEnv *env, jclass obj, jlong optionsPtr, jint version)
+{
+    ((git_merge_options *)optionsPtr)->version = (unsigned int)version;
+}
+
+/** uint32_t flags*/
+JNIEXPORT void JNICALL J_MAKE_METHOD(Merge_jniOptionsSetFlags)(JNIEnv *env, jclass obj, jlong optionsPtr, jint flags)
+{
+    ((git_merge_options *)optionsPtr)->flags = (uint32_t)flags;
+}
+
+/** unsigned int rename_threshold*/
+JNIEXPORT void JNICALL J_MAKE_METHOD(Merge_jniOptionsSetRenameThreshold)(JNIEnv *env, jclass obj, jlong optionsPtr, jint renameThreshold)
+{
+    ((git_merge_options *)optionsPtr)->rename_threshold = (unsigned int)renameThreshold;
+}
+
+/** unsigned int target_limit*/
+JNIEXPORT void JNICALL J_MAKE_METHOD(Merge_jniOptionsSetTargetLimit)(JNIEnv *env, jclass obj, jlong optionsPtr, jint targetLimit)
+{
+    ((git_merge_options *)optionsPtr)->target_limit = (unsigned int)targetLimit;
+}
+
+/** git_diff_similarity_metric *metric*/
+JNIEXPORT void JNICALL J_MAKE_METHOD(Merge_jniOptionsSetMetric)(JNIEnv *env, jclass obj, jlong optionsPtr, jlong metric)
+{
+    ((git_merge_options *)optionsPtr)->metric = (git_diff_similarity_metric *)metric;
+}
+
+/** unsigned int recursion_limit*/
+JNIEXPORT void JNICALL J_MAKE_METHOD(Merge_jniOptionsSetRecursionLimit)(JNIEnv *env, jclass obj, jlong optionsPtr, jint recursionLimit)
+{
+    ((git_merge_options *)optionsPtr)->recursion_limit = (unsigned int)recursionLimit;
+}
+
+/** const char *default_driver*/
+JNIEXPORT void JNICALL J_MAKE_METHOD(Merge_jniOptionsSetDefaultDriver)(JNIEnv *env, jclass obj, jlong optionsPtr, jstring defaultDriver)
+{
+    if (defaultDriver == NULL)
+    {
+        return;
+    }
+    // (*env)->GetStringChars(env, )
+    ((git_merge_options *)optionsPtr)->default_driver = j_copy_of_jstring(env, defaultDriver, false);
+}
+
+/** git_merge_file_favor_t file_favor*/
+JNIEXPORT void JNICALL J_MAKE_METHOD(Merge_jniOptionsSetFileFavor)(JNIEnv *env, jclass obj, jlong optionsPtr, jint fileFavor)
+{
+    ((git_merge_options *)optionsPtr)->file_favor = (git_merge_file_favor_t)fileFavor;
+}
+
+/** uint32_t file_flags*/
+JNIEXPORT void JNICALL J_MAKE_METHOD(Merge_jniOptionsSetFileFlags)(JNIEnv *env, jclass obj, jlong optionsPtr, jint fileFlags)
+{
+    ((git_merge_options *)optionsPtr)->file_flags = (uint32_t)fileFlags;
 }
 
 /** int git_merge_base(git_oid *out, git_repository *repo, const git_oid *one, const git_oid *two); */
