@@ -1,16 +1,97 @@
 package com.github.git24j.core;
 
-import static com.github.git24j.core.GitException.ErrorCode.ENOTFOUND;
-
+import javax.annotation.CheckForNull;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
-import javax.annotation.CheckForNull;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+
+import static com.github.git24j.core.GitException.ErrorCode.ENOTFOUND;
 
 public class Commit extends GitObject {
+    static native int jniAmend(
+            Oid outOid,
+            long commitToAmend,
+            String updateRef,
+            long author,
+            long committer,
+            String messageEncoding,
+            String message,
+            long treePtr);
+
+    static native long jniAuthor(long commitPtr);
+
+    /**
+     * int git_commit_author_with_mailmap(git_signature **out, const git_commit *commit, const
+     * git_mailmap *mailmap);
+     */
+    static native int jniAuthorWithMailmap(AtomicLong out, long commit, long mailmap);
+
+    static native String jniBody(long commitPtr);
+
+    static native long jniCommitter(long commitPtr);
+
+    /**
+     * int git_commit_committer_with_mailmap(git_signature **out, const git_commit *commit, const
+     * git_mailmap *mailmap);
+     */
+    static native int jniCommitterWithMailmap(AtomicLong out, long commit, long mailmap);
+
+    static native int jniCreate(
+            Oid outOid,
+            long repoPtr,
+            String updateRef,
+            long author,
+            long commiter,
+            String msgEncoding,
+            String message,
+            long treePtr,
+            long[] parents);
+
+    static native int jniCreateBuffer(
+            Buf outBuf,
+            long repoPtr,
+            long author,
+            long committer,
+            String messageEncoding,
+            String message,
+            long treePtr,
+            int parentCnt,
+            long[] parents);
+
+    static native int jniCreateWithSignature(
+            Oid oid, long repoPtr, String commitContent, String signature, String signatureField);
+
+    static native int jniHeaderField(Buf outBuf, long commitPtr, String field);
+
+    static native String jniMessage(long commitPtr);
+
+    static native String jniMessageEncoding(long commitPtr);
+
+    static native String jniMessageRaw(long commitPtr);
+
+    static native int jniNthGenAncestor(AtomicLong outPtr, long commitPtr, int n);
+
+    static native int jniParent(AtomicLong outPtr, long commitPtr, int n);
+
+    static native int jniParentCount(long commitPtr);
+
+    static native byte[] jniParentId(long commitPtr, int n);
+
+    static native String jniRawHeader(long commitPtr);
+
+    static native String jniSummary(long commitPtr);
+
+    static native long jniTime(long commitPtr);
+
+    static native int jniTimeOffset(long commitPtr);
+
+    static native int jniTree(AtomicLong outTreePtr, long commitPtr);
+
+    static native byte[] jniTreeId(long commitPtr);
+
     Commit(boolean weak, long rawPointer) {
         super(weak, rawPointer);
     }
@@ -43,308 +124,6 @@ public class Commit extends GitObject {
     public static Commit lookupPrefix(@Nonnull Repository repo, @Nonnull String shortOid) {
         return (Commit) GitObject.lookupPrefix(repo, shortOid, Type.COMMIT);
     }
-
-    static native String jniMessageEncoding(long commitPtr);
-
-    /**
-     * Get the encoding for the message of a commit, as a string representing a standard encoding
-     * name.
-     *
-     * <p>The encoding may be NULL if the `encoding` header in the commit is missing; in that case
-     * UTF-8 is assumed.
-     *
-     * @return NULL, or the encoding
-     */
-    public String messageEncoding() {
-        return jniMessageEncoding(getRawPointer());
-    }
-
-    static native String jniMessage(long commitPtr);
-
-    /**
-     * Get the full message of a commit.
-     *
-     * <p>The returned message will be slightly prettified by removing any potential leading
-     * newlines.
-     *
-     * @return the message of a commit
-     */
-    public String message() {
-        return jniMessage(getRawPointer());
-    }
-
-    static native String jniMessageRaw(long commitPtr);
-
-    /**
-     * Get the full raw message of a commit.
-     *
-     * @return the raw message of a commit
-     */
-    public String messageRaw() {
-        return jniMessageRaw(getRawPointer());
-    }
-
-    static native String jniSummary(long commitPtr);
-
-    /**
-     * Get the short "summary" of the git commit message.
-     *
-     * <p>The returned message is the summary of the commit, comprising the first paragraph of the
-     * message with whitespace trimmed and squashed.
-     *
-     * @return the summary of a commit or NULL on error
-     */
-    public String summary() {
-        return jniSummary(getRawPointer());
-    }
-
-    static native String jniBody(long commitPtr);
-
-    /**
-     * Get the long "body" of the git commit message.
-     *
-     * <p>The returned message is the body of the commit, comprising everything but the first
-     * paragraph of the message. Leading and trailing whitespaces are trimmed.
-     *
-     * @return the body of a commit or NULL when no the message only consists of a summary
-     */
-    public String body() {
-        return jniBody(getRawPointer());
-    }
-
-    static native long jniTime(long commitPtr);
-
-    /**
-     * Get the commit time (i.e. committer time) of a commit.
-     *
-     * @return the time of a commit
-     */
-    public Instant time() {
-        return Instant.ofEpochSecond(jniTime(getRawPointer()));
-    }
-
-    static native int jniTimeOffset(long commitPtr);
-
-    /**
-     * Get the commit timezone offset (i.e. committer's preferred timezone) of a commit.
-     *
-     * @return positive or negative timezone offset, in minutes from UTC
-     */
-    public int timeOffset() {
-        return jniTimeOffset(getRawPointer());
-    }
-
-    static native long jniCommitter(long commitPtr);
-
-    /**
-     * Get the committer of a commit.
-     *
-     * @return the committer of a commit
-     */
-    @Nonnull
-    public Signature committer() {
-        long ptr = jniCommitter(getRawPointer());
-        return new Signature(true, ptr);
-    }
-
-    static native long jniAuthor(long commitPtr);
-
-    /**
-     * Get the author of a commit.
-     *
-     * @return the author of a commit
-     */
-    @Nonnull
-    public Signature author() {
-        long ptr = jniAuthor(getRawPointer());
-        return new Signature(true, ptr);
-    }
-
-    /**
-     * int git_commit_committer_with_mailmap(git_signature **out, const git_commit *commit, const
-     * git_mailmap *mailmap);
-     */
-    static native int jniCommitterWithMailmap(AtomicLong out, long commit, long mailmap);
-
-    /**
-     * Get the committer of a commit, using the mailmap to map names and email addresses to
-     * canonical real names and email addresses.
-     *
-     * @param mailmap the mailmap to resolve with. (may be null)
-     * @return signature that contains the committer identity
-     * @throws GitException git errors
-     */
-    @Nonnull
-    public Optional<Signature> committerWithMailmap(@Nullable Mailmap mailmap) {
-        Signature outSig = new Signature(false, 0);
-        Error.throwIfNeeded(
-                jniCommitterWithMailmap(
-                        outSig._rawPtr,
-                        getRawPointer(),
-                        mailmap == null ? 0 : mailmap.getRawPointer()));
-        return outSig.isNull() ? Optional.empty() : Optional.of(outSig);
-    }
-
-    /**
-     * int git_commit_author_with_mailmap(git_signature **out, const git_commit *commit, const
-     * git_mailmap *mailmap);
-     */
-    static native int jniAuthorWithMailmap(AtomicLong out, long commit, long mailmap);
-
-    /**
-     * Get the author of a commit, using the mailmap to map names and email addresses to canonical
-     * real names and email addresses.
-     *
-     * @param mailmap the mailmap to resolve with. (may be NULL)
-     * @return signature that contains the author information
-     * @throws GitException git errors
-     */
-    @Nonnull
-    public Optional<Signature> authorWithMailmap(@Nullable Mailmap mailmap) {
-        Signature outSig = new Signature(false, 0);
-        Error.throwIfNeeded(
-                jniAuthorWithMailmap(
-                        outSig._rawPtr,
-                        getRawPointer(),
-                        mailmap == null ? 0 : mailmap.getRawPointer()));
-        return outSig.isNull() ? Optional.empty() : Optional.of(outSig);
-    }
-
-    static native String jniRawHeader(long commitPtr);
-
-    /**
-     * Get the full raw text of the commit header.
-     *
-     * @return the header text of the commit
-     */
-    public String rawHeader() {
-        return jniRawHeader(getRawPointer());
-    }
-
-    static native int jniTree(AtomicLong outTreePtr, long commitPtr);
-
-    /**
-     * Get the tree pointed to by a commit. Equiv to {@code git rev-parse "$COMMIT^{tree}"} or
-     * {@code git cat-file $COMMIT | grep tree}
-     *
-     * @return tree object
-     * @throws GitException git errors
-     */
-    public Tree tree() {
-        AtomicLong outTreePtr = new AtomicLong();
-        Error.throwIfNeeded(jniTree(outTreePtr, getRawPointer()));
-        return new Tree(false, outTreePtr.get());
-    }
-
-    static native byte[] jniTreeId(long commitPtr);
-
-    /**
-     * Get the id of the tree pointed to by a commit. This differs from `tree()` in that no attempts
-     * are made to fetch an object from the ODB.
-     *
-     * @return the id of tree pointed to by commit.
-     */
-    @CheckForNull
-    public Oid treeId() {
-        return Oid.ofNullable(jniTreeId(getRawPointer()));
-    }
-
-    static native int jniParentCount(long commitPtr);
-
-    /**
-     * Get the number of parents of this commit
-     *
-     * @return integer of count of parents
-     */
-    public int parentCount() {
-        return jniParentCount(getRawPointer());
-    }
-
-    static native int jniParent(AtomicLong outPtr, long commitPtr, int n);
-
-    /**
-     * Get the specified parent of the commit.
-     *
-     * @param n the position of the parent (from 0 to `parentcount`)
-     * @return parent commit
-     * @throws GitException git errors
-     */
-    public Commit parent(int n) {
-        AtomicLong outPtr = new AtomicLong();
-        Error.throwIfNeeded(jniParent(outPtr, getRawPointer(), n));
-        return new Commit(false, outPtr.get());
-    }
-
-    static native byte[] jniParentId(long commitPtr, int n);
-
-    /**
-     *
-     * <li>{@code git cat-file -p master | grep parent}
-     * <li>{@code git rev-parse master^1 }
-     * <li>{@code git log --pretty=%P -n 1 master}
-     *
-     *     <p>Get the oid of a specified parent for a commit. This is different from
-     *     `git_commit_parent`, which will attempt to load the parent commit from the ODB.
-     *
-     * @param n the position of the parent (from 0 to `parentcount`)
-     * @return the id of the parent, NULL on error.
-     */
-    @CheckForNull
-    public Oid parentId(int n) {
-        return Oid.ofNullable(jniParentId(getRawPointer(), n));
-    }
-
-    static native int jniNthGenAncestor(AtomicLong outPtr, long commitPtr, int n);
-
-    /**
-     * Get the commit object that is the <n>th generation ancestor of the named commit object,
-     * following only the first parents. The returned commit has to be freed by the caller.
-     *
-     * <p>Passing `0` as the generation number returns another instance of the base commit itself.
-     *
-     * @param n the requested generation
-     * @return found commit, return null if no matching ancestor exists
-     * @throws GitException git errors
-     */
-    public Commit nthGenAncestor(int n) {
-        AtomicLong outPtr = new AtomicLong();
-        int e = jniNthGenAncestor(outPtr, getRawPointer(), n);
-        if (e == ENOTFOUND.getCode()) {
-            return null;
-        }
-        Error.throwIfNeeded(e);
-        return new Commit(false, outPtr.get());
-    }
-
-    static native int jniHeaderField(Buf outBuf, long commitPtr, String field);
-
-    /**
-     * Get an arbitrary header field
-     *
-     * @param field the header field to return
-     * @return git header field, return empty if the field does not exist
-     * @throws GitException git errors
-     */
-    public Optional<String> headerField(String field) {
-        Buf buf = new Buf();
-        int e = jniHeaderField(buf, getRawPointer(), field);
-        if (e == ENOTFOUND.getCode()) {
-            return Optional.empty();
-        }
-        Error.throwIfNeeded(e);
-        return buf.getString();
-    }
-
-    static native int jniCreate(
-            Oid outOid,
-            long repoPtr,
-            String updateRef,
-            long author,
-            long commiter,
-            String msgEncoding,
-            String message,
-            long treePtr,
-            long[] parents);
 
     /**
      * Create new commit in the repository. See also {@code git-commit-tree}.
@@ -412,16 +191,6 @@ public class Commit extends GitObject {
         return outOid;
     }
 
-    static native int jniAmend(
-            Oid outOid,
-            long commitToAmend,
-            String updateRef,
-            long author,
-            long committer,
-            String messageEncoding,
-            String message,
-            long treePtr);
-
     /**
      * Amend an existing commit by replacing only non-NULL values.
      *
@@ -473,17 +242,6 @@ public class Commit extends GitObject {
         return outOid;
     }
 
-    static native int jniCreateBuffer(
-            Buf outBuf,
-            long repoPtr,
-            long author,
-            long committer,
-            String messageEncoding,
-            String message,
-            long treePtr,
-            int parentCnt,
-            long[] parents);
-
     /**
      * Create a commit and write it into a buffer
      *
@@ -530,9 +288,6 @@ public class Commit extends GitObject {
         return outBuf;
     }
 
-    static native int jniCreateWithSignature(
-            Oid oid, long repoPtr, String commitContent, String signature, String signatureField);
-
     /**
      * Create a commit object from the given buffer and signature
      *
@@ -555,6 +310,251 @@ public class Commit extends GitObject {
                 jniCreateWithSignature(
                         outOid, repo.getRawPointer(), commitContent, signature, signatureField));
         return outOid;
+    }
+
+    /**
+     * Get the encoding for the message of a commit, as a string representing a standard encoding
+     * name.
+     *
+     * <p>The encoding may be NULL if the `encoding` header in the commit is missing; in that case
+     * UTF-8 is assumed.
+     *
+     * @return NULL, or the encoding
+     */
+    public String messageEncoding() {
+        return jniMessageEncoding(getRawPointer());
+    }
+
+    /**
+     * Get the full message of a commit.
+     *
+     * <p>The returned message will be slightly prettified by removing any potential leading
+     * newlines.
+     *
+     * @return the message of a commit
+     */
+    public String message() {
+        return jniMessage(getRawPointer());
+    }
+
+    /**
+     * Get the full raw message of a commit.
+     *
+     * @return the raw message of a commit
+     */
+    public String messageRaw() {
+        return jniMessageRaw(getRawPointer());
+    }
+
+    /**
+     * Get the short "summary" of the git commit message.
+     *
+     * <p>The returned message is the summary of the commit, comprising the first paragraph of the
+     * message with whitespace trimmed and squashed.
+     *
+     * @return the summary of a commit or NULL on error
+     */
+    public String summary() {
+        return jniSummary(getRawPointer());
+    }
+
+    /**
+     * Get the long "body" of the git commit message.
+     *
+     * <p>The returned message is the body of the commit, comprising everything but the first
+     * paragraph of the message. Leading and trailing whitespaces are trimmed.
+     *
+     * @return the body of a commit or NULL when no the message only consists of a summary
+     */
+    public String body() {
+        return jniBody(getRawPointer());
+    }
+
+    /**
+     * Get the commit time (i.e. committer time) of a commit.
+     *
+     * @return the time of a commit
+     */
+    public Instant time() {
+        return Instant.ofEpochSecond(jniTime(getRawPointer()));
+    }
+
+    /**
+     * Get the commit timezone offset (i.e. committer's preferred timezone) of a commit.
+     *
+     * @return positive or negative timezone offset, in minutes from UTC
+     */
+    public int timeOffset() {
+        return jniTimeOffset(getRawPointer());
+    }
+
+    /**
+     * Get the committer of a commit.
+     *
+     * @return the committer of a commit
+     */
+    @Nonnull
+    public Signature committer() {
+        long ptr = jniCommitter(getRawPointer());
+        return new Signature(true, ptr);
+    }
+
+    /**
+     * Get the author of a commit.
+     *
+     * @return the author of a commit
+     */
+    @Nonnull
+    public Signature author() {
+        long ptr = jniAuthor(getRawPointer());
+        return new Signature(true, ptr);
+    }
+
+    /**
+     * Get the committer of a commit, using the mailmap to map names and email addresses to
+     * canonical real names and email addresses.
+     *
+     * @param mailmap the mailmap to resolve with. (may be null)
+     * @return signature that contains the committer identity
+     * @throws GitException git errors
+     */
+    @Nonnull
+    public Optional<Signature> committerWithMailmap(@Nullable Mailmap mailmap) {
+        Signature outSig = new Signature(false, 0);
+        Error.throwIfNeeded(
+                jniCommitterWithMailmap(
+                        outSig._rawPtr,
+                        getRawPointer(),
+                        mailmap == null ? 0 : mailmap.getRawPointer()));
+        return outSig.isNull() ? Optional.empty() : Optional.of(outSig);
+    }
+
+    /**
+     * Get the author of a commit, using the mailmap to map names and email addresses to canonical
+     * real names and email addresses.
+     *
+     * @param mailmap the mailmap to resolve with. (may be NULL)
+     * @return signature that contains the author information
+     * @throws GitException git errors
+     */
+    @Nonnull
+    public Optional<Signature> authorWithMailmap(@Nullable Mailmap mailmap) {
+        Signature outSig = new Signature(false, 0);
+        Error.throwIfNeeded(
+                jniAuthorWithMailmap(
+                        outSig._rawPtr,
+                        getRawPointer(),
+                        mailmap == null ? 0 : mailmap.getRawPointer()));
+        return outSig.isNull() ? Optional.empty() : Optional.of(outSig);
+    }
+
+    /**
+     * Get the full raw text of the commit header.
+     *
+     * @return the header text of the commit
+     */
+    public String rawHeader() {
+        return jniRawHeader(getRawPointer());
+    }
+
+    /**
+     * Get the tree pointed to by a commit. Equiv to {@code git rev-parse "$COMMIT^{tree}"} or
+     * {@code git cat-file $COMMIT | grep tree}
+     *
+     * @return tree object
+     * @throws GitException git errors
+     */
+    public Tree tree() {
+        AtomicLong outTreePtr = new AtomicLong();
+        Error.throwIfNeeded(jniTree(outTreePtr, getRawPointer()));
+        return new Tree(false, outTreePtr.get());
+    }
+
+    /**
+     * Get the id of the tree pointed to by a commit. This differs from `tree()` in that no attempts
+     * are made to fetch an object from the ODB.
+     *
+     * @return the id of tree pointed to by commit.
+     */
+    @CheckForNull
+    public Oid treeId() {
+        return Oid.ofNullable(jniTreeId(getRawPointer()));
+    }
+
+    /**
+     * Get the number of parents of this commit
+     *
+     * @return integer of count of parents
+     */
+    public int parentCount() {
+        return jniParentCount(getRawPointer());
+    }
+
+    /**
+     * Get the specified parent of the commit.
+     *
+     * @param n the position of the parent (from 0 to `parentcount`)
+     * @return parent commit
+     * @throws GitException git errors
+     */
+    public Commit parent(int n) {
+        AtomicLong outPtr = new AtomicLong();
+        Error.throwIfNeeded(jniParent(outPtr, getRawPointer(), n));
+        return new Commit(false, outPtr.get());
+    }
+
+    /**
+     *
+     * <li>{@code git cat-file -p master | grep parent}
+     * <li>{@code git rev-parse master^1 }
+     * <li>{@code git log --pretty=%P -n 1 master}
+     *
+     *     <p>Get the oid of a specified parent for a commit. This is different from
+     *     `git_commit_parent`, which will attempt to load the parent commit from the ODB.
+     *
+     * @param n the position of the parent (from 0 to `parentcount`)
+     * @return the id of the parent, NULL on error.
+     */
+    @CheckForNull
+    public Oid parentId(int n) {
+        return Oid.ofNullable(jniParentId(getRawPointer(), n));
+    }
+
+    /**
+     * Get the commit object that is the <n>th generation ancestor of the named commit object,
+     * following only the first parents. The returned commit has to be freed by the caller.
+     *
+     * <p>Passing `0` as the generation number returns another instance of the base commit itself.
+     *
+     * @param n the requested generation
+     * @return found commit, return null if no matching ancestor exists
+     * @throws GitException git errors
+     */
+    public Commit nthGenAncestor(int n) {
+        AtomicLong outPtr = new AtomicLong();
+        int e = jniNthGenAncestor(outPtr, getRawPointer(), n);
+        if (e == ENOTFOUND.getCode()) {
+            return null;
+        }
+        Error.throwIfNeeded(e);
+        return new Commit(false, outPtr.get());
+    }
+
+    /**
+     * Get an arbitrary header field
+     *
+     * @param field the header field to return
+     * @return git header field, return empty if the field does not exist
+     * @throws GitException git errors
+     */
+    public Optional<String> headerField(String field) {
+        Buf buf = new Buf();
+        int e = jniHeaderField(buf, getRawPointer(), field);
+        if (e == ENOTFOUND.getCode()) {
+            return Optional.empty();
+        }
+        Error.throwIfNeeded(e);
+        return buf.getString();
     }
 
     @Override

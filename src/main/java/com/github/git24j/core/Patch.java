@@ -1,26 +1,130 @@
 package com.github.git24j.core;
 
-import static com.github.git24j.core.GitException.ErrorCode.ENOTFOUND;
-import static com.github.git24j.core.Internals.JJJCallback;
-
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+
+import static com.github.git24j.core.GitException.ErrorCode.ENOTFOUND;
+import static com.github.git24j.core.Internals.JJJCallback;
 
 public class Patch extends CAutoReleasable {
+    /** void git_patch_free(git_patch *patch); */
+    static native void jniFree(long patch);
+
+    /**
+     *
+     *
+     * <pre>
+     * int git_patch_from_blob_and_buffer(
+     *     git_patch **out,
+     *     const git_blob *old_blob,
+     *     const char *old_as_path,
+     *     const void *buffer,
+     *     size_t buffer_len,
+     *     const char *buffer_as_path,
+     *     const git_diff_options *opts);
+     * </pre>
+     */
+    static native int jniFromBlobAndBuffer(
+            AtomicLong out,
+            long oldBlob,
+            String oldAsPath,
+            byte[] buffer,
+            int bufferLen,
+            String bufferAsPath,
+            long opts);
+    /** -------- Jni Signature ---------- */
+
+    /**
+     * int git_patch_from_blobs(git_patch **out, const git_blob *old_blob, const char *old_as_path,
+     * const git_blob *new_blob, const char *new_as_path, const git_diff_options *opts);
+     */
+    static native int jniFromBlobs(
+            AtomicLong out,
+            long oldBlob,
+            String oldAsPath,
+            long newBlob,
+            String newAsPath,
+            long opts);
+
+    /**
+     *
+     *
+     * <pre>
+     * int git_patch_from_buffers(
+     *     git_patch **out,
+     *     const void *old_buffer,
+     *     size_t old_len,
+     *     const char *old_as_path,
+     *     const void *new_buffer,
+     *     size_t new_len,
+     *     const char *new_as_path,
+     *     const git_diff_options *opts);
+     * </pre>
+     */
+    static native int jniFromBuffers(
+            AtomicLong out,
+            byte[] oldBuffer,
+            int oldLen,
+            String oldAsPath,
+            byte[] newBuffer,
+            int newLen,
+            String newAsPath,
+            long opts);
+
+    /** int git_patch_from_diff(git_patch **out, git_diff *diff, size_t idx); */
+    static native int jniFromDiff(AtomicLong out, long diff, int idx);
+
+    /** const git_diff_delta * git_patch_get_delta(const git_patch *patch); */
+    static native long jniGetDelta(long patch);
+
+    /**
+     * int git_patch_get_hunk(const git_diff_hunk **out, size_t *lines_in_hunk, git_patch *patch,
+     * size_t hunk_idx);
+     */
+    static native int jniGetHunk(
+            AtomicLong out, AtomicInteger linesInHunk, long patch, int hunkIdx);
+
+    /**
+     * int git_patch_get_line_in_hunk(const git_diff_line **out, git_patch *patch, size_t hunk_idx,
+     * size_t line_of_hunk);
+     */
+    static native int jniGetLineInHunk(AtomicLong out, long patch, int hunkIdx, int lineOfHunk);
+
+    /**
+     * int git_patch_line_stats(size_t *total_context, size_t *total_additions, size_t
+     * *total_deletions, const git_patch *patch);
+     */
+    static native int jniLineStats(
+            AtomicInteger totalContext,
+            AtomicInteger totalAdditions,
+            AtomicInteger totalDeletions,
+            long patch);
+
+    /** size_t git_patch_num_hunks(const git_patch *patch); */
+    static native int jniNumHunks(long patch);
+
+    /** int git_patch_num_lines_in_hunk(const git_patch *patch, size_t hunk_idx); */
+    static native int jniNumLinesInHunk(long patch, int hunkIdx);
+
+    /** int git_patch_print(git_patch *patch, git_diff_line_cb print_cb, void *payload); */
+    static native int jniPrint(long patch, JJJCallback printCb);
+
+    /**
+     * size_t git_patch_size(git_patch *patch, int include_context, int include_hunk_headers, int
+     * include_file_headers);
+     */
+    static native int jniSize(
+            long patch, int includeContext, int includeHunkHeaders, int includeFileHeaders);
+
+    /** int git_patch_to_buf(git_buf *out, git_patch *patch); */
+    static native int jniToBuf(Buf out, long patch);
+
     protected Patch(boolean isWeak, long rawPtr) {
         super(isWeak, rawPtr);
     }
-
-    @Override
-    protected void freeOnce(long cPtr) {
-        jniFree(cPtr);
-    }
-    /** -------- Jni Signature ---------- */
-    /** int git_patch_from_diff(git_patch **out, git_diff *diff, size_t idx); */
-    static native int jniFromDiff(AtomicLong out, long diff, int idx);
 
     /**
      * Return a patch for an entry in the diff list.
@@ -46,18 +150,6 @@ public class Patch extends CAutoReleasable {
         }
         return Optional.of(out);
     }
-
-    /**
-     * int git_patch_from_blobs(git_patch **out, const git_blob *old_blob, const char *old_as_path,
-     * const git_blob *new_blob, const char *new_as_path, const git_diff_options *opts);
-     */
-    static native int jniFromBlobs(
-            AtomicLong out,
-            long oldBlob,
-            String oldAsPath,
-            long newBlob,
-            String newAsPath,
-            long opts);
 
     /**
      * Directly generate a patch from the difference between two blobs.
@@ -95,29 +187,6 @@ public class Patch extends CAutoReleasable {
         }
         return Optional.of(out);
     }
-
-    /**
-     *
-     *
-     * <pre>
-     * int git_patch_from_blob_and_buffer(
-     *     git_patch **out,
-     *     const git_blob *old_blob,
-     *     const char *old_as_path,
-     *     const void *buffer,
-     *     size_t buffer_len,
-     *     const char *buffer_as_path,
-     *     const git_diff_options *opts);
-     * </pre>
-     */
-    static native int jniFromBlobAndBuffer(
-            AtomicLong out,
-            long oldBlob,
-            String oldAsPath,
-            byte[] buffer,
-            int bufferLen,
-            String bufferAsPath,
-            long opts);
 
     /**
      * Directly generate a patch from the difference between a blob and a buffer.
@@ -159,31 +228,6 @@ public class Patch extends CAutoReleasable {
     }
 
     /**
-     *
-     *
-     * <pre>
-     * int git_patch_from_buffers(
-     *     git_patch **out,
-     *     const void *old_buffer,
-     *     size_t old_len,
-     *     const char *old_as_path,
-     *     const void *new_buffer,
-     *     size_t new_len,
-     *     const char *new_as_path,
-     *     const git_diff_options *opts);
-     * </pre>
-     */
-    static native int jniFromBuffers(
-            AtomicLong out,
-            byte[] oldBuffer,
-            int oldLen,
-            String oldAsPath,
-            byte[] newBuffer,
-            int newLen,
-            String newAsPath,
-            long opts);
-
-    /**
      * Directly generate a patch from the difference between two buffers.
      *
      * <p>This is just like `git_diff_buffers()` except it generates a patch object for the
@@ -223,11 +267,10 @@ public class Patch extends CAutoReleasable {
         return Optional.of(out);
     }
 
-    /** void git_patch_free(git_patch *patch); */
-    static native void jniFree(long patch);
-
-    /** const git_diff_delta * git_patch_get_delta(const git_patch *patch); */
-    static native long jniGetDelta(long patch);
+    @Override
+    protected void freeOnce(long cPtr) {
+        jniFree(cPtr);
+    }
 
     /**
      * Get the delta associated with a patch. This delta points to internal data and you do not have
@@ -239,46 +282,10 @@ public class Patch extends CAutoReleasable {
         return new Diff.Delta(ptr);
     }
 
-    /** size_t git_patch_num_hunks(const git_patch *patch); */
-    static native int jniNumHunks(long patch);
-
     /** Get the number of hunks in a patch */
     public int numHunks() {
         return jniNumHunks(getRawPointer());
     }
-
-    public static class LineStats {
-        private final int totalContext;
-        private final int totalAdditions;
-        private final int totalDeletions;
-
-        public LineStats(int totalContext, int totalAdditions, int totalDeletions) {
-            this.totalContext = totalContext;
-            this.totalAdditions = totalAdditions;
-            this.totalDeletions = totalDeletions;
-        }
-
-        public int getTotalContext() {
-            return totalContext;
-        }
-
-        public int getTotalAdditions() {
-            return totalAdditions;
-        }
-
-        public int getTotalDeletions() {
-            return totalDeletions;
-        }
-    }
-    /**
-     * int git_patch_line_stats(size_t *total_context, size_t *total_additions, size_t
-     * *total_deletions, const git_patch *patch);
-     */
-    static native int jniLineStats(
-            AtomicInteger totalContext,
-            AtomicInteger totalAdditions,
-            AtomicInteger totalDeletions,
-            long patch);
 
     /**
      * Get line counts of each type in a patch.
@@ -303,32 +310,6 @@ public class Patch extends CAutoReleasable {
     }
 
     /**
-     * int git_patch_get_hunk(const git_diff_hunk **out, size_t *lines_in_hunk, git_patch *patch,
-     * size_t hunk_idx);
-     */
-    static native int jniGetHunk(
-            AtomicLong out, AtomicInteger linesInHunk, long patch, int hunkIdx);
-
-    /** the information about a hunk in a patch */
-    public static class HunkInfo {
-        private final Diff.Hunk _hunk;
-        private final int _lines;
-
-        public HunkInfo(Diff.Hunk hunk, int lines) {
-            _hunk = hunk;
-            _lines = lines;
-        }
-
-        @Nonnull
-        public Diff.Hunk getHunk() {
-            return _hunk;
-        }
-
-        public int getLines() {
-            return _lines;
-        }
-    }
-    /**
      * Get the information about a hunk in a patch
      *
      * <p>Given a patch and a hunk index into the patch, this returns detailed information about
@@ -350,9 +331,6 @@ public class Patch extends CAutoReleasable {
         return Optional.of(new HunkInfo(new Diff.Hunk(outHunk.get()), linesInHunk.get()));
     }
 
-    /** int git_patch_num_lines_in_hunk(const git_patch *patch, size_t hunk_idx); */
-    static native int jniNumLinesInHunk(long patch, int hunkIdx);
-
     /**
      * Get the number of lines in a hunk.
      *
@@ -365,12 +343,6 @@ public class Patch extends CAutoReleasable {
         Error.throwIfNeeded(r);
         return r;
     }
-
-    /**
-     * int git_patch_get_line_in_hunk(const git_diff_line **out, git_patch *patch, size_t hunk_idx,
-     * size_t line_of_hunk);
-     */
-    static native int jniGetLineInHunk(AtomicLong out, long patch, int hunkIdx, int lineOfHunk);
 
     /**
      * Get data about a line in a hunk of a patch.
@@ -397,13 +369,6 @@ public class Patch extends CAutoReleasable {
     }
 
     /**
-     * size_t git_patch_size(git_patch *patch, int include_context, int include_hunk_headers, int
-     * include_file_headers);
-     */
-    static native int jniSize(
-            long patch, int includeContext, int includeHunkHeaders, int includeFileHeaders);
-
-    /**
      * Look up size of patch diff data in bytes
      *
      * <p>This returns the raw size of the patch data. This only includes the actual data from the
@@ -426,9 +391,6 @@ public class Patch extends CAutoReleasable {
                 includeHunkHeaders ? 1 : 0,
                 includeFileHeaders ? 1 : 0);
     }
-
-    /** int git_patch_print(git_patch *patch, git_diff_line_cb print_cb, void *payload); */
-    static native int jniPrint(long patch, JJJCallback printCb);
 
     /**
      * Serialize the patch to text via callback.
@@ -453,9 +415,6 @@ public class Patch extends CAutoReleasable {
         return e;
     }
 
-    /** int git_patch_to_buf(git_buf *out, git_patch *patch); */
-    static native int jniToBuf(Buf out, long patch);
-
     /**
      * Get the content of a patch as a single diff text.
      *
@@ -467,5 +426,49 @@ public class Patch extends CAutoReleasable {
         Buf buf = new Buf();
         Error.throwIfNeeded(jniToBuf(buf, getRawPointer()));
         return buf.getString().orElse("");
+    }
+
+    public static class LineStats {
+        private final int totalContext;
+        private final int totalAdditions;
+        private final int totalDeletions;
+
+        public LineStats(int totalContext, int totalAdditions, int totalDeletions) {
+            this.totalContext = totalContext;
+            this.totalAdditions = totalAdditions;
+            this.totalDeletions = totalDeletions;
+        }
+
+        public int getTotalContext() {
+            return totalContext;
+        }
+
+        public int getTotalAdditions() {
+            return totalAdditions;
+        }
+
+        public int getTotalDeletions() {
+            return totalDeletions;
+        }
+    }
+
+    /** the information about a hunk in a patch */
+    public static class HunkInfo {
+        private final Diff.Hunk _hunk;
+        private final int _lines;
+
+        public HunkInfo(Diff.Hunk hunk, int lines) {
+            _hunk = hunk;
+            _lines = lines;
+        }
+
+        @Nonnull
+        public Diff.Hunk getHunk() {
+            return _hunk;
+        }
+
+        public int getLines() {
+            return _lines;
+        }
     }
 }

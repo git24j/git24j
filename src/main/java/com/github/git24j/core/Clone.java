@@ -1,12 +1,103 @@
 package com.github.git24j.core;
 
-import java.nio.file.Path;
-import java.util.concurrent.atomic.AtomicLong;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.nio.file.Path;
+import java.util.concurrent.atomic.AtomicLong;
 
 public class Clone {
+    /* -------- Jni Signature ---------- */
+    static native int jniClone(AtomicLong out, String url, String localPath, long options);
+
+    static native void jniOptionsFree(long optionsPtr);
+
+    /** int bare */
+    static native int jniOptionsGetBare(long optionsPtr);
+
+    /** const char* checkout_branch */
+    static native String jniOptionsGetCheckoutBranch(long optionsPtr);
+
+    /** git_checkout_options checkout_opts */
+    static native long jniOptionsGetCheckoutOpts(long optionsPtr);
+
+    /** git_fetch_options fetch_opts */
+    static native long jniOptionsGetFetchOpts(long optionsPtr);
+
+    /** git_clone_local_t local */
+    static native int jniOptionsGetLocal(long optionsPtr);
+
+    /** unsigned int version */
+    static native int jniOptionsGetVersion(long optionsPtr);
+
+    /** -------- Jni Signature ---------- */
+    static native int jniOptionsNew(int version, AtomicLong outOpts);
+
+    /** int bare */
+    static native void jniOptionsSetBare(long optionsPtr, int bare);
+
+    /** git_clone_local_t local */
+    static native void jniOptionsSetLocal(long optionsPtr, int local);
+
+    /** git_remote_create_cb remote_cb */
+    static native void jniOptionsSetRemoteCb(long optionsPtr, Internals.ALSSCallback remoteCb);
+
+    /** git_repository_create_cb repository_cb */
+    static native void jniOptionsSetRepositoryCb(
+            long optionsPtr, Internals.ASICallback repositoryCb);
+
+    /** unsigned int version */
+    static native void jniOptionsSetVersion(long optionsPtr, int version);
+
+    /**
+     * Clone a remote repository.
+     *
+     * <p>By default this creates its repository and initial remote to match git's defaults. You can
+     * use the options in the callback to customize how these are created.
+     *
+     * @param url the remote repository to clone
+     * @param localPath local directory to clone to
+     * @param options configuration options for the clone. If NULL, the function works as though
+     *     GIT_OPTIONS_INIT were passed.
+     * @return cloned repository
+     * @throws GitException git errors
+     */
+    @Nonnull
+    public static Repository cloneRepo(
+            @Nonnull String url, @Nonnull Path localPath, @Nullable Options options) {
+        Repository outRepo = new Repository(0);
+        jniClone(
+                outRepo._rawPtr,
+                url,
+                localPath.toString(),
+                options == null ? 0 : options.getRawPointer());
+        return outRepo;
+    }
+
+    public enum LocalT implements IBitEnum {
+        /**
+         * Auto-detect (default), libgit2 will bypass the git-aware transport for local paths, but
+         * use a normal fetch for `file://` urls.
+         */
+        LOCAL_AUTO(0),
+        /** Bypass the git-aware transport even for a `file://` url. */
+        LOCAL(1),
+        /** Do no bypass the git-aware transport */
+        NO_LOCAL(2),
+        /** Bypass the git-aware transport, but do not try to use hardlinks. */
+        LOCAL_NO_LINKS(3);
+        private final int _bit;
+
+        LocalT(int bit) {
+            _bit = bit;
+        }
+
+        @Override
+        public int getBit() {
+            return _bit;
+        }
+    }
+
     @FunctionalInterface
     interface RepositoryCreateCb {
         /**
@@ -44,30 +135,6 @@ public class Clone {
                 throws GitException;
     }
 
-    public enum LocalT implements IBitEnum {
-        /**
-         * Auto-detect (default), libgit2 will bypass the git-aware transport for local paths, but
-         * use a normal fetch for `file://` urls.
-         */
-        LOCAL_AUTO(0),
-        /** Bypass the git-aware transport even for a `file://` url. */
-        LOCAL(1),
-        /** Do no bypass the git-aware transport */
-        NO_LOCAL(2),
-        /** Bypass the git-aware transport, but do not try to use hardlinks. */
-        LOCAL_NO_LINKS(3);
-        private final int _bit;
-
-        LocalT(int bit) {
-            _bit = bit;
-        }
-
-        @Override
-        public int getBit() {
-            return _bit;
-        }
-    }
-
     public static class Options extends CAutoReleasable {
         public static int VERSION = 1;
 
@@ -96,6 +163,10 @@ public class Clone {
             return jniOptionsGetVersion(getRawPointer());
         }
 
+        public void setVersion(int version) {
+            jniOptionsSetVersion(getRawPointer(), version);
+        }
+
         /** @return reference to checkout options that can be used to set up checkout options */
         @Nonnull
         public Checkout.Options getCheckoutOpts() {
@@ -112,27 +183,23 @@ public class Clone {
             return jniOptionsGetBare(getRawPointer()) == 1;
         }
 
+        public void setBare(boolean bare) {
+            jniOptionsSetBare(getRawPointer(), bare ? 1 : 0);
+        }
+
         @Nonnull
         public LocalT getLocal() {
             int r = jniOptionsGetLocal(getRawPointer());
             return IBitEnum.valueOf(r, LocalT.class, LocalT.LOCAL_AUTO);
         }
 
+        public void setLocal(LocalT local) {
+            jniOptionsSetLocal(getRawPointer(), local.getBit());
+        }
+
         @CheckForNull
         public String getCheckoutBranch() {
             return jniOptionsGetCheckoutBranch(getRawPointer());
-        }
-
-        public void setVersion(int version) {
-            jniOptionsSetVersion(getRawPointer(), version);
-        }
-
-        public void setBare(boolean bare) {
-            jniOptionsSetBare(getRawPointer(), bare ? 1 : 0);
-        }
-
-        public void setLocal(LocalT local) {
-            jniOptionsSetLocal(getRawPointer(), local.getBit());
         }
 
         /**
@@ -174,71 +241,5 @@ public class Clone {
                         return 0;
                     });
         }
-    }
-
-    /** -------- Jni Signature ---------- */
-    static native int jniOptionsNew(int version, AtomicLong outOpts);
-
-    static native void jniOptionsFree(long optionsPtr);
-    /** unsigned int version */
-    static native int jniOptionsGetVersion(long optionsPtr);
-
-    /** git_checkout_options checkout_opts */
-    static native long jniOptionsGetCheckoutOpts(long optionsPtr);
-
-    /** git_fetch_options fetch_opts */
-    static native long jniOptionsGetFetchOpts(long optionsPtr);
-
-    /** int bare */
-    static native int jniOptionsGetBare(long optionsPtr);
-
-    /** git_clone_local_t local */
-    static native int jniOptionsGetLocal(long optionsPtr);
-
-    /** const char* checkout_branch */
-    static native String jniOptionsGetCheckoutBranch(long optionsPtr);
-
-    /** unsigned int version */
-    static native void jniOptionsSetVersion(long optionsPtr, int version);
-
-    /** int bare */
-    static native void jniOptionsSetBare(long optionsPtr, int bare);
-
-    /** git_clone_local_t local */
-    static native void jniOptionsSetLocal(long optionsPtr, int local);
-
-    /** git_repository_create_cb repository_cb */
-    static native void jniOptionsSetRepositoryCb(
-            long optionsPtr, Internals.ASICallback repositoryCb);
-
-    /** git_remote_create_cb remote_cb */
-    static native void jniOptionsSetRemoteCb(long optionsPtr, Internals.ALSSCallback remoteCb);
-
-    /* -------- Jni Signature ---------- */
-    static native int jniClone(AtomicLong out, String url, String localPath, long options);
-
-    /**
-     * Clone a remote repository.
-     *
-     * <p>By default this creates its repository and initial remote to match git's defaults. You can
-     * use the options in the callback to customize how these are created.
-     *
-     * @param url the remote repository to clone
-     * @param localPath local directory to clone to
-     * @param options configuration options for the clone. If NULL, the function works as though
-     *     GIT_OPTIONS_INIT were passed.
-     * @return cloned repository
-     * @throws GitException git errors
-     */
-    @Nonnull
-    public static Repository cloneRepo(
-            @Nonnull String url, @Nonnull Path localPath, @Nullable Options options) {
-        Repository outRepo = new Repository(0);
-        jniClone(
-                outRepo._rawPtr,
-                url,
-                localPath.toString(),
-                options == null ? 0 : options.getRawPointer());
-        return outRepo;
     }
 }

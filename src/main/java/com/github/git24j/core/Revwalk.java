@@ -1,23 +1,24 @@
 package com.github.git24j.core;
 
-import static com.github.git24j.core.GitException.ErrorCode.ITEROVER;
-import static com.github.git24j.core.Internals.BArrCallback;
-
-import java.util.EnumSet;
-import java.util.concurrent.atomic.AtomicLong;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.EnumSet;
+import java.util.concurrent.atomic.AtomicLong;
+
+import static com.github.git24j.core.GitException.ErrorCode.ITEROVER;
+import static com.github.git24j.core.Internals.BArrCallback;
 
 public class Revwalk extends CAutoReleasable {
-    protected Revwalk(boolean isWeak, long rawPtr) {
-        super(isWeak, rawPtr);
-    }
-
-    static native int jniFreeHideCb(long payloadPtr);
+    /**
+     * int git_revwalk_add_hide_cb(git_revwalk *walk, git_revwalk_hide_cb hide_cb, void *payload);
+     */
+    static native int jniAddHideCb(long walk, BArrCallback hideCb, AtomicLong outPayload);
 
     /** void git_revwalk_free(git_revwalk *walk); */
     static native void jniFree(long walk);
+
+    static native int jniFreeHideCb(long payloadPtr);
 
     /** int git_revwalk_hide(git_revwalk *walk, const git_oid *commit_id); */
     static native int jniHide(long walk, Oid commitId);
@@ -35,29 +36,6 @@ public class Revwalk extends CAutoReleasable {
 
     /** int git_revwalk_new(git_revwalk **out, git_repository *repo); */
     static native int jniNew(AtomicLong out, long repoPtr);
-
-    /**
-     * Allocate a new revision walker to iterate through a repo.
-     *
-     * <p>This revision walker uses a custom memory pool and an internal commit cache, so it is
-     * relatively expensive to allocate.
-     *
-     * <p>For maximum performance, this revision walker should be reused for different walks.
-     *
-     * <p>This revision walker is *not* thread safe: it may only be used to walk a repository on a
-     * single thread; however, it is possible to have several revision walkers in several different
-     * threads walking the same repository.
-     *
-     * @param repo the repo to walk through
-     * @return the new revision walker
-     * @throws GitException git errors
-     */
-    @Nonnull
-    public static Revwalk create(@Nonnull Repository repo) {
-        Revwalk out = new Revwalk(true, 0);
-        Error.throwIfNeeded(jniNew(out._rawPtr, repo.getRawPointer()));
-        return out;
-    }
 
     /** int git_revwalk_next(git_oid *out, git_revwalk *walk); */
     static native int jniNext(Oid out, long walk);
@@ -89,10 +67,32 @@ public class Revwalk extends CAutoReleasable {
     /** void git_revwalk_sorting(git_revwalk *walk, unsigned int sort_mode); */
     static native void jniSorting(long walk, int sortMode);
 
+    protected Revwalk(boolean isWeak, long rawPtr) {
+        super(isWeak, rawPtr);
+    }
+
     /**
-     * int git_revwalk_add_hide_cb(git_revwalk *walk, git_revwalk_hide_cb hide_cb, void *payload);
+     * Allocate a new revision walker to iterate through a repo.
+     *
+     * <p>This revision walker uses a custom memory pool and an internal commit cache, so it is
+     * relatively expensive to allocate.
+     *
+     * <p>For maximum performance, this revision walker should be reused for different walks.
+     *
+     * <p>This revision walker is *not* thread safe: it may only be used to walk a repository on a
+     * single thread; however, it is possible to have several revision walkers in several different
+     * threads walking the same repository.
+     *
+     * @param repo the repo to walk through
+     * @return the new revision walker
+     * @throws GitException git errors
      */
-    static native int jniAddHideCb(long walk, BArrCallback hideCb, AtomicLong outPayload);
+    @Nonnull
+    public static Revwalk create(@Nonnull Repository repo) {
+        Revwalk out = new Revwalk(true, 0);
+        Error.throwIfNeeded(jniNew(out._rawPtr, repo.getRawPointer()));
+        return out;
+    }
 
     @Override
     protected void freeOnce(long cPtr) {

@@ -1,27 +1,45 @@
 package com.github.git24j.core;
 
-import java.util.Optional;
-import java.util.concurrent.atomic.AtomicLong;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.Optional;
+import java.util.concurrent.atomic.AtomicLong;
 
 public class Blob extends GitObject {
-    Blob(boolean weak, long rawPointer) {
-        super(weak, rawPointer);
-    }
+    static native int jniCreateFromBuffer(Oid oid, long repoPtr, final byte[] buf);
+
+    static native int jniCreateFromDisk(Oid oid, long repoPtr, String path);
+
+    static native int jniCreateFromStream(AtomicLong outStream, long repoPtr, String hintPath);
+
+    static native int jniCreateFromStreamCommit(Oid oid, long streamPtr);
+
+    static native int jniCreateFromWorkdir(Oid oid, long repoPtr, String relativePath);
+
+    static native int jniDup(AtomicLong outDest, long srcPtr);
+
+    /**
+     * int git_blob_filtered_content(git_buf *out, git_blob *blob, const char *as_path, int
+     * check_for_binary_data);
+     */
+    static native int jniFilteredContent(Buf out, long blob, String asPath, int checkForBinaryData);
+
+    static native byte[] jniId(long blobPtr);
+
+    static native int jniIsBinary(long blobPtr);
 
     static native int jniLookup(AtomicLong outBlob, long repoPtr, Oid oid);
 
     static native int jniLookupPrefix(AtomicLong outBlob, long repoPtr, String shortId);
 
-    static native byte[] jniId(long blobPtr);
-
     static native long jniOwner(long blobPtr);
 
     static native long jniRawSize(long blobPtr);
 
-    static native int jniCreateFromWorkdir(Oid oid, long repoPtr, String relativePath);
+    Blob(boolean weak, long rawPointer) {
+        super(weak, rawPointer);
+    }
 
     /**
      * Read a file from the working folder of a repository and write it to the Object Database as a
@@ -38,8 +56,6 @@ public class Blob extends GitObject {
         return oid;
     }
 
-    static native int jniCreateFromDisk(Oid oid, long repoPtr, String path);
-
     /**
      * Read a file from the filesystem and write its content to the Object Database as a loose blob
      *
@@ -53,8 +69,6 @@ public class Blob extends GitObject {
         Error.throwIfNeeded(jniCreateFromDisk(oid, repo.getRawPointer(), path));
         return oid;
     }
-
-    static native int jniCreateFromStream(AtomicLong outStream, long repoPtr, String hintPath);
 
     /**
      * Create a stream to write a new blob into the object db
@@ -83,8 +97,6 @@ public class Blob extends GitObject {
         return new WriteStream(outWs.get());
     }
 
-    static native int jniCreateFromStreamCommit(Oid oid, long streamPtr);
-
     /**
      * Close the stream and write the blob to the object db
      *
@@ -100,8 +112,6 @@ public class Blob extends GitObject {
         return oid;
     }
 
-    static native int jniCreateFromBuffer(Oid oid, long repoPtr, final byte[] buf);
-
     /**
      * Write an in-memory buffer to the ODB as a blob
      *
@@ -114,10 +124,6 @@ public class Blob extends GitObject {
         Error.throwIfNeeded(jniCreateFromBuffer(oid, repo.getRawPointer(), buf));
         return oid;
     }
-
-    static native int jniIsBinary(long blobPtr);
-
-    static native int jniDup(AtomicLong outDest, long srcPtr);
 
     /**
      * Lookup a blob from sha in a repository.
@@ -149,12 +155,6 @@ public class Blob extends GitObject {
         Error.throwIfNeeded(jniLookupPrefix(outBlob, repo.getRawPointer(), shortId));
         return outBlob.get() == 0 ? null : new Blob(false, outBlob.get());
     }
-
-    /**
-     * int git_blob_filtered_content(git_buf *out, git_blob *blob, const char *as_path, int
-     * check_for_binary_data);
-     */
-    static native int jniFilteredContent(Buf out, long blob, String asPath, int checkForBinaryData);
 
     @Override
     @Nonnull

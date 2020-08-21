@@ -17,14 +17,10 @@ import static com.github.git24j.core.Remote.jniPushOptionsSetPbParallelism;
 import static com.github.git24j.core.Remote.jniPushOptionsSetVersion;
 
 public class PushOptions extends CAutoReleasable {
-    public final static int VERSION = 1;
+    public static final int VERSION = 1;
+
     protected PushOptions(boolean isWeak, long rawPtr) {
         super(isWeak, rawPtr);
-    }
-
-    @Override
-    protected void freeOnce(long cPtr) {
-        jniPushOptionsFree(cPtr);
     }
 
     public static PushOptions create(int version) {
@@ -37,12 +33,25 @@ public class PushOptions extends CAutoReleasable {
         return create(VERSION);
     }
 
+    @Override
+    protected void freeOnce(long cPtr) {
+        jniPushOptionsFree(cPtr);
+    }
+
     public int getVersion() {
         return jniPushOptionsGetVersion(getRawPointer());
     }
 
+    public void setVersion(int version) {
+        jniPushOptionsSetVersion(getRawPointer(), version);
+    }
+
     public int getPbParallelism() {
         return jniPushOptionsGetPbParallelism(getRawPointer());
+    }
+
+    public void setPbParallelism(int pbParallelism) {
+        jniPushOptionsSetPbParallelism(getRawPointer(), pbParallelism);
     }
 
     @CheckForNull
@@ -65,14 +74,6 @@ public class PushOptions extends CAutoReleasable {
         List<String> out = new ArrayList<>();
         jniPushOptionsGetCustomHeaders(getRawPointer(), out);
         return out;
-    }
-
-    public void setVersion(int version) {
-        jniPushOptionsSetVersion(getRawPointer(), version);
-    }
-
-    public void setPbParallelism(int pbParallelism) {
-        jniPushOptionsSetPbParallelism(getRawPointer(), pbParallelism);
     }
 
     public void setCustomHeaders(String[] customHeaders) {

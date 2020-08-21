@@ -1,19 +1,149 @@
 package com.github.git24j.core;
 
-import java.util.Optional;
-import java.util.concurrent.atomic.AtomicLong;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.Optional;
+import java.util.concurrent.atomic.AtomicLong;
 
 public class Blame extends CAutoReleasable {
+    /**
+     * int git_blame_buffer(git_blame **out, git_blame *reference, const char *buffer, size_t
+     * buffer_len);
+     */
+    static native int jniBuffer(AtomicLong out, long reference, String buffer, int bufferLen);
+
+    /**
+     * int git_blame_file(git_blame **out, git_repository *repo, const char *path, git_blame_options
+     * *options);
+     */
+    static native int jniFile(AtomicLong out, long repoPtr, String path, long options);
+
+    /** void git_blame_free(git_blame *blame); */
+    static native void jniFree(long blame);
+
+    /** const git_blame_hunk * git_blame_get_hunk_byindex(git_blame *blame, size_t index); */
+    static native long jniGetHunkByindex(long blame, int index);
+
+    /** const git_blame_hunk * git_blame_get_hunk_byline(git_blame *blame, size_t lineno); */
+    static native long jniGetHunkByline(long blame, int lineno);
+
+    /** size_t git_blame_get_hunk_count(git_blame *blame); */
+    static native int jniGetHunkCount(long blame);
+
+    /** char boundary */
+    static native char jniHunkGetBoundary(long hunkPtr);
+
+    /** git_oid final_commit_id */
+    static native byte[] jniHunkGetFinalCommitId(long hunkPtr);
+
+    /** git_signature *final_signature */
+    static native long jniHunkGetFinalSignature(long hunkPtr);
+
+    /** size_t final_start_line_number */
+    static native int jniHunkGetFinalStartLineNumber(long hunkPtr);
+
+    /** size_t lines_in_hunk */
+    static native int jniHunkGetLinesInHunk(long hunkPtr);
+
+    /** git_oid orig_commit_id */
+    static native byte[] jniHunkGetOrigCommitId(long hunkPtr);
+
+    /** const char *orig_path */
+    static native String jniHunkGetOrigPath(long hunkPtr);
+
+    /** git_signature *orig_signature */
+    static native long jniHunkGetOrigSignature(long hunkPtr);
+
+    /** size_t orig_start_line_number */
+    static native int jniHunkGetOrigStartLineNumber(long hunkPtr);
+
+    /** int git_blame_init_options(git_blame_options *opts, unsigned int version); */
+    static native int jniInitOptions(long opts, int version);
+
+    static native void jniOptionsNew(AtomicLong outPtr, int version);
+
     protected Blame(boolean isWeak, long rawPtr) {
         super(isWeak, rawPtr);
+    }
+
+    /** -------- Jni Signature ---------- */
+
+    /**
+     * Get the blame for a single file.
+     *
+     * @param repo repository whose history is to be walked
+     * @param path path to file to consider
+     * @param options options for the blame operation. If NULL, default Options will be used.
+     * @return Blame object
+     * @throws GitException git errors
+     */
+    @Nonnull
+    public static Blame file(
+            @Nonnull Repository repo, @Nonnull String path, @Nullable Options options) {
+        Blame blame = new Blame(false, 0);
+        Error.throwIfNeeded(
+                jniFile(
+                        blame._rawPtr,
+                        repo.getRawPointer(),
+                        path,
+                        options == null ? 0 : options.getRawPointer()));
+        return blame;
     }
 
     @Override
     protected void freeOnce(long cPtr) {
         jniFree(cPtr);
+    }
+
+    /** Gets the number of hunks that exist in the blame structure. */
+    public int getHunkCount() {
+        return jniGetHunkCount(getRawPointer());
+    }
+
+    /**
+     * Gets the blame hunk at the given index.
+     *
+     * @param index index of the hunk to retrieve
+     * @return the hunk at the given index, or empty if non is available
+     * @throws GitException git errors
+     */
+    public Optional<Hunk> getHunkByIndex(int index) {
+        long ptr = jniGetHunkByindex(getRawPointer(), index);
+        if (ptr == 0) {
+            return Optional.empty();
+        }
+        return Optional.of(new Hunk(true, ptr));
+    }
+
+    /**
+     * Gets the hunk that relates to the given line number in the newest commit.
+     *
+     * @param lineno the (1-based) line number to find a hunk for
+     * @return the hunk that contains the given line, or NULL on error
+     */
+    public Optional<Hunk> getHunkByLine(int lineno) {
+        long ptr = jniGetHunkByline(getRawPointer(), lineno);
+        return ptr == 0 ? Optional.empty() : Optional.of(new Hunk(true, ptr));
+    }
+
+    /**
+     * Get blame data for a file that has been modified in memory. The `reference` parameter is a
+     * pre-calculated blame for the in-odb history of the file. This means that once a file blame is
+     * completed (which can be expensive), updating the buffer blame is very fast.
+     *
+     * <p>Lines that differ between the buffer and the committed version are marked as having a zero
+     * OID for their final_commit_id.
+     *
+     * @param buffer the (possibly) modified contents of the file
+     * @return blame data.
+     * @throws GitException git errors
+     */
+    @Nonnull
+    public Blame buffer(@Nonnull String buffer) {
+        Blame out = new Blame(false, 0);
+        Error.throwIfNeeded(jniBuffer(out._rawPtr, getRawPointer(), buffer, buffer.length()));
+        return out;
     }
 
     public enum FlagT implements IBitEnum {
@@ -63,15 +193,15 @@ public class Blame extends CAutoReleasable {
             super(isWeak, rawPtr);
         }
 
-        @Override
-        protected void freeOnce(long cPtr) {
-            Libgit2.jniShadowFree(cPtr);
-        }
-
         public static Options init(int version) {
             Options out = new Options(false, 0);
             jniOptionsNew(out._rawPtr, version);
             return out;
+        }
+
+        @Override
+        protected void freeOnce(long cPtr) {
+            Libgit2.jniShadowFree(cPtr);
         }
     }
 
@@ -165,133 +295,4 @@ public class Blame extends CAutoReleasable {
             return jniHunkGetBoundary(getRawPointer());
         }
     }
-
-    /** int git_blame_init_options(git_blame_options *opts, unsigned int version); */
-    static native int jniInitOptions(long opts, int version);
-
-    static native void jniOptionsNew(AtomicLong outPtr, int version);
-
-    /** size_t git_blame_get_hunk_count(git_blame *blame); */
-    static native int jniGetHunkCount(long blame);
-
-    /** Gets the number of hunks that exist in the blame structure. */
-    public int getHunkCount() {
-        return jniGetHunkCount(getRawPointer());
-    }
-
-    /** const git_blame_hunk * git_blame_get_hunk_byindex(git_blame *blame, size_t index); */
-    static native long jniGetHunkByindex(long blame, int index);
-
-    /**
-     * Gets the blame hunk at the given index.
-     *
-     * @param index index of the hunk to retrieve
-     * @return the hunk at the given index, or empty if non is available
-     * @throws GitException git errors
-     */
-    public Optional<Hunk> getHunkByIndex(int index) {
-        long ptr = jniGetHunkByindex(getRawPointer(), index);
-        if (ptr == 0) {
-            return Optional.empty();
-        }
-        return Optional.of(new Hunk(true, ptr));
-    }
-
-    /** const git_blame_hunk * git_blame_get_hunk_byline(git_blame *blame, size_t lineno); */
-    static native long jniGetHunkByline(long blame, int lineno);
-
-    /**
-     * Gets the hunk that relates to the given line number in the newest commit.
-     *
-     * @param lineno the (1-based) line number to find a hunk for
-     * @return the hunk that contains the given line, or NULL on error
-     */
-    public Optional<Hunk> getHunkByLine(int lineno) {
-        long ptr = jniGetHunkByline(getRawPointer(), lineno);
-        return ptr == 0 ? Optional.empty() : Optional.of(new Hunk(true, ptr));
-    }
-
-    /**
-     * int git_blame_file(git_blame **out, git_repository *repo, const char *path, git_blame_options
-     * *options);
-     */
-    static native int jniFile(AtomicLong out, long repoPtr, String path, long options);
-
-    /**
-     * Get the blame for a single file.
-     *
-     * @param repo repository whose history is to be walked
-     * @param path path to file to consider
-     * @param options options for the blame operation. If NULL, default Options will be used.
-     * @return Blame object
-     * @throws GitException git errors
-     */
-    @Nonnull
-    public static Blame file(
-            @Nonnull Repository repo, @Nonnull String path, @Nullable Options options) {
-        Blame blame = new Blame(false, 0);
-        Error.throwIfNeeded(
-                jniFile(
-                        blame._rawPtr,
-                        repo.getRawPointer(),
-                        path,
-                        options == null ? 0 : options.getRawPointer()));
-        return blame;
-    }
-
-    /**
-     * int git_blame_buffer(git_blame **out, git_blame *reference, const char *buffer, size_t
-     * buffer_len);
-     */
-    static native int jniBuffer(AtomicLong out, long reference, String buffer, int bufferLen);
-
-    /**
-     * Get blame data for a file that has been modified in memory. The `reference` parameter is a
-     * pre-calculated blame for the in-odb history of the file. This means that once a file blame is
-     * completed (which can be expensive), updating the buffer blame is very fast.
-     *
-     * <p>Lines that differ between the buffer and the committed version are marked as having a zero
-     * OID for their final_commit_id.
-     *
-     * @param buffer the (possibly) modified contents of the file
-     * @return blame data.
-     * @throws GitException git errors
-     */
-    @Nonnull
-    public Blame buffer(@Nonnull String buffer) {
-        Blame out = new Blame(false, 0);
-        Error.throwIfNeeded(jniBuffer(out._rawPtr, getRawPointer(), buffer, buffer.length()));
-        return out;
-    }
-
-    /** void git_blame_free(git_blame *blame); */
-    static native void jniFree(long blame);
-
-    /** -------- Jni Signature ---------- */
-    /** size_t lines_in_hunk */
-    static native int jniHunkGetLinesInHunk(long hunkPtr);
-
-    /** git_oid final_commit_id */
-    static native byte[] jniHunkGetFinalCommitId(long hunkPtr);
-
-    /** size_t final_start_line_number */
-    static native int jniHunkGetFinalStartLineNumber(long hunkPtr);
-
-    /** git_signature *final_signature */
-    static native long jniHunkGetFinalSignature(long hunkPtr);
-
-    /** git_oid orig_commit_id */
-    static native byte[] jniHunkGetOrigCommitId(long hunkPtr);
-
-    /** const char *orig_path */
-    static native String jniHunkGetOrigPath(long hunkPtr);
-
-    /** size_t orig_start_line_number */
-    static native int jniHunkGetOrigStartLineNumber(long hunkPtr);
-
-    /** git_signature *orig_signature */
-    static native long jniHunkGetOrigSignature(long hunkPtr);
-
-    /** char boundary */
-    static native char jniHunkGetBoundary(long hunkPtr);
 }

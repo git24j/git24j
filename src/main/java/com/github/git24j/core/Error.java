@@ -2,9 +2,9 @@ package com.github.git24j.core;
 
 /** Delegate git_error_* methods. */
 public class Error {
-    static native GitException jniLast();
-
     static native void jniClear();
+
+    static native GitException jniLast();
 
     static native void jniSetStr(int klass, String message);
 

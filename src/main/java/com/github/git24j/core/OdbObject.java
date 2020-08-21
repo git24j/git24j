@@ -1,45 +1,11 @@
 package com.github.git24j.core;
 
-import java.util.Objects;
-import javax.annotation.Nonnull;
 import com.github.git24j.core.GitObject.Type;
 
+import javax.annotation.Nonnull;
+import java.util.Objects;
+
 public class OdbObject extends CAutoReleasable {
-    public static class Header {
-        private final int _len;
-        private final Type _type;
-
-        public Header(int len, Type type) {
-            _len = len;
-            _type = type;
-        }
-
-        public int getLen() {
-            return _len;
-        }
-
-        public Type getType() {
-            return _type;
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) {
-                return true;
-            }
-            if (o == null || getClass() != o.getClass()) {
-                return false;
-            }
-            Header header = (Header) o;
-            return _len == header._len && _type == header._type;
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(_len, _type);
-        }
-    }
-
     protected OdbObject(boolean isWeak, long rawPtr) {
         super(isWeak, rawPtr);
     }
@@ -84,5 +50,40 @@ public class OdbObject extends CAutoReleasable {
     @Nonnull
     public Type type() {
         return IBitEnum.valueOf(Odb.jniObjectType(getRawPointer()), Type.class, Type.ANY);
+    }
+
+    public static class Header {
+        private final int _len;
+        private final Type _type;
+
+        public Header(int len, Type type) {
+            _len = len;
+            _type = type;
+        }
+
+        public int getLen() {
+            return _len;
+        }
+
+        public Type getType() {
+            return _type;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) {
+                return true;
+            }
+            if (o == null || getClass() != o.getClass()) {
+                return false;
+            }
+            Header header = (Header) o;
+            return _len == header._len && _type == header._type;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(_len, _type);
+        }
     }
 }

@@ -2,8 +2,6 @@ package com.github.git24j.core;
 
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,29 +21,10 @@ import static com.github.git24j.core.Remote.jniFetchOptionsSetUpdateFetchhead;
 import static com.github.git24j.core.Remote.jniFetchOptionsSetVersion;
 
 public class FetchOptions extends CAutoReleasable {
-    public final static int VERSION = 1;
-    public enum PruneT {
-        /**
-         * Use the setting from the configuration
-         */
-        UNSPECIFIED,
-        /**
-         * Force pruning on
-         */
-        PRUNE,
-        /**
-         * Force pruning off
-         */
-        NO_PRUNE,
-    }
+    public static final int VERSION = 1;
 
     protected FetchOptions(boolean isWeak, long rawPtr) {
         super(isWeak, rawPtr);
-    }
-
-    @Override
-    protected void freeOnce(long cPtr) {
-        jniFetchOptionsFree(cPtr);
     }
 
     @Nonnull
@@ -59,11 +38,20 @@ public class FetchOptions extends CAutoReleasable {
         return FetchOptions.of(VERSION);
     }
 
+    @Override
+    protected void freeOnce(long cPtr) {
+        jniFetchOptionsFree(cPtr);
+    }
+
     public int getVersion() {
         return jniFetchOptionsGetVersion(getRawPointer());
     }
 
-    /**git_remote_callbacks callbacks*/
+    public void setVersion(int version) {
+        jniFetchOptionsSetVersion(getRawPointer(), version);
+    }
+
+    /** git_remote_callbacks callbacks */
     @CheckForNull
     public Remote.Callbacks getCallbacks() {
         long ptr = jniFetchOptionsGetCallbacks(getRawPointer());
@@ -86,8 +74,16 @@ public class FetchOptions extends CAutoReleasable {
         }
     }
 
+    public void setPrune(PruneT prune) {
+        jniFetchOptionsSetPrune(getRawPointer(), prune.ordinal());
+    }
+
     public boolean getUpdateFetchhead() {
         return 0 != jniFetchOptionsGetUpdateFetchhead(getRawPointer());
+    }
+
+    public void setUpdateFetchhead(boolean updateFetchhead) {
+        jniFetchOptionsSetUpdateFetchhead(getRawPointer(), updateFetchhead ? 1 : 0);
     }
 
     @Nonnull
@@ -105,13 +101,17 @@ public class FetchOptions extends CAutoReleasable {
         }
     }
 
+    public void setDownloadTags(Remote.AutotagOptionT downloadTags) {
+        jniFetchOptionsSetDownloadTags(getRawPointer(), downloadTags.getBit());
+    }
+
     @CheckForNull
     public Proxy.Options getProxyOpts() {
         long ptr = jniFetchOptionsGetProxyOpts(getRawPointer());
         return ptr == 0 ? null : new Proxy.Options(true, ptr);
     }
 
-    /**git_strarray custom_headers*/
+    /** git_strarray custom_headers */
     @Nonnull
     public List<String> getCustomHeaders() {
         ArrayList<String> out = new ArrayList<>();
@@ -119,26 +119,20 @@ public class FetchOptions extends CAutoReleasable {
         return out;
     }
 
+    public void setCustomHeaders(@Nonnull String[] customHeaders) {
+        jniFetchOptionsSetCustomHeaders(getRawPointer(), customHeaders);
+    }
+
     public void setCallback(Remote.Callbacks callbacks) {
         jniFetchOptionsSetCallbacks(callbacks.getRawPointer(), callbacks);
     }
-    public void setVersion(int version) {
-        jniFetchOptionsSetVersion(getRawPointer(), version);
-    }
 
-    public void setPrune(PruneT prune) {
-        jniFetchOptionsSetPrune(getRawPointer(), prune.ordinal());
-    }
-
-    public void setUpdateFetchhead(boolean updateFetchhead) {
-        jniFetchOptionsSetUpdateFetchhead(getRawPointer(), updateFetchhead ? 1 : 0);
-    }
-
-    public void setDownloadTags(Remote.AutotagOptionT downloadTags) {
-        jniFetchOptionsSetDownloadTags(getRawPointer(), downloadTags.getBit());
-    }
-
-    public void setCustomHeaders(@Nonnull String[] customHeaders) {
-        jniFetchOptionsSetCustomHeaders(getRawPointer(), customHeaders);
+    public enum PruneT {
+        /** Use the setting from the configuration */
+        UNSPECIFIED,
+        /** Force pruning on */
+        PRUNE,
+        /** Force pruning off */
+        NO_PRUNE,
     }
 }

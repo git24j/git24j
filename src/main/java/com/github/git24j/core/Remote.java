@@ -16,13 +16,928 @@ import java.util.stream.Collectors;
 import static com.github.git24j.core.GitException.ErrorCode.ENOTFOUND;
 
 public class Remote extends CAutoReleasable {
+    /** int git_remote_add_fetch(git_repository *repo, const char *remote, const char *refspec); */
+    static native int jniAddFetch(long repoPtr, String remote, String refspec);
+
+    /** int git_remote_add_push(git_repository *repo, const char *remote, const char *refspec); */
+    static native int jniAddPush(long repoPtr, String remote, String refspec);
+
+    /** git_remote_autotag_option_t git_remote_autotag(const git_remote *remote); */
+    static native int jniAutotag(long remote);
+
+    static native void jniCallbacksFree(long cbsPtr);
+
+    static native int jniCallbacksNew(AtomicLong outCb, int version);
+
+    static native void jniCallbacksSetCallbackObject(long cbsPtr, Callbacks cbsObject);
+
+    static native void jniCallbacksTest(long cbsPtr, Callbacks callbacks);
+
+    /**
+     *
+     *
+     * <pre>
+     * int git_remote_connect(
+     *     git_remote *remote,
+     *     git_direction direction,
+     *     const git_remote_callbacks *callbacks,
+     *     const git_proxy_options *proxy_opts,
+     *     const git_strarray *custom_headers);
+     * </pre>
+     */
+    static native int jniConnect(
+            long remote, int direction, long callbacks, long proxyOpts, String[] customHeaders);
+
+    /** int git_remote_connected(const git_remote *remote); */
+    static native int jniConnected(long remote);
+
+    /**
+     * int git_remote_create(git_remote **out, git_repository *repo, const char *name, const char
+     * *url);
+     */
+    static native int jniCreate(AtomicLong out, long repoPtr, String name, String url);
+
+    /** int git_remote_create_anonymous(git_remote **out, git_repository *repo, const char *url); */
+    static native int jniCreateAnonymous(AtomicLong out, long repoPtr, String url);
+
+    /** int git_remote_create_detached(git_remote **out, const char *url); */
+    static native int jniCreateDetached(AtomicLong out, String url);
+
+    static native int jniCreateOptionsFree(long optsPtr);
+
+    /** const char *fetchspec */
+    static native String jniCreateOptionsGetFetchspec(long create_optionsPtr);
+
+    /** unsigned int flags */
+    static native int jniCreateOptionsGetFlags(long create_optionsPtr);
+
+    /** const char *name */
+    static native String jniCreateOptionsGetName(long create_optionsPtr);
+
+    /** git_repository *repository */
+    static native long jniCreateOptionsGetRepository(long create_optionsPtr);
+
+    /** unsigned int version */
+    static native int jniCreateOptionsGetVersion(long create_optionsPtr);
+
+    static native int jniCreateOptionsNew(AtomicLong outOpts, int version);
+
+    /** const char *fetchspec */
+    static native void jniCreateOptionsSetFetchspec(long create_optionsPtr, String fetchspec);
+
+    /** unsigned int flags */
+    static native void jniCreateOptionsSetFlags(long create_optionsPtr, int flags);
+
+    /** const char *name */
+    static native void jniCreateOptionsSetName(long create_optionsPtr, String name);
+
+    /** git_repository *repository */
+    static native void jniCreateOptionsSetRepository(long create_optionsPtr, long repository);
+
+    /** unsigned int version */
+    static native void jniCreateOptionsSetVersion(long create_optionsPtr, int version);
+    // no matching type found for 'const git_remote_head ***out'
+    /** int git_remote_ls(const git_remote_head ***out, size_t *size, git_remote *remote); */
+    /** -------- Jni Signature ---------- */
+
+    /**
+     * int git_remote_create_with_fetchspec(git_remote **out, git_repository *repo, const char
+     * *name, const char *url, const char *fetch);
+     */
+    static native int jniCreateWithFetchspec(
+            AtomicLong out, long repoPtr, String name, String url, String fetch);
+
+    /**
+     * int git_remote_create_with_opts(git_remote **out, const char *url, const
+     * git_remote_create_options *opts);
+     */
+    static native int jniCreateWithOpts(AtomicLong out, String url, long opts);
+
+    /** int git_remote_default_branch(git_buf *out, git_remote *remote); */
+    static native int jniDefaultBranch(Buf out, long remote);
+
+    /** int git_remote_delete(git_repository *repo, const char *name); */
+    static native int jniDelete(long repoPtr, String name);
+
+    /** void git_remote_disconnect(git_remote *remote); */
+    static native void jniDisconnect(long remote);
+
+    /**
+     * int git_remote_download(git_remote *remote, const git_strarray *refspecs, const
+     * git_fetch_options *opts);
+     */
+    static native int jniDownload(long remote, String[] refspecs, long opts);
+
+    /** int git_remote_dup(git_remote **dest, git_remote *source); */
+    static native int jniDup(AtomicLong dest, long source);
+
+    /**
+     * int git_remote_fetch(git_remote *remote, const git_strarray *refspecs, const
+     * git_fetch_options *opts, const char *reflog_message);
+     */
+    static native int jniFetch(long remote, String[] refspecs, long opts, String reflogMessage);
+
+    static native int jniFetchOptionsFree(long ptr);
+
+    /** git_remote_callbacks callbacks */
+    static native long jniFetchOptionsGetCallbacks(long fetch_optionsPtr);
+
+    /** git_strarray custom_headers */
+    static native void jniFetchOptionsGetCustomHeaders(
+            long fetch_optionsPtr, List<String> customHeaders);
+
+    /** git_remote_autotag_option_t download_tags */
+    static native int jniFetchOptionsGetDownloadTags(long fetch_optionsPtr);
+
+    /** git_proxy_options proxy_opts */
+    static native long jniFetchOptionsGetProxyOpts(long fetch_optionsPtr);
+
+    /** git_fetch_prune_t prune */
+    static native int jniFetchOptionsGetPrune(long fetch_optionsPtr);
+
+    /** int update_fetchhead */
+    static native int jniFetchOptionsGetUpdateFetchhead(long fetch_optionsPtr);
+
+    /** int version */
+    static native int jniFetchOptionsGetVersion(long fetch_optionsPtr);
+
+    /** -------- Fetch Options---------- */
+    static native int jniFetchOptionsNew(AtomicLong outPtr, int version);
+
+    /** git_remote_callbacks callbacks */
+    static native void jniFetchOptionsSetCallbacks(long fetch_optionsPtr, Callbacks callbacks);
+
+    /** git_strarray custom_headers */
+    static native void jniFetchOptionsSetCustomHeaders(
+            long fetch_optionsPtr, String[] customHeaders);
+
+    /** git_remote_autotag_option_t download_tags */
+    static native void jniFetchOptionsSetDownloadTags(long fetch_optionsPtr, int downloadTags);
+
+    /** git_fetch_prune_t prune */
+    static native void jniFetchOptionsSetPrune(long fetch_optionsPtr, int prune);
+
+    /** int update_fetchhead */
+    static native void jniFetchOptionsSetUpdateFetchhead(
+            long fetch_optionsPtr, int updateFetchhead);
+
+    /** int version */
+    static native void jniFetchOptionsSetVersion(long fetch_optionsPtr, int version);
+
+    /** void git_remote_free(git_remote *remote); */
+    static native void jniFree(long remote);
+
+    /** int git_remote_get_fetch_refspecs(git_strarray *array, const git_remote *remote); */
+    static native int jniGetFetchRefspecs(List<String> array, long remote);
+
+    /** int git_remote_get_push_refspecs(git_strarray *array, const git_remote *remote); */
+    static native int jniGetPushRefspecs(List<String> array, long remote);
+
+    /** const git_refspec * git_remote_get_refspec(const git_remote *remote, size_t n); */
+    static native long jniGetRefspec(long remote, int n);
+
+    /** int git_remote_is_valid_name(const char *remote_name); */
+    static native int jniIsValidName(String remoteName);
+
+    /** int git_remote_list(git_strarray *out, git_repository *repo); */
+    static native int jniList(List<String> out, long repoPtr);
+
+    /** int git_remote_lookup(git_remote **out, git_repository *repo, const char *name); */
+    static native int jniLookup(AtomicLong out, long repoPtr, String name);
+
+    /** const char * git_remote_name(const git_remote *remote); */
+    static native String jniName(long remote);
+
+    /** git_repository * git_remote_owner(const git_remote *remote); */
+    static native long jniOwner(long remote);
+
+    /** int git_remote_prune(git_remote *remote, const git_remote_callbacks *callbacks); */
+    static native int jniPrune(long remote, long callbacks);
+
+    /** int git_remote_prune_refs(const git_remote *remote); */
+    static native int jniPruneRefs(long remote);
+
+    /**
+     * int git_remote_push(git_remote *remote, const git_strarray *refspecs, const git_push_options
+     * *opts);
+     */
+    static native int jniPush(long remote, String[] refspecs, long opts);
+
+    static native void jniPushOptionsFree(long optsPtr);
+
+    /** git_remote_callbacks callbacks */
+    static native long jniPushOptionsGetCallbacks(long push_optionsPtr);
+
+    /** git_strarray custom_headers */
+    static native void jniPushOptionsGetCustomHeaders(
+            long push_optionsPtr, List<String> outHeaders);
+
+    /** unsigned int pb_parallelism */
+    static native int jniPushOptionsGetPbParallelism(long push_optionsPtr);
+
+    /** git_proxy_options proxy_opts */
+    static native long jniPushOptionsGetProxyOpts(long push_optionsPtr);
+
+    static native int jniPushOptionsGetVersion(long push_optionsPtr);
+
+    /** unsigned int version */
+    static native int jniPushOptionsNew(AtomicLong outPtr, int version);
+
+    /** git_strarray custom_headers */
+    static native void jniPushOptionsSetCustomHeaders(long push_optionsPtr, String[] customHeaders);
+
+    /** unsigned int pb_parallelism */
+    static native void jniPushOptionsSetPbParallelism(long push_optionsPtr, int pbParallelism);
+
+    /** unsigned int version */
+    static native void jniPushOptionsSetVersion(long push_optionsPtr, int version);
+
+    static native char jniPushUpdateFree(long push_updatePtr);
+
+    /** git_oid dst */
+    static native byte[] jniPushUpdateGetDst(long push_updatePtr);
+
+    /** char *dst_refname */
+    static native String jniPushUpdateGetDstRefname(long push_updatePtr);
+
+    /** git_oid src */
+    static native byte[] jniPushUpdateGetSrc(long push_updatePtr);
+
+    /** char *src_refname */
+    static native String jniPushUpdateGetSrcRefname(long push_updatePtr);
+
+    /** -------- Jni Signature ---------- */
+    static native long jniPushUpdateNew();
+
+    /** git_oid dst */
+    static native void jniPushUpdateSetDst(long push_updatePtr, Oid dst);
+
+    /** char *dst_refname */
+    static native void jniPushUpdateSetDstRefname(long push_updatePtr, String dstRefname);
+
+    /** git_oid src */
+    static native void jniPushUpdateSetSrc(long push_updatePtr, Oid src);
+
+    /** char *src_refname */
+    static native void jniPushUpdateSetSrcRefname(long push_updatePtr, String srcRefname);
+
+    /** const char * git_remote_pushurl(const git_remote *remote); */
+    static native String jniPushurl(long remote);
+
+    /** size_t git_remote_refspec_count(const git_remote *remote); */
+    static native int jniRefspecCount(long remote);
+
+    /**
+     * int git_remote_rename(git_strarray *problems, git_repository *repo, const char *name, const
+     * char *new_name);
+     */
+    static native int jniRename(List<String> problems, long repoPtr, String name, String newName);
+
+    /**
+     * int git_remote_set_autotag(git_repository *repo, const char *remote,
+     * git_remote_autotag_option_t value);
+     */
+    static native int jniSetAutotag(long repoPtr, String remote, int value);
+
+    /** int git_remote_set_pushurl(git_repository *repo, const char *remote, const char *url); */
+    static native int jniSetPushurl(long repoPtr, String remote, String url);
+
+    /** int git_remote_set_url(git_repository *repo, const char *remote, const char *url); */
+    static native int jniSetUrl(long repoPtr, String remote, String url);
+
+    /** const git_transfer_progress * git_remote_stats(git_remote *remote); */
+    static native long jniStats(long remote);
+
+    /** void git_remote_stop(git_remote *remote); */
+    static native void jniStop(long remote);
+
+    /**
+     * int git_remote_update_tips(git_remote *remote, const git_remote_callbacks *callbacks, int
+     * update_fetchhead, git_remote_autotag_option_t download_tags, const char *reflog_message);
+     */
+    static native int jniUpdateTips(
+            long remote,
+            long callbacks,
+            int updateFetchhead,
+            int downloadTags,
+            String reflogMessage);
+
+    /**
+     * int git_remote_upload(git_remote *remote, const git_strarray *refspecs, const
+     * git_push_options *opts);
+     */
+    static native int jniUpload(long remote, String[] refspecs, long opts);
+
+    /** const char * git_remote_url(const git_remote *remote); */
+    static native String jniUrl(long remote);
+
     protected Remote(boolean isWeak, long rawPtr) {
         super(isWeak, rawPtr);
+    }
+
+    /**
+     * Add a fetch refspec to the remote's configuration
+     *
+     * <p>Add the given refspec to the fetch list in the configuration. No loaded remote instances
+     * will be affected.
+     *
+     * @param repo the repository in which to change the configuration
+     * @param remote the name of the remote to change
+     * @param refspec the new fetch refspec
+     * @throws GitException GIT_EINVALIDSPEC if refspec is invalid or an error value
+     */
+    public static void addFetch(
+            @Nonnull Repository repo, @Nonnull String remote, @Nonnull String refspec) {
+        Error.throwIfNeeded(jniAddFetch(repo.getRawPointer(), remote, refspec));
+    }
+
+    /**
+     * Add a push refspec to the remote's configuration
+     *
+     * <p>Add the given refspec to the push list in the configuration. No loaded remote instances
+     * will be affected.
+     *
+     * @param repo the repository in which to change the configuration
+     * @param remote the name of the remote to change
+     * @param refspec the new push refspec
+     * @throws GitException GIT_EINVALIDSPEC if refspec is invalid or an error value
+     */
+    public static void addPush(
+            @Nonnull Repository repo, @Nonnull String remote, @Nonnull String refspec) {
+        Error.throwIfNeeded(jniAddPush(repo.getRawPointer(), remote, refspec));
+    }
+
+    /**
+     * Add a remote with the default fetch refspec to the repository's configuration.
+     *
+     * @param repo the repository in which to create the remote
+     * @param name the remote's name
+     * @param url the remote's url
+     * @return the resulting remote
+     * @throws GitException GIT_EINVALIDSPEC, GIT_EEXISTS or an error code
+     */
+    @Nonnull
+    public static Remote create(@Nonnull Repository repo, @Nonnull String name, @Nonnull URI url) {
+        Remote remote = new Remote(false, 0);
+        Error.throwIfNeeded(jniCreate(remote._rawPtr, repo.getRawPointer(), name, url.toString()));
+        return remote;
+    }
+
+    /**
+     * Create an anonymous remote
+     *
+     * <p>Create a remote with the given url in-memory. You can use this when you have a URL instead
+     * of a remote's name.
+     *
+     * @param repo the associated repository
+     * @param url the remote repository's URL
+     * @return remote objects
+     * @throws GitException git errors
+     */
+    @Nonnull
+    public static Remote createAnonymous(@Nonnull Repository repo, @Nonnull URI url) {
+        Remote remote = new Remote(false, 0);
+        Error.throwIfNeeded(
+                jniCreateAnonymous(remote._rawPtr, repo.getRawPointer(), url.toString()));
+        return remote;
+    }
+
+    /**
+     * Create a remote without a connected local repo
+     *
+     * <p>Create a remote with the given url in-memory. You can use this when you have a URL instead
+     * of a remote's name.
+     *
+     * <p>Contrasted with git_remote_create_anonymous, a detached remote will not consider any repo
+     * configuration values (such as insteadof url substitutions).
+     *
+     * @param url the remote repository's URL
+     * @return the remote object
+     * @throws GitException git errors
+     */
+    @Nonnull
+    public static Remote createDetached(@Nonnull URI url) {
+        Remote remote = new Remote(false, 0);
+        Error.throwIfNeeded(jniCreateDetached(remote._rawPtr, url.toString()));
+        return remote;
+    }
+
+    /**
+     * Add a remote with the provided fetch refspec (or default if NULL) to the repository's
+     * configuration.
+     *
+     * @param repo the repository in which to create the remote
+     * @param name the remote's name
+     * @param url the remote's url
+     * @param fetch the remote fetch value
+     * @return remote object
+     * @throws GitException GIT_EINVALIDSPEC, GIT_EEXISTS or an error code
+     */
+    @Nonnull
+    public static Remote createWithFetchspec(
+            @Nonnull Repository repo,
+            @Nonnull String name,
+            @Nonnull URI url,
+            @Nullable String fetch) {
+        Remote remote = new Remote(false, 0);
+        Error.throwIfNeeded(
+                jniCreateWithFetchspec(
+                        remote._rawPtr, repo.getRawPointer(), name, url.toString(), fetch));
+        return remote;
+    }
+
+    /**
+     * Create a remote, with options.
+     *
+     * <p>This function allows more fine-grained control over the remote creation.
+     *
+     * <p>Passing NULL as the opts argument will result in a detached remote.
+     *
+     * @param url the remote's url
+     * @param opts the remote creation options
+     * @return remote object
+     * @throws GitException GIT_EINVALIDSPEC, GIT_EEXISTS or an error code
+     */
+    @Nonnull
+    public static Remote createWithOpts(@Nonnull URI url, @Nullable CreateOptions opts) {
+        Remote remote = new Remote(false, 0);
+        Error.throwIfNeeded(
+                jniCreateWithOpts(
+                        remote._rawPtr, url.toString(), opts == null ? 0 : opts.getRawPointer()));
+        return remote;
+    }
+
+    /**
+     * Delete an existing persisted remote.
+     *
+     * <p>All remote-tracking branches and configuration settings for the remote will be removed.
+     *
+     * @param repo the repository in which to act
+     * @param name the name of the remote to delete
+     * @throws GitException an error code.
+     */
+    public static void delete(@Nonnull Repository repo, @Nonnull String name) {
+        Error.throwIfNeeded(jniDelete(repo.getRawPointer(), name));
+    }
+
+    /**
+     * Get a list of the configured remotes for a repo
+     *
+     * <p>The string array must be freed by the user.
+     *
+     * @param repo the repository to query
+     * @return a list of the names of the remotes 0
+     * @throws GitException git errors
+     */
+    @Nonnull
+    public static List<String> list(@Nonnull Repository repo) {
+        List<String> out = new ArrayList<>();
+        Error.throwIfNeeded(jniList(out, repo.getRawPointer()));
+        return out;
+    }
+
+    /**
+     * Get the information for a particular remote
+     *
+     * <p>The name will be checked for validity. See `git_tag_create()` for rules about valid names.
+     *
+     * @param repo the associated repository
+     * @param name the remote's name
+     * @return remote object
+     * @throws GitException , GIT_ENOTFOUND, GIT_EINVALIDSPEC or an error code
+     */
+    @Nullable
+    public static Remote lookup(@Nonnull Repository repo, @Nonnull String name) {
+        // FIXME: jniLookup returns a weak reference, a bug?
+        Remote out = new Remote(true, 0);
+        int e = jniLookup(out._rawPtr, repo.getRawPointer(), name);
+        if (e == ENOTFOUND.getCode()) {
+            return null;
+        }
+        Error.throwIfNeeded(e);
+        return out;
+    }
+
+    /**
+     * Give the remote a new name
+     *
+     * <p>All remote-tracking branches and configuration settings for the remote are updated.
+     *
+     * <p>The new name will be checked for validity. See `git_tag_create()` for rules about valid
+     * names.
+     *
+     * <p>No loaded instances of a the remote with the old name will change their name or their list
+     * of refspecs.
+     *
+     * @param repo the repository in which to rename
+     * @param name the current name of the remote
+     * @param newName the new name the remote should bear
+     * @return non-default refspecs cannot be renamed for further processing by the caller.
+     * @throws GitException GIT_EINVALIDSPEC, GIT_EEXISTS or an error code
+     */
+    @Nonnull
+    public static List<String> rename(
+            @Nonnull Repository repo, @Nonnull String name, @Nonnull String newName) {
+        List<String> problems = new ArrayList<>();
+        Error.throwIfNeeded(jniRename(problems, repo.getRawPointer(), name, newName));
+        return problems;
+    }
+
+    /**
+     * Set the remote's tag following setting.
+     *
+     * <p>The change will be made in the configuration. No loaded remotes will be affected.
+     *
+     * @param repo the repository in which to make the change
+     * @param remote the name of the remote
+     * @param value the new value to take.
+     * @throws GitException git errors
+     */
+    public static void setAutotag(
+            @Nonnull Repository repo, @Nonnull String remote, @Nonnull AutotagOptionT value) {
+        Error.throwIfNeeded(jniSetAutotag(repo.getRawPointer(), remote, value.getBit()));
+    }
+
+    /**
+     * Set the remote's url for pushing in the configuration.
+     *
+     * <p>Remote objects already in memory will not be affected. This assumes the common case of a
+     * single-url remote and will otherwise return an error.
+     *
+     * @param repo the repository in which to perform the change
+     * @param remote the remote's name
+     * @param url the url to set, set null to delete the remote
+     * @throws GitException git errors
+     */
+    public static void setPushurl(
+            @Nonnull Repository repo, @Nonnull String remote, @Nullable URI url) {
+        Error.throwIfNeeded(
+                jniSetPushurl(repo.getRawPointer(), remote, url == null ? null : url.toString()));
+    }
+
+    /**
+     * Set the remote's url in the configuration
+     *
+     * <p>Remote objects already in memory will not be affected. This assumes the common case of a
+     * single-url remote and will otherwise return an error.
+     *
+     * @param repo the repository in which to perform the change
+     * @param remote the remote's name
+     * @param url the url to set, null to delete the remote from config
+     * @throws GitException git errors
+     */
+    public static void setUrl(@Nonnull Repository repo, @Nonnull String remote, @Nullable URI url) {
+        Error.throwIfNeeded(
+                jniSetUrl(repo.getRawPointer(), remote, url == null ? null : url.toString()));
     }
 
     @Override
     protected void freeOnce(long cPtr) {
         jniFree(cPtr);
+    }
+
+    /**
+     * Retrieve the tag auto-follow setting
+     *
+     * @return the auto-follow setting
+     * @throws GitException if auto tag settings is not recognizable.
+     */
+    @Nonnull
+    AutotagOptionT autotag() {
+        int t = jniAutotag(getRawPointer());
+        AutotagOptionT ret = IBitEnum.valueOf(t, AutotagOptionT.class);
+        if (ret == null) {
+            throw new GitException(
+                    GitException.ErrorClass.CONFIG,
+                    "remote autotag(" + t + ") is not recognizable");
+        }
+        return ret;
+    }
+
+    /**
+     * Open a connection to a remote
+     *
+     * <p>The transport is selected based on the URL. The direction argument is due to a limitation
+     * of the git protocol (over TCP or SSH) which starts up a specific binary which can only do the
+     * one or the other.
+     *
+     * @param direction GIT_DIRECTION_FETCH if you want to fetch or GIT_DIRECTION_PUSH if you want
+     *     to push
+     * @param callbacks the callbacks to use for this connection
+     * @param proxyOpts proxy settings
+     * @param customHeaders extra HTTP headers to use in this connection
+     * @throws GitException git errors
+     */
+    public void connect(
+            @Nonnull Direction direction,
+            @Nullable Callbacks callbacks,
+            @Nullable Proxy.Options proxyOpts,
+            @Nullable List<String> customHeaders) {
+        Error.throwIfNeeded(
+                jniConnect(
+                        getRawPointer(),
+                        direction.ordinal(),
+                        callbacks == null ? 0 : Callbacks.createDefault().getRawPointer(),
+                        proxyOpts == null ? 0 : proxyOpts.getRawPointer(),
+                        customHeaders == null
+                                ? new String[0]
+                                : customHeaders.toArray(new String[0])));
+    }
+
+    /**
+     * Check whether the remote is connected
+     *
+     * <p>Check whether the remote's underlying transport is connected to the remote host.
+     *
+     * @return if it's connected
+     */
+    public boolean connected() {
+        return jniConnected(getRawPointer()) == 1;
+    }
+
+    /**
+     * Retrieve the name of the remote's default branch
+     *
+     * <p>The default branch of a repository is the branch which HEAD points to. If the remote does
+     * not support reporting this information directly, it performs the guess as git does; that is,
+     * if there are multiple branches which point to the same commit, the first one is chosen. If
+     * the master branch is a candidate, it wins.
+     *
+     * <p>This function must only be called after connecting.
+     *
+     * @return reference name of the branch.
+     * @throws GitException GIT_ENOTFOUND if the remote does not have any references or none of them
+     *     point to HEAD's commit, or an error message.
+     */
+    public Optional<String> defaultBranch() {
+        Buf out = new Buf();
+        int e = jniDefaultBranch(out, getRawPointer());
+        if (ENOTFOUND.getCode() == e) {
+            return Optional.empty();
+        }
+        return out.getString();
+    }
+
+    /**
+     * Disconnect from the remote
+     *
+     * <p>Close the connection to the remote.
+     */
+    public void disconnect() {
+        jniDisconnect(getRawPointer());
+    }
+
+    /**
+     * Download and index the packfile
+     *
+     * <p>Connect to the remote if it hasn't been done yet, negotiate with the remote git which
+     * objects are missing, download and index the packfile.
+     *
+     * <p>The .idx file will be created and both it and the packfile with be renamed to their final
+     * name.
+     *
+     * @param refspecs the refspecs to use for this negotiation and download. Use NULL or an empty
+     *     array to use the base refspecs
+     * @param opts the options to use for this fetch
+     * @throws GitException git errors
+     */
+    public void download(@Nonnull String[] refspecs, @Nullable FetchOptions opts) {
+        Error.throwIfNeeded(
+                jniDownload(getRawPointer(), refspecs, opts == null ? 0 : opts.getRawPointer()));
+    }
+
+    /**
+     * Create a copy of an existing remote. All internal strings are also duplicated. Callbacks are
+     * not duplicated.
+     *
+     * @return Remote object
+     */
+    @Nonnull
+    public Remote dup() {
+        Remote out = new Remote(false, 0);
+        Error.throwIfNeeded(jniDup(out._rawPtr, getRawPointer()));
+        return out;
+    }
+
+    /**
+     * Download new data and update tips
+     *
+     * <p>Convenience function to connect to a remote, download the data, disconnect and update the
+     * remote-tracking branches.
+     *
+     * @param refspecs the refspecs to use for this fetch. Pass an empty array to use the base
+     *     refspecs.
+     * @param opts options to use for this fetch
+     * @param reflogMessage The message to insert into the reflogs. If NULL, the default is "fetch"
+     * @throws GitException git errors
+     */
+    public void fetch(
+            @Nullable String[] refspecs,
+            @Nullable FetchOptions opts,
+            @Nullable String reflogMessage) {
+        Error.throwIfNeeded(
+                jniFetch(
+                        getRawPointer(),
+                        refspecs == null ? new String[0] : refspecs,
+                        opts == null ? 0 : opts.getRawPointer(),
+                        reflogMessage));
+    }
+
+    /** Get the remote's list of fetch refspecs */
+    public List<String> getFetchRefspecs() {
+        List<String> out = new ArrayList<>();
+        Error.throwIfNeeded(jniGetFetchRefspecs(out, getRawPointer()));
+        return out;
+    }
+
+    /** Get the remote's list of push refspecs */
+    public List<String> getPushRefspecs() {
+        List<String> out = new ArrayList<>();
+        Error.throwIfNeeded(jniGetPushRefspecs(out, getRawPointer()));
+        return out;
+    }
+
+    /**
+     * Get a refspec from the remote
+     *
+     * @param n the refspec to get
+     * @return the nth refspec
+     */
+    public Optional<Refspec> getRefspec(int n) {
+        long ptr = jniGetRefspec(getRawPointer(), n);
+        if (ptr == 0) {
+            return Optional.empty();
+        }
+        return Optional.of(new Refspec(false, ptr));
+    }
+
+    /**
+     * Ensure the remote name is well-formed.
+     *
+     * @return true if the reference name is acceptable;
+     */
+    public boolean isValidName(String remoteName) {
+        return jniIsValidName(remoteName) == 1;
+    }
+
+    /**
+     * Get the remote's name
+     *
+     * @return a pointer to the name or empty for in-memory remotes
+     */
+    public Optional<String> name() {
+        return Optional.ofNullable(jniName(getRawPointer()));
+    }
+
+    /**
+     * Get the remote's repository
+     *
+     * @return a pointer to the repository
+     */
+    public Optional<Repository> owner() {
+        long ptr = jniOwner(getRawPointer());
+        if (ptr == 0) {
+            return Optional.empty();
+        }
+        return Optional.of(new Repository(ptr));
+    }
+
+    /**
+     * Prune tracking refs that are no longer present on remote
+     *
+     * @param callbacks callbacks to use for this prune
+     * @throws GitException 0 or an error code
+     */
+    public void prune(@Nullable Callbacks callbacks) {
+        Error.throwIfNeeded(
+                jniPrune(getRawPointer(), callbacks == null ? 0 : callbacks.getRawPointer()));
+    }
+
+    /**
+     * Retrieve the ref-prune setting
+     *
+     * @return the ref-prune setting
+     */
+    public int pruneRefs() {
+        return jniPruneRefs(getRawPointer());
+    }
+
+    /**
+     * Perform a push
+     *
+     * <p>Peform all the steps from a push.
+     *
+     * @param refspecs the refspecs to use for pushing. If NULL or an empty array, the configured
+     *     refspecs will be used
+     * @param opts options to use for this push
+     */
+    public void push(@Nonnull List<String> refspecs, @Nullable PushOptions opts) {
+        Error.throwIfNeeded(
+                jniPush(
+                        getRawPointer(),
+                        refspecs.toArray(new String[0]),
+                        opts == null ? 0 : opts.getRawPointer()));
+    }
+
+    /**
+     * Get the remote's url for pushing
+     *
+     * <p>If url.*.pushInsteadOf has been configured for this URL, it will return the modified URL.
+     *
+     * @return the url or empty if no special url for pushing is set
+     */
+    public Optional<URI> pushurl() {
+        return Optional.ofNullable(jniPushurl(getRawPointer())).map(URI::create);
+    }
+
+    /**
+     * Get the number of refspecs for a remote
+     *
+     * @return the amount of refspecs configured in this remote
+     */
+    public int refspecCount() {
+        return jniRefspecCount(getRawPointer());
+    }
+
+    /** Get the statistics structure that is filled in by the fetch operation. */
+    @CheckForNull
+    public TransferProgress stats() {
+        long ptr = jniStats(getRawPointer());
+        if (ptr == 0) {
+            return null;
+        }
+        return new TransferProgress(true, ptr);
+    }
+
+    /**
+     * Cancel the operation
+     *
+     * <p>At certain points in its operation, the network code checks whether the operation has been
+     * cancelled and if so stops the operation.
+     */
+    public void stop() {
+        jniStop(getRawPointer());
+    }
+
+    /**
+     * Update the tips to the new state
+     *
+     * @param reflogMessage The message to insert into the reflogs. If NULL and fetching, the
+     *     default is "fetch <name>", where <name> is the name of the remote (or its url, for
+     *     in-memory remotes). This parameter is ignored when pushing.
+     * @param callbacks pointer to the callback structure to use
+     * @param updateFetchhead whether to write to FETCH_HEAD. Pass 1 to behave like git.
+     * @param downloadTags what the behaviour for downloading tags is for this fetch. This is
+     *     ignored for push. This must be the same value passed to `git_remote_download()`.
+     * @throws GitException git errors
+     */
+    public void updateTips(
+            @Nullable String reflogMessage,
+            @Nullable Callbacks callbacks,
+            boolean updateFetchhead,
+            @Nonnull AutotagOptionT downloadTags) {
+        Error.throwIfNeeded(
+                jniUpdateTips(
+                        getRawPointer(),
+                        callbacks == null ? 0 : callbacks.getRawPointer(),
+                        updateFetchhead ? 1 : 0,
+                        downloadTags.getBit(),
+                        reflogMessage));
+    }
+    /** git_proxy_options proxy_opts */
+
+    /**
+     * Create a packfile and send it to the server
+     *
+     * <p>Connect to the remote if it hasn't been done yet, negotiate with the remote git which
+     * objects are missing, create a packfile with the missing objects and send it.
+     *
+     * @param refspecs the refspecs to use for this negotiation and upload. Use NULL or an empty
+     *     array to use the base refspecs
+     * @param opts the options to use for this push
+     * @throws GitException git errors
+     */
+    public void updaload(@Nonnull List<String> refspecs, @Nullable PushOptions opts) {
+        Error.throwIfNeeded(
+                jniUpload(
+                        getRawPointer(),
+                        refspecs.toArray(new String[0]),
+                        opts == null ? 0 : opts.getRawPointer()));
+    }
+
+    /** -------- Push Options ---------- */
+
+    /**
+     * Get the remote's url
+     *
+     * <p>If url.*.insteadOf has been configured for this URL, it will return the modified URL.
+     *
+     * @return URI that represents the url
+     * @throws IllegalStateException if remote url is not a valid URI
+     */
+    @Nonnull
+    public URI url() {
+        return URI.create(jniUrl(getRawPointer()));
     }
 
     public enum AutotagOptionT implements IBitEnum {
@@ -71,7 +986,6 @@ public class Remote extends CAutoReleasable {
         FETCH,
         PUSH;
     }
-
     /** Remote creation options flags */
     public enum CreateFlags implements IBitEnum {
         /** Ignore the repository apply.insteadOf configuration */
@@ -90,144 +1004,6 @@ public class Remote extends CAutoReleasable {
             return _bit;
         }
     }
-
-    public static class CreateOptions extends CAutoReleasable {
-        public enum Flag implements IBitEnum {
-            SKIP_INSTEADOF(1<<0),
-            SKIP_DEFAULT_FETCHSPEC (1 << 1);
-            private final int _bit;
-
-            Flag(int bit) {
-                _bit = bit;
-            }
-
-            @Override
-            public int getBit() {
-                return _bit;
-            }
-        }
-        public static final int VERSION = 1;
-
-        protected CreateOptions(boolean isWeak, long rawPtr) {
-            super(isWeak, rawPtr);
-        }
-
-        @Override
-        protected void freeOnce(long cPtr) {
-            jniCreateOptionsFree(cPtr);
-        }
-
-        @Nonnull
-        public static CreateOptions create(int version) {
-            CreateOptions opts = new CreateOptions(false, 0);
-            Error.throwIfNeeded(jniCreateOptionsNew(opts._rawPtr, version));
-            return opts;
-        }
-
-        @Nonnull
-        public static CreateOptions createDefault() {
-            return create(VERSION);
-        }
-
-        public int getVersion() {
-            return jniCreateOptionsGetVersion(getRawPointer());
-        }
-
-        @Nullable
-        public Repository getRepository() {
-            long repoPtr = jniCreateOptionsGetRepository(getRawPointer());
-            if (repoPtr <= 0) {
-                return null;
-            }
-            return new Repository(repoPtr);
-        }
-
-        @Nullable
-        public String getName() {
-            return jniCreateOptionsGetName(getRawPointer());
-        }
-
-        public String getFetchspec() {
-            return jniCreateOptionsGetFetchspec(getRawPointer());
-        }
-
-        public EnumSet<Flag> getFlags() {
-            return IBitEnum.parse(jniCreateOptionsGetFlags(getRawPointer()), Flag.class);
-        }
-
-        public void setVersion(int version) {
-            jniCreateOptionsSetVersion(getRawPointer(), version);
-        }
-
-        public void setRepository(@Nullable Repository repository) {
-            jniCreateOptionsSetRepository(getRawPointer(), repository == null ? 0 : repository.getRawPointer());
-        }
-
-        public void setName(String name) {
-            jniCreateOptionsSetName(getRawPointer(), name);
-        }
-
-        public void setFetchspec(String fetchspec) {
-            jniCreateOptionsSetFetchspec(getRawPointer(), fetchspec);
-        }
-
-        public void setFlags(EnumSet<Flag> flags) {
-            jniCreateOptionsSetFlags(getRawPointer(), IBitEnum.bitOrAll(flags));
-        }
-    }
-
-    public static class PushUpdate extends CAutoReleasable {
-        protected PushUpdate(boolean isWeak, long rawPtr) {
-            super(isWeak, rawPtr);
-        }
-
-        @Override
-        protected void freeOnce(long cPtr) {
-            jniPushUpdateFree(cPtr);
-        }
-
-        public static PushUpdate create() {
-            long ptr = jniPushUpdateNew();
-            return new PushUpdate(true, ptr);
-        }
-
-        public String getSrcRefname() {
-            return jniPushUpdateGetSrcRefname(getRawPointer());
-        }
-
-        public String getDstRefname() {
-            return jniPushUpdateGetDstRefname(getRawPointer());
-        }
-
-        @CheckForNull
-        public Oid getSrc() {
-            byte[] src = jniPushUpdateGetSrc(getRawPointer());
-            return src == null ? null : Oid.of(src);
-        }
-
-        @CheckForNull
-        public Oid getDst() {
-            byte[] dst = jniPushUpdateGetDst(getRawPointer());
-            return dst == null ? null : Oid.of(dst);
-        }
-
-        public void setSrcRefname(@Nonnull String srcRefname) {
-            jniPushUpdateSetSrcRefname(getRawPointer(), srcRefname);
-        }
-
-        public void setDstRefname(@Nonnull String dstRefname) {
-            jniPushUpdateSetDstRefname(getRawPointer(), dstRefname);
-        }
-
-        public void setSrc(@Nonnull Oid src) {
-            jniPushUpdateSetSrc(getRawPointer(), src);
-        }
-
-        public void setDst(@Nonnull Oid dst) {
-            jniPushUpdateSetDst(getRawPointer(), dst);
-        }
-    }
-
     @FunctionalInterface
     public interface CredAcquireCb {
         /**
@@ -241,7 +1017,6 @@ public class Remote extends CAutoReleasable {
          */
         Optional<Cred> acquire(String url, String usernameFromUrl, int allowedTypes);
     }
-
     @FunctionalInterface
     public interface TransportMessageCb {
         /**
@@ -252,15 +1027,11 @@ public class Remote extends CAutoReleasable {
          */
         int accept(String message);
     }
-
     @FunctionalInterface
     public interface CompletionCb {
-        /**
-         * int (*)(git_remote_completion_t, void *) completion
-         */
+        /** int (*)(git_remote_completion_t, void *) completion */
         int accept(CompletionT completionT);
     }
-
     @FunctionalInterface
     public interface TransportCertificateCheckCb {
         /**
@@ -276,7 +1047,6 @@ public class Remote extends CAutoReleasable {
          */
         int accept(Cert cert, boolean valid, String host);
     }
-
     @FunctionalInterface
     public interface TransferProgressCb {
         /**
@@ -299,13 +1069,11 @@ public class Remote extends CAutoReleasable {
         /** Packbuilder progress notification function */
         int accept(int stage, long current, long total);
     }
-
     @FunctionalInterface
     public interface PushTransferProgressCb {
         /** Push network progress notification function */
         int accept(long current, long total, int bytes);
     }
-
     @FunctionalInterface
     public interface PushUpdateReferenceCb {
         /**
@@ -320,7 +1088,6 @@ public class Remote extends CAutoReleasable {
          */
         int accept(String refname, String status);
     }
-
     @FunctionalInterface
     public interface PushNegotiationCb {
         /**
@@ -331,7 +1098,6 @@ public class Remote extends CAutoReleasable {
          */
         int accept(@Nonnull List<PushUpdate> updates);
     }
-
     @FunctionalInterface
     public interface TransportCb {
         /**
@@ -340,18 +1106,150 @@ public class Remote extends CAutoReleasable {
          */
         Optional<Transport> accept(Remote owner);
     }
-
     @FunctionalInterface
     public interface UrlResolveCb {
-        /**
-         * Callback to resolve URLs before connecting to remote
-         */
+        /** Callback to resolve URLs before connecting to remote */
         int accept(String urlResolved, String url, @Nonnull Direction direction);
     }
 
-    static native void jniCallbacksFree(long cbsPtr);
-    static native void jniCallbacksTest(long cbsPtr, Callbacks callbacks);
-    static native void jniCallbacksSetCallbackObject(long cbsPtr, Callbacks cbsObject);
+    public static class CreateOptions extends CAutoReleasable {
+        public static final int VERSION = 1;
+
+        protected CreateOptions(boolean isWeak, long rawPtr) {
+            super(isWeak, rawPtr);
+        }
+
+        @Nonnull
+        public static CreateOptions create(int version) {
+            CreateOptions opts = new CreateOptions(false, 0);
+            Error.throwIfNeeded(jniCreateOptionsNew(opts._rawPtr, version));
+            return opts;
+        }
+
+        @Nonnull
+        public static CreateOptions createDefault() {
+            return create(VERSION);
+        }
+
+        @Override
+        protected void freeOnce(long cPtr) {
+            jniCreateOptionsFree(cPtr);
+        }
+
+        public int getVersion() {
+            return jniCreateOptionsGetVersion(getRawPointer());
+        }
+
+        public void setVersion(int version) {
+            jniCreateOptionsSetVersion(getRawPointer(), version);
+        }
+
+        @Nullable
+        public Repository getRepository() {
+            long repoPtr = jniCreateOptionsGetRepository(getRawPointer());
+            if (repoPtr <= 0) {
+                return null;
+            }
+            return new Repository(repoPtr);
+        }
+
+        public void setRepository(@Nullable Repository repository) {
+            jniCreateOptionsSetRepository(
+                    getRawPointer(), repository == null ? 0 : repository.getRawPointer());
+        }
+
+        @Nullable
+        public String getName() {
+            return jniCreateOptionsGetName(getRawPointer());
+        }
+
+        public void setName(String name) {
+            jniCreateOptionsSetName(getRawPointer(), name);
+        }
+
+        public String getFetchspec() {
+            return jniCreateOptionsGetFetchspec(getRawPointer());
+        }
+
+        public void setFetchspec(String fetchspec) {
+            jniCreateOptionsSetFetchspec(getRawPointer(), fetchspec);
+        }
+
+        public EnumSet<Flag> getFlags() {
+            return IBitEnum.parse(jniCreateOptionsGetFlags(getRawPointer()), Flag.class);
+        }
+
+        public void setFlags(EnumSet<Flag> flags) {
+            jniCreateOptionsSetFlags(getRawPointer(), IBitEnum.bitOrAll(flags));
+        }
+
+        public enum Flag implements IBitEnum {
+            SKIP_INSTEADOF(1 << 0),
+            SKIP_DEFAULT_FETCHSPEC(1 << 1);
+            private final int _bit;
+
+            Flag(int bit) {
+                _bit = bit;
+            }
+
+            @Override
+            public int getBit() {
+                return _bit;
+            }
+        }
+    }
+
+    public static class PushUpdate extends CAutoReleasable {
+        protected PushUpdate(boolean isWeak, long rawPtr) {
+            super(isWeak, rawPtr);
+        }
+
+        public static PushUpdate create() {
+            long ptr = jniPushUpdateNew();
+            return new PushUpdate(true, ptr);
+        }
+
+        @Override
+        protected void freeOnce(long cPtr) {
+            jniPushUpdateFree(cPtr);
+        }
+
+        public String getSrcRefname() {
+            return jniPushUpdateGetSrcRefname(getRawPointer());
+        }
+
+        public void setSrcRefname(@Nonnull String srcRefname) {
+            jniPushUpdateSetSrcRefname(getRawPointer(), srcRefname);
+        }
+
+        public String getDstRefname() {
+            return jniPushUpdateGetDstRefname(getRawPointer());
+        }
+
+        public void setDstRefname(@Nonnull String dstRefname) {
+            jniPushUpdateSetDstRefname(getRawPointer(), dstRefname);
+        }
+
+        @CheckForNull
+        public Oid getSrc() {
+            byte[] src = jniPushUpdateGetSrc(getRawPointer());
+            return src == null ? null : Oid.of(src);
+        }
+
+        public void setSrc(@Nonnull Oid src) {
+            jniPushUpdateSetSrc(getRawPointer(), src);
+        }
+
+        @CheckForNull
+        public Oid getDst() {
+            byte[] dst = jniPushUpdateGetDst(getRawPointer());
+            return dst == null ? null : Oid.of(dst);
+        }
+
+        public void setDst(@Nonnull Oid dst) {
+            jniPushUpdateSetDst(getRawPointer(), dst);
+        }
+    }
 
     public static final class Callbacks extends CAutoReleasable {
         public static final int VERSION = 1;
@@ -367,6 +1265,21 @@ public class Remote extends CAutoReleasable {
         private PushNegotiationCb _pushNegotiationCb;
         private TransportCb _transportCb;
         private UrlResolveCb _urlResolveCb;
+
+        protected Callbacks(boolean isWeak, long rawPtr) {
+            super(isWeak, rawPtr);
+        }
+
+        @Nonnull
+        public static Callbacks create(int version) {
+            Callbacks cb = new Callbacks(false, 0);
+            Error.throwIfNeeded(jniCallbacksNew(cb._rawPtr, version));
+            return cb;
+        }
+
+        public static Callbacks createDefault() {
+            return create(VERSION);
+        }
 
         public void setCredAcquireCb(CredAcquireCb credAcquireCb) {
             jniCallbacksSetCallbackObject(getRawPointer(), this);
@@ -433,24 +1346,9 @@ public class Remote extends CAutoReleasable {
             _urlResolveCb = urlResolveCbCb;
         }
 
-        protected Callbacks(boolean isWeak, long rawPtr) {
-            super(isWeak, rawPtr);
-        }
-
         @Override
         protected void freeOnce(long cPtr) {
             jniCallbacksFree(cPtr);
-        }
-
-        @Nonnull
-        public static Callbacks create(int version) {
-            Callbacks cb = new Callbacks(false, 0);
-            Error.throwIfNeeded(jniCallbacksNew(cb._rawPtr, version));
-            return cb;
-        }
-
-        public static Callbacks createDefault() {
-            return create(VERSION);
         }
 
         /**
@@ -478,7 +1376,10 @@ public class Remote extends CAutoReleasable {
 
         int complete(int type) {
             if (_completionCb != null) {
-                CompletionT completionT = type == 0 ? CompletionT.DOWNLOAD : (type == 1 ? CompletionT.INDEXING : CompletionT.ERROR);
+                CompletionT completionT =
+                        type == 0
+                                ? CompletionT.DOWNLOAD
+                                : (type == 1 ? CompletionT.INDEXING : CompletionT.ERROR);
                 return _completionCb.accept(completionT);
             }
             return 0;
@@ -494,7 +1395,8 @@ public class Remote extends CAutoReleasable {
 
         int transferProgress(long progressPtr) {
             if (_transferProgressCb != null) {
-                TransferProgress progress = progressPtr == 0 ? null : new TransferProgress(true, progressPtr);
+                TransferProgress progress =
+                        progressPtr == 0 ? null : new TransferProgress(true, progressPtr);
                 return _transferProgressCb.accept(progress);
             }
             return 0;
@@ -546,10 +1448,7 @@ public class Remote extends CAutoReleasable {
         int resolveUrl(String resolvedUrl, String url, int direction) {
             if (_urlResolveCb != null) {
                 return _urlResolveCb.accept(
-                        resolvedUrl,
-                        url,
-                        direction == 0 ? Direction.FETCH : Direction.PUSH
-                );
+                        resolvedUrl, url, direction == 0 ? Direction.FETCH : Direction.PUSH);
             }
             return 0;
         }
@@ -571,881 +1470,9 @@ public class Remote extends CAutoReleasable {
         long transport(long ownerPtr) {
             if (_transportCb != null) {
                 Remote remote = ownerPtr == 0 ? null : new Remote(true, ownerPtr);
-                return _transportCb
-                        .accept(remote)
-                        .map(CAutoReleasable::getRawPointer)
-                        .orElse(0L);
+                return _transportCb.accept(remote).map(CAutoReleasable::getRawPointer).orElse(0L);
             }
             return 0L;
         }
     }
-    // no matching type found for 'const git_remote_head ***out'
-    /** int git_remote_ls(const git_remote_head ***out, size_t *size, git_remote *remote); */
-    /** -------- Jni Signature ---------- */
-    /** int git_remote_add_fetch(git_repository *repo, const char *remote, const char *refspec); */
-    static native int jniAddFetch(long repoPtr, String remote, String refspec);
-
-    /**
-     * Add a fetch refspec to the remote's configuration
-     *
-     * <p>Add the given refspec to the fetch list in the configuration. No loaded remote instances
-     * will be affected.
-     *
-     * @param repo the repository in which to change the configuration
-     * @param remote the name of the remote to change
-     * @param refspec the new fetch refspec
-     * @throws GitException GIT_EINVALIDSPEC if refspec is invalid or an error value
-     */
-    public static void addFetch(
-            @Nonnull Repository repo, @Nonnull String remote, @Nonnull String refspec) {
-        Error.throwIfNeeded(jniAddFetch(repo.getRawPointer(), remote, refspec));
-    }
-
-    /** int git_remote_add_push(git_repository *repo, const char *remote, const char *refspec); */
-    static native int jniAddPush(long repoPtr, String remote, String refspec);
-
-    /**
-     * Add a push refspec to the remote's configuration
-     *
-     * <p>Add the given refspec to the push list in the configuration. No loaded remote instances
-     * will be affected.
-     *
-     * @param repo the repository in which to change the configuration
-     * @param remote the name of the remote to change
-     * @param refspec the new push refspec
-     * @throws GitException GIT_EINVALIDSPEC if refspec is invalid or an error value
-     */
-    public static void addPush(
-            @Nonnull Repository repo, @Nonnull String remote, @Nonnull String refspec) {
-        Error.throwIfNeeded(jniAddPush(repo.getRawPointer(), remote, refspec));
-    }
-
-    /** git_remote_autotag_option_t git_remote_autotag(const git_remote *remote); */
-    static native int jniAutotag(long remote);
-
-    /**
-     * Retrieve the tag auto-follow setting
-     *
-     * @return the auto-follow setting
-     * @throws GitException if auto tag settings is not recognizable.
-     */
-    @Nonnull
-    AutotagOptionT autotag() {
-        int t = jniAutotag(getRawPointer());
-        AutotagOptionT ret = IBitEnum.valueOf(t, AutotagOptionT.class);
-        if (ret == null) {
-            throw new GitException(
-                    GitException.ErrorClass.CONFIG,
-                    "remote autotag(" + t + ") is not recognizable");
-        }
-        return ret;
-    }
-
-    /**
-     *
-     *
-     * <pre>
-     * int git_remote_connect(
-     *     git_remote *remote,
-     *     git_direction direction,
-     *     const git_remote_callbacks *callbacks,
-     *     const git_proxy_options *proxy_opts,
-     *     const git_strarray *custom_headers);
-     * </pre>
-     */
-    static native int jniConnect(
-            long remote, int direction, long callbacks, long proxyOpts, String[] customHeaders);
-
-    /**
-     * Open a connection to a remote
-     *
-     * <p>The transport is selected based on the URL. The direction argument is due to a limitation
-     * of the git protocol (over TCP or SSH) which starts up a specific binary which can only do the
-     * one or the other.
-     *
-     * @param direction GIT_DIRECTION_FETCH if you want to fetch or GIT_DIRECTION_PUSH if you want
-     *     to push
-     * @param callbacks the callbacks to use for this connection
-     * @param proxyOpts proxy settings
-     * @param customHeaders extra HTTP headers to use in this connection
-     * @throws GitException git errors
-     */
-    public void connect(
-            @Nonnull Direction direction,
-            @Nullable Callbacks callbacks,
-            @Nullable Proxy.Options proxyOpts,
-            @Nullable List<String> customHeaders) {
-        Error.throwIfNeeded(
-                jniConnect(
-                        getRawPointer(),
-                        direction.ordinal(),
-                        callbacks == null ? 0 : Callbacks.createDefault().getRawPointer(),
-                        proxyOpts == null ? 0 : proxyOpts.getRawPointer(),
-                        customHeaders == null
-                                ? new String[0]
-                                : customHeaders.toArray(new String[0])));
-    }
-
-    /** int git_remote_connected(const git_remote *remote); */
-    static native int jniConnected(long remote);
-
-    /**
-     * Check whether the remote is connected
-     *
-     * <p>Check whether the remote's underlying transport is connected to the remote host.
-     *
-     * @return if it's connected
-     */
-    public boolean connected() {
-        return jniConnected(getRawPointer()) == 1;
-    }
-
-    /**
-     * int git_remote_create(git_remote **out, git_repository *repo, const char *name, const char
-     * *url);
-     */
-    static native int jniCreate(AtomicLong out, long repoPtr, String name, String url);
-
-    /**
-     * Add a remote with the default fetch refspec to the repository's configuration.
-     *
-     * @param repo the repository in which to create the remote
-     * @param name the remote's name
-     * @param url the remote's url
-     * @return the resulting remote
-     * @throws GitException GIT_EINVALIDSPEC, GIT_EEXISTS or an error code
-     */
-    @Nonnull
-    public static Remote create(@Nonnull Repository repo, @Nonnull String name, @Nonnull URI url) {
-        Remote remote = new Remote(false, 0);
-        Error.throwIfNeeded(jniCreate(remote._rawPtr, repo.getRawPointer(), name, url.toString()));
-        return remote;
-    }
-
-    /** int git_remote_create_anonymous(git_remote **out, git_repository *repo, const char *url); */
-    static native int jniCreateAnonymous(AtomicLong out, long repoPtr, String url);
-
-    /**
-     * Create an anonymous remote
-     *
-     * <p>Create a remote with the given url in-memory. You can use this when you have a URL instead
-     * of a remote's name.
-     *
-     * @param repo the associated repository
-     * @param url the remote repository's URL
-     * @return remote objects
-     * @throws GitException git errors
-     */
-    @Nonnull
-    public static Remote createAnonymous(@Nonnull Repository repo, @Nonnull URI url) {
-        Remote remote = new Remote(false, 0);
-        Error.throwIfNeeded(
-                jniCreateAnonymous(remote._rawPtr, repo.getRawPointer(), url.toString()));
-        return remote;
-    }
-
-    /** int git_remote_create_detached(git_remote **out, const char *url); */
-    static native int jniCreateDetached(AtomicLong out, String url);
-
-    /**
-     * Create a remote without a connected local repo
-     *
-     * <p>Create a remote with the given url in-memory. You can use this when you have a URL instead
-     * of a remote's name.
-     *
-     * <p>Contrasted with git_remote_create_anonymous, a detached remote will not consider any repo
-     * configuration values (such as insteadof url substitutions).
-     *
-     * @param url the remote repository's URL
-     * @return the remote object
-     * @throws GitException git errors
-     */
-    @Nonnull
-    public static Remote createDetached(@Nonnull URI url) {
-        Remote remote = new Remote(false, 0);
-        Error.throwIfNeeded(jniCreateDetached(remote._rawPtr, url.toString()));
-        return remote;
-    }
-
-    static native int jniCreateOptionsNew(AtomicLong outOpts, int version);
-
-    static native int jniCreateOptionsFree(long optsPtr);
-    /**
-     * int git_remote_create_with_fetchspec(git_remote **out, git_repository *repo, const char
-     * *name, const char *url, const char *fetch);
-     */
-    static native int jniCreateWithFetchspec(
-            AtomicLong out, long repoPtr, String name, String url, String fetch);
-
-    /** unsigned int version */
-    static native int jniCreateOptionsGetVersion(long create_optionsPtr);
-
-    /** git_repository *repository */
-    static native long jniCreateOptionsGetRepository(long create_optionsPtr);
-
-    /** const char *name */
-    static native String jniCreateOptionsGetName(long create_optionsPtr);
-
-    /** const char *fetchspec */
-    static native String jniCreateOptionsGetFetchspec(long create_optionsPtr);
-
-    /** unsigned int flags */
-    static native int jniCreateOptionsGetFlags(long create_optionsPtr);
-
-    /** unsigned int version */
-    static native void jniCreateOptionsSetVersion(long create_optionsPtr, int version);
-
-    /** git_repository *repository */
-    static native void jniCreateOptionsSetRepository(long create_optionsPtr, long repository);
-
-    /** const char *name */
-    static native void jniCreateOptionsSetName(long create_optionsPtr, String name);
-
-    /** const char *fetchspec */
-    static native void jniCreateOptionsSetFetchspec(long create_optionsPtr, String fetchspec);
-
-    /** unsigned int flags */
-    static native void jniCreateOptionsSetFlags(long create_optionsPtr, int flags);
-
-    /**
-     * Add a remote with the provided fetch refspec (or default if NULL) to the repository's
-     * configuration.
-     *
-     * @param repo the repository in which to create the remote
-     * @param name the remote's name
-     * @param url the remote's url
-     * @param fetch the remote fetch value
-     * @return remote object
-     * @throws GitException GIT_EINVALIDSPEC, GIT_EEXISTS or an error code
-     */
-    @Nonnull
-    public static Remote createWithFetchspec(
-            @Nonnull Repository repo,
-            @Nonnull String name,
-            @Nonnull URI url,
-            @Nullable String fetch) {
-        Remote remote = new Remote(false, 0);
-        Error.throwIfNeeded(
-                jniCreateWithFetchspec(
-                        remote._rawPtr, repo.getRawPointer(), name, url.toString(), fetch));
-        return remote;
-    }
-
-    /**
-     * int git_remote_create_with_opts(git_remote **out, const char *url, const
-     * git_remote_create_options *opts);
-     */
-    static native int jniCreateWithOpts(AtomicLong out, String url, long opts);
-
-    /**
-     * Create a remote, with options.
-     *
-     * <p>This function allows more fine-grained control over the remote creation.
-     *
-     * <p>Passing NULL as the opts argument will result in a detached remote.
-     *
-     * @param url the remote's url
-     * @param opts the remote creation options
-     * @return remote object
-     * @throws GitException GIT_EINVALIDSPEC, GIT_EEXISTS or an error code
-     */
-    @Nonnull
-    public static Remote createWithOpts(@Nonnull URI url, @Nullable CreateOptions opts) {
-        Remote remote = new Remote(false, 0);
-        Error.throwIfNeeded(
-                jniCreateWithOpts(
-                        remote._rawPtr, url.toString(), opts == null ? 0 : opts.getRawPointer()));
-        return remote;
-    }
-
-    /** int git_remote_default_branch(git_buf *out, git_remote *remote); */
-    static native int jniDefaultBranch(Buf out, long remote);
-
-    /**
-     * Retrieve the name of the remote's default branch
-     *
-     * <p>The default branch of a repository is the branch which HEAD points to. If the remote does
-     * not support reporting this information directly, it performs the guess as git does; that is,
-     * if there are multiple branches which point to the same commit, the first one is chosen. If
-     * the master branch is a candidate, it wins.
-     *
-     * <p>This function must only be called after connecting.
-     *
-     * @return reference name of the branch.
-     * @throws GitException GIT_ENOTFOUND if the remote does not have any references or none of them
-     *     point to HEAD's commit, or an error message.
-     */
-    public Optional<String> defaultBranch() {
-        Buf out = new Buf();
-        int e = jniDefaultBranch(out, getRawPointer());
-        if (ENOTFOUND.getCode() == e) {
-            return Optional.empty();
-        }
-        return out.getString();
-    }
-
-    /** int git_remote_delete(git_repository *repo, const char *name); */
-    static native int jniDelete(long repoPtr, String name);
-
-    /**
-     * Delete an existing persisted remote.
-     *
-     * <p>All remote-tracking branches and configuration settings for the remote will be removed.
-     *
-     * @param repo the repository in which to act
-     * @param name the name of the remote to delete
-     * @throws GitException an error code.
-     */
-    public static void delete(@Nonnull Repository repo, @Nonnull String name) {
-        Error.throwIfNeeded(jniDelete(repo.getRawPointer(), name));
-    }
-
-    /** void git_remote_disconnect(git_remote *remote); */
-    static native void jniDisconnect(long remote);
-
-    /**
-     * Disconnect from the remote
-     *
-     * <p>Close the connection to the remote.
-     */
-    public void disconnect() {
-        jniDisconnect(getRawPointer());
-    }
-
-    /**
-     * int git_remote_download(git_remote *remote, const git_strarray *refspecs, const
-     * git_fetch_options *opts);
-     */
-    static native int jniDownload(long remote, String[] refspecs, long opts);
-
-    /**
-     * Download and index the packfile
-     *
-     * <p>Connect to the remote if it hasn't been done yet, negotiate with the remote git which
-     * objects are missing, download and index the packfile.
-     *
-     * <p>The .idx file will be created and both it and the packfile with be renamed to their final
-     * name.
-     *
-     * @param refspecs the refspecs to use for this negotiation and download. Use NULL or an empty
-     *     array to use the base refspecs
-     * @param opts the options to use for this fetch
-     * @throws GitException git errors
-     */
-    public void download(@Nonnull String[] refspecs, @Nullable FetchOptions opts) {
-        Error.throwIfNeeded(
-                jniDownload(getRawPointer(), refspecs, opts == null ? 0 : opts.getRawPointer()));
-    }
-
-    /** int git_remote_dup(git_remote **dest, git_remote *source); */
-    static native int jniDup(AtomicLong dest, long source);
-
-    /**
-     * Create a copy of an existing remote. All internal strings are also duplicated. Callbacks are
-     * not duplicated.
-     *
-     * @return Remote object
-     */
-    @Nonnull
-    public Remote dup() {
-        Remote out = new Remote(false, 0);
-        Error.throwIfNeeded(jniDup(out._rawPtr, getRawPointer()));
-        return out;
-    }
-
-    /**
-     * int git_remote_fetch(git_remote *remote, const git_strarray *refspecs, const
-     * git_fetch_options *opts, const char *reflog_message);
-     */
-    static native int jniFetch(long remote, String[] refspecs, long opts, String reflogMessage);
-
-    /**
-     * Download new data and update tips
-     *
-     * <p>Convenience function to connect to a remote, download the data, disconnect and update the
-     * remote-tracking branches.
-     *
-     * @param refspecs the refspecs to use for this fetch. Pass an empty array to use the base
-     *     refspecs.
-     * @param opts options to use for this fetch
-     * @param reflogMessage The message to insert into the reflogs. If NULL, the default is "fetch"
-     * @throws GitException git errors
-     */
-    public void fetch(
-            @Nullable String[] refspecs,
-            @Nullable FetchOptions opts,
-            @Nullable String reflogMessage) {
-        Error.throwIfNeeded(
-                jniFetch(
-                        getRawPointer(),
-                        refspecs == null ? new String[0] : refspecs,
-                        opts == null ? 0 : opts.getRawPointer(),
-                        reflogMessage));
-    }
-
-    /** void git_remote_free(git_remote *remote); */
-    static native void jniFree(long remote);
-
-    /** int git_remote_get_fetch_refspecs(git_strarray *array, const git_remote *remote); */
-    static native int jniGetFetchRefspecs(List<String> array, long remote);
-
-    /** Get the remote's list of fetch refspecs */
-    public List<String> getFetchRefspecs() {
-        List<String> out = new ArrayList<>();
-        Error.throwIfNeeded(jniGetFetchRefspecs(out, getRawPointer()));
-        return out;
-    }
-
-    /** int git_remote_get_push_refspecs(git_strarray *array, const git_remote *remote); */
-    static native int jniGetPushRefspecs(List<String> array, long remote);
-
-    /** Get the remote's list of push refspecs */
-    public List<String> getPushRefspecs() {
-        List<String> out = new ArrayList<>();
-        Error.throwIfNeeded(jniGetPushRefspecs(out, getRawPointer()));
-        return out;
-    }
-
-    /** const git_refspec * git_remote_get_refspec(const git_remote *remote, size_t n); */
-    static native long jniGetRefspec(long remote, int n);
-
-    /**
-     * Get a refspec from the remote
-     *
-     * @param n the refspec to get
-     * @return the nth refspec
-     */
-    public Optional<Refspec> getRefspec(int n) {
-        long ptr = jniGetRefspec(getRawPointer(), n);
-        if (ptr == 0) {
-            return Optional.empty();
-        }
-        return Optional.of(new Refspec(false, ptr));
-    }
-
-    static native int jniCallbacksNew(AtomicLong outCb, int version);
-
-    /** int git_remote_is_valid_name(const char *remote_name); */
-    static native int jniIsValidName(String remoteName);
-
-    /**
-     * Ensure the remote name is well-formed.
-     *
-     * @return true if the reference name is acceptable;
-     */
-    public boolean isValidName(String remoteName) {
-        return jniIsValidName(remoteName) == 1;
-    }
-
-    /** int git_remote_list(git_strarray *out, git_repository *repo); */
-    static native int jniList(List<String> out, long repoPtr);
-
-    /**
-     * Get a list of the configured remotes for a repo
-     *
-     * <p>The string array must be freed by the user.
-     *
-     * @param repo the repository to query
-     * @return a list of the names of the remotes 0
-     * @throws GitException git errors
-     */
-    @Nonnull
-    public static List<String> list(@Nonnull Repository repo) {
-        List<String> out = new ArrayList<>();
-        Error.throwIfNeeded(jniList(out, repo.getRawPointer()));
-        return out;
-    }
-
-    /** int git_remote_lookup(git_remote **out, git_repository *repo, const char *name); */
-    static native int jniLookup(AtomicLong out, long repoPtr, String name);
-
-    /**
-     * Get the information for a particular remote
-     *
-     * <p>The name will be checked for validity. See `git_tag_create()` for rules about valid names.
-     *
-     * @param repo the associated repository
-     * @param name the remote's name
-     * @return remote object
-     * @throws GitException , GIT_ENOTFOUND, GIT_EINVALIDSPEC or an error code
-     */
-    @Nullable
-    public static Remote lookup(@Nonnull Repository repo, @Nonnull String name) {
-        // FIXME: jniLookup returns a weak reference, a bug?
-        Remote out = new Remote(true, 0);
-        int e = jniLookup(out._rawPtr, repo.getRawPointer(), name);
-        if (e == ENOTFOUND.getCode()) {
-            return null;
-        }
-        Error.throwIfNeeded(e);
-        return out;
-    }
-
-    /** const char * git_remote_name(const git_remote *remote); */
-    static native String jniName(long remote);
-
-    /**
-     * Get the remote's name
-     *
-     * @return a pointer to the name or empty for in-memory remotes
-     */
-    public Optional<String> name() {
-        return Optional.ofNullable(jniName(getRawPointer()));
-    }
-
-    /** git_repository * git_remote_owner(const git_remote *remote); */
-    static native long jniOwner(long remote);
-
-    /**
-     * Get the remote's repository
-     *
-     * @return a pointer to the repository
-     */
-    public Optional<Repository> owner() {
-        long ptr = jniOwner(getRawPointer());
-        if (ptr == 0) {
-            return Optional.empty();
-        }
-        return Optional.of(new Repository(ptr));
-    }
-
-    /** int git_remote_prune(git_remote *remote, const git_remote_callbacks *callbacks); */
-    static native int jniPrune(long remote, long callbacks);
-
-    /**
-     * Prune tracking refs that are no longer present on remote
-     *
-     * @param callbacks callbacks to use for this prune
-     * @throws GitException 0 or an error code
-     */
-    public void prune(@Nullable Callbacks callbacks) {
-        Error.throwIfNeeded(
-                jniPrune(getRawPointer(), callbacks == null ? 0 : callbacks.getRawPointer()));
-    }
-
-    /** int git_remote_prune_refs(const git_remote *remote); */
-    static native int jniPruneRefs(long remote);
-
-    /**
-     * Retrieve the ref-prune setting
-     *
-     * @return the ref-prune setting
-     */
-    public int pruneRefs() {
-        return jniPruneRefs(getRawPointer());
-    }
-
-    /**
-     * int git_remote_push(git_remote *remote, const git_strarray *refspecs, const git_push_options
-     * *opts);
-     */
-    static native int jniPush(long remote, String[] refspecs, long opts);
-
-    /**
-     * Perform a push
-     *
-     * <p>Peform all the steps from a push.
-     *
-     * @param refspecs the refspecs to use for pushing. If NULL or an empty array, the configured
-     *     refspecs will be used
-     * @param opts options to use for this push
-     */
-    public void push(@Nonnull List<String> refspecs, @Nullable PushOptions opts) {
-        Error.throwIfNeeded(
-                jniPush(
-                        getRawPointer(),
-                        refspecs.toArray(new String[0]),
-                        opts == null ? 0 : opts.getRawPointer()));
-    }
-
-    /** const char * git_remote_pushurl(const git_remote *remote); */
-    static native String jniPushurl(long remote);
-
-    /**
-     * Get the remote's url for pushing
-     *
-     * <p>If url.*.pushInsteadOf has been configured for this URL, it will return the modified URL.
-     *
-     * @return the url or empty if no special url for pushing is set
-     */
-    public Optional<URI> pushurl() {
-        return Optional.ofNullable(jniPushurl(getRawPointer())).map(URI::create);
-    }
-
-    /** size_t git_remote_refspec_count(const git_remote *remote); */
-    static native int jniRefspecCount(long remote);
-
-    /**
-     * Get the number of refspecs for a remote
-     *
-     * @return the amount of refspecs configured in this remote
-     */
-    public int refspecCount() {
-        return jniRefspecCount(getRawPointer());
-    }
-
-    /**
-     * int git_remote_rename(git_strarray *problems, git_repository *repo, const char *name, const
-     * char *new_name);
-     */
-    static native int jniRename(List<String> problems, long repoPtr, String name, String newName);
-
-    /**
-     * Give the remote a new name
-     *
-     * <p>All remote-tracking branches and configuration settings for the remote are updated.
-     *
-     * <p>The new name will be checked for validity. See `git_tag_create()` for rules about valid
-     * names.
-     *
-     * <p>No loaded instances of a the remote with the old name will change their name or their list
-     * of refspecs.
-     *
-     * @param repo the repository in which to rename
-     * @param name the current name of the remote
-     * @param newName the new name the remote should bear
-     * @return non-default refspecs cannot be renamed for further processing by the caller.
-     * @throws GitException GIT_EINVALIDSPEC, GIT_EEXISTS or an error code
-     */
-    @Nonnull
-    public static List<String> rename(
-            @Nonnull Repository repo, @Nonnull String name, @Nonnull String newName) {
-        List<String> problems = new ArrayList<>();
-        Error.throwIfNeeded(jniRename(problems, repo.getRawPointer(), name, newName));
-        return problems;
-    }
-
-    /**
-     * int git_remote_set_autotag(git_repository *repo, const char *remote,
-     * git_remote_autotag_option_t value);
-     */
-    static native int jniSetAutotag(long repoPtr, String remote, int value);
-    /**
-     * Set the remote's tag following setting.
-     *
-     * <p>The change will be made in the configuration. No loaded remotes will be affected.
-     *
-     * @param repo the repository in which to make the change
-     * @param remote the name of the remote
-     * @param value the new value to take.
-     * @throws GitException git errors
-     */
-    public static void setAutotag(
-            @Nonnull Repository repo, @Nonnull String remote, @Nonnull AutotagOptionT value) {
-        Error.throwIfNeeded(jniSetAutotag(repo.getRawPointer(), remote, value.getBit()));
-    }
-
-    /** int git_remote_set_pushurl(git_repository *repo, const char *remote, const char *url); */
-    static native int jniSetPushurl(long repoPtr, String remote, String url);
-
-    /**
-     * Set the remote's url for pushing in the configuration.
-     *
-     * <p>Remote objects already in memory will not be affected. This assumes the common case of a
-     * single-url remote and will otherwise return an error.
-     *
-     * @param repo the repository in which to perform the change
-     * @param remote the remote's name
-     * @param url the url to set, set null to delete the remote
-     * @throws GitException git errors
-     */
-    public static void setPushurl(
-            @Nonnull Repository repo, @Nonnull String remote, @Nullable URI url) {
-        Error.throwIfNeeded(
-                jniSetPushurl(repo.getRawPointer(), remote, url == null ? null : url.toString()));
-    }
-
-    /** int git_remote_set_url(git_repository *repo, const char *remote, const char *url); */
-    static native int jniSetUrl(long repoPtr, String remote, String url);
-
-    /**
-     * Set the remote's url in the configuration
-     *
-     * <p>Remote objects already in memory will not be affected. This assumes the common case of a
-     * single-url remote and will otherwise return an error.
-     *
-     * @param repo the repository in which to perform the change
-     * @param remote the remote's name
-     * @param url the url to set, null to delete the remote from config
-     * @throws GitException git errors
-     */
-    public static void setUrl(@Nonnull Repository repo, @Nonnull String remote, @Nullable URI url) {
-        Error.throwIfNeeded(
-                jniSetUrl(repo.getRawPointer(), remote, url == null ? null : url.toString()));
-    }
-
-    /** const git_transfer_progress * git_remote_stats(git_remote *remote); */
-    static native long jniStats(long remote);
-
-    /** Get the statistics structure that is filled in by the fetch operation. */
-    @CheckForNull
-    public TransferProgress stats() {
-        long ptr = jniStats(getRawPointer());
-        if (ptr == 0) {
-            return null;
-        }
-        return new TransferProgress(true, ptr);
-    }
-
-    /** void git_remote_stop(git_remote *remote); */
-    static native void jniStop(long remote);
-
-    /**
-     * Cancel the operation
-     *
-     * <p>At certain points in its operation, the network code checks whether the operation has been
-     * cancelled and if so stops the operation.
-     */
-    public void stop() {
-        jniStop(getRawPointer());
-    }
-
-    /**
-     * int git_remote_update_tips(git_remote *remote, const git_remote_callbacks *callbacks, int
-     * update_fetchhead, git_remote_autotag_option_t download_tags, const char *reflog_message);
-     */
-    static native int jniUpdateTips(
-            long remote,
-            long callbacks,
-            int updateFetchhead,
-            int downloadTags,
-            String reflogMessage);
-
-    /**
-     * Update the tips to the new state
-     *
-     * @param reflogMessage The message to insert into the reflogs. If NULL and fetching, the
-     *     default is "fetch <name>", where <name> is the name of the remote (or its url, for
-     *     in-memory remotes). This parameter is ignored when pushing.
-     * @param callbacks pointer to the callback structure to use
-     * @param updateFetchhead whether to write to FETCH_HEAD. Pass 1 to behave like git.
-     * @param downloadTags what the behaviour for downloading tags is for this fetch. This is
-     *     ignored for push. This must be the same value passed to `git_remote_download()`.
-     * @throws GitException git errors
-     */
-    public void updateTips(
-            @Nullable String reflogMessage,
-            @Nullable Callbacks callbacks,
-            boolean updateFetchhead,
-            @Nonnull AutotagOptionT downloadTags) {
-        Error.throwIfNeeded(
-                jniUpdateTips(
-                        getRawPointer(),
-                        callbacks == null ? 0 : callbacks.getRawPointer(),
-                        updateFetchhead ? 1 : 0,
-                        downloadTags.getBit(),
-                        reflogMessage));
-    }
-
-    /**
-     * int git_remote_upload(git_remote *remote, const git_strarray *refspecs, const
-     * git_push_options *opts);
-     */
-    static native int jniUpload(long remote, String[] refspecs, long opts);
-
-    /**
-     * Create a packfile and send it to the server
-     *
-     * <p>Connect to the remote if it hasn't been done yet, negotiate with the remote git which
-     * objects are missing, create a packfile with the missing objects and send it.
-     *
-     * @param refspecs the refspecs to use for this negotiation and upload. Use NULL or an empty
-     *     array to use the base refspecs
-     * @param opts the options to use for this push
-     * @throws GitException git errors
-     */
-    public void updaload(@Nonnull List<String> refspecs, @Nullable PushOptions opts) {
-        Error.throwIfNeeded(
-                jniUpload(
-                        getRawPointer(),
-                        refspecs.toArray(new String[0]),
-                        opts == null ? 0 : opts.getRawPointer()));
-    }
-
-    /** const char * git_remote_url(const git_remote *remote); */
-    static native String jniUrl(long remote);
-
-    /**
-     * Get the remote's url
-     *
-     * <p>If url.*.insteadOf has been configured for this URL, it will return the modified URL.
-     *
-     * @return URI that represents the url
-     * @throws IllegalStateException if remote url is not a valid URI
-     */
-    @Nonnull
-    public URI url() {
-        return URI.create(jniUrl(getRawPointer()));
-    }
-
-    /** -------- Fetch Options---------- */
-    static native int jniFetchOptionsNew(AtomicLong outPtr, int version);
-    static native int jniFetchOptionsFree(long ptr);
-    /**int version*/
-    static native int jniFetchOptionsGetVersion(long fetch_optionsPtr);
-    /**git_remote_callbacks callbacks*/
-    static native long jniFetchOptionsGetCallbacks(long fetch_optionsPtr);
-    /**git_fetch_prune_t prune*/
-    static native int jniFetchOptionsGetPrune(long fetch_optionsPtr);
-    /**int update_fetchhead*/
-    static native int jniFetchOptionsGetUpdateFetchhead(long fetch_optionsPtr);
-    /**git_remote_autotag_option_t download_tags*/
-    static native int jniFetchOptionsGetDownloadTags(long fetch_optionsPtr);
-    /**git_proxy_options proxy_opts*/
-    static native long jniFetchOptionsGetProxyOpts(long fetch_optionsPtr);
-    /**git_strarray custom_headers*/
-    static native void jniFetchOptionsGetCustomHeaders(long fetch_optionsPtr, List<String> customHeaders);
-    /**int version*/
-    static native void jniFetchOptionsSetVersion(long fetch_optionsPtr, int version);
-    /**git_remote_callbacks callbacks*/
-    static native void jniFetchOptionsSetCallbacks(long fetch_optionsPtr, Callbacks callbacks);
-    /**git_fetch_prune_t prune*/
-    static native void jniFetchOptionsSetPrune(long fetch_optionsPtr, int prune);
-    /**int update_fetchhead*/
-    static native void jniFetchOptionsSetUpdateFetchhead(long fetch_optionsPtr, int updateFetchhead);
-    /**git_remote_autotag_option_t download_tags*/
-    static native void jniFetchOptionsSetDownloadTags(long fetch_optionsPtr, int downloadTags);
-    /**git_proxy_options proxy_opts*/
-    /**git_strarray custom_headers*/
-    static native void jniFetchOptionsSetCustomHeaders(long fetch_optionsPtr, String[] customHeaders);
-
-    /** -------- Push Options ---------- */
-    /**unsigned int version*/
-    static native int jniPushOptionsNew(AtomicLong outPtr, int version);
-    static native void jniPushOptionsFree(long optsPtr);
-    static native int jniPushOptionsGetVersion(long push_optionsPtr);
-    /**unsigned int pb_parallelism*/
-    static native int jniPushOptionsGetPbParallelism(long push_optionsPtr);
-    /**git_remote_callbacks callbacks*/
-    static native long jniPushOptionsGetCallbacks(long push_optionsPtr);
-    /**git_proxy_options proxy_opts*/
-    static native long jniPushOptionsGetProxyOpts(long push_optionsPtr);
-    /**git_strarray custom_headers*/
-    static native void jniPushOptionsGetCustomHeaders(long push_optionsPtr, List<String> outHeaders);
-    /**unsigned int version*/
-    static native void jniPushOptionsSetVersion(long push_optionsPtr, int version);
-    /**unsigned int pb_parallelism*/
-    static native void jniPushOptionsSetPbParallelism(long push_optionsPtr, int pbParallelism);
-    /**git_strarray custom_headers*/
-    static native void jniPushOptionsSetCustomHeaders(long push_optionsPtr, String[] customHeaders);
-
-    /** -------- Jni Signature ---------- */
-    static native long jniPushUpdateNew();
-    static native char jniPushUpdateFree(long push_updatePtr);
-    /**char *src_refname*/
-    static native String jniPushUpdateGetSrcRefname(long push_updatePtr);
-    /**char *dst_refname*/
-    static native String jniPushUpdateGetDstRefname(long push_updatePtr);
-    /**git_oid src*/
-    static native byte[] jniPushUpdateGetSrc(long push_updatePtr);
-    /**git_oid dst*/
-    static native byte[] jniPushUpdateGetDst(long push_updatePtr);
-    /**char *src_refname*/
-    static native void jniPushUpdateSetSrcRefname(long push_updatePtr, String srcRefname);
-    /**char *dst_refname*/
-    static native void jniPushUpdateSetDstRefname(long push_updatePtr, String dstRefname);
-    /**git_oid src*/
-    static native void jniPushUpdateSetSrc(long push_updatePtr, Oid src);
-    /**git_oid dst*/
-    static native void jniPushUpdateSetDst(long push_updatePtr, Oid dst);
 }

@@ -1,5 +1,7 @@
 package com.github.git24j.core;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.EnumSet;
@@ -7,18 +9,32 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 public class Status {
+
+    /** const git_status_entry * git_status_byindex(git_status_list *statuslist, size_t idx); */
+    static native long jniByindex(long statuslist, int idx);
+
+    /** git_diff_delta *head_to_index */
+    static native long jniEntryGetHeadToIndex(long entryPtr);
+
+    /** git_diff_delta *index_to_workdir */
+    static native long jniEntryGetIndexToWorkdir(long entryPtr);
+
+    /** git_status_t status */
+    static native int jniEntryGetStatus(long entryPtr);
+
+    /** int git_status_file(unsigned int *status_flags, git_repository *repo, const char *path); */
+    static native int jniFile(AtomicInteger statusFlags, long repoPtr, String path);
 
     /** int git_status_init_options(git_status_options *opts, unsigned int version); */
     static native int jniInitOptions(long opts, int version);
 
-    static native int jniOptionsNew(AtomicLong outOpts, int version);
+    /** size_t git_status_list_entrycount(git_status_list *statuslist); */
+    static native int jniListEntrycount(long statuslist);
 
-    /** int git_status_file(unsigned int *status_flags, git_repository *repo, const char *path); */
-    static native int jniFile(AtomicInteger statusFlags, long repoPtr, String path);
+    /** void git_status_list_free(git_status_list *statuslist); */
+    static native void jniListFree(long statuslist);
 
     /**
      * int git_status_list_new(git_status_list **out, git_repository *repo, const git_status_options
@@ -26,14 +42,37 @@ public class Status {
      */
     static native int jniListNew(AtomicLong out, long repoPtr, long opts);
 
-    /** size_t git_status_list_entrycount(git_status_list *statuslist); */
-    static native int jniListEntrycount(long statuslist);
+    /** git_tree *baseline */
+    static native long jniOptionsGetBaseline(long optionsPtr);
 
-    /** const git_status_entry * git_status_byindex(git_status_list *statuslist, size_t idx); */
-    static native long jniByindex(long statuslist, int idx);
+    /** unsigned int flags */
+    static native int jniOptionsGetFlags(long optionsPtr);
 
-    /** void git_status_list_free(git_status_list *statuslist); */
-    static native void jniListFree(long statuslist);
+    /** git_strarray pathspec */
+    static native void jniOptionsGetPathspec(long optionsPtr, List<String> outPathSpec);
+
+    /** git_status_show_t show */
+    static native int jniOptionsGetShow(long optionsPtr);
+
+    /** unsigned int version */
+    static native int jniOptionsGetVersion(long optionsPtr);
+
+    static native int jniOptionsNew(AtomicLong outOpts, int version);
+
+    /** git_tree *baseline */
+    static native void jniOptionsSetBaseline(long optionsPtr, long baseline);
+
+    /** unsigned int flags */
+    static native void jniOptionsSetFlags(long optionsPtr, int flags);
+
+    /** git_strarray pathspec */
+    static native void jniOptionsSetPathspec(long optionsPtr, String[] pathspec);
+
+    /** git_status_show_t show */
+    static native void jniOptionsSetShow(long optionsPtr, int show);
+
+    /** unsigned int version */
+    static native void jniOptionsSetVersion(long optionsPtr, int version);
 
     /** int git_status_should_ignore(int *ignored, git_repository *repo, const char *path); */
     static native int jniShouldIgnore(AtomicInteger ignored, long repoPtr, String path);
@@ -59,45 +98,6 @@ public class Status {
         Error.throwIfNeeded(jniShouldIgnore(out, repo.getRawPointer(), path.toString()));
         return out.get() == 1;
     }
-
-    /** unsigned int version */
-    static native int jniOptionsGetVersion(long optionsPtr);
-
-    /** git_status_show_t show */
-    static native int jniOptionsGetShow(long optionsPtr);
-
-    /** unsigned int flags */
-    static native int jniOptionsGetFlags(long optionsPtr);
-
-    /** git_strarray pathspec */
-    static native void jniOptionsGetPathspec(long optionsPtr, List<String> outPathSpec);
-
-    /** git_tree *baseline */
-    static native long jniOptionsGetBaseline(long optionsPtr);
-
-    /** unsigned int version */
-    static native void jniOptionsSetVersion(long optionsPtr, int version);
-
-    /** git_status_show_t show */
-    static native void jniOptionsSetShow(long optionsPtr, int show);
-
-    /** unsigned int flags */
-    static native void jniOptionsSetFlags(long optionsPtr, int flags);
-
-    /** git_strarray pathspec */
-    static native void jniOptionsSetPathspec(long optionsPtr, String[] pathspec);
-
-    /** git_tree *baseline */
-    static native void jniOptionsSetBaseline(long optionsPtr, long baseline);
-
-    /** git_status_t status */
-    static native int jniEntryGetStatus(long entryPtr);
-
-    /** git_diff_delta *head_to_index */
-    static native long jniEntryGetHeadToIndex(long entryPtr);
-
-    /** git_diff_delta *index_to_workdir */
-    static native long jniEntryGetIndexToWorkdir(long entryPtr);
 
     /**
      * Get file status for a single file.

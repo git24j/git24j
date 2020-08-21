@@ -1,11 +1,181 @@
 package com.github.git24j.core;
 
-import java.util.EnumSet;
-import java.util.concurrent.atomic.AtomicLong;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.EnumSet;
+import java.util.concurrent.atomic.AtomicLong;
 
 public class Credential extends CAutoReleasable {
+    /** int git_credential_default_new(git_credential **out); */
+    static native int jniDefaultNew(AtomicLong out);
+
+    /** void git_credential_free(git_credential *cred); */
+    static native void jniFree(long cred);
+
+    /** const char * git_credential_get_username(git_credential *cred); */
+    static native String jniGetUsername(long cred);
+
+    /** int git_credential_has_username(git_credential *cred); */
+    static native int jniHasUsername(long cred);
+    // no matching type found for 'git_credential_ssh_interactive_cb prompt_callback'
+    /**
+     * int git_credential_ssh_interactive_new(git_credential **out, const char *username,
+     * git_credential_ssh_interactive_cb prompt_callback, void *payload);
+     */
+    // no matching type found for 'git_credential_sign_cb sign_callback'
+    /**
+     * int git_credential_ssh_custom_new(git_credential **out, const char *username, const char
+     * *publickey, size_t publickey_len, git_credential_sign_cb sign_callback, void *payload);
+     */
+    /** -------- Jni Signature ---------- */
+
+    /** int git_credential_ssh_key_from_agent(git_credential **out, const char *username); */
+    static native int jniSshKeyFromAgent(AtomicLong out, String username);
+
+    /**
+     * int git_credential_ssh_key_memory_new(git_credential **out, const char *username, const char
+     * *publickey, const char *privatekey, const char *passphrase);
+     */
+    static native int jniSshKeyMemoryNew(
+            AtomicLong out,
+            String username,
+            String publickey,
+            String privatekey,
+            String passphrase);
+
+    /**
+     * int git_credential_ssh_key_new(git_credential **out, const char *username, const char
+     * *publickey, const char *privatekey, const char *passphrase);
+     */
+    static native int jniSshKeyNew(
+            AtomicLong out,
+            String username,
+            String publickey,
+            String privatekey,
+            String passphrase);
+
+    /** int git_credential_username_new(git_credential **out, const char *username); */
+    static native int jniUsernameNew(AtomicLong out, String username);
+
+    /**
+     * int git_credential_userpass(git_credential **out, const char *url, const char *user_from_url,
+     * unsigned int allowed_types, void *payload);
+     */
+    static native int jniUserpass(
+            AtomicLong out, String url, String userFromUrl, int allowedTypes, long payloadPtr);
+
+    /**
+     * int git_credential_userpass_plaintext_new(git_credential **out, const char *username, const
+     * char *password);
+     */
+    static native int jniUserpassPlaintextNew(AtomicLong out, String username, String password);
+
+    protected Credential(boolean isWeak, long rawPtr) {
+        super(isWeak, rawPtr);
+    }
+
+    /**
+     * Create a new plain-text username and password credential object. The supplied credential
+     * parameter will be internally duplicated.
+     *
+     * @return The newly created credential object.
+     * @param username The username of the credential.
+     * @param password The password of the credential.
+     * @throws GitException git errors
+     */
+    @Nonnull
+    public static Credential userpassPlaintextNew(
+            @Nonnull String username, @Nonnull String password) {
+        Credential out = new Credential(false, 0);
+        Error.throwIfNeeded(jniUserpassPlaintextNew(out._rawPtr, username, password));
+        return out;
+    }
+
+    /**
+     * Create a "default" credential usable for Negotiate mechanisms like NTLM or Kerberos
+     * authentication.
+     *
+     * @return The newly created credential object.
+     * @throws GitException git errors
+     */
+    @Nonnull
+    public static Credential defaultNew() {
+        Credential out = new Credential(false, 0);
+        Error.throwIfNeeded(jniDefaultNew(out._rawPtr));
+        return out;
+    }
+
+    /**
+     * Create a credential to specify a username.
+     *
+     * <p>This is used with ssh authentication to query for the username if none is specified in the
+     * url.
+     *
+     * @return The newly created credential object.
+     * @param username The username to authenticate with
+     * @throws GitException git errors
+     */
+    @Nonnull
+    public static Credential usernameNew(@Nonnull String username) {
+        Credential out = new Credential(false, 0);
+        Error.throwIfNeeded(jniUsernameNew(out._rawPtr, username));
+        return out;
+    }
+
+    @Nonnull
+    public static Credential sshKeyNew(
+            @Nonnull String username,
+            @Nullable String publickey,
+            @Nonnull String privateKey,
+            @Nullable String passphrase) {
+        Credential out = new Credential(false, 0);
+        Error.throwIfNeeded(jniSshKeyNew(out._rawPtr, username, publickey, privateKey, passphrase));
+        return out;
+    }
+
+    @Nonnull
+    public static Credential sshKeyMemoryNew(
+            @Nonnull String username,
+            @Nullable String publickey,
+            @Nonnull String privateKey,
+            @Nullable String passphrase) {
+        Credential out = new Credential(false, 0);
+        Error.throwIfNeeded(
+                jniSshKeyMemoryNew(out._rawPtr, username, publickey, privateKey, passphrase));
+        return out;
+    }
+
+    @Nonnull
+    public static Credential fromAgent(@Nonnull String username) {
+        Credential out = new Credential(false, 0);
+        Error.throwIfNeeded(jniSshKeyFromAgent(out._rawPtr, username));
+        return out;
+    }
+
+    static int userpass(
+            AtomicLong out,
+            @Nonnull String url,
+            @Nonnull String userFromUrl,
+            EnumSet<Type> allowedTypes,
+            long payloadPtr) {
+        return jniUserpass(out, url, userFromUrl, IBitEnum.bitOrAll(allowedTypes), payloadPtr);
+    }
+
+    @Override
+    protected void freeOnce(long cPtr) {
+        jniFree(cPtr);
+    }
+
+    /** @return true if credential object contains non-null username. */
+    public boolean hasUsername() {
+        return jniHasUsername(getRawPointer()) == 1;
+    }
+
+    /** @return associated username */
+    public String getUsername() {
+        return jniGetUsername(getRawPointer());
+    }
+
     public enum Type implements IBitEnum {
         /** A vanilla user/password request */
         USERPASS_PLAINTEXT(1 << 0),
@@ -63,175 +233,7 @@ public class Credential extends CAutoReleasable {
          * @throws GitException exception if failed to create credential
          */
         @Nonnull
-        Credential accept(@Nonnull String url, @Nullable String usernameFromUrl, int allowedTypes) throws GitException;
-    }
-
-    protected Credential(boolean isWeak, long rawPtr) {
-        super(isWeak, rawPtr);
-    }
-
-    @Override
-    protected void freeOnce(long cPtr) {
-        jniFree(cPtr);
-    }
-    // no matching type found for 'git_credential_ssh_interactive_cb prompt_callback'
-    /**
-     * int git_credential_ssh_interactive_new(git_credential **out, const char *username,
-     * git_credential_ssh_interactive_cb prompt_callback, void *payload);
-     */
-    // no matching type found for 'git_credential_sign_cb sign_callback'
-    /**
-     * int git_credential_ssh_custom_new(git_credential **out, const char *username, const char
-     * *publickey, size_t publickey_len, git_credential_sign_cb sign_callback, void *payload);
-     */
-    /** -------- Jni Signature ---------- */
-    /** void git_credential_free(git_credential *cred); */
-    static native void jniFree(long cred);
-
-    /** int git_credential_has_username(git_credential *cred); */
-    static native int jniHasUsername(long cred);
-
-    /** @return true if credential object contains non-null username. */
-    public boolean hasUsername() {
-        return jniHasUsername(getRawPointer()) == 1;
-    }
-
-    /** const char * git_credential_get_username(git_credential *cred); */
-    static native String jniGetUsername(long cred);
-
-    /** @return associated username */
-    public String getUsername() {
-        return jniGetUsername(getRawPointer());
-    }
-
-    /**
-     * int git_credential_userpass_plaintext_new(git_credential **out, const char *username, const
-     * char *password);
-     */
-    static native int jniUserpassPlaintextNew(AtomicLong out, String username, String password);
-
-    /**
-     * Create a new plain-text username and password credential object. The supplied credential
-     * parameter will be internally duplicated.
-     *
-     * @return The newly created credential object.
-     * @param username The username of the credential.
-     * @param password The password of the credential.
-     * @throws GitException git errors
-     */
-    @Nonnull
-    public static Credential userpassPlaintextNew(
-            @Nonnull String username, @Nonnull String password) {
-        Credential out = new Credential(false, 0);
-        Error.throwIfNeeded(jniUserpassPlaintextNew(out._rawPtr, username, password));
-        return out;
-    }
-
-    /** int git_credential_default_new(git_credential **out); */
-    static native int jniDefaultNew(AtomicLong out);
-
-    /**
-     * Create a "default" credential usable for Negotiate mechanisms like NTLM or Kerberos
-     * authentication.
-     *
-     * @return The newly created credential object.
-     * @throws GitException git errors
-     */
-    @Nonnull
-    public static Credential defaultNew() {
-        Credential out = new Credential(false, 0);
-        Error.throwIfNeeded(jniDefaultNew(out._rawPtr));
-        return out;
-    }
-
-    /** int git_credential_username_new(git_credential **out, const char *username); */
-    static native int jniUsernameNew(AtomicLong out, String username);
-
-    /**
-     * Create a credential to specify a username.
-     *
-     * <p>This is used with ssh authentication to query for the username if none is specified in the
-     * url.
-     *
-     * @return The newly created credential object.
-     * @param username The username to authenticate with
-     * @throws GitException git errors
-     */
-    @Nonnull
-    public static Credential usernameNew(@Nonnull String username) {
-        Credential out = new Credential(false, 0);
-        Error.throwIfNeeded(jniUsernameNew(out._rawPtr, username));
-        return out;
-    }
-
-    /**
-     * int git_credential_ssh_key_new(git_credential **out, const char *username, const char
-     * *publickey, const char *privatekey, const char *passphrase);
-     */
-    static native int jniSshKeyNew(
-            AtomicLong out,
-            String username,
-            String publickey,
-            String privatekey,
-            String passphrase);
-
-    @Nonnull
-    public static Credential sshKeyNew(
-            @Nonnull String username,
-            @Nullable String publickey,
-            @Nonnull String privateKey,
-            @Nullable String passphrase) {
-        Credential out = new Credential(false, 0);
-        Error.throwIfNeeded(jniSshKeyNew(out._rawPtr, username, publickey, privateKey, passphrase));
-        return out;
-    }
-
-    /**
-     * int git_credential_ssh_key_memory_new(git_credential **out, const char *username, const char
-     * *publickey, const char *privatekey, const char *passphrase);
-     */
-    static native int jniSshKeyMemoryNew(
-            AtomicLong out,
-            String username,
-            String publickey,
-            String privatekey,
-            String passphrase);
-
-    @Nonnull
-    public static Credential sshKeyMemoryNew(
-            @Nonnull String username,
-            @Nullable String publickey,
-            @Nonnull String privateKey,
-            @Nullable String passphrase) {
-        Credential out = new Credential(false, 0);
-        Error.throwIfNeeded(
-                jniSshKeyMemoryNew(out._rawPtr, username, publickey, privateKey, passphrase));
-        return out;
-    }
-
-    /** int git_credential_ssh_key_from_agent(git_credential **out, const char *username); */
-    static native int jniSshKeyFromAgent(AtomicLong out, String username);
-
-    @Nonnull
-    public static Credential fromAgent(@Nonnull String username) {
-        Credential out = new Credential(false, 0);
-        Error.throwIfNeeded(jniSshKeyFromAgent(out._rawPtr, username));
-        return out;
-    }
-
-    /**
-     * int git_credential_userpass(git_credential **out, const char *url, const char *user_from_url,
-     * unsigned int allowed_types, void *payload);
-     */
-    static native int jniUserpass(
-            AtomicLong out, String url, String userFromUrl, int allowedTypes, long payloadPtr);
-
-    static int userpass(
-            AtomicLong out,
-            @Nonnull String url,
-            @Nonnull String userFromUrl,
-            EnumSet<Type> allowedTypes,
-            long payloadPtr) {
-        return jniUserpass(out, url, userFromUrl, IBitEnum.bitOrAll(allowedTypes), payloadPtr);
+        Credential accept(@Nonnull String url, @Nullable String usernameFromUrl, int allowedTypes)
+                throws GitException;
     }
 }
