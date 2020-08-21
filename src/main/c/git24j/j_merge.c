@@ -31,7 +31,10 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Merge_jniFileInputNew)(JNIEnv *env, jclass 
 
 JNIEXPORT void JNICALL J_MAKE_METHOD(Merge_jniFileInputFree)(JNIEnv *env, jclass obj, jlong optsPtr)
 {
-    free((git_merge_file_input *)optsPtr);
+    git_merge_file_input *ptr = (git_merge_file_input *)optsPtr;
+    free((char *)ptr->path);
+    free((char *)ptr->ptr);
+    free(ptr);
 }
 
 /** unsigned int version*/
@@ -531,6 +534,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Merge_jniFileFromIndex)(JNIEnv *env, jclass
     return r;
 }
 
+/** -------- git_merge_file_result ---------- */
 /** void git_merge_file_result_free(git_merge_file_result *result); 
  * Note: this also frees the resultPtr itself.
  */
@@ -538,6 +542,42 @@ JNIEXPORT void JNICALL J_MAKE_METHOD(Merge_jniFileResultFree)(JNIEnv *env, jclas
 {
     git_merge_file_result_free((git_merge_file_result *)resultPtr);
     free((git_merge_file_result *)resultPtr);
+}
+
+JNIEXPORT jlong JNICALL J_MAKE_METHOD(Merge_jniFileResultNew)(JNIEnv *env, jclass obj)
+{
+    git_merge_file_result *result = (git_merge_file_result *)malloc(sizeof(git_merge_file_result));
+    return (jlong)result;
+}
+
+/** unsigned int automergeable*/
+JNIEXPORT jint JNICALL J_MAKE_METHOD(Merge_jniFileResultGetAutomergeable)(JNIEnv *env, jclass obj, jlong fileResultPtr)
+{
+    return ((git_merge_file_result *)fileResultPtr)->automergeable;
+}
+
+/** const char *path*/
+JNIEXPORT jstring JNICALL J_MAKE_METHOD(Merge_jniFileResultGetPath)(JNIEnv *env, jclass obj, jlong fileResultPtr)
+{
+    return (*env)->NewStringUTF(env, ((git_merge_file_result *)fileResultPtr)->path);
+}
+
+/** unsigned int mode*/
+JNIEXPORT jint JNICALL J_MAKE_METHOD(Merge_jniFileResultGetMode)(JNIEnv *env, jclass obj, jlong fileResultPtr)
+{
+    return ((git_merge_file_result *)fileResultPtr)->mode;
+}
+
+/** const char *ptr*/
+JNIEXPORT jstring JNICALL J_MAKE_METHOD(Merge_jniFileResultGetPtr)(JNIEnv *env, jclass obj, jlong fileResultPtr)
+{
+    return (*env)->NewStringUTF(env, ((git_merge_file_result *)fileResultPtr)->ptr);
+}
+
+/** size_t len*/
+JNIEXPORT jint JNICALL J_MAKE_METHOD(Merge_jniFileResultGetLen)(JNIEnv *env, jclass obj, jlong fileResultPtr)
+{
+    return ((git_merge_file_result *)fileResultPtr)->len;
 }
 
 /** int git_merge_create(git_repository *repo, const git_annotated_commit **their_heads, size_t their_heads_len, const git_merge_options *merge_opts, const git_checkout_options *checkout_opts); */

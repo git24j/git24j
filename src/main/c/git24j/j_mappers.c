@@ -54,7 +54,7 @@ char *j_strdup(const char *src)
         copy = malloc(len);
         if (copy)
         {
-            memcpy(copy, src, len);
+            strncpy(copy, src, len);
         }
     }
     return copy;

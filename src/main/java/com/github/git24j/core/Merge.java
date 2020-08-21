@@ -1,15 +1,15 @@
 package com.github.git24j.core;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import static com.github.git24j.core.GitException.ErrorCode.ENOTFOUND;
+import static com.github.git24j.core.Internals.OidArray;
+
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
-
-import static com.github.git24j.core.GitException.ErrorCode.ENOTFOUND;
-import static com.github.git24j.core.Internals.OidArray;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 /** Git merge util functions, all are static */
 public class Merge {
@@ -20,7 +20,7 @@ public class Merge {
      * the merge file.
      */
     public static class FileInput extends CAutoReleasable {
-        public static final int CURRENT_VERSION = 1;
+        public static final int VERSION = 1;
 
         FileInput(boolean isWeak, long rawPtr) {
             super(isWeak, rawPtr);
@@ -37,6 +37,11 @@ public class Merge {
             Error.throwIfNeeded(jniFileInputNew(out._rawPtr, version));
             return out;
         }
+
+        public static FileInput createDefault() {
+            return create(VERSION);
+        }
+
         public int getVersion() {
             return jniFileInputGetVersion(getRawPointer());
         }
@@ -63,10 +68,7 @@ public class Merge {
 
         public void setPtr(String ptr) {
             jniFileInputSetPtr(getRawPointer(), ptr);
-        }
-
-        public void setSize(int size) {
-            jniFileInputSetSize(getRawPointer(), size);
+            jniFileInputSetSize(getRawPointer(), ptr.length());
         }
 
         public void setPath(String path) {
@@ -281,7 +283,37 @@ public class Merge {
         protected void freeOnce(long cPtr) {
             jniFileResultFree(cPtr);
         }
+
+        public boolean getAutomergeable() {
+            return jniFileResultGetAutomergeable(getRawPointer()) != 0;
+        }
+
+        public String getPath() {
+            return jniFileResultGetPath(getRawPointer());
+        }
+
+        public int getMode() {
+            return jniFileResultGetMode(getRawPointer());
+        }
+
+        public String getPtr() {
+            return jniFileResultGetPtr(getRawPointer());
+        }
+
+        public int getLen() {
+            return jniFileResultGetLen(getRawPointer());
+        }
     }
+    /** unsigned int automergeable */
+    static native int jniFileResultGetAutomergeable(long file_resultPtr);
+    /** const char *path */
+    static native String jniFileResultGetPath(long file_resultPtr);
+    /** unsigned int mode */
+    static native int jniFileResultGetMode(long file_resultPtr);
+    /** const char *ptr */
+    static native String jniFileResultGetPtr(long file_resultPtr);
+    /** size_t len */
+    static native int jniFileResultGetLen(long file_resultPtr);
 
     /** Merging options */
     public static class Options extends CAutoReleasable {
@@ -570,8 +602,8 @@ public class Merge {
     public static Index trees(
             @Nonnull Repository repo,
             @Nullable Tree ancestorTree,
-            @Nullable Tree ourTree,
-            @Nullable Tree theirTree,
+            @Nonnull Tree ourTree,
+            @Nonnull Tree theirTree,
             @Nullable Options opts) {
         Index out = new Index(0);
         Error.throwIfNeeded(
@@ -579,8 +611,8 @@ public class Merge {
                         out._rawPtr,
                         repo.getRawPointer(),
                         ancestorTree == null ? 0 : ancestorTree.getRawPointer(),
-                        ourTree == null ? 0 : ourTree.getRawPointer(),
-                        theirTree == null ? 0 : theirTree.getRawPointer(),
+                        ourTree.getRawPointer(),
+                        theirTree.getRawPointer(),
                         opts == null ? 0 : opts.getRawPointer()));
         return out;
     }

@@ -1,0 +1,7 @@
+typedef struct {
+	unsigned int automergeable;
+	const char *path;
+	unsigned int mode;
+	const char *ptr;
+	size_t len;
+} git_merge_file_result;
