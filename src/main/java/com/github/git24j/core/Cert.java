@@ -5,10 +5,34 @@ import javax.annotation.Nonnull;
 import java.util.EnumSet;
 
 public class Cert extends CAutoReleasable {
+    /** create empty hostkey struct for testing */
+    static native long jniHostkeyCreateEmptyForTesting();
+
+    /** unsigned char hash_md5[16] */
+    static native byte[] jniHostkeyGetHashMd5(long hostkeyPtr);
+
+    /** unsigned char hash_sha1[20] */
+    static native byte[] jniHostkeyGetHashSha1(long hostkeyPtr);
+
+    /** unsigned char hash_sha256[32] */
+    static native byte[] jniHostkeyGetHashSha256(long hostkeyPtr);
+
+    /** git_cert parent */
+    static native long jniHostkeyGetParent(long hostkeyPtr);
+
+    /** git_cert_ssh_t type */
+    static native int jniHostkeyGetType(long hostkeyPtr);
+
+    /** git_cert parent */
+    static native long jniX509GetParent(long x509Ptr);
     protected Cert(boolean isWeak, long rawPtr) {
         super(isWeak, rawPtr);
     }
 
+    @Override
+    protected void freeOnce(long cPtr) {
+        Libgit2.jniShadowFree(cPtr);
+    }
     public enum T {
         /** No information about the certificate is available. This may happen when using curl. */
         NONE,
@@ -51,6 +75,11 @@ public class Cert extends CAutoReleasable {
             super(isWeak, rawPtr);
         }
 
+        @Nonnull
+        static HostKey createEmpty() {
+            return new HostKey(false, jniHostkeyCreateEmptyForTesting());
+        }
+
         @Override
         protected void freeOnce(long cPtr) {
             Libgit2.jniShadowFree(cPtr);
@@ -78,11 +107,6 @@ public class Cert extends CAutoReleasable {
         public byte[] getHashSha256() {
             return jniHostkeyGetHashSha256(getRawPointer());
         }
-
-        @Nonnull
-        static HostKey createEmpty() {
-            return new HostKey(false, jniHostkeyCreateEmptyForTesting());
-        }
     }
 
     public static class X509 extends CAutoReleasable {
@@ -100,27 +124,5 @@ public class Cert extends CAutoReleasable {
             long ptr = jniX509GetParent(getRawPointer());
             return ptr == 0 ? null : new Cert(true, ptr);
         }
-    }
-
-    /** git_cert parent */
-    static native long jniHostkeyGetParent(long hostkeyPtr);
-    /** git_cert_ssh_t type */
-    static native int jniHostkeyGetType(long hostkeyPtr);
-    /** unsigned char hash_md5[16] */
-    static native byte[] jniHostkeyGetHashMd5(long hostkeyPtr);
-    /** unsigned char hash_sha1[20] */
-    static native byte[] jniHostkeyGetHashSha1(long hostkeyPtr);
-    /** unsigned char hash_sha256[32] */
-    static native byte[] jniHostkeyGetHashSha256(long hostkeyPtr);
-
-    /** create empty hostkey struct for testing */
-    static native long jniHostkeyCreateEmptyForTesting();
-
-    /** git_cert parent */
-    static native long jniX509GetParent(long x509Ptr);
-
-    @Override
-    protected void freeOnce(long cPtr) {
-        Libgit2.jniShadowFree(cPtr);
     }
 }

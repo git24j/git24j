@@ -1,7 +1,7 @@
 package com.github.git24j.core;
 
-import java.util.concurrent.atomic.AtomicLong;
 import javax.annotation.Nonnull;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * An annotated commit contains information about how it was looked up, which may be useful for
@@ -11,18 +11,24 @@ import javax.annotation.Nonnull;
  * that data is known.
  */
 public class AnnotatedCommit extends CAutoReleasable {
+    static native String jniFree(long acPtr);
+
+    static native int jniFromFetchHead(
+            AtomicLong outAc, long repoPtr, String branchName, String remoteUrl, Oid oid);
+
+    static native int jniFromRef(AtomicLong outAc, long repoPtr, long refPtr);
+
+    static native int jniFromRevspec(AtomicLong outAc, long repoPtr, String revspec);
+
+    static native byte[] jniId(long acPtr);
+
+    static native int jniLookup(AtomicLong outAc, long repoPtr, Oid oid);
+
+    static native String jniRef(long acPtr);
+
     protected AnnotatedCommit(boolean isWeak, long rawPtr) {
         super(isWeak, rawPtr);
     }
-
-    @Override
-    protected void freeOnce(long cPtr) {
-        jniFree(cPtr);
-    }
-
-    static native String jniFree(long acPtr);
-
-    static native int jniFromRef(AtomicLong outAc, long repoPtr, long refPtr);
 
     /**
      * Initialize {@link AnnotatedCommit} from a {@link Reference} of a repository.
@@ -38,9 +44,6 @@ public class AnnotatedCommit extends CAutoReleasable {
         Error.throwIfNeeded(jniFromRef(commit._rawPtr, repo.getRawPointer(), ref.getRawPointer()));
         return commit;
     }
-
-    static native int jniFromFetchHead(
-            AtomicLong outAc, long repoPtr, String branchName, String remoteUrl, Oid oid);
 
     /**
      * Initialize {@link AnnotatedCommit} from FETCH_HEAD data
@@ -64,8 +67,6 @@ public class AnnotatedCommit extends CAutoReleasable {
         return commit;
     }
 
-    static native int jniLookup(AtomicLong outAc, long repoPtr, Oid oid);
-
     /**
      * Initialize {@link AnnotatedCommit} from Oid
      *
@@ -79,8 +80,6 @@ public class AnnotatedCommit extends CAutoReleasable {
         Error.throwIfNeeded(jniLookup(commit._rawPtr, repo.getRawPointer(), oid));
         return commit;
     }
-
-    static native int jniFromRevspec(AtomicLong outAc, long repoPtr, String revspec);
 
     /**
      * Creates a `git_annotated_comit` from a revision string.
@@ -101,15 +100,16 @@ public class AnnotatedCommit extends CAutoReleasable {
         return commit;
     }
 
-    static native byte[] jniId(long acPtr);
+    @Override
+    protected void freeOnce(long cPtr) {
+        jniFree(cPtr);
+    }
 
     /** @return the commit ID that the given `git_annotated_commit` refers to. */
     @Nonnull
     public Oid id() {
         return Oid.of(jniId(getRawPointer()));
     }
-
-    static native String jniRef(long acPtr);
 
     @Nonnull
     public String ref() {

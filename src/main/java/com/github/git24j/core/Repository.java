@@ -1,88 +1,84 @@
 package com.github.git24j.core;
 
-import static com.github.git24j.core.GitException.ErrorCode.ENOTFOUND;
-import static com.github.git24j.core.GitException.ErrorCode.EUNBORNBRANCH;
-
+import javax.annotation.CheckForNull;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.EnumSet;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
-import javax.annotation.CheckForNull;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+
+import static com.github.git24j.core.GitException.ErrorCode.ENOTFOUND;
+import static com.github.git24j.core.GitException.ErrorCode.EUNBORNBRANCH;
 
 public class Repository extends CAutoCloseable {
-    public Repository(long rawPointer) {
-        super(rawPointer);
-    }
-
-    static native int jniOpen(AtomicLong outRepo, String path);
-
-    static native int jniOpenFromWorkTree(AtomicLong outRepo, long wtPtr);
-
-    static native int jniWrapOdb(AtomicLong outRepo, long odbPtr);
-
-    static native int jniDiscover(Buf out, String startPath, int accessFs, String ceilingDirs);
-
-    static native int jniOpenExt(AtomicLong outRepo, String path, int flags, String ceilingDirs);
-
-    static native int jniOpenBare(AtomicLong outRepo, String path);
-
-    static native int jniFree(long repoPtr);
-
-    static native int jniInit(AtomicLong outRepo, String path, int isBare);
-
-    static native int jniInitOptionsInit(InitOptions initOpts, int version);
-
-    static native int jniInitExt(AtomicLong outRepo, String repoPath, InitOptions initOpts);
-
-    static native int jniHead(AtomicLong gitRef, long repoPtr);
-
-    static native int jniHeadForWorktree(AtomicLong outRef, long repoPtr, String name);
-
-    static native int jniHeadDetached(long repoPtr);
-
-    static native int jniHeadUnborn(long repoPtr);
-
-    static native int jniIsEmpty(long repoPtr);
-
-    static native int jniItemPath(Buf buf, long repoPtr, int item);
-
-    static native int jniIndex(AtomicLong outIndex, long repoPtr);
-
-    static native String jniPath(long repoPtr);
-
-    static native String jniWorkdir(long repoPtr);
-
     static native String jniCommondir(long repoPtr);
-
-    static native int jniSetWorkdir(long repoPtr, String workdir, int updateGitlink);
-
-    static native int jniIsBare(long repoPtr);
-
-    static native int jniIsWorktree(long repoPtr);
 
     static native int jniConfig(AtomicLong outCfg, long repoPtr);
 
     static native int jniConfigSnapshot(AtomicLong outCfg, long repoPtr);
 
-    static native int jniOdb(AtomicLong outOdb, long repoPtr);
+    static native int jniDetachHead(long repoPtr);
 
-    static native int jniRefdb(AtomicLong outRefdb, long repoPtr);
+    static native int jniDiscover(Buf out, String startPath, int accessFs, String ceilingDirs);
+
+    static native int jniFetchheadForeach(long repoPtr, FetchHeadForeachCb cb);
+
+    static native int jniFree(long repoPtr);
+
+    static native String jniGetNamespace(long repoPtr);
+
+    static native int jniHashfile(Oid oid, long repoPtr, String path, int type, String asPath);
+
+    static native int jniHead(AtomicLong gitRef, long repoPtr);
+
+    static native int jniHeadDetached(long repoPtr);
+
+    static native int jniHeadForWorktree(AtomicLong outRef, long repoPtr, String name);
+
+    static native int jniHeadUnborn(long repoPtr);
+
+    static native int jniIdent(Identity identity, long repoPtr);
+
+    static native int jniIndex(AtomicLong outIndex, long repoPtr);
+
+    static native int jniInit(AtomicLong outRepo, String path, int isBare);
+
+    static native int jniInitExt(AtomicLong outRepo, String repoPath, InitOptions initOpts);
+
+    static native int jniInitOptionsInit(InitOptions initOpts, int version);
+
+    static native int jniIsBare(long repoPtr);
+
+    static native int jniIsEmpty(long repoPtr);
+
+    static native int jniIsShadow(long repoPtr);
+
+    static native int jniIsWorktree(long repoPtr);
+
+    static native int jniItemPath(Buf buf, long repoPtr, int item);
+
+    static native int jniMergeheadForeach(long repoPtr, MergeheadForeachCb cb);
 
     static native int jniMessage(Buf buf, long repoPtr);
 
     static native int jniMessageRemove(long repoPtr);
 
-    static native int jniStateCleanup(long repoPtr);
+    static native int jniOdb(AtomicLong outOdb, long repoPtr);
 
-    static native int jniFetchheadForeach(long repoPtr, FetchHeadForeachCb cb);
+    static native int jniOpen(AtomicLong outRepo, String path);
 
-    static native int jniMergeheadForeach(long repoPtr, MergeheadForeachCb cb);
+    static native int jniOpenBare(AtomicLong outRepo, String path);
 
-    static native int jniHashfile(Oid oid, long repoPtr, String path, int type, String asPath);
+    static native int jniOpenExt(AtomicLong outRepo, String path, int flags, String ceilingDirs);
+
+    static native int jniOpenFromWorkTree(AtomicLong outRepo, long wtPtr);
+
+    static native String jniPath(long repoPtr);
+
+    static native int jniRefdb(AtomicLong outRefdb, long repoPtr);
 
     static native int jniSetHead(long repoPtr, String refName);
 
@@ -90,19 +86,23 @@ public class Repository extends CAutoCloseable {
 
     static native int jniSetHeadDetachedFromAnnotated(long repoPtr, long commitishPtr);
 
-    static native int jniDetachHead(long repoPtr);
-
-    static native int jniState(long repoPtr);
+    static native int jniSetIdent(long repoPtr, String name, String email);
 
     static native int jniSetNamespace(long repoPtr, String namespace);
 
-    static native String jniGetNamespace(long repoPtr);
+    static native int jniSetWorkdir(long repoPtr, String workdir, int updateGitlink);
 
-    static native int jniIsShadow(long repoPtr);
+    static native int jniState(long repoPtr);
 
-    static native int jniIdent(Identity identity, long repoPtr);
+    static native int jniStateCleanup(long repoPtr);
 
-    static native int jniSetIdent(long repoPtr, String name, String email);
+    static native String jniWorkdir(long repoPtr);
+
+    static native int jniWrapOdb(AtomicLong outRepo, long odbPtr);
+
+    public Repository(long rawPointer) {
+        super(rawPointer);
+    }
 
     static Repository ofRaw(long ptr) {
         return new Repository(ptr);

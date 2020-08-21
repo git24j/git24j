@@ -15,69 +15,543 @@ import static com.github.git24j.core.Internals.OidArray;
 public class Merge {
 
     /**
-     * The file inputs to `git_merge_file`. Callers should populate the `git_merge_file_input`
-     * structure with descriptions of the files in each side of the conflict for use in producing
-     * the merge file.
+     * int git_merge_analysis( git_merge_analysis_t *analysis_out, git_merge_preference_t
+     * *preference_out, git_repository *repo, const git_annotated_commit **their_heads, size_t
+     * their_heads_len);
      */
-    public static class FileInput extends CAutoReleasable {
-        public static final int CURRENT_VERSION = 1;
+    static native int jniAnalysis(
+            AtomicInteger analysisOut,
+            AtomicInteger preferenceOut,
+            long repoPtr,
+            long[] theirHeads);
 
-        FileInput(boolean isWeak, long rawPtr) {
-            super(isWeak, rawPtr);
-        }
+    /**
+     * int git_merge_analysis_for_ref(git_merge_analysis_t *analysis_out, git_merge_preference_t
+     * *preference_out, git_repository *repo, git_reference *our_ref, const git_annotated_commit
+     * **their_heads, size_t their_heads_len);
+     */
+    static native int jniAnalysisForRef(
+            AtomicInteger analysisOut,
+            AtomicInteger preferenceOut,
+            long repoPtr,
+            long ourRefPtr,
+            long[] theirHeads);
+    ;
 
-        @Override
-        protected void freeOnce(long cPtr) {
-            jniFileInputFree(cPtr);
-        }
+    /**
+     * int git_merge_base(git_oid *out, git_repository *repo, const git_oid *one, const git_oid
+     * *two);
+     */
+    static native int jniBase(Oid out, long repoPtr, Oid one, Oid two);
 
-        @Nonnull
-        public static FileInput create(int version) {
-            FileInput out = new FileInput(false, 0);
-            Error.throwIfNeeded(jniFileInputNew(out._rawPtr, version));
-            return out;
-        }
-        public int getVersion() {
-            return jniFileInputGetVersion(getRawPointer());
-        }
+    /**
+     * int git_merge_base_many(git_oid *out, git_repository *repo, size_t length, const git_oid []
+     * input_array);
+     */
+    static native int jniBaseMany(Oid outOid, long repoPtr, Oid[] inputArray);
 
-        public String getPtr() {
-            return jniFileInputGetPtr(getRawPointer());
-        }
+    /**
+     * int git_merge_base_octopus(git_oid *out, git_repository *repo, size_t length, const git_oid
+     * [] input_array);
+     */
+    static native int jniBaseOctopus(Oid outOid, long repoPtr, Oid[] intputArray);
 
-        public int getSize() {
-            return jniFileInputGetSize(getRawPointer());
-        }
+    /**
+     * int git_merge_bases(git_oidarray *out, git_repository *repo, const git_oid *one, const
+     * git_oid *two);
+     */
+    static native int jniBases(OidArray outOids, long repoPtr, Oid one, Oid two);
 
-        public String getPath() {
-            return jniFileInputGetPath(getRawPointer());
-        }
+    /**
+     * int git_merge_bases_many(git_oidarray *out, git_repository *repo, size_t length, const
+     * git_oid [] input_array);
+     */
+    static native int jniBasesMany(OidArray outOids, long repoPtr, Oid[] inputArray);
 
-        public int getMode() {
-            return jniFileInputGetMode(getRawPointer());
-        }
+    /**
+     * int git_merge_commits(git_index **out, git_repository *repo, const git_commit *our_commit,
+     * const git_commit *their_commit, const git_merge_options *opts);
+     */
+    static native int jniCommits(
+            AtomicLong out, long repoPtr, long ourCommit, long theirCommit, long opts);
 
-        public void setVersion(int version) {
-            jniFileInputSetVersion(getRawPointer(), version);
-        }
+    /**
+     * int git_merge_file( git_merge_file_result *out, const git_merge_file_input *ancestor, const
+     * git_merge_file_input *ours, const git_merge_file_input *theirs, const git_merge_file_options
+     * *opts);
+     */
+    static native int jniFile(
+            AtomicLong out, long ancestorPtr, long oursPtr, long theirsPtr, long optsPtr);
 
-        public void setPtr(String ptr) {
-            jniFileInputSetPtr(getRawPointer(), ptr);
-        }
+    /** int git_merge_file_init_input(git_merge_file_input *opts, unsigned int version); */
+    static native int jniFileInitInput(long opts, int version);
 
-        public void setSize(int size) {
-            jniFileInputSetSize(getRawPointer(), size);
-        }
+    /** int git_merge_file_init_options(git_merge_file_options *opts, unsigned int version); */
+    static native int jniFileInitOptions(long opts, int version);
 
-        public void setPath(String path) {
-            jniFileInputSetPath(getRawPointer(), path);
-        }
+    static native int jniFileInputFree(long optsPtr);
 
-        public void setMode(int mode) {
-            jniFileInputSetMode(getRawPointer(), mode);
+    /** int mode */
+    static native int jniFileInputGetMode(long file_inputPtr);
+
+    /** const char *path */
+    static native String jniFileInputGetPath(long file_inputPtr);
+
+    /** const char *ptr */
+    static native String jniFileInputGetPtr(long file_inputPtr);
+
+    /** size_t size */
+    static native int jniFileInputGetSize(long file_inputPtr);
+
+    /** unsigned int version */
+    static native int jniFileInputGetVersion(long file_inputPtr);
+
+    static native int jniFileInputNew(AtomicLong outOpts, int version);
+
+    /** int mode */
+    static native void jniFileInputSetMode(long file_inputPtr, int mode);
+
+    /** const char *path */
+    static native void jniFileInputSetPath(long file_inputPtr, String path);
+
+    /** const char *ptr */
+    static native void jniFileInputSetPtr(long file_inputPtr, String ptr);
+
+    /** size_t size */
+    static native void jniFileInputSetSize(long file_inputPtr, int size);
+
+    /** unsigned int version */
+    static native void jniFileInputSetVersion(long file_inputPtr, int version);
+
+    static native int jniFileOptionsFree(long opts);
+
+    /** const char *ancestor_label */
+    static native String jniFileOptionsGetAncestorLabel(long file_optionsPtr);
+
+    /** git_merge_file_favor_t favor */
+    static native int jniFileOptionsGetFavor(long file_optionsPtr);
+
+    /** uint32_t flags */
+    static native int jniFileOptionsGetFlags(long file_optionsPtr);
+
+    /** int marker_size */
+    static native int jniFileOptionsGetMarkerSize(long file_optionsPtr);
+
+    /** const char *our_label */
+    static native String jniFileOptionsGetOurLabel(long file_optionsPtr);
+
+    /** const char *their_label */
+    static native String jniFileOptionsGetTheirLabel(long file_optionsPtr);
+
+    /** unsigned int version */
+    static native int jniFileOptionsGetVersion(long file_optionsPtr);
+
+    static native int jniFileOptionsNew(AtomicLong outOpts, int version);
+
+    /** const char *ancestor_label */
+    static native void jniFileOptionsSetAncestorLabel(long file_optionsPtr, String ancestorLabel);
+
+    /** git_merge_file_favor_t favor */
+    static native void jniFileOptionsSetFavor(long file_optionsPtr, int favor);
+
+    /** uint32_t flags */
+    static native void jniFileOptionsSetFlags(long file_optionsPtr, int flags);
+
+    /** int marker_size */
+    static native void jniFileOptionsSetMarkerSize(long file_optionsPtr, int markerSize);
+
+    /** const char *our_label */
+    static native void jniFileOptionsSetOurLabel(long file_optionsPtr, String ourLabel);
+
+    /** const char *their_label */
+    static native void jniFileOptionsSetTheirLabel(long file_optionsPtr, String theirLabel);
+
+    /** unsigned int version */
+    static native void jniFileOptionsSetVersion(long file_optionsPtr, int version);
+
+    /**
+     * void git_merge_file_result_free(git_merge_file_result *result); Note: this also frees the
+     * resultPtr itself.
+     */
+    static native void jniFileResultFree(long resultPtr);
+
+    /** unsigned int automergeable */
+    static native int jniFileResultGetAutomergeable(long file_resultPtr);
+
+    /** size_t len */
+    static native int jniFileResultGetLen(long file_resultPtr);
+
+    /** unsigned int mode */
+    static native int jniFileResultGetMode(long file_resultPtr);
+
+    /** const char *path */
+    static native String jniFileResultGetPath(long file_resultPtr);
+
+    /** const char *ptr */
+    static native String jniFileResultGetPtr(long file_resultPtr);
+
+    /** int git_merge_init_options(git_merge_options *opts, unsigned int version); */
+    static native int jniInitOptions(long opts, int version);
+
+    /**
+     * int git_merge_create( git_repository *repo, const git_annotated_commit **their_heads, size_t
+     * their_heads_len, const git_merge_options *merge_opts, const git_checkout_options
+     * *checkout_opts);
+     */
+    static native int jniMerge(
+            long repoPtr, long[] theirHeads, long mergeOptsPtr, long checkoutOpts);
+
+    /** -------- Jni Signature ---------- */
+    static native void jniOptionsFree(long optsPtr);
+
+    /** const char *default_driver */
+    static native String jniOptionsGetDefaultDriver(long optionsPtr);
+
+    /** git_merge_file_favor_t file_favor */
+    static native int jniOptionsGetFileFavor(long optionsPtr);
+
+    /** uint32_t file_flags */
+    static native int jniOptionsGetFileFlags(long optionsPtr);
+
+    /** uint32_t flags */
+    static native int jniOptionsGetFlags(long optionsPtr);
+
+    /** git_diff_similarity_metric *metric */
+    static native long jniOptionsGetMetric(long optionsPtr);
+
+    /** unsigned int recursion_limit */
+    static native int jniOptionsGetRecursionLimit(long optionsPtr);
+
+    /** unsigned int rename_threshold */
+    static native int jniOptionsGetRenameThreshold(long optionsPtr);
+
+    /** unsigned int target_limit */
+    static native int jniOptionsGetTargetLimit(long optionsPtr);
+
+    /** unsigned int version */
+    static native int jniOptionsGetVersion(long optionsPtr);
+
+    static native int jniOptionsNew(AtomicLong outOpts, int version);
+
+    /** const char *default_driver */
+    static native void jniOptionsSetDefaultDriver(long optionsPtr, String defaultDriver);
+
+    /** git_merge_file_favor_t file_favor */
+    static native void jniOptionsSetFileFavor(long optionsPtr, int fileFavor);
+
+    /** uint32_t file_flags */
+    static native void jniOptionsSetFileFlags(long optionsPtr, int fileFlags);
+
+    /** uint32_t flags */
+    static native void jniOptionsSetFlags(long optionsPtr, int flags);
+
+    /** git_diff_similarity_metric *metric */
+    static native void jniOptionsSetMetric(long optionsPtr, long metric);
+
+    /** unsigned int recursion_limit */
+    static native void jniOptionsSetRecursionLimit(long optionsPtr, int recursionLimit);
+
+    /** unsigned int rename_threshold */
+    static native void jniOptionsSetRenameThreshold(long optionsPtr, int renameThreshold);
+
+    /** -------- Jni Signature ---------- */
+
+    /** unsigned int target_limit */
+    static native void jniOptionsSetTargetLimit(long optionsPtr, int targetLimit);
+
+    /** unsigned int version */
+    static native void jniOptionsSetVersion(long optionsPtr, int version);
+
+    /**
+     * int git_merge_trees( git_index **out, git_repository *repo, const git_tree *ancestor_tree,
+     * const git_tree *our_tree, const git_tree *their_tree, const git_merge_options *opts);
+     */
+    static native int jniTrees(
+            AtomicLong out,
+            long repoPtr,
+            long ancestorTree,
+            long ourTree,
+            long theirTree,
+            long opts);
+
+    /**
+     * Find a merge base between two commits
+     *
+     * @param repo the repository where the commits exist
+     * @param one one of the commits
+     * @param two the other commit
+     * @return the OID of a merge base between 'one' and 'two'
+     * @throws GitException git errors 0 on success, GIT_ENOTFOUND if not found or error code
+     */
+    @Nonnull
+    public static Optional<Oid> base(@Nonnull Repository repo, @Nonnull Oid one, @Nonnull Oid two) {
+        Oid out = new Oid();
+        int e = jniBase(out, repo.getRawPointer(), one, two);
+        if (ENOTFOUND.getCode() == e) {
+            return Optional.empty();
         }
+        Error.throwIfNeeded(e);
+        return Optional.of(out);
     }
 
+    /**
+     * Find merge bases between two commits
+     *
+     * @param repo the repository where the commits exist
+     * @param one one of the commits
+     * @param two the other commit
+     * @return list of merge base ids, empty if not found
+     * @throws GitException 0 on success
+     */
+    @Nonnull
+    public static List<Oid> bases(@Nonnull Repository repo, @Nonnull Oid one, @Nonnull Oid two) {
+        OidArray outOids = new OidArray();
+        int e = jniBases(outOids, repo.getRawPointer(), one, two);
+        if (ENOTFOUND.getCode() == e) {
+            return Collections.emptyList();
+        }
+        Error.throwIfNeeded(e);
+        return outOids.getOids();
+    }
+
+    /**
+     * Merge two trees, producing a `git_index` that reflects the result of the merge. The index may
+     * be written as-is to the working directory or checked out. If the index is to be converted to
+     * a tree, the caller should resolve any conflicts that arose as part of the merge.
+     *
+     * <p>The returned index must be freed explicitly with `git_index_free`.
+     *
+     * @param repo repository that contains the given trees
+     * @param ancestorTree the common ancestor between the trees (or null if none)
+     * @param ourTree the tree that reflects the destination tree
+     * @param theirTree the tree to merge in to `our_tree`
+     * @param opts the merge tree options (or null for defaults)
+     * @return index of the merge
+     * @throws GitException git errors
+     */
+    @Nonnull
+    public static Index trees(
+            @Nonnull Repository repo,
+            @Nullable Tree ancestorTree,
+            @Nonnull Tree ourTree,
+            @Nonnull Tree theirTree,
+            @Nullable Options opts) {
+        Index out = new Index(0);
+        Error.throwIfNeeded(
+                jniTrees(
+                        out._rawPtr,
+                        repo.getRawPointer(),
+                        ancestorTree == null ? 0 : ancestorTree.getRawPointer(),
+                        ourTree.getRawPointer(),
+                        theirTree.getRawPointer(),
+                        opts == null ? 0 : opts.getRawPointer()));
+        return out;
+    }
+
+    /**
+     * Merge two commits, producing a `git_index` that reflects the result of the merge. The index
+     * may be written as-is to the working directory or checked out. If the index is to be converted
+     * to a tree, the caller should resolve any conflicts that arose as part of the merge.
+     *
+     * <p>The returned index must be freed explicitly with `git_index_free`.
+     *
+     * @param repo repository that contains the given trees
+     * @param ourCommit the commit that reflects the destination tree
+     * @param theirCommit the commit to merge in to `our_commit`
+     * @param opts the merge tree options (or null for defaults)
+     * @return index reflecting the merge result
+     * @throws GitException git errors
+     */
+    @Nonnull
+    public static Index commits(
+            @Nonnull Repository repo,
+            @Nullable Commit ourCommit,
+            @Nullable Commit theirCommit,
+            @Nullable Options opts) {
+        Index out = new Index(0);
+        Error.throwIfNeeded(
+                jniCommits(
+                        out._rawPtr,
+                        repo.getRawPointer(),
+                        ourCommit == null ? 0 : ourCommit.getRawPointer(),
+                        theirCommit == null ? 0 : theirCommit.getRawPointer(),
+                        opts == null ? 0 : opts.getRawPointer()));
+        return out;
+    }
+
+    /**
+     * Analyzes the given branch(es) and determines the opportunities for merging them into the HEAD
+     * of the repository.
+     *
+     * @param repo the repository to merge
+     * @param theirHeads the heads to merge into
+     * @return out analysis
+     * @throws GitException git errors
+     */
+    @Nonnull
+    public static AnalysisPair analysis(
+            @Nonnull Repository repo, @Nonnull List<AnnotatedCommit> theirHeads) {
+        AtomicInteger outAnalysis = new AtomicInteger();
+        AtomicInteger outPreference = new AtomicInteger();
+        Error.throwIfNeeded(
+                jniAnalysis(
+                        outAnalysis,
+                        outPreference,
+                        repo.getRawPointer(),
+                        theirHeads.stream().mapToLong(AnnotatedCommit::getRawPointer).toArray()));
+        return new AnalysisPair(
+                IBitEnum.valueOf(outAnalysis.get(), AnalysisT.class),
+                IBitEnum.valueOf(outPreference.get(), PreferenceT.class));
+    }
+
+    /**
+     * Analyzes the given branch(es) and determines the opportunities for merging them into a
+     * reference.
+     *
+     * @param repo the repository to merge
+     * @param ourRef the reference to perform the analysis from
+     * @param theirHeads the heads to merge into
+     * @return analysis out
+     * @throws GitException git errors
+     */
+    @Nonnull
+    public static AnalysisPair analysisForRef(
+            @Nonnull Repository repo,
+            @Nullable Reference ourRef,
+            @Nonnull List<AnnotatedCommit> theirHeads) {
+        AtomicInteger outAnalysis = new AtomicInteger();
+        AtomicInteger outPreference = new AtomicInteger();
+        Error.throwIfNeeded(
+                jniAnalysisForRef(
+                        outAnalysis,
+                        outPreference,
+                        repo.getRawPointer(),
+                        ourRef == null ? 0 : ourRef.getRawPointer(),
+                        theirHeads.stream().mapToLong(AnnotatedCommit::getRawPointer).toArray()));
+        return new AnalysisPair(
+                IBitEnum.valueOf(outAnalysis.get(), AnalysisT.class),
+                IBitEnum.valueOf(outPreference.get(), PreferenceT.class));
+    }
+
+    /**
+     * Find a merge base given a list of commits
+     *
+     * @param repo the repository where the commits exist
+     * @param inputArray oids of the commits
+     * @return the OID of a merge base considering all the commits
+     * @throws GitException git errors
+     */
+    @Nonnull
+    public static Optional<Oid> baseMany(@Nonnull Repository repo, @Nonnull Oid[] inputArray) {
+        Oid outOid = new Oid();
+        int e = jniBaseMany(outOid, repo.getRawPointer(), inputArray);
+        if (ENOTFOUND.getCode() == e) {
+            return Optional.empty();
+        }
+        Error.throwIfNeeded(e);
+        return Optional.of(outOid);
+    }
+
+    /**
+     * Find all merge bases given a list of commits
+     *
+     * @param repo the repository where the commits exist
+     * @param inputArray oids of the commits
+     * @return list of merge base commits or empty list if none found
+     * @throws GitException git errors
+     */
+    @Nonnull
+    public static List<Oid> basesMany(@Nonnull Repository repo, @Nonnull Oid[] inputArray) {
+        OidArray outOids = new OidArray();
+        int e = jniBasesMany(outOids, repo.getRawPointer(), inputArray);
+        if (ENOTFOUND.getCode() == e) {
+            return Collections.emptyList();
+        }
+        Error.throwIfNeeded(e);
+        return outOids.getOids();
+    }
+
+    /**
+     * Find a merge base in preparation for an octopus merge
+     *
+     * @param repo the repository where the commits exist
+     * @param inputArray oids of the commits
+     * @return the OID of a merge base considering all the commits or empty if not found
+     * @throws GitException git errors
+     */
+    @Nonnull
+    public static Optional<Oid> baseOctopus(@Nonnull Repository repo, @Nonnull Oid[] inputArray) {
+        Oid outOid = new Oid();
+        int e = jniBaseOctopus(outOid, repo.getRawPointer(), inputArray);
+        if (ENOTFOUND.getCode() == e) {
+            return Optional.empty();
+        }
+        Error.throwIfNeeded(e);
+        return Optional.of(outOid);
+    }
+
+    /**
+     * Merge two files as they exist in the in-memory data structures, using the given common
+     * ancestor as the baseline, producing a `git_merge_file_result` that reflects the merge result.
+     * The `git_merge_file_result` must be freed with `git_merge_file_result_free`.
+     *
+     * <p>Note that this function does not reference a repository and any configuration must be
+     * passed as `git_merge_file_options`.
+     *
+     * @param ancestor The contents of the ancestor file
+     * @param ours The contents of the file in "our" side
+     * @param theirs The contents of the file in "their" side
+     * @param opts The merge file options or `NULL` for defaults
+     * @return The merge result
+     * @throws GitException git errors
+     */
+    @Nonnull
+    public static FileResult file(
+            @Nonnull FileInput ancestor,
+            @Nonnull FileInput ours,
+            @Nonnull FileInput theirs,
+            @Nullable FileOptions opts) {
+        FileResult result = new FileResult(false, 0);
+        Error.throwIfNeeded(
+                jniFile(
+                        result._rawPtr,
+                        ancestor.getRawPointer(),
+                        ours.getRawPointer(),
+                        theirs.getRawPointer(),
+                        CAutoReleasable.rawPtr(opts)));
+        return result;
+    }
+
+    /**
+     * Merges the given commit(s) into HEAD, writing the results into the working directory. Any
+     * changes are staged for commit and any conflicts are written to the index. Callers should
+     * inspect the repository's index after this completes, resolve any conflicts and prepare a
+     * commit.
+     *
+     * <p>For compatibility with git, the repository is put into a merging state. Once the commit is
+     * done (or if the uses wishes to abort), you should clear this state by calling
+     * `git_repository_state_cleanup()`.
+     *
+     * @param repo the repository to merge
+     * @param theirHeads the heads to merge into
+     * @param mergeOpts merge options
+     * @param checkoutOpts checkout options
+     * @throws GitException git errors
+     */
+    public static void merge(
+            @Nonnull Repository repo,
+            @Nonnull List<AnnotatedCommit> theirHeads,
+            @Nullable Options mergeOpts,
+            @Nullable Checkout.Options checkoutOpts) {
+        Error.throwIfNeeded(
+                jniMerge(
+                        repo.getRawPointer(),
+                        theirHeads.stream().mapToLong(CAutoReleasable::getRawPointer).toArray(),
+                        CAutoReleasable.rawPtr(mergeOpts),
+                        CAutoReleasable.rawPtr(checkoutOpts)));
+    }
+
+    /** -------- Jni Signature ---------- */
     /**
      * Flags for `git_merge` options. A combination of these flags can be passed in via the `flags`
      * value in the `git_merge_options`.
@@ -116,8 +590,7 @@ public class Merge {
         public int getBit() {
             return _bit;
         }
-    };
-
+    }
     /**
      * Merge file favor options for `git_merge_options` instruct the file-level merging
      * functionality how to deal with conflicting regions of the files.
@@ -155,7 +628,6 @@ public class Merge {
             this.bit = bit;
         }
     }
-
     /** File merging flags */
     public enum FileFlagT implements IBitEnum {
         /** Defaults */
@@ -195,187 +667,6 @@ public class Merge {
             return _bit;
         }
     }
-
-    /** options for merging a file */
-    public static class FileOptions extends CAutoReleasable {
-        FileOptions(boolean isWeak, long rawPtr) {
-            super(isWeak, rawPtr);
-        }
-
-        @Override
-        protected void freeOnce(long cPtr) {
-            jniFileOptionsFree(cPtr);
-        }
-
-        @Nonnull
-        public static FileOptions create(int version) {
-            FileOptions opts = new FileOptions(false, 0);
-            Error.throwIfNeeded(jniFileOptionsNew(opts._rawPtr, version));
-            return opts;
-        }
-
-        public int getVersion() {
-            return jniFileOptionsGetVersion(getRawPointer());
-        }
-
-        public String getAncestorLabel() {
-            return jniFileOptionsGetAncestorLabel(getRawPointer());
-        }
-
-        public String getOurLabel() {
-            return jniFileOptionsGetOurLabel(getRawPointer());
-        }
-
-        public String getTheirLabel() {
-            return jniFileOptionsGetTheirLabel(getRawPointer());
-        }
-
-        public int getFavor() {
-            return jniFileOptionsGetFavor(getRawPointer());
-        }
-
-        public int getFlags() {
-            return jniFileOptionsGetFlags(getRawPointer());
-        }
-
-        public int getMarkerSize() {
-            return jniFileOptionsGetMarkerSize(getRawPointer());
-        }
-
-        public void setVersion(int version) {
-            jniFileOptionsSetVersion(getRawPointer(), version);
-        }
-
-        public void setAncestorLabel(String ancestorLabel) {
-            jniFileOptionsSetAncestorLabel(getRawPointer(), ancestorLabel);
-        }
-
-        public void setOurLabel(String ourLabel) {
-            jniFileOptionsSetOurLabel(getRawPointer(), ourLabel);
-        }
-
-        public void setTheirLabel(String theirLabel) {
-            jniFileOptionsSetTheirLabel(getRawPointer(), theirLabel);
-        }
-
-        public void setFavor(int favor) {
-            jniFileOptionsSetFavor(getRawPointer(), favor);
-        }
-
-        public void setFlags(int flags) {
-            jniFileOptionsSetFlags(getRawPointer(), flags);
-        }
-
-        public void setMarkerSize(int markerSize) {
-            jniFileOptionsSetMarkerSize(getRawPointer(), markerSize);
-        }
-    }
-
-    public static class FileResult extends CAutoReleasable {
-
-        protected FileResult(boolean isWeak, long rawPtr) {
-            super(isWeak, rawPtr);
-        }
-
-        @Override
-        protected void freeOnce(long cPtr) {
-            jniFileResultFree(cPtr);
-        }
-    }
-
-    /** Merging options */
-    public static class Options extends CAutoReleasable {
-        public static final int CURRENT_VERSION = 1;
-
-        protected Options(boolean isWeak, long rawPtr) {
-            super(isWeak, rawPtr);
-        }
-
-        @Override
-        protected void freeOnce(long cPtr) {
-            jniOptionsFree(cPtr);
-        }
-
-        @Nonnull
-        public Options create(int version) {
-            Options out = new Options(false, 0);
-            Error.throwIfNeeded(jniOptionsNew(out._rawPtr, version));
-            return out;
-        }
-
-        public int getVersion() {
-            return jniOptionsGetVersion(getRawPointer());
-        }
-
-        public int getFlags() {
-            return jniOptionsGetFlags(getRawPointer());
-        }
-
-        public int getRenameThreshold() {
-            return jniOptionsGetRenameThreshold(getRawPointer());
-        }
-
-        public int getTargetLimit() {
-            return jniOptionsGetTargetLimit(getRawPointer());
-        }
-
-        public long getMetric() {
-            return jniOptionsGetMetric(getRawPointer());
-        }
-
-        public int getRecursionLimit() {
-            return jniOptionsGetRecursionLimit(getRawPointer());
-        }
-
-        public String getDefaultDriver() {
-            return jniOptionsGetDefaultDriver(getRawPointer());
-        }
-
-        public int getFileFavor() {
-            return jniOptionsGetFileFavor(getRawPointer());
-        }
-
-        public int getFileFlags() {
-            return jniOptionsGetFileFlags(getRawPointer());
-        }
-
-        public void setVersion(int version) {
-            jniOptionsSetVersion(getRawPointer(), version);
-        }
-
-        public void setFlags(int flags) {
-            jniOptionsSetFlags(getRawPointer(), flags);
-        }
-
-        public void setRenameThreshold(int renameThreshold) {
-            jniOptionsSetRenameThreshold(getRawPointer(), renameThreshold);
-        }
-
-        public void setTargetLimit(int targetLimit) {
-            jniOptionsSetTargetLimit(getRawPointer(), targetLimit);
-        }
-
-        public void setMetric(long metric) {
-            jniOptionsSetMetric(getRawPointer(), metric);
-        }
-
-        public void setRecursionLimit(int recursionLimit) {
-            jniOptionsSetRecursionLimit(getRawPointer(), recursionLimit);
-        }
-
-        public void setDefaultDriver(String defaultDriver) {
-            jniOptionsSetDefaultDriver(getRawPointer(), defaultDriver);
-        }
-
-        public void setFileFavor(int fileFavor) {
-            jniOptionsSetFileFavor(getRawPointer(), fileFavor);
-        }
-
-        public void setFileFlags(int fileFlags) {
-            jniOptionsSetFileFlags(getRawPointer(), fileFlags);
-        }
-    }
-
     /** The results of `git_merge_analysis` indicate the merge opportunities. */
     public enum AnalysisT implements IBitEnum {
         /** No merge is possible. (Unused.) */
@@ -416,7 +707,6 @@ public class Merge {
             return _bit;
         }
     }
-
     /** The user's stated preference for merges. */
     public enum PreferenceT implements IBitEnum {
         /** No configuration was found that suggests a preferred behavior for merge. */
@@ -446,6 +736,272 @@ public class Merge {
     }
 
     /**
+     * The file inputs to `git_merge_file`. Callers should populate the `git_merge_file_input`
+     * structure with descriptions of the files in each side of the conflict for use in producing
+     * the merge file.
+     */
+    public static class FileInput extends CAutoReleasable {
+        public static final int VERSION = 1;
+
+        FileInput(boolean isWeak, long rawPtr) {
+            super(isWeak, rawPtr);
+        }
+
+        public static FileInput createDefault() {
+            return create(VERSION);
+        }
+
+        @Nonnull
+        public static FileInput create(int version) {
+            FileInput out = new FileInput(false, 0);
+            Error.throwIfNeeded(jniFileInputNew(out._rawPtr, version));
+            return out;
+        }
+
+        @Override
+        protected void freeOnce(long cPtr) {
+            jniFileInputFree(cPtr);
+        }
+
+        public int getVersion() {
+            return jniFileInputGetVersion(getRawPointer());
+        }
+
+        public void setVersion(int version) {
+            jniFileInputSetVersion(getRawPointer(), version);
+        }
+
+        public String getPtr() {
+            return jniFileInputGetPtr(getRawPointer());
+        }
+
+        public void setPtr(String ptr) {
+            jniFileInputSetPtr(getRawPointer(), ptr);
+            jniFileInputSetSize(getRawPointer(), ptr.length());
+        }
+
+        public int getSize() {
+            return jniFileInputGetSize(getRawPointer());
+        }
+
+        public String getPath() {
+            return jniFileInputGetPath(getRawPointer());
+        }
+
+        public void setPath(String path) {
+            jniFileInputSetPath(getRawPointer(), path);
+        }
+
+        public int getMode() {
+            return jniFileInputGetMode(getRawPointer());
+        }
+
+        public void setMode(int mode) {
+            jniFileInputSetMode(getRawPointer(), mode);
+        }
+    }
+
+    /** options for merging a file */
+    public static class FileOptions extends CAutoReleasable {
+        FileOptions(boolean isWeak, long rawPtr) {
+            super(isWeak, rawPtr);
+        }
+
+        @Nonnull
+        public static FileOptions create(int version) {
+            FileOptions opts = new FileOptions(false, 0);
+            Error.throwIfNeeded(jniFileOptionsNew(opts._rawPtr, version));
+            return opts;
+        }
+
+        @Override
+        protected void freeOnce(long cPtr) {
+            jniFileOptionsFree(cPtr);
+        }
+
+        public int getVersion() {
+            return jniFileOptionsGetVersion(getRawPointer());
+        }
+
+        public void setVersion(int version) {
+            jniFileOptionsSetVersion(getRawPointer(), version);
+        }
+
+        public String getAncestorLabel() {
+            return jniFileOptionsGetAncestorLabel(getRawPointer());
+        }
+
+        public void setAncestorLabel(String ancestorLabel) {
+            jniFileOptionsSetAncestorLabel(getRawPointer(), ancestorLabel);
+        }
+
+        public String getOurLabel() {
+            return jniFileOptionsGetOurLabel(getRawPointer());
+        }
+
+        public void setOurLabel(String ourLabel) {
+            jniFileOptionsSetOurLabel(getRawPointer(), ourLabel);
+        }
+
+        public String getTheirLabel() {
+            return jniFileOptionsGetTheirLabel(getRawPointer());
+        }
+
+        public void setTheirLabel(String theirLabel) {
+            jniFileOptionsSetTheirLabel(getRawPointer(), theirLabel);
+        }
+
+        public int getFavor() {
+            return jniFileOptionsGetFavor(getRawPointer());
+        }
+
+        public void setFavor(int favor) {
+            jniFileOptionsSetFavor(getRawPointer(), favor);
+        }
+
+        public int getFlags() {
+            return jniFileOptionsGetFlags(getRawPointer());
+        }
+
+        public void setFlags(int flags) {
+            jniFileOptionsSetFlags(getRawPointer(), flags);
+        }
+
+        public int getMarkerSize() {
+            return jniFileOptionsGetMarkerSize(getRawPointer());
+        }
+
+        public void setMarkerSize(int markerSize) {
+            jniFileOptionsSetMarkerSize(getRawPointer(), markerSize);
+        }
+    }
+
+    public static class FileResult extends CAutoReleasable {
+
+        protected FileResult(boolean isWeak, long rawPtr) {
+            super(isWeak, rawPtr);
+        }
+
+        @Override
+        protected void freeOnce(long cPtr) {
+            jniFileResultFree(cPtr);
+        }
+
+        public boolean getAutomergeable() {
+            return jniFileResultGetAutomergeable(getRawPointer()) != 0;
+        }
+
+        public String getPath() {
+            return jniFileResultGetPath(getRawPointer());
+        }
+
+        public int getMode() {
+            return jniFileResultGetMode(getRawPointer());
+        }
+
+        public String getPtr() {
+            return jniFileResultGetPtr(getRawPointer());
+        }
+
+        public int getLen() {
+            return jniFileResultGetLen(getRawPointer());
+        }
+    }
+
+    /** Merging options */
+    public static class Options extends CAutoReleasable {
+        public static final int CURRENT_VERSION = 1;
+
+        protected Options(boolean isWeak, long rawPtr) {
+            super(isWeak, rawPtr);
+        }
+
+        @Override
+        protected void freeOnce(long cPtr) {
+            jniOptionsFree(cPtr);
+        }
+
+        @Nonnull
+        public Options create(int version) {
+            Options out = new Options(false, 0);
+            Error.throwIfNeeded(jniOptionsNew(out._rawPtr, version));
+            return out;
+        }
+
+        public int getVersion() {
+            return jniOptionsGetVersion(getRawPointer());
+        }
+
+        public void setVersion(int version) {
+            jniOptionsSetVersion(getRawPointer(), version);
+        }
+
+        public int getFlags() {
+            return jniOptionsGetFlags(getRawPointer());
+        }
+
+        public void setFlags(int flags) {
+            jniOptionsSetFlags(getRawPointer(), flags);
+        }
+
+        public int getRenameThreshold() {
+            return jniOptionsGetRenameThreshold(getRawPointer());
+        }
+
+        public void setRenameThreshold(int renameThreshold) {
+            jniOptionsSetRenameThreshold(getRawPointer(), renameThreshold);
+        }
+
+        public int getTargetLimit() {
+            return jniOptionsGetTargetLimit(getRawPointer());
+        }
+
+        public void setTargetLimit(int targetLimit) {
+            jniOptionsSetTargetLimit(getRawPointer(), targetLimit);
+        }
+
+        public long getMetric() {
+            return jniOptionsGetMetric(getRawPointer());
+        }
+
+        public void setMetric(long metric) {
+            jniOptionsSetMetric(getRawPointer(), metric);
+        }
+
+        public int getRecursionLimit() {
+            return jniOptionsGetRecursionLimit(getRawPointer());
+        }
+
+        public void setRecursionLimit(int recursionLimit) {
+            jniOptionsSetRecursionLimit(getRawPointer(), recursionLimit);
+        }
+
+        public String getDefaultDriver() {
+            return jniOptionsGetDefaultDriver(getRawPointer());
+        }
+
+        public void setDefaultDriver(String defaultDriver) {
+            jniOptionsSetDefaultDriver(getRawPointer(), defaultDriver);
+        }
+
+        public int getFileFavor() {
+            return jniOptionsGetFileFavor(getRawPointer());
+        }
+
+        public void setFileFavor(int fileFavor) {
+            jniOptionsSetFileFavor(getRawPointer(), fileFavor);
+        }
+
+        public int getFileFlags() {
+            return jniOptionsGetFileFlags(getRawPointer());
+        }
+
+        public void setFileFlags(int fileFlags) {
+            jniOptionsSetFileFlags(getRawPointer(), fileFlags);
+        }
+    }
+
+    /**
      * POJO contains analysis result from {@code Merge::analysis} and {@code Merge::analysisForRef}
      */
     public static class AnalysisPair {
@@ -465,484 +1021,4 @@ public class Merge {
             return preference;
         }
     }
-
-    /** int git_merge_file_init_input(git_merge_file_input *opts, unsigned int version); */
-    static native int jniFileInitInput(long opts, int version);
-
-    static native int jniFileInputNew(AtomicLong outOpts, int version);
-
-    static native int jniFileInputFree(long optsPtr);
-
-    /** int git_merge_file_init_options(git_merge_file_options *opts, unsigned int version); */
-    static native int jniFileInitOptions(long opts, int version);
-
-    static native int jniFileOptionsNew(AtomicLong outOpts, int version);
-
-    static native int jniFileOptionsFree(long opts);
-
-    /** int git_merge_init_options(git_merge_options *opts, unsigned int version); */
-    static native int jniInitOptions(long opts, int version);
-
-    static native int jniOptionsNew(AtomicLong outOpts, int version);
-
-    static native void jniOptionsFree(long optsPtr);
-
-    /**
-     * int git_merge_base(git_oid *out, git_repository *repo, const git_oid *one, const git_oid
-     * *two);
-     */
-    static native int jniBase(Oid out, long repoPtr, Oid one, Oid two);
-
-    /**
-     * Find a merge base between two commits
-     *
-     * @param repo the repository where the commits exist
-     * @param one one of the commits
-     * @param two the other commit
-     * @return the OID of a merge base between 'one' and 'two'
-     * @throws GitException git errors 0 on success, GIT_ENOTFOUND if not found or error code
-     */
-    @Nonnull
-    public static Optional<Oid> base(@Nonnull Repository repo, @Nonnull Oid one, @Nonnull Oid two) {
-        Oid out = new Oid();
-        int e = jniBase(out, repo.getRawPointer(), one, two);
-        if (ENOTFOUND.getCode() == e) {
-            return Optional.empty();
-        }
-        Error.throwIfNeeded(e);
-        return Optional.of(out);
-    }
-
-    /**
-     * int git_merge_bases(git_oidarray *out, git_repository *repo, const git_oid *one, const
-     * git_oid *two);
-     */
-    static native int jniBases(OidArray outOids, long repoPtr, Oid one, Oid two);
-
-    /**
-     * Find merge bases between two commits
-     *
-     * @param repo the repository where the commits exist
-     * @param one one of the commits
-     * @param two the other commit
-     * @return list of merge base ids, empty if not found
-     * @throws GitException 0 on success
-     */
-    @Nonnull
-    public static List<Oid> bases(@Nonnull Repository repo, @Nonnull Oid one, @Nonnull Oid two) {
-        OidArray outOids = new OidArray();
-        int e = jniBases(outOids, repo.getRawPointer(), one, two);
-        if (ENOTFOUND.getCode() == e) {
-            return Collections.emptyList();
-        }
-        Error.throwIfNeeded(e);
-        return outOids.getOids();
-    }
-
-    /**
-     * int git_merge_trees( git_index **out, git_repository *repo, const git_tree *ancestor_tree,
-     * const git_tree *our_tree, const git_tree *their_tree, const git_merge_options *opts);
-     */
-    static native int jniTrees(
-            AtomicLong out,
-            long repoPtr,
-            long ancestorTree,
-            long ourTree,
-            long theirTree,
-            long opts);
-
-    /**
-     * Merge two trees, producing a `git_index` that reflects the result of the merge. The index may
-     * be written as-is to the working directory or checked out. If the index is to be converted to
-     * a tree, the caller should resolve any conflicts that arose as part of the merge.
-     *
-     * <p>The returned index must be freed explicitly with `git_index_free`.
-     *
-     * @param repo repository that contains the given trees
-     * @param ancestorTree the common ancestor between the trees (or null if none)
-     * @param ourTree the tree that reflects the destination tree
-     * @param theirTree the tree to merge in to `our_tree`
-     * @param opts the merge tree options (or null for defaults)
-     * @return index of the merge
-     * @throws GitException git errors
-     */
-    @Nonnull
-    public static Index trees(
-            @Nonnull Repository repo,
-            @Nullable Tree ancestorTree,
-            @Nullable Tree ourTree,
-            @Nullable Tree theirTree,
-            @Nullable Options opts) {
-        Index out = new Index(0);
-        Error.throwIfNeeded(
-                jniTrees(
-                        out._rawPtr,
-                        repo.getRawPointer(),
-                        ancestorTree == null ? 0 : ancestorTree.getRawPointer(),
-                        ourTree == null ? 0 : ourTree.getRawPointer(),
-                        theirTree == null ? 0 : theirTree.getRawPointer(),
-                        opts == null ? 0 : opts.getRawPointer()));
-        return out;
-    }
-
-    /**
-     * int git_merge_commits(git_index **out, git_repository *repo, const git_commit *our_commit,
-     * const git_commit *their_commit, const git_merge_options *opts);
-     */
-    static native int jniCommits(
-            AtomicLong out, long repoPtr, long ourCommit, long theirCommit, long opts);
-
-    /**
-     * Merge two commits, producing a `git_index` that reflects the result of the merge. The index
-     * may be written as-is to the working directory or checked out. If the index is to be converted
-     * to a tree, the caller should resolve any conflicts that arose as part of the merge.
-     *
-     * <p>The returned index must be freed explicitly with `git_index_free`.
-     *
-     * @param repo repository that contains the given trees
-     * @param ourCommit the commit that reflects the destination tree
-     * @param theirCommit the commit to merge in to `our_commit`
-     * @param opts the merge tree options (or null for defaults)
-     * @return index reflecting the merge result
-     * @throws GitException git errors
-     */
-    @Nonnull
-    public static Index commits(
-            @Nonnull Repository repo,
-            @Nullable Commit ourCommit,
-            @Nullable Commit theirCommit,
-            @Nullable Options opts) {
-        Index out = new Index(0);
-        Error.throwIfNeeded(
-                jniCommits(
-                        out._rawPtr,
-                        repo.getRawPointer(),
-                        ourCommit == null ? 0 : ourCommit.getRawPointer(),
-                        theirCommit == null ? 0 : theirCommit.getRawPointer(),
-                        opts == null ? 0 : opts.getRawPointer()));
-        return out;
-    }
-    /**
-     * int git_merge_analysis( git_merge_analysis_t *analysis_out, git_merge_preference_t
-     * *preference_out, git_repository *repo, const git_annotated_commit **their_heads, size_t
-     * their_heads_len);
-     */
-    static native int jniAnalysis(
-            AtomicInteger analysisOut,
-            AtomicInteger preferenceOut,
-            long repoPtr,
-            long[] theirHeads);
-
-    /**
-     * Analyzes the given branch(es) and determines the opportunities for merging them into the HEAD
-     * of the repository.
-     *
-     * @param repo the repository to merge
-     * @param theirHeads the heads to merge into
-     * @return out analysis
-     * @throws GitException git errors
-     */
-    @Nonnull
-    public static AnalysisPair analysis(
-            @Nonnull Repository repo, @Nonnull List<AnnotatedCommit> theirHeads) {
-        AtomicInteger outAnalysis = new AtomicInteger();
-        AtomicInteger outPreference = new AtomicInteger();
-        Error.throwIfNeeded(
-                jniAnalysis(
-                        outAnalysis,
-                        outPreference,
-                        repo.getRawPointer(),
-                        theirHeads.stream().mapToLong(AnnotatedCommit::getRawPointer).toArray()));
-        return new AnalysisPair(
-                IBitEnum.valueOf(outAnalysis.get(), AnalysisT.class),
-                IBitEnum.valueOf(outPreference.get(), PreferenceT.class));
-    }
-
-    /**
-     * int git_merge_analysis_for_ref(git_merge_analysis_t *analysis_out, git_merge_preference_t
-     * *preference_out, git_repository *repo, git_reference *our_ref, const git_annotated_commit
-     * **their_heads, size_t their_heads_len);
-     */
-    static native int jniAnalysisForRef(
-            AtomicInteger analysisOut,
-            AtomicInteger preferenceOut,
-            long repoPtr,
-            long ourRefPtr,
-            long[] theirHeads);
-    /**
-     * Analyzes the given branch(es) and determines the opportunities for merging them into a
-     * reference.
-     *
-     * @param repo the repository to merge
-     * @param ourRef the reference to perform the analysis from
-     * @param theirHeads the heads to merge into
-     * @return analysis out
-     * @throws GitException git errors
-     */
-    @Nonnull
-    public static AnalysisPair analysisForRef(
-            @Nonnull Repository repo,
-            @Nullable Reference ourRef,
-            @Nonnull List<AnnotatedCommit> theirHeads) {
-        AtomicInteger outAnalysis = new AtomicInteger();
-        AtomicInteger outPreference = new AtomicInteger();
-        Error.throwIfNeeded(
-                jniAnalysisForRef(
-                        outAnalysis,
-                        outPreference,
-                        repo.getRawPointer(),
-                        ourRef == null ? 0 : ourRef.getRawPointer(),
-                        theirHeads.stream().mapToLong(AnnotatedCommit::getRawPointer).toArray()));
-        return new AnalysisPair(
-                IBitEnum.valueOf(outAnalysis.get(), AnalysisT.class),
-                IBitEnum.valueOf(outPreference.get(), PreferenceT.class));
-    }
-
-    /**
-     * int git_merge_base_many(git_oid *out, git_repository *repo, size_t length, const git_oid []
-     * input_array);
-     */
-    static native int jniBaseMany(Oid outOid, long repoPtr, Oid[] inputArray);
-
-    /**
-     * Find a merge base given a list of commits
-     *
-     * @param repo the repository where the commits exist
-     * @param inputArray oids of the commits
-     * @return the OID of a merge base considering all the commits
-     * @throws GitException git errors
-     */
-    @Nonnull
-    public static Optional<Oid> baseMany(@Nonnull Repository repo, @Nonnull Oid[] inputArray) {
-        Oid outOid = new Oid();
-        int e = jniBaseMany(outOid, repo.getRawPointer(), inputArray);
-        if (ENOTFOUND.getCode() == e) {
-            return Optional.empty();
-        }
-        Error.throwIfNeeded(e);
-        return Optional.of(outOid);
-    }
-
-    /**
-     * int git_merge_bases_many(git_oidarray *out, git_repository *repo, size_t length, const
-     * git_oid [] input_array);
-     */
-    static native int jniBasesMany(OidArray outOids, long repoPtr, Oid[] inputArray);
-
-    /**
-     * Find all merge bases given a list of commits
-     *
-     * @param repo the repository where the commits exist
-     * @param inputArray oids of the commits
-     * @return list of merge base commits or empty list if none found
-     * @throws GitException git errors
-     */
-    @Nonnull
-    public static List<Oid> basesMany(@Nonnull Repository repo, @Nonnull Oid[] inputArray) {
-        OidArray outOids = new OidArray();
-        int e = jniBasesMany(outOids, repo.getRawPointer(), inputArray);
-        if (ENOTFOUND.getCode() == e) {
-            return Collections.emptyList();
-        }
-        Error.throwIfNeeded(e);
-        return outOids.getOids();
-    }
-
-    /**
-     * int git_merge_base_octopus(git_oid *out, git_repository *repo, size_t length, const git_oid
-     * [] input_array);
-     */
-    static native int jniBaseOctopus(Oid outOid, long repoPtr, Oid[] intputArray);
-
-    /**
-     * Find a merge base in preparation for an octopus merge
-     *
-     * @param repo the repository where the commits exist
-     * @param inputArray oids of the commits
-     * @return the OID of a merge base considering all the commits or empty if not found
-     * @throws GitException git errors
-     */
-    @Nonnull
-    public static Optional<Oid> baseOctopus(@Nonnull Repository repo, @Nonnull Oid[] inputArray) {
-        Oid outOid = new Oid();
-        int e = jniBaseOctopus(outOid, repo.getRawPointer(), inputArray);
-        if (ENOTFOUND.getCode() == e) {
-            return Optional.empty();
-        }
-        Error.throwIfNeeded(e);
-        return Optional.of(outOid);
-    }
-
-    /**
-     * int git_merge_file( git_merge_file_result *out, const git_merge_file_input *ancestor, const
-     * git_merge_file_input *ours, const git_merge_file_input *theirs, const git_merge_file_options
-     * *opts);
-     */
-    static native int jniFile(
-            AtomicLong out, long ancestorPtr, long oursPtr, long theirsPtr, long optsPtr);
-
-    /**
-     * Merge two files as they exist in the in-memory data structures, using the given common
-     * ancestor as the baseline, producing a `git_merge_file_result` that reflects the merge result.
-     * The `git_merge_file_result` must be freed with `git_merge_file_result_free`.
-     *
-     * <p>Note that this function does not reference a repository and any configuration must be
-     * passed as `git_merge_file_options`.
-     *
-     * @param ancestor The contents of the ancestor file
-     * @param ours The contents of the file in "our" side
-     * @param theirs The contents of the file in "their" side
-     * @param opts The merge file options or `NULL` for defaults
-     * @return The merge result
-     * @throws GitException git errors
-     */
-    @Nonnull
-    public static FileResult file(
-            @Nonnull FileInput ancestor,
-            @Nonnull FileInput ours,
-            @Nonnull FileInput theirs,
-            @Nullable FileOptions opts) {
-        FileResult result = new FileResult(false, 0);
-        Error.throwIfNeeded(
-                jniFile(
-                        result._rawPtr,
-                        ancestor.getRawPointer(),
-                        ours.getRawPointer(),
-                        theirs.getRawPointer(),
-                        CAutoReleasable.rawPtr(opts)));
-        return result;
-    }
-
-    /**
-     * void git_merge_file_result_free(git_merge_file_result *result); Note: this also frees the
-     * resultPtr itself.
-     */
-    static native void jniFileResultFree(long resultPtr);
-
-    /**
-     * int git_merge_create( git_repository *repo, const git_annotated_commit **their_heads, size_t
-     * their_heads_len, const git_merge_options *merge_opts, const git_checkout_options
-     * *checkout_opts);
-     */
-    static native int jniMerge(
-            long repoPtr, long[] theirHeads, long mergeOptsPtr, long checkoutOpts);
-
-    /**
-     * Merges the given commit(s) into HEAD, writing the results into the working directory. Any
-     * changes are staged for commit and any conflicts are written to the index. Callers should
-     * inspect the repository's index after this completes, resolve any conflicts and prepare a
-     * commit.
-     *
-     * <p>For compatibility with git, the repository is put into a merging state. Once the commit is
-     * done (or if the uses wishes to abort), you should clear this state by calling
-     * `git_repository_state_cleanup()`.
-     *
-     * @param repo the repository to merge
-     * @param theirHeads the heads to merge into
-     * @param mergeOpts merge options
-     * @param checkoutOpts checkout options
-     * @throws GitException git errors
-     */
-    public static void merge(
-            @Nonnull Repository repo,
-            @Nonnull List<AnnotatedCommit> theirHeads,
-            @Nullable Options mergeOpts,
-            @Nullable Checkout.Options checkoutOpts) {
-        Error.throwIfNeeded(
-                jniMerge(
-                        repo.getRawPointer(),
-                        theirHeads.stream().mapToLong(CAutoReleasable::getRawPointer).toArray(),
-                        CAutoReleasable.rawPtr(mergeOpts),
-                        CAutoReleasable.rawPtr(checkoutOpts)));
-    }
-
-    /** -------- Jni Signature ---------- */
-    /** unsigned int version */
-    static native int jniOptionsGetVersion(long optionsPtr);
-    /** uint32_t flags */
-    static native int jniOptionsGetFlags(long optionsPtr);
-    /** unsigned int rename_threshold */
-    static native int jniOptionsGetRenameThreshold(long optionsPtr);
-    /** unsigned int target_limit */
-    static native int jniOptionsGetTargetLimit(long optionsPtr);
-    /** git_diff_similarity_metric *metric */
-    static native long jniOptionsGetMetric(long optionsPtr);
-    /** unsigned int recursion_limit */
-    static native int jniOptionsGetRecursionLimit(long optionsPtr);
-    /** const char *default_driver */
-    static native String jniOptionsGetDefaultDriver(long optionsPtr);
-    /** git_merge_file_favor_t file_favor */
-    static native int jniOptionsGetFileFavor(long optionsPtr);
-    /** uint32_t file_flags */
-    static native int jniOptionsGetFileFlags(long optionsPtr);
-    /** unsigned int version */
-    static native void jniOptionsSetVersion(long optionsPtr, int version);
-    /** uint32_t flags */
-    static native void jniOptionsSetFlags(long optionsPtr, int flags);
-    /** unsigned int rename_threshold */
-    static native void jniOptionsSetRenameThreshold(long optionsPtr, int renameThreshold);
-    /** unsigned int target_limit */
-    static native void jniOptionsSetTargetLimit(long optionsPtr, int targetLimit);
-    /** git_diff_similarity_metric *metric */
-    static native void jniOptionsSetMetric(long optionsPtr, long metric);
-    /** unsigned int recursion_limit */
-    static native void jniOptionsSetRecursionLimit(long optionsPtr, int recursionLimit);
-    /** const char *default_driver */
-    static native void jniOptionsSetDefaultDriver(long optionsPtr, String defaultDriver);
-    /** git_merge_file_favor_t file_favor */
-    static native void jniOptionsSetFileFavor(long optionsPtr, int fileFavor);
-    /** uint32_t file_flags */
-    static native void jniOptionsSetFileFlags(long optionsPtr, int fileFlags);
-
-    /** -------- Jni Signature ---------- */
-    /** unsigned int version */
-    static native int jniFileOptionsGetVersion(long file_optionsPtr);
-    /** const char *ancestor_label */
-    static native String jniFileOptionsGetAncestorLabel(long file_optionsPtr);
-    /** const char *our_label */
-    static native String jniFileOptionsGetOurLabel(long file_optionsPtr);
-    /** const char *their_label */
-    static native String jniFileOptionsGetTheirLabel(long file_optionsPtr);
-    /** git_merge_file_favor_t favor */
-    static native int jniFileOptionsGetFavor(long file_optionsPtr);
-    /** uint32_t flags */
-    static native int jniFileOptionsGetFlags(long file_optionsPtr);
-    /** int marker_size */
-    static native int jniFileOptionsGetMarkerSize(long file_optionsPtr);
-    /** unsigned int version */
-    static native void jniFileOptionsSetVersion(long file_optionsPtr, int version);
-    /** const char *ancestor_label */
-    static native void jniFileOptionsSetAncestorLabel(long file_optionsPtr, String ancestorLabel);
-    /** const char *our_label */
-    static native void jniFileOptionsSetOurLabel(long file_optionsPtr, String ourLabel);
-    /** const char *their_label */
-    static native void jniFileOptionsSetTheirLabel(long file_optionsPtr, String theirLabel);
-    /** git_merge_file_favor_t favor */
-    static native void jniFileOptionsSetFavor(long file_optionsPtr, int favor);
-    /** uint32_t flags */
-    static native void jniFileOptionsSetFlags(long file_optionsPtr, int flags);
-    /** int marker_size */
-    static native void jniFileOptionsSetMarkerSize(long file_optionsPtr, int markerSize);
-
-    /** -------- Jni Signature ---------- */
-    /** unsigned int version */
-    static native int jniFileInputGetVersion(long file_inputPtr);
-    /** const char *ptr */
-    static native String jniFileInputGetPtr(long file_inputPtr);
-    /** size_t size */
-    static native int jniFileInputGetSize(long file_inputPtr);
-    /** const char *path */
-    static native String jniFileInputGetPath(long file_inputPtr);
-    /** int mode */
-    static native int jniFileInputGetMode(long file_inputPtr);
-    /** unsigned int version */
-    static native void jniFileInputSetVersion(long file_inputPtr, int version);
-    /** const char *ptr */
-    static native void jniFileInputSetPtr(long file_inputPtr, String ptr);
-    /** size_t size */
-    static native void jniFileInputSetSize(long file_inputPtr, int size);
-    /** const char *path */
-    static native void jniFileInputSetPath(long file_inputPtr, String path);
-    /** int mode */
-    static native void jniFileInputSetMode(long file_inputPtr, int mode);
 }

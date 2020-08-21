@@ -1,215 +1,225 @@
 package com.github.git24j.core;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.EnumSet;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicLong;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.EnumSet;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicLong;
 
 public class Checkout {
 
+    /** int git_checkout_head(git_repository *repo, const git_checkout_options *opts); */
+    static native int jniHead(long repoPtr, long opts);
+
     /**
-     * Checkout options structure
-     *
-     * <p>Initialize with `GIT_CHECKOUT_OPTIONS_INIT`. Alternatively, you can use
-     * `git_checkout_init_options`.
+     * int git_checkout_index(git_repository *repo, git_index *index, const git_checkout_options
+     * *opts);
      */
-    public static class Options extends CAutoReleasable {
-        public static int GIT_CHECKOUT_OPTIONS_VERSION = 1;
+    static native int jniIndex(long repoPtr, long index, long opts);
 
-        protected Options(boolean isWeak, long rawPtr) {
-            super(isWeak, rawPtr);
-        }
+    /** int git_checkout_init_options(git_checkout_options *opts, unsigned int version); */
+    static native int jniInitOptions(long opts, int version);
 
-        @Override
-        protected void freeOnce(long cPtr) {
-            Libgit2.jniShadowFree(cPtr);
-        }
+    static native String jniOptionsGetAncestorLabel(long opts);
 
-        @Nonnull
-        public static Options create(int version) {
-            Options opts = new Options(false, 0);
-            Error.throwIfNeeded(jniOptionsNew(opts._rawPtr, version));
-            return opts;
-        }
+    static native long jniOptionsGetBaseline(long opts);
 
-        public static Options defaultOptions() {
-            return create(GIT_CHECKOUT_OPTIONS_VERSION);
-        }
+    static native long jniOptionsGetBaselineIndex(long opts);
+    // no matching type found for 'git_checkout_notify_t why'
+    /**
+     * int git_checkout_notify_cb(git_checkout_notify_t why, const char *path, const git_diff_file
+     * *baseline, const git_diff_file *target, const git_diff_file *workdir, void *payload);
+     */
+    /** -------- Jni Signature ---------- */
 
-        public int getVersion() {
-            return jniOptionsGetVersion(getRawPointer());
-        }
+    /** unsigned int git_checkout_options_get_dir_mode(const git_checkout_options *opts); */
+    static native int jniOptionsGetDirMode(long opts);
 
-        public void setVersion(int ver) {
-            jniOptionsSetVersion(getRawPointer(), ver);
-        }
+    /** int git_checkout_options_get_disable_filters(const git_checkout_options *opts); */
+    static native int jniOptionsGetDisableFilters(long opts);
 
-        /** @return checkout strategy, default is SAFE */
-        @Nonnull
-        public EnumSet<StrategyT> getStrategy() {
-            return IBitEnum.parse(jniOptionsGetStrategy(getRawPointer()), StrategyT.class);
-        }
+    /** unsigned int git_checkout_options_get_file_mode(const git_checkout_options *opts); */
+    static native int jniOptionsGetFileMode(long opts);
 
-        public void setStrategy(@Nonnull EnumSet<StrategyT> strategies) {
-            jniOptionsSetStrategy(getRawPointer(), IBitEnum.bitOrAll(strategies));
-        }
+    /** int git_checkout_options_get_file_open_flags(const git_checkout_options *opts); */
+    static native int jniOptionsGetFileOpenFlags(long opts);
 
-        public boolean getDisableFilter() {
-            return jniOptionsGetDisableFilters(getRawPointer()) == 1;
-        }
+    /** unsigned int git_checkout_options_get_notify_flags(const git_checkout_options *opts); */
+    static native int jniOptionsGetNotifyFlags(long opts);
 
-        /** don't apply filters like CRLF conversion */
-        public void setDisableFilter(boolean disableFilter) {
-            jniOptionsSetDisableFilters(getRawPointer(), disableFilter ? 1 : 0);
-        }
+    static native String jniOptionsGetOurLabel(long opts);
 
-        /** default is 0755 */
-        public int getDirMode() {
-            return jniOptionsGetDirMode(getRawPointer());
-        }
+    static native void jniOptionsGetPaths(long opts, List<String> outPathList);
 
-        public void setDirMode(int mode) {
-            jniOptionsSetDirMode(getRawPointer(), mode);
-        }
+    /** unsigned int git_checkout_options_get_strategy(const git_checkout_options *opts); */
+    static native int jniOptionsGetStrategy(long opts);
 
-        /** default is 0644 or 0755 as dictated by blob */
-        public int getFileMode() {
-            return jniOptionsGetFileMode(getRawPointer());
-        }
+    /** -------- Jni Signature ---------- */
 
-        public void setFileMode(int mode) {
-            jniOptionsSetFileMode(getRawPointer(), mode);
-        }
+    static native String jniOptionsGetTargetDirectory(long opts);
 
-        /** default is O_CREAT | O_TRUNC | O_WRONLY */
-        public int getOpenFlags() {
-            return jniOptionsGetFileOpenFlags(getRawPointer());
-        }
+    static native String jniOptionsGetTheirLable(long opts);
 
-        public void setOpenFlags(int flags) {
-            jniOptionsSetFileOpenFlags(getRawPointer(), flags);
-        }
+    /** unsigned int git_checkout_options_get_version(const git_checkout_options *opts); */
+    static native int jniOptionsGetVersion(long opts);
 
-        /** see `git_checkout_notify_t` above */
-        public EnumSet<NotifyT> getNotifyFlags() {
-            int flags = jniOptionsGetNotifyFlags(getRawPointer());
-            EnumSet<NotifyT> candidates = EnumSet.allOf(NotifyT.class);
-            candidates.remove(NotifyT.NONE);
-            candidates.remove(NotifyT.ALL);
-            EnumSet<NotifyT> res = IBitEnum.parse(flags, candidates);
-            if (res == null) {
-                return EnumSet.of(NotifyT.NONE);
-            }
-            if (res.size() == candidates.size()) {
-                return EnumSet.of(NotifyT.ALL);
-            }
-            return res;
-        }
+    static native int jniOptionsNew(AtomicLong outPots, int version);
 
-        public void setNotifyFlags(EnumSet<NotifyT> flags) {
-            jniOptionsSetNotifyFlags(getRawPointer(), IBitEnum.bitOrAll(flags));
-        }
+    /**
+     * void git_checkout_options_set_ancestor_label(const git_checkout_options *opts, const char
+     * *ancestor_label);
+     */
+    static native void jniOptionsSetAncestorLabel(long opts, String ancestorLabel);
 
-        public void setNotifyCb(@Nonnull NotifyCb callback) {
-            jniOptionsSetNotifyCb(
-                    getRawPointer(),
-                    (why, s, basePtr, targePtr, workdirPtr) ->
-                            callback.accept(
-                                    IBitEnum.valueOf(why, NotifyT.class),
-                                    s,
-                                    Diff.File.ofWeak(basePtr),
-                                    Diff.File.ofWeak(targePtr),
-                                    Diff.File.ofWeak(workdirPtr)));
-        }
+    /**
+     * void git_checkout_options_set_baseline(const git_checkout_options *opts, git_tree *baseline);
+     */
+    static native void jniOptionsSetBaseline(long opts, long baseline);
 
-        public void setProgressCb(@Nonnull ProgressCb callback) {
-            jniOptionsSetProgressCb(getRawPointer(), callback);
-        }
+    /**
+     * void git_checkout_options_set_baseline_index(const git_checkout_options *opts, git_index
+     * *baseline_index);
+     */
+    static native void jniOptionsSetBaselineIndex(long opts, long baselineIndex);
 
-        public void setPerfdataCb(@Nonnull PerfdataCb callback) {
-            jniOptionsSetPerfdataCb(getRawPointer(), callback);
-        }
+    /**
+     * void git_checkout_options_set_dir_mode(const git_checkout_options *opts, unsigned int mode);
+     */
+    static native void jniOptionsSetDirMode(long opts, int mode);
 
-        public void setPaths(@Nonnull String[] paths) {
-            jniOptionsSetPaths(getRawPointer(), paths);
-        }
+    /**
+     * void git_checkout_options_set_disable_filters(const git_checkout_options *opts, int
+     * disalbe_filters);
+     */
+    static native void jniOptionsSetDisableFilters(long opts, int disalbeFilters);
 
-        public List<String> getPaths() {
-            List<String> out = new ArrayList<>();
-            jniOptionsGetPaths(getRawPointer(), out);
-            return out;
-        }
+    /**
+     * void git_checkout_options_set_file_mode(const git_checkout_options *opts, unsigned int mode);
+     */
+    static native void jniOptionsSetFileMode(long opts, int mode);
 
-        public void setBaseline(@Nonnull Tree baseline) {
-            jniOptionsSetBaseline(getRawPointer(), baseline.getRawPointer());
-        }
+    /**
+     * void git_checkout_options_set_file_open_flags(const git_checkout_options *opts, int flags);
+     */
+    static native void jniOptionsSetFileOpenFlags(long opts, int flags);
 
-        @Nullable
-        public Tree getBaseline() {
-            long ptr = jniOptionsGetBaseline(getRawPointer());
-            return ptr == 0 ? null : new Tree(true, ptr);
-        }
+    static native void jniOptionsSetNotifyCb(long optsPtr, Internals.ISJJJCallback notifyCb);
 
-        public void setBaselineIndex(@Nonnull Index baselineIndex) {
-            jniOptionsSetBaselineIndex(getRawPointer(), baselineIndex.getRawPointer());
-        }
+    /**
+     * void git_checkout_options_set_notify_flags(const git_checkout_options *opts, unsigned int
+     * flags);
+     */
+    static native void jniOptionsSetNotifyFlags(long opts, int flags);
 
-        @Nullable
-        public Index getBaselineIndex() {
-            long ptr = jniOptionsGetBaselineIndex(getRawPointer());
-            return ptr == 0 ? null : new Index(ptr);
-        }
+    /**
+     * void git_checkout_options_set_our_label(const git_checkout_options *opts, const char
+     * *our_label);
+     */
+    static native void jniOptionsSetOurLabel(long opts, String ourLabel);
 
-        public void setTargetDirectory(@Nonnull String targetDirectory) {
-            jniOptionsSetTargetDirectory(getRawPointer(), targetDirectory);
-        }
+    /**
+     * void git_checkout_options_set_paths(const git_checkout_options *opts, git_strarray paths);
+     */
+    static native void jniOptionsSetPaths(long opts, String[] paths);
 
-        public String getTargetDirectory() {
-             return jniOptionsGetTargetDirectory(getRawPointer());
-        }
+    static native void jniOptionsSetPerfdataCb(long optsPtr, PerfdataCb perfdataCb);
 
-        public void setAncestorLabel(@Nonnull String ancestorLabel) {
-            jniOptionsSetAncestorLabel(getRawPointer(), ancestorLabel);
-        }
+    static native void jniOptionsSetProgressCb(long optsPtr, ProgressCb progressCb);
 
-        public String getAncestorLabel() {
-            return jniOptionsGetAncestorLabel(getRawPointer());
-        }
+    /**
+     * void git_checkout_options_set_strategy(const git_checkout_options *opts, unsigned int
+     * strategy);
+     */
+    static native void jniOptionsSetStrategy(long opts, int strategy);
 
-        public void setOurLabel(@Nonnull String ourLabel) {
-            jniOptionsSetOurLabel(getRawPointer(), ourLabel);
-        }
+    /**
+     * void git_checkout_options_set_target_directory(const git_checkout_options *opts, const char
+     * *target_directory);
+     */
+    static native void jniOptionsSetTargetDirectory(long opts, String targetDirectory);
 
-        public String getOurLabel() {
-            return jniOptionsGetOurLabel(getRawPointer());
-        }
+    /**
+     * void git_checkout_options_set_their_lable(const git_checkout_options *opts, const char
+     * *their_label);
+     */
+    static native void jniOptionsSetTheirLable(long opts, String theirLabel);
 
-        public void setTheirLabel(@Nonnull String theirLabel) {
-            jniOptionsSetTheirLable(getRawPointer(), theirLabel);
-        }
-        public String getTheirLabel() {
-            return jniOptionsGetTheirLable(getRawPointer());
-        }
+    /**
+     * void git_checkout_options_set_version(const git_checkout_options *opts, unsigned int
+     * version);
+     */
+    static native void jniOptionsSetVersion(long opts, int version);
+
+    /**
+     * int git_checkout_tree(git_repository *repo, const git_object *treeish, const
+     * git_checkout_options *opts);
+     */
+    static native int jniTree(long repoPtr, long treeish, long opts);
+
+    /**
+     * Updates files in the index and the working tree to match the content of the commit pointed at
+     * by HEAD.
+     *
+     * <p>Note that this is _not_ the correct mechanism used to switch branches; do not change your
+     * `HEAD` and then call this method, that would leave you with checkout conflicts since your
+     * working directory would then appear to be dirty. Instead, checkout the target of the branch
+     * and then update `HEAD` using `git_repository_set_head` to point to the branch you checked
+     * out.
+     *
+     * @param repo repository to check out (must be non-bare)
+     * @param opts specifies checkout options (may be NULL)
+     * @return code returned by `notify_cb`
+     * @throws GitException GIT_EUNBORNBRANCH if HEAD points to a non existing branch non-zero value
+     *     returned by `notify_cb`, or other error code < 0 (use git_error_last for error details)
+     */
+    public static int head(@Nonnull Repository repo, @Nullable Options opts) {
+        int e = jniHead(repo.getRawPointer(), opts == null ? 0 : opts.getRawPointer());
+        Error.throwIfNeeded(e);
+        return e;
     }
 
-    @FunctionalInterface
-    public interface NotifyCb {
-        int accept(
-                NotifyT why, String path, Diff.File baseline, Diff.File target, Diff.File workdir);
+    /**
+     * Updates files in the working tree to match the content of the index.
+     *
+     * @param repo repository into which to check out (must be non-bare)
+     * @param index index to be checked out (or NULL to use repository index)
+     * @param opts specifies checkout options (may be NULL)
+     * @return non-zero return value from `notify_cb`,
+     * @throws GitException git errors
+     */
+    public static int index(
+            @Nonnull Repository repo, @Nullable Index index, @Nullable Options opts) {
+        int e =
+                jniIndex(
+                        repo.getRawPointer(),
+                        index == null ? 0 : index.getRawPointer(),
+                        opts == null ? 0 : opts.getRawPointer());
+        Error.throwIfNeeded(e);
+        return e;
     }
 
-    @FunctionalInterface
-    public interface ProgressCb {
-        void accept(@CheckForNull String path, int completedSteps, int totalSteps);
-    }
-
-    @FunctionalInterface
-    public interface PerfdataCb {
-        void accept(int mkdirCalls, int statCalls, int chmodCalls);
+    /**
+     * Updates files in the index and working tree to match the content of the tree pointed at by
+     * the treeish.
+     *
+     * @param repo repository to check out (must be non-bare)
+     * @param treeish a commit, tag or tree which content will be used to update the working
+     *     directory (or NULL to use HEAD)
+     * @param opts specifies checkout options (may be NULL)
+     * @return non-zero return value from `notify_cb`,
+     * @throws GitException git errors
+     */
+    public static int tree(
+            @Nonnull Repository repo, @Nullable GitObject treeish, @Nullable Options opts) {
+        int e =
+                jniTree(
+                        repo.getRawPointer(),
+                        treeish == null ? 0 : treeish.getRawPointer(),
+                        opts == null ? 0 : opts.getRawPointer());
+        Error.throwIfNeeded(e);
+        return e;
     }
 
     public enum StrategyT implements IBitEnum {
@@ -308,208 +318,206 @@ public class Checkout {
             return _bit;
         }
     }
-    // no matching type found for 'git_checkout_notify_t why'
-    /**
-     * int git_checkout_notify_cb(git_checkout_notify_t why, const char *path, const git_diff_file
-     * *baseline, const git_diff_file *target, const git_diff_file *workdir, void *payload);
-     */
-    /** -------- Jni Signature ---------- */
-    /** int git_checkout_init_options(git_checkout_options *opts, unsigned int version); */
-    static native int jniInitOptions(long opts, int version);
 
-    static native int jniOptionsNew(AtomicLong outPots, int version);
+    @FunctionalInterface
+    public interface NotifyCb {
+        int accept(
+                NotifyT why, String path, Diff.File baseline, Diff.File target, Diff.File workdir);
+    }
 
-    /** int git_checkout_head(git_repository *repo, const git_checkout_options *opts); */
-    static native int jniHead(long repoPtr, long opts);
+    @FunctionalInterface
+    public interface ProgressCb {
+        void accept(@CheckForNull String path, int completedSteps, int totalSteps);
+    }
 
-    /**
-     * Updates files in the index and the working tree to match the content of the commit pointed at
-     * by HEAD.
-     *
-     * <p>Note that this is _not_ the correct mechanism used to switch branches; do not change your
-     * `HEAD` and then call this method, that would leave you with checkout conflicts since your
-     * working directory would then appear to be dirty. Instead, checkout the target of the branch
-     * and then update `HEAD` using `git_repository_set_head` to point to the branch you checked
-     * out.
-     *
-     * @param repo repository to check out (must be non-bare)
-     * @param opts specifies checkout options (may be NULL)
-     * @return code returned by `notify_cb`
-     * @throws GitException GIT_EUNBORNBRANCH if HEAD points to a non existing branch non-zero value
-     *     returned by `notify_cb`, or other error code < 0 (use git_error_last for error details)
-     */
-    public static int head(@Nonnull Repository repo, @Nullable Options opts) {
-        int e = jniHead(repo.getRawPointer(), opts == null ? 0 : opts.getRawPointer());
-        Error.throwIfNeeded(e);
-        return e;
+    @FunctionalInterface
+    public interface PerfdataCb {
+        void accept(int mkdirCalls, int statCalls, int chmodCalls);
     }
 
     /**
-     * int git_checkout_index(git_repository *repo, git_index *index, const git_checkout_options
-     * *opts);
-     */
-    static native int jniIndex(long repoPtr, long index, long opts);
-
-    /**
-     * Updates files in the working tree to match the content of the index.
+     * Checkout options structure
      *
-     * @param repo repository into which to check out (must be non-bare)
-     * @param index index to be checked out (or NULL to use repository index)
-     * @param opts specifies checkout options (may be NULL)
-     * @return non-zero return value from `notify_cb`,
-     * @throws GitException git errors
+     * <p>Initialize with `GIT_CHECKOUT_OPTIONS_INIT`. Alternatively, you can use
+     * `git_checkout_init_options`.
      */
-    public static int index(
-            @Nonnull Repository repo, @Nullable Index index, @Nullable Options opts) {
-        int e =
-                jniIndex(
-                        repo.getRawPointer(),
-                        index == null ? 0 : index.getRawPointer(),
-                        opts == null ? 0 : opts.getRawPointer());
-        Error.throwIfNeeded(e);
-        return e;
+    public static class Options extends CAutoReleasable {
+        public static int GIT_CHECKOUT_OPTIONS_VERSION = 1;
+
+        protected Options(boolean isWeak, long rawPtr) {
+            super(isWeak, rawPtr);
+        }
+
+        @Nonnull
+        public static Options create(int version) {
+            Options opts = new Options(false, 0);
+            Error.throwIfNeeded(jniOptionsNew(opts._rawPtr, version));
+            return opts;
+        }
+
+        public static Options defaultOptions() {
+            return create(GIT_CHECKOUT_OPTIONS_VERSION);
+        }
+
+        @Override
+        protected void freeOnce(long cPtr) {
+            Libgit2.jniShadowFree(cPtr);
+        }
+
+        public int getVersion() {
+            return jniOptionsGetVersion(getRawPointer());
+        }
+
+        public void setVersion(int ver) {
+            jniOptionsSetVersion(getRawPointer(), ver);
+        }
+
+        /** @return checkout strategy, default is SAFE */
+        @Nonnull
+        public EnumSet<StrategyT> getStrategy() {
+            return IBitEnum.parse(jniOptionsGetStrategy(getRawPointer()), StrategyT.class);
+        }
+
+        public void setStrategy(@Nonnull EnumSet<StrategyT> strategies) {
+            jniOptionsSetStrategy(getRawPointer(), IBitEnum.bitOrAll(strategies));
+        }
+
+        public boolean getDisableFilter() {
+            return jniOptionsGetDisableFilters(getRawPointer()) == 1;
+        }
+
+        /** don't apply filters like CRLF conversion */
+        public void setDisableFilter(boolean disableFilter) {
+            jniOptionsSetDisableFilters(getRawPointer(), disableFilter ? 1 : 0);
+        }
+
+        /** default is 0755 */
+        public int getDirMode() {
+            return jniOptionsGetDirMode(getRawPointer());
+        }
+
+        public void setDirMode(int mode) {
+            jniOptionsSetDirMode(getRawPointer(), mode);
+        }
+
+        /** default is 0644 or 0755 as dictated by blob */
+        public int getFileMode() {
+            return jniOptionsGetFileMode(getRawPointer());
+        }
+
+        public void setFileMode(int mode) {
+            jniOptionsSetFileMode(getRawPointer(), mode);
+        }
+
+        /** default is O_CREAT | O_TRUNC | O_WRONLY */
+        public int getOpenFlags() {
+            return jniOptionsGetFileOpenFlags(getRawPointer());
+        }
+
+        public void setOpenFlags(int flags) {
+            jniOptionsSetFileOpenFlags(getRawPointer(), flags);
+        }
+
+        /** see `git_checkout_notify_t` above */
+        public EnumSet<NotifyT> getNotifyFlags() {
+            int flags = jniOptionsGetNotifyFlags(getRawPointer());
+            EnumSet<NotifyT> candidates = EnumSet.allOf(NotifyT.class);
+            candidates.remove(NotifyT.NONE);
+            candidates.remove(NotifyT.ALL);
+            EnumSet<NotifyT> res = IBitEnum.parse(flags, candidates);
+            if (res == null) {
+                return EnumSet.of(NotifyT.NONE);
+            }
+            if (res.size() == candidates.size()) {
+                return EnumSet.of(NotifyT.ALL);
+            }
+            return res;
+        }
+
+        public void setNotifyFlags(EnumSet<NotifyT> flags) {
+            jniOptionsSetNotifyFlags(getRawPointer(), IBitEnum.bitOrAll(flags));
+        }
+
+        public void setNotifyCb(@Nonnull NotifyCb callback) {
+            jniOptionsSetNotifyCb(
+                    getRawPointer(),
+                    (why, s, basePtr, targePtr, workdirPtr) ->
+                            callback.accept(
+                                    IBitEnum.valueOf(why, NotifyT.class),
+                                    s,
+                                    Diff.File.ofWeak(basePtr),
+                                    Diff.File.ofWeak(targePtr),
+                                    Diff.File.ofWeak(workdirPtr)));
+        }
+
+        public void setProgressCb(@Nonnull ProgressCb callback) {
+            jniOptionsSetProgressCb(getRawPointer(), callback);
+        }
+
+        public void setPerfdataCb(@Nonnull PerfdataCb callback) {
+            jniOptionsSetPerfdataCb(getRawPointer(), callback);
+        }
+
+        public List<String> getPaths() {
+            List<String> out = new ArrayList<>();
+            jniOptionsGetPaths(getRawPointer(), out);
+            return out;
+        }
+
+        public void setPaths(@Nonnull String[] paths) {
+            jniOptionsSetPaths(getRawPointer(), paths);
+        }
+
+        @Nullable
+        public Tree getBaseline() {
+            long ptr = jniOptionsGetBaseline(getRawPointer());
+            return ptr == 0 ? null : new Tree(true, ptr);
+        }
+
+        public void setBaseline(@Nonnull Tree baseline) {
+            jniOptionsSetBaseline(getRawPointer(), baseline.getRawPointer());
+        }
+
+        @Nullable
+        public Index getBaselineIndex() {
+            long ptr = jniOptionsGetBaselineIndex(getRawPointer());
+            return ptr == 0 ? null : new Index(ptr);
+        }
+
+        public void setBaselineIndex(@Nonnull Index baselineIndex) {
+            jniOptionsSetBaselineIndex(getRawPointer(), baselineIndex.getRawPointer());
+        }
+
+        public String getTargetDirectory() {
+            return jniOptionsGetTargetDirectory(getRawPointer());
+        }
+
+        public void setTargetDirectory(@Nonnull String targetDirectory) {
+            jniOptionsSetTargetDirectory(getRawPointer(), targetDirectory);
+        }
+
+        public String getAncestorLabel() {
+            return jniOptionsGetAncestorLabel(getRawPointer());
+        }
+
+        public void setAncestorLabel(@Nonnull String ancestorLabel) {
+            jniOptionsSetAncestorLabel(getRawPointer(), ancestorLabel);
+        }
+
+        public String getOurLabel() {
+            return jniOptionsGetOurLabel(getRawPointer());
+        }
+
+        public void setOurLabel(@Nonnull String ourLabel) {
+            jniOptionsSetOurLabel(getRawPointer(), ourLabel);
+        }
+
+        public String getTheirLabel() {
+            return jniOptionsGetTheirLable(getRawPointer());
+        }
+
+        public void setTheirLabel(@Nonnull String theirLabel) {
+            jniOptionsSetTheirLable(getRawPointer(), theirLabel);
+        }
     }
-
-    /**
-     * int git_checkout_tree(git_repository *repo, const git_object *treeish, const
-     * git_checkout_options *opts);
-     */
-    static native int jniTree(long repoPtr, long treeish, long opts);
-
-    /**
-     * Updates files in the index and working tree to match the content of the tree pointed at by
-     * the treeish.
-     *
-     * @param repo repository to check out (must be non-bare)
-     * @param treeish a commit, tag or tree which content will be used to update the working
-     *     directory (or NULL to use HEAD)
-     * @param opts specifies checkout options (may be NULL)
-     * @return non-zero return value from `notify_cb`,
-     * @throws GitException git errors
-     */
-    public static int tree(
-            @Nonnull Repository repo, @Nullable GitObject treeish, @Nullable Options opts) {
-        int e =
-                jniTree(
-                        repo.getRawPointer(),
-                        treeish == null ? 0 : treeish.getRawPointer(),
-                        opts == null ? 0 : opts.getRawPointer());
-        Error.throwIfNeeded(e);
-        return e;
-    }
-
-    /** -------- Jni Signature ---------- */
-    /** unsigned int git_checkout_options_get_version(const git_checkout_options *opts); */
-    static native int jniOptionsGetVersion(long opts);
-
-    /**
-     * void git_checkout_options_set_version(const git_checkout_options *opts, unsigned int
-     * version);
-     */
-    static native void jniOptionsSetVersion(long opts, int version);
-
-    /** unsigned int git_checkout_options_get_strategy(const git_checkout_options *opts); */
-    static native int jniOptionsGetStrategy(long opts);
-
-    /**
-     * void git_checkout_options_set_strategy(const git_checkout_options *opts, unsigned int
-     * strategy);
-     */
-    static native void jniOptionsSetStrategy(long opts, int strategy);
-
-    /** int git_checkout_options_get_disable_filters(const git_checkout_options *opts); */
-    static native int jniOptionsGetDisableFilters(long opts);
-
-    /**
-     * void git_checkout_options_set_disable_filters(const git_checkout_options *opts, int
-     * disalbe_filters);
-     */
-    static native void jniOptionsSetDisableFilters(long opts, int disalbeFilters);
-
-    /** unsigned int git_checkout_options_get_dir_mode(const git_checkout_options *opts); */
-    static native int jniOptionsGetDirMode(long opts);
-
-    /**
-     * void git_checkout_options_set_dir_mode(const git_checkout_options *opts, unsigned int mode);
-     */
-    static native void jniOptionsSetDirMode(long opts, int mode);
-
-    /** unsigned int git_checkout_options_get_file_mode(const git_checkout_options *opts); */
-    static native int jniOptionsGetFileMode(long opts);
-
-    /**
-     * void git_checkout_options_set_file_mode(const git_checkout_options *opts, unsigned int mode);
-     */
-    static native void jniOptionsSetFileMode(long opts, int mode);
-
-    /** int git_checkout_options_get_file_open_flags(const git_checkout_options *opts); */
-    static native int jniOptionsGetFileOpenFlags(long opts);
-
-    /**
-     * void git_checkout_options_set_file_open_flags(const git_checkout_options *opts, int flags);
-     */
-    static native void jniOptionsSetFileOpenFlags(long opts, int flags);
-
-    /** unsigned int git_checkout_options_get_notify_flags(const git_checkout_options *opts); */
-    static native int jniOptionsGetNotifyFlags(long opts);
-
-    /**
-     * void git_checkout_options_set_notify_flags(const git_checkout_options *opts, unsigned int
-     * flags);
-     */
-    static native void jniOptionsSetNotifyFlags(long opts, int flags);
-
-    static native void jniOptionsSetNotifyCb(long optsPtr, Internals.ISJJJCallback notifyCb);
-
-    static native void jniOptionsSetProgressCb(long optsPtr, ProgressCb progressCb);
-
-    static native void jniOptionsSetPerfdataCb(long optsPtr, PerfdataCb perfdataCb);
-
-    /**
-     * void git_checkout_options_set_paths(const git_checkout_options *opts, git_strarray paths);
-     */
-    static native void jniOptionsSetPaths(long opts, String[] paths);
-
-    static native void jniOptionsGetPaths(long opts, List<String> outPathList);
-
-    /**
-     * void git_checkout_options_set_baseline(const git_checkout_options *opts, git_tree *baseline);
-     */
-    static native void jniOptionsSetBaseline(long opts, long baseline);
-    static native long jniOptionsGetBaseline(long opts);
-
-    /**
-     * void git_checkout_options_set_baseline_index(const git_checkout_options *opts, git_index
-     * *baseline_index);
-     */
-    static native void jniOptionsSetBaselineIndex(long opts, long baselineIndex);
-    static native long jniOptionsGetBaselineIndex(long opts);
-
-    /**
-     * void git_checkout_options_set_target_directory(const git_checkout_options *opts, const char
-     * *target_directory);
-     */
-    static native void jniOptionsSetTargetDirectory(long opts, String targetDirectory);
-    static native String jniOptionsGetTargetDirectory(long opts);
-
-    /**
-     * void git_checkout_options_set_ancestor_label(const git_checkout_options *opts, const char
-     * *ancestor_label);
-     */
-    static native void jniOptionsSetAncestorLabel(long opts, String ancestorLabel);
-    static native String jniOptionsGetAncestorLabel(long opts);
-
-    /**
-     * void git_checkout_options_set_our_label(const git_checkout_options *opts, const char
-     * *our_label);
-     */
-    static native void jniOptionsSetOurLabel(long opts, String ourLabel);
-    static native String jniOptionsGetOurLabel(long opts);
-
-    /**
-     * void git_checkout_options_set_their_lable(const git_checkout_options *opts, const char
-     * *their_label);
-     */
-    static native void jniOptionsSetTheirLable(long opts, String theirLabel);
-    static native String jniOptionsGetTheirLable(long opts);
 }

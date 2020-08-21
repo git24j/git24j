@@ -1,7 +1,8 @@
 package com.github.git24j.core;
 
-import static com.github.git24j.core.GitException.ErrorCode;
-
+import javax.annotation.CheckForNull;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
@@ -9,19 +10,119 @@ import java.util.Objects;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
-import javax.annotation.CheckForNull;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+
+import static com.github.git24j.core.GitException.ErrorCode;
 
 public class Reference extends CAutoReleasable {
-    protected Reference(boolean isWeak, long rawPtr) {
-        super(isWeak, rawPtr);
-    }
+    static native int jniCmp(long ref1Ptr, long ref2Ptr);
+
+    static native int jniCreate(
+            AtomicLong outRef, long repoPtr, String name, Oid oid, int force, String logMessage);
+
+    static native int jniCreateMatching(
+            AtomicLong outRef,
+            long repoPtr,
+            String name,
+            Oid oid,
+            int force,
+            Oid currentId,
+            String logMessage);
+
+    static native int jniDelete(long refPtr);
+
+    static native int jniDup(AtomicLong outDest, long sourcePtr);
+
+    static native int jniDwim(AtomicLong outRef, long repoPtr, String shorthand);
+
+    static native int jniEnsureLog(long repoPtr, String refname);
+
+    static native int jniForeach(long repoPtr, ForeachCb consumer);
+
+    static native int jniForeachGlob(long repoPtr, String glob, ForeachNameCb callback);
+
+    static native int jniForeachName(long repoPtr, ForeachNameCb consumer);
+
+    static native void jniFree(long refPtr);
+
+    static native int jniHasLog(long repoPtr, String refname);
+
+    static native int jniIsBranch(long refPtr);
+
+    static native int jniIsNote(long refPtr);
+
+    static native int jniIsRemote(long refPtr);
+
+    static native int jniIsTag(long refPtr);
+
+    static native int jniIsValidName(String refname);
+
+    static native void jniIteratorFree(long iterPtr);
+
+    static native int jniIteratorGlobNew(AtomicLong outIter, long repoPtr, String glob);
+
+    static native int jniIteratorNew(AtomicLong outIter, long repoPtr);
+
+    static native int jniList(List<String> strList, long repoPtr);
+
+    static native int jniLookup(AtomicLong outRef, long repoPtr, String name);
+
+    static native String jniName(long refPtr);
+
+    static native int jniNameToId(Oid oid, long repoPtr, String name);
+
+    static native int jniNext(AtomicLong outRef, long iterPtr);
+
+    static native int jniNextName(AtomicReference<String> outName, long iterPtr);
+
+    static native int jniNormalizeName(AtomicReference<String> outName, String name, int flags);
+
+    static native long jniOwner(long refPtr);
+
+    static native int jniPeel(AtomicLong outObj, long refPtr, int objType);
+
+    static native int jniRemove(long repoPtr, String name);
+
+    static native int jniRename(
+            AtomicLong outRef, long refPtr, String newName, int force, String logMessage);
+
+    static native int jniResolve(AtomicLong outRef, long refPtr);
+
+    static native int jniSetTarget(AtomicLong outRef, long refPtr, Oid oid, String logMessage);
+
+    static native String jniShorthand(long refPtr);
+
+    static native int jniSymbolicCreate(
+            AtomicLong outRef,
+            long repoPtr,
+            String name,
+            String target,
+            int force,
+            String logMessage);
+
+    static native int jniSymbolicCreateMatching(
+            AtomicLong outRef,
+            long repoPtr,
+            String name,
+            String target,
+            int force,
+            String currentValue,
+            String logMessage);
+
+    static native int jniSymbolicSetTarget(
+            AtomicLong outRef, long refPtr, String target, String logMessage);
+
+    static native String jniSymbolicTarget(long refPtr);
 
     /** const git_oid * git_reference_target(const git_reference *ref); */
     static native byte[] jniTarget(long refPtr);
 
-    static native int jniLookup(AtomicLong outRef, long repoPtr, String name);
+    static native byte[] jniTargetPeel(long refPtr);
+
+    static native int jniType(long refPtr);
+
+    protected Reference(boolean isWeak, long rawPtr) {
+        super(isWeak, rawPtr);
+    }
 
     /**
      * Lookup a reference by name in a repository.
@@ -45,8 +146,6 @@ public class Reference extends CAutoReleasable {
         Error.throwIfNeeded(e);
         return new Reference(false, outRef.get());
     }
-
-    static native int jniNameToId(Oid oid, long repoPtr, String name);
 
     /**
      * Lookup a reference by name and resolve immediately to OID.
@@ -75,8 +174,6 @@ public class Reference extends CAutoReleasable {
         return oid;
     }
 
-    static native int jniDwim(AtomicLong outRef, long repoPtr, String shorthand);
-
     /**
      * Do What I Mean (dwim). Lookup a reference by DWIMing its short name. For example {@code dwim}
      * can find reference given name like "feature/dev", but look only understands
@@ -100,15 +197,6 @@ public class Reference extends CAutoReleasable {
         Error.throwIfNeeded(e);
         return new Reference(false, outRef.get());
     }
-
-    static native int jniSymbolicCreateMatching(
-            AtomicLong outRef,
-            long repoPtr,
-            String name,
-            String target,
-            int force,
-            String currentValue,
-            String logMessage);
 
     /**
      * Create a symbolic reference that points to another reference (target reference) and matches
@@ -156,14 +244,6 @@ public class Reference extends CAutoReleasable {
         return new Reference(false, outRef.get());
     }
 
-    static native int jniSymbolicCreate(
-            AtomicLong outRef,
-            long repoPtr,
-            String name,
-            String target,
-            int force,
-            String logMessage);
-
     /**
      * Create a new symbolic reference.
      *
@@ -189,9 +269,6 @@ public class Reference extends CAutoReleasable {
         return new Reference(false, outRef.get());
     }
 
-    static native int jniCreate(
-            AtomicLong outRef, long repoPtr, String name, Oid oid, int force, String logMessage);
-
     /**
      * Create a new direct reference that refers directly to an Oid.
      *
@@ -215,15 +292,6 @@ public class Reference extends CAutoReleasable {
                 jniCreate(outRef, repo.getRawPointer(), name, oid, force ? 1 : 0, logMessage));
         return new Reference(false, outRef.get());
     }
-
-    static native int jniCreateMatching(
-            AtomicLong outRef,
-            long repoPtr,
-            String name,
-            Oid oid,
-            int force,
-            Oid currentId,
-            String logMessage);
 
     /**
      * Conditionally create new direct reference.
@@ -259,28 +327,6 @@ public class Reference extends CAutoReleasable {
         return new Reference(false, outRef.get());
     }
 
-    static native byte[] jniTargetPeel(long refPtr);
-
-    static native String jniSymbolicTarget(long refPtr);
-
-    static native int jniType(long refPtr);
-
-    static native String jniName(long refPtr);
-
-    static native int jniResolve(AtomicLong outRef, long refPtr);
-
-    static native long jniOwner(long refPtr);
-
-    static native int jniSymbolicSetTarget(
-            AtomicLong outRef, long refPtr, String target, String logMessage);
-
-    static native int jniSetTarget(AtomicLong outRef, long refPtr, Oid oid, String logMessage);
-
-    static native int jniRename(
-            AtomicLong outRef, long refPtr, String newName, int force, String logMessage);
-
-    static native int jniDelete(long refPtr);
-
     /**
      * Delete an existing reference.
      *
@@ -299,8 +345,6 @@ public class Reference extends CAutoReleasable {
         }
     }
 
-    static native int jniRemove(long repoPtr, String name);
-
     /**
      * Delete an existing reference by name
      *
@@ -314,8 +358,6 @@ public class Reference extends CAutoReleasable {
     public static void remove(Repository repo, String name) {
         Error.throwIfNeeded(jniRemove(repo.getRawPointer(), name));
     }
-
-    static native int jniList(List<String> strList, long repoPtr);
 
     /**
      * Fill a list with all the references that can be found in a repository.
@@ -333,8 +375,6 @@ public class Reference extends CAutoReleasable {
         Error.throwIfNeeded(jniList(strList, repo.getRawPointer()));
         return strList;
     }
-
-    static native int jniForeach(long repoPtr, ForeachCb consumer);
 
     /**
      * Perform a callback on each reference in the repository.
@@ -358,8 +398,6 @@ public class Reference extends CAutoReleasable {
         Error.throwIfNeeded(e);
     }
 
-    static native int jniForeachName(long repoPtr, ForeachNameCb consumer);
-
     /**
      * Perform a callback on the fully-qualified name of each reference.
      *
@@ -376,20 +414,10 @@ public class Reference extends CAutoReleasable {
         Error.throwIfNeeded(jniForeachName(repo.getRawPointer(), callback::apply));
     }
 
-    static native int jniDup(AtomicLong outDest, long sourcePtr);
-
-    static native void jniFree(long refPtr);
-
-    static native int jniCmp(long ref1Ptr, long ref2Ptr);
-
     public static int cmp(@Nullable Reference ref1, @Nullable Reference ref2) {
         return jniCmp(
                 ref1 == null ? 0 : ref1.getRawPointer(), ref2 == null ? 0 : ref2.getRawPointer());
     }
-
-    static native int jniIteratorNew(AtomicLong outIter, long repoPtr);
-
-    static native int jniIteratorGlobNew(AtomicLong outIter, long repoPtr, String glob);
 
     /**
      * Create an iterator for the repo's references that match the specified glob
@@ -405,8 +433,6 @@ public class Reference extends CAutoReleasable {
         Error.throwIfNeeded(jniIteratorGlobNew(outIter, repo.getRawPointer(), glob));
         return new Iterator(false, outIter.get());
     }
-
-    static native int jniNext(AtomicLong outRef, long iterPtr);
 
     /**
      * Get the next reference
@@ -425,12 +451,6 @@ public class Reference extends CAutoReleasable {
         Error.throwIfNeeded(e);
         return new Reference(true, outRef.get());
     }
-
-    static native int jniNextName(AtomicReference<String> outName, long iterPtr);
-
-    static native void jniIteratorFree(long iterPtr);
-
-    static native int jniForeachGlob(long repoPtr, String glob, ForeachNameCb callback);
 
     /**
      * Perform a callback on each reference in the repository whose name matches the given pattern.
@@ -453,8 +473,6 @@ public class Reference extends CAutoReleasable {
         Error.throwIfNeeded(jniForeachGlob(repo.getRawPointer(), glob, callback));
     }
 
-    static native int jniHasLog(long repoPtr, String refname);
-
     /**
      * Check if a reflog exists for the specified reference. Same as cli: {@code git reflog exists
      * refs/heads/master}
@@ -473,8 +491,6 @@ public class Reference extends CAutoReleasable {
         return false;
     }
 
-    static native int jniEnsureLog(long repoPtr, String refname);
-
     /**
      * Ensure there is a reflog for a particular reference.
      *
@@ -487,16 +503,6 @@ public class Reference extends CAutoReleasable {
     public static void ensureLog(Repository repo, String refname) {
         Error.throwIfNeeded(jniEnsureLog(repo.getRawPointer(), refname));
     }
-
-    static native int jniIsBranch(long refPtr);
-
-    static native int jniIsRemote(long refPtr);
-
-    static native int jniIsTag(long refPtr);
-
-    static native int jniIsNote(long refPtr);
-
-    static native int jniNormalizeName(AtomicReference<String> outName, String name, int flags);
 
     /**
      * Normalize reference name and check validity. See also {@code git check-ref-format
@@ -522,10 +528,6 @@ public class Reference extends CAutoReleasable {
         return outName.get();
     }
 
-    static native int jniPeel(AtomicLong outObj, long refPtr, int objType);
-
-    static native int jniIsValidName(String refname);
-
     /**
      * Ensure the reference name is well-formed.
      *
@@ -543,8 +545,6 @@ public class Reference extends CAutoReleasable {
     public static boolean isValidName(String refname) {
         return jniIsValidName(refname) == 1;
     }
-
-    static native String jniShorthand(long refPtr);
 
     /**
      * Create an iterator for the repo's references

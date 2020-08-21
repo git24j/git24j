@@ -1,17 +1,49 @@
 package com.github.git24j.core;
 
+import javax.annotation.Nonnull;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
-import javax.annotation.Nonnull;
 
 public class Signature extends CAutoReleasable {
+    /** int git_signature_default(git_signature **out, git_repository *repo); */
+    static native int jniDefault(AtomicLong out, long repoPtr);
+
+    /** int git_signature_dup(git_signature **dest, const git_signature *sig); */
+    static native int jniDup(AtomicLong dest, long sig);
+
+    /** void git_signature_free(git_signature *sig); */
+    static native void jniFree(long sig);
+
+    /** int git_signature_from_buffer(git_signature **out, const char *buf); */
+    static native int jniFromBuffer(AtomicLong out, String buf);
+
+    /** -------- Jni Signature ---------- */
+
+    static native String jniGetEmail(long sigPtr);
+
+    static native long jniGetEpocSeconds(long sigPtr);
+
+    static native String jniGetName(long sigPtr);
+
+    static native int jniGetOffsetMinutes(long sigPtr);
+
+    /**
+     * int git_signature_new(git_signature **out, const char *name, const char *email, git_time_t
+     * time, int offset);
+     */
+    static native int jniNew(AtomicLong out, String name, String email, long time, int offset);
+
+    /** int git_signature_now(git_signature **out, const char *name, const char *email); */
+    static native int jniNow(AtomicLong out, String name, String email);
+
     protected Signature(boolean isWeak, long rawPtr) {
         super(isWeak, rawPtr);
     }
+
     /**
      * Create a new action signature.
      *
@@ -40,21 +72,6 @@ public class Signature extends CAutoReleasable {
         Error.throwIfNeeded(jniNew(_rawPtr, name, email, epocSecs, offsetMinutes));
     }
 
-    @Override
-    protected void freeOnce(long cPtr) {
-        jniFree(cPtr);
-    }
-
-    /** -------- Jni Signature ---------- */
-    /**
-     * int git_signature_new(git_signature **out, const char *name, const char *email, git_time_t
-     * time, int offset);
-     */
-    static native int jniNew(AtomicLong out, String name, String email, long time, int offset);
-
-    /** int git_signature_now(git_signature **out, const char *name, const char *email); */
-    static native int jniNow(AtomicLong out, String name, String email);
-
     /**
      * Create a new action signature with a timestamp of 'now'.
      *
@@ -74,9 +91,6 @@ public class Signature extends CAutoReleasable {
         }
         return out;
     }
-
-    /** int git_signature_default(git_signature **out, git_repository *repo); */
-    static native int jniDefault(AtomicLong out, long repoPtr);
 
     /**
      * Create a new action signature with default user and now timestamp.
@@ -100,9 +114,6 @@ public class Signature extends CAutoReleasable {
         return sig.isNull() ? Optional.empty() : Optional.of(sig);
     }
 
-    /** int git_signature_from_buffer(git_signature **out, const char *buf); */
-    static native int jniFromBuffer(AtomicLong out, String buf);
-
     /**
      * Create a new signature by parsing the given buffer, which is expected to be in the format
      * "Real Name <email> timestamp tzoffset", where `timestamp` is the number of seconds since the
@@ -120,8 +131,10 @@ public class Signature extends CAutoReleasable {
         return out;
     }
 
-    /** int git_signature_dup(git_signature **dest, const git_signature *sig); */
-    static native int jniDup(AtomicLong dest, long sig);
+    @Override
+    protected void freeOnce(long cPtr) {
+        jniFree(cPtr);
+    }
 
     /**
      * Create a copy of an existing signature. All internal strings are also duplicated.
@@ -136,17 +149,6 @@ public class Signature extends CAutoReleasable {
         Error.throwIfNeeded(jniDup(out._rawPtr, getRawPointer()));
         return out;
     }
-
-    /** void git_signature_free(git_signature *sig); */
-    static native void jniFree(long sig);
-
-    static native String jniGetName(long sigPtr);
-
-    static native String jniGetEmail(long sigPtr);
-
-    static native long jniGetEpocSeconds(long sigPtr);
-
-    static native int jniGetOffsetMinutes(long sigPtr);
 
     @Nonnull
     public String getName() {

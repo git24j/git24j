@@ -1,53 +1,39 @@
 package com.github.git24j.core;
 
+import javax.annotation.Nonnull;
 import java.util.AbstractMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
-import javax.annotation.Nonnull;
 
 public class Mailmap {
+    static native int jniAddEntry(
+            long mmPtr, String realName, String realEmail, String replaceName, String replaceEmail);
+
+    static native void jniFree(long rawPtr);
+
+    static native int jniFromBuffer(AtomicLong outPtr, String buf);
+
+    static native int jniFromRepository(AtomicLong outPtr, long repoPtr);
+
+    static native int jniResolve(
+            AtomicReference<String> outRealName,
+            AtomicReference<String> outRealEmail,
+            long mmPtr,
+            String name,
+            String email);
+
+    /**
+     * int git_mailmap_resolve_signature(git_signature **out, const git_mailmap *mm, const
+     * git_signature *sig);
+     */
+    static native int jniResolveSignature(AtomicLong out, long mm, long sig);
     private final AtomicLong _rawPtr = new AtomicLong();
 
     public Mailmap(long ptr) {
         _rawPtr.set(ptr);
     }
-
-    static native void jniFree(long rawPtr);
-
-    @Override
-    protected void finalize() throws Throwable {
-        if (_rawPtr.get() > 0) {
-            jniFree(_rawPtr.getAndSet(0));
-        }
-        super.finalize();
-    }
-
-    long getRawPointer() {
-        return _rawPtr.get();
-    }
-
-    static native int jniAddEntry(
-            long mmPtr, String realName, String realEmail, String replaceName, String replaceEmail);
-
-    /**
-     * Add a single entry to the given mailmap object. If the entry already exists, it will be
-     * replaced with the new entry.
-     *
-     * @param realName the real name to use, or NULL
-     * @param realEmail the real email to use, or NULL
-     * @param replaceName the name to replace, or NULL
-     * @param replaceEmail the email to replace
-     * @throws GitException git errors
-     */
-    public void addEntry(
-            String realName, String realEmail, String replaceName, String replaceEmail) {
-        Error.throwIfNeeded(
-                jniAddEntry(getRawPointer(), realName, realEmail, replaceName, replaceEmail));
-    }
-
-    static native int jniFromBuffer(AtomicLong outPtr, String buf);
 
     /**
      * Create a new mailmap instance containing a single mailmap file
@@ -61,8 +47,6 @@ public class Mailmap {
         jniFromBuffer(mm._rawPtr, buf);
         return mm;
     }
-
-    static native int jniFromRepository(AtomicLong outPtr, long repoPtr);
 
     /**
      * Create a new mailmap instance from a repository, loading mailmap files based on the
@@ -83,12 +67,33 @@ public class Mailmap {
         return new Mailmap(outPtr.get());
     }
 
-    static native int jniResolve(
-            AtomicReference<String> outRealName,
-            AtomicReference<String> outRealEmail,
-            long mmPtr,
-            String name,
-            String email);
+    @Override
+    protected void finalize() throws Throwable {
+        if (_rawPtr.get() > 0) {
+            jniFree(_rawPtr.getAndSet(0));
+        }
+        super.finalize();
+    }
+
+    long getRawPointer() {
+        return _rawPtr.get();
+    }
+
+    /**
+     * Add a single entry to the given mailmap object. If the entry already exists, it will be
+     * replaced with the new entry.
+     *
+     * @param realName the real name to use, or NULL
+     * @param realEmail the real email to use, or NULL
+     * @param replaceName the name to replace, or NULL
+     * @param replaceEmail the email to replace
+     * @throws GitException git errors
+     */
+    public void addEntry(
+            String realName, String realEmail, String replaceName, String replaceEmail) {
+        Error.throwIfNeeded(
+                jniAddEntry(getRawPointer(), realName, realEmail, replaceName, replaceEmail));
+    }
 
     /**
      * Resolve a name and email to the corresponding real name and email.
@@ -122,11 +127,6 @@ public class Mailmap {
         resolve(outRealName, outRealEmail, name, email);
         return new AbstractMap.SimpleImmutableEntry<>(outRealName.get(), outRealEmail.get());
     }
-    /**
-     * int git_mailmap_resolve_signature(git_signature **out, const git_mailmap *mm, const
-     * git_signature *sig);
-     */
-    static native int jniResolveSignature(AtomicLong out, long mm, long sig);
 
     /**
      * Resolve a signature to use real names and emails with a mailmap.

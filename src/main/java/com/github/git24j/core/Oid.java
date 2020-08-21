@@ -1,9 +1,9 @@
 package com.github.git24j.core;
 
-import java.util.Arrays;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.Arrays;
 
 /**
  * An Oid is a 20 bytes array (each byte coded 32bit), or a 40 hex characters string (16 bit coded)

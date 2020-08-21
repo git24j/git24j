@@ -22,7 +22,7 @@
 - [ ] Giterr
 - [ ] Graph
 - [ ] Ignore
-- [x] Index
+- [x] Index (IndexEntry)
 - [ ] Indexer
 - [x] Libgit2
 - [ ] Mailmap

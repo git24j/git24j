@@ -1,23 +1,17 @@
 package com.github.git24j.core;
 
-import java.util.concurrent.atomic.AtomicLong;
 import javax.annotation.Nonnull;
+import java.util.concurrent.atomic.AtomicLong;
 
 /** Generic git object: {@code Commit}, {@code Tag}, {@code Tree} or {@code Blob} */
 public class GitObject extends CAutoReleasable {
     // weak referenced git_object won't be free-ed in the finalizer
 
-    protected GitObject(boolean weak, long rawPointer) {
-        super(weak, rawPointer);
-    }
+    static native int jniDup(AtomicLong outObj, long objPtr);
 
     static native void jniFree(long objPtr);
 
-    static native int jniType(long objPtr);
-
     static native void jniId(long objPtr, Oid oid);
-
-    static native int jniShortId(Buf buf, long objPtr);
 
     static native int jniLookup(AtomicLong outObj, long repoPtr, Oid oid, int objType);
 
@@ -27,7 +21,13 @@ public class GitObject extends CAutoReleasable {
 
     static native int jniPeel(AtomicLong outObj, long objPtr, int objType);
 
-    static native int jniDup(AtomicLong outObj, long objPtr);
+    static native int jniShortId(Buf buf, long objPtr);
+
+    static native int jniType(long objPtr);
+
+    protected GitObject(boolean weak, long rawPointer) {
+        super(weak, rawPointer);
+    }
 
     /**
      * Create Right object according to GitObject's type. We need this because c does not have

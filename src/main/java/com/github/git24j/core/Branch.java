@@ -1,16 +1,47 @@
 package com.github.git24j.core;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 public class Branch {
     static native int jniCreate(
             AtomicLong outRef, long repoPtr, String branchName, long targetPtr, int force);
+
+    static native int jniCreateFromAnnotated(
+            AtomicLong outRef, long repoPtr, String branchName, long annoCommitPtr, int force);
+
+    static native int jniDelete(long refPtr);
+
+    static native int jniIsCheckedOut(long refPtr);
+
+    static native int jniIsHead(long refPtr);
+
+    static native void jniIteratorFree(long branchIterPtr);
+
+    static native int jniIteratorNew(AtomicLong outBranchIter, long repoPtr, int listFlags);
+
+    static native int jniLookup(AtomicLong outRef, long repoPtr, String branchName, int branchType);
+
+    static native int jniMove(AtomicLong outRef, long branchPtr, String branchName, int force);
+
+    static native int jniName(AtomicReference<String> outStr, long refPtr);
+
+    static native int jniNext(AtomicLong outRef, AtomicInteger outType, long branchIterPtr);
+
+    static native int jniRemoteName(Buf outBuf, long repoPtr, String canonicalBranchName);
+
+    static native int jniSetUpstream(long refPtr, String upstreamName);
+
+    static native int jniUpstream(AtomicLong outRef, long branchPtr);
+
+    static native int jniUpstreamName(Buf outBuf, long repoPtr, String refName);
+
+    static native int jniUpstreamRemote(Buf outBuf, long repoPtr, String refName);
 
     /**
      * Create a new branch pointing at a target commit.
@@ -41,8 +72,6 @@ public class Branch {
         return new Reference(false, outRef.get());
     }
 
-    static native int jniCreateFromAnnotated(
-            AtomicLong outRef, long repoPtr, String branchName, long annoCommitPtr, int force);
     /**
      * Create a new branch pointing at a target commit
      *
@@ -72,8 +101,6 @@ public class Branch {
         return new Reference(false, outRef.get());
     }
 
-    static native int jniDelete(long refPtr);
-
     /**
      * Delete a branch and free corresponding branch reference.
      *
@@ -83,62 +110,6 @@ public class Branch {
     public static void delete(Reference branch) {
         Error.throwIfNeeded(jniDelete(branch._rawPtr.getAndSet(0)));
     }
-
-    public static class Iterator {
-        private final AtomicLong _ptr = new AtomicLong();
-
-        Iterator(long rawPointer) {
-            _ptr.set(rawPointer);
-        }
-
-        @Override
-        protected void finalize() throws Throwable {
-            if (_ptr.get() > 0) {
-                jniIteratorFree(_ptr.get());
-            }
-            super.finalize();
-        }
-        /**
-         * Create an iterator which loops over the requested branches.
-         *
-         * @param repo Repository where to find the branches.
-         * @param flag Filtering flags for the branch listing. Valid values are GIT_BRANCH_LOCAL,
-         *     GIT_BRANCH_REMOTE or GIT_BRANCH_ALL.
-         * @return the iterator
-         * @throws GitException git errors
-         */
-        public static Iterator create(Repository repo, BranchType flag) {
-            AtomicLong outRef = new AtomicLong();
-            Error.throwIfNeeded(jniIteratorNew(outRef, repo.getRawPointer(), flag.ordinal()));
-            return new Iterator(outRef.get());
-        }
-        /**
-         * Retrieve the next branch from the iterator
-         *
-         * @return the reference and the type, null if there are no more branches
-         * @throws GitException git errors.
-         */
-        public Map.Entry<Reference, BranchType> next() {
-            AtomicLong outRef = new AtomicLong();
-            AtomicInteger outType = new AtomicInteger();
-            int e = jniNext(outRef, outType, _ptr.get());
-            if (e == GitException.ErrorCode.ITEROVER.getCode()) {
-                return null;
-            }
-            Error.throwIfNeeded(e);
-            Reference ref = new Reference(true, outRef.get());
-            BranchType type = BranchType.valueOf(outType.get());
-            return new HashMap.SimpleImmutableEntry<>(ref, type);
-        }
-    }
-
-    static native int jniIteratorNew(AtomicLong outBranchIter, long repoPtr, int listFlags);
-
-    static native int jniNext(AtomicLong outRef, AtomicInteger outType, long branchIterPtr);
-
-    static native void jniIteratorFree(long branchIterPtr);
-
-    static native int jniMove(AtomicLong outRef, long branchPtr, String branchName, int force);
 
     /**
      * Move/rename an existing local branch reference.
@@ -163,30 +134,6 @@ public class Branch {
         return outRef;
     }
 
-    public enum BranchType implements IBitEnum {
-        INVALID(0),
-        LOCAL(1),
-        REMOTE(2),
-        ALL(3);
-
-        private final int _bit;
-
-        BranchType(int bit) {
-            _bit = bit;
-        }
-
-        static BranchType valueOf(int iVal) {
-            return IBitEnum.valueOf(iVal, BranchType.class, INVALID);
-        }
-
-        @Override
-        public int getBit() {
-            return _bit;
-        }
-    }
-
-    static native int jniLookup(AtomicLong outRef, long repoPtr, String branchName, int branchType);
-
     /**
      * Lookup a branch by its name in a repository.
      *
@@ -210,8 +157,6 @@ public class Branch {
         return new Reference(false, outRef.get());
     }
 
-    static native int jniName(AtomicReference<String> outStr, long refPtr);
-
     /**
      * Get the branch name
      *
@@ -231,7 +176,6 @@ public class Branch {
         return outStr.get();
     }
 
-    static native int jniUpstream(AtomicLong outRef, long branchPtr);
     /**
      * Get the upstream of a branch
      *
@@ -255,8 +199,6 @@ public class Branch {
         return new Reference(false, outRef.get());
     }
 
-    static native int jniSetUpstream(long refPtr, String upstreamName);
-
     /**
      * Set a branch's upstream branch
      *
@@ -272,8 +214,6 @@ public class Branch {
     public static void setUpstream(@Nonnull Reference branch, @Nullable String upstreamName) {
         Error.throwIfNeeded(jniSetUpstream(branch.getRawPointer(), upstreamName));
     }
-
-    static native int jniUpstreamName(Buf outBuf, long repoPtr, String refName);
 
     /**
      * Get the upstream name of a branch
@@ -297,7 +237,6 @@ public class Branch {
         return outBuf.getPtr();
     }
 
-    static native int jniIsHead(long refPtr);
     /**
      * Determine if HEAD points to the given branch
      *
@@ -314,7 +253,6 @@ public class Branch {
         return e == 1;
     }
 
-    static native int jniIsCheckedOut(long refPtr);
     /**
      * Determine if any HEAD points to the current branch
      *
@@ -331,7 +269,6 @@ public class Branch {
         return e == 1;
     }
 
-    static native int jniRemoteName(Buf outBuf, long repoPtr, String canonicalBranchName);
     /**
      * Find the remote name of a remote-tracking branch
      *
@@ -357,8 +294,6 @@ public class Branch {
         return outBuf.getPtr();
     }
 
-    static native int jniUpstreamRemote(Buf outBuf, long repoPtr, String refName);
-
     /**
      * Retrieve the upstream remote of a local branch
      *
@@ -377,5 +312,77 @@ public class Branch {
             return null;
         }
         return outBuf.getPtr();
+    }
+
+    public enum BranchType implements IBitEnum {
+        INVALID(0),
+        LOCAL(1),
+        REMOTE(2),
+        ALL(3);
+
+        private final int _bit;
+
+        BranchType(int bit) {
+            _bit = bit;
+        }
+
+        static BranchType valueOf(int iVal) {
+            return IBitEnum.valueOf(iVal, BranchType.class, INVALID);
+        }
+
+        @Override
+        public int getBit() {
+            return _bit;
+        }
+    }
+
+    public static class Iterator {
+        private final AtomicLong _ptr = new AtomicLong();
+
+        Iterator(long rawPointer) {
+            _ptr.set(rawPointer);
+        }
+
+        /**
+         * Create an iterator which loops over the requested branches.
+         *
+         * @param repo Repository where to find the branches.
+         * @param flag Filtering flags for the branch listing. Valid values are GIT_BRANCH_LOCAL,
+         *     GIT_BRANCH_REMOTE or GIT_BRANCH_ALL.
+         * @return the iterator
+         * @throws GitException git errors
+         */
+        public static Iterator create(Repository repo, BranchType flag) {
+            AtomicLong outRef = new AtomicLong();
+            Error.throwIfNeeded(jniIteratorNew(outRef, repo.getRawPointer(), flag.ordinal()));
+            return new Iterator(outRef.get());
+        }
+
+        @Override
+        protected void finalize() throws Throwable {
+            if (_ptr.get() > 0) {
+                jniIteratorFree(_ptr.get());
+            }
+            super.finalize();
+        }
+
+        /**
+         * Retrieve the next branch from the iterator
+         *
+         * @return the reference and the type, null if there are no more branches
+         * @throws GitException git errors.
+         */
+        public Map.Entry<Reference, BranchType> next() {
+            AtomicLong outRef = new AtomicLong();
+            AtomicInteger outType = new AtomicInteger();
+            int e = jniNext(outRef, outType, _ptr.get());
+            if (e == GitException.ErrorCode.ITEROVER.getCode()) {
+                return null;
+            }
+            Error.throwIfNeeded(e);
+            Reference ref = new Reference(true, outRef.get());
+            BranchType type = BranchType.valueOf(outType.get());
+            return new HashMap.SimpleImmutableEntry<>(ref, type);
+        }
     }
 }

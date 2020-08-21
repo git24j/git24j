@@ -1,10 +1,42 @@
 package com.github.git24j.core;
 
 import javax.annotation.Nonnull;
-import java.lang.reflect.Type;
 import java.util.concurrent.atomic.AtomicLong;
 
 public class Proxy {
+    static native void jniOptionsFree(long optsPtr);
+
+    /** int type */
+    static native int jniOptionsGetType(long optionsPtr);
+
+    /** const char *url */
+    static native String jniOptionsGetUrl(long optionsPtr);
+
+    /** int version */
+    static native int jniOptionsGetVersion(long optionsPtr);
+
+    static native int jniOptionsNew(AtomicLong outPtr, int version);
+    /** -------- Jni Signature ---------- */
+
+    /** git_transport_certificate_check_cb certificate_check */
+    static native void jniOptionsSetCertificateCheck(
+            long optionsPtr, Internals.JISCallback certificateCheckCb);
+
+    /** git_credential_acquire_cb credentials */
+    static native void jniOptionsSetCredentials(
+            long optionsPtr, Internals.SSIJCallback credentialCb);
+
+    /** int type */
+    static native void jniOptionsSetType(long optionsPtr, int type);
+
+    /** const char *url */
+    static native void jniOptionsSetUrl(long optionsPtr, String url);
+
+    /** int version */
+    static native void jniOptionsSetVersion(long optionsPtr, int version);
+
+    static native void jniOptionsTestCallbacks(long optsPtr);
+
     /** Type of proxy */
     public enum Type {
         /**
@@ -25,11 +57,6 @@ public class Proxy {
             super(isWeak, rawPtr);
         }
 
-        @Override
-        protected void freeOnce(long cPtr) {
-            jniOptionsFree(cPtr);
-        }
-
         @Nonnull
         public static Options create(int version) {
             Options opts = new Options(false, 0);
@@ -42,8 +69,17 @@ public class Proxy {
             return create(VERSION);
         }
 
+        @Override
+        protected void freeOnce(long cPtr) {
+            jniOptionsFree(cPtr);
+        }
+
         public int getVersion() {
             return jniOptionsGetVersion(getRawPointer());
+        }
+
+        public void setVersion(int version) {
+            jniOptionsSetVersion(getRawPointer(), version);
         }
 
         @Nonnull
@@ -59,16 +95,12 @@ public class Proxy {
             }
         }
 
-        public String getUrl() {
-            return jniOptionsGetUrl(getRawPointer());
-        }
-
-        public void setVersion(int version) {
-            jniOptionsSetVersion(getRawPointer(), version);
-        }
-
         public void setType(@Nonnull Type type) {
             jniOptionsSetType(getRawPointer(), type.ordinal());
+        }
+
+        public String getUrl() {
+            return jniOptionsGetUrl(getRawPointer());
         }
 
         public void setUrl(String url) {
@@ -97,34 +129,4 @@ public class Proxy {
                     });
         }
     }
-
-    static native int jniOptionsNew(AtomicLong outPtr, int version);
-    static native void jniOptionsFree(long optsPtr);
-    static native void jniOptionsTestCallbacks(long optsPtr);
-    /** -------- Jni Signature ---------- */
-    /** int version */
-    static native int jniOptionsGetVersion(long optionsPtr);
-
-    /** int type */
-    static native int jniOptionsGetType(long optionsPtr);
-
-    /** const char *url */
-    static native String jniOptionsGetUrl(long optionsPtr);
-
-    /** int version */
-    static native void jniOptionsSetVersion(long optionsPtr, int version);
-
-    /** int type */
-    static native void jniOptionsSetType(long optionsPtr, int type);
-
-    /** const char *url */
-    static native void jniOptionsSetUrl(long optionsPtr, String url);
-
-    /** git_credential_acquire_cb credentials */
-    static native void jniOptionsSetCredentials(
-            long optionsPtr, Internals.SSIJCallback credentialCb);
-
-    /** git_transport_certificate_check_cb certificate_check */
-    static native void jniOptionsSetCertificateCheck(
-            long optionsPtr, Internals.JISCallback certificateCheckCb);
 }

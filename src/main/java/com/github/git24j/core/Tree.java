@@ -1,24 +1,132 @@
 package com.github.git24j.core;
 
+import javax.annotation.CheckForNull;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
-import javax.annotation.CheckForNull;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 public class Tree extends GitObject {
 
-    Tree(boolean weak, long rawPointer) {
-        super(weak, rawPointer);
-    }
+    /** int git_tree_builder_clear(git_tree_builder *bld); */
+    static native int jniBuilderClear(long bld);
+
+    /** size_t git_tree_builder_entrycount(git_tree_builder *bld); */
+    static native int jniBuilderEntrycount(long bld);
+
+    /**
+     * int git_tree_builder_filter(git_tree_builder *bld, git_tree_builder_filter_cb filter, void
+     * *payload);
+     */
+    static native void jniBuilderFilter(long bldPtr, Internals.JCallback callback);
+
+    /** void git_tree_builder_free(git_tree_builder *bld); */
+    static native void jniBuilderFree(long bld);
+
+    /** const git_tree_entry * git_tree_builder_get(git_tree_builder *bld, const char *filename); */
+    static native long jniBuilderGet(long bld, String filename);
+
+    /**
+     * int git_tree_builder_insert(const git_tree_entry **out, git_tree_builder *bld, const char
+     * *filename, const git_oid *id, git_filemode_t filemode);
+     */
+    static native int jniBuilderInsert(
+            AtomicLong out, long bld, String filename, Oid id, int filemode);
+
+    /**
+     * int git_tree_builder_new(git_tree_builder **out, git_repository *repo, const git_tree
+     * *source);
+     */
+    static native int jniBuilderNew(AtomicLong out, long repoPtr, long source);
+
+    // no matching type found for 'git_filemode_t filemode'
+    /**
+     * int git_treebuilder_insert(const git_tree_entry **out, git_treebuilder *bld, const char
+     * *filename, const git_oid *id, git_filemode_t filemode);
+     */
+    // no matching type found for 'git_treewalk_cb callback'
+
+    /** int git_tree_builder_remove(git_tree_builder *bld, const char *filename); */
+    static native int jniBuilderRemove(long bld, String filename);
+
+    /** int git_tree_builder_write(git_oid *id, git_tree_builder *bld); */
+    static native int jniBuilderWrite(Oid id, long bld);
+    /** -------- Jni Signature ---------- */
+
+    /**
+     * int git_tree_builder_write_with_buffer(git_oid *oid, git_tree_builder *bld, git_buf *tree);
+     */
+    static native int jniBuilderWriteWithBuffer(Oid oid, long bld, Buf tree);
+
+    /**
+     * int git_tree_create_updated(git_oid *out, git_repository *repo, git_tree *baseline, size_t
+     * nupdates, const git_tree_update *updates);
+     */
+    static native int jniCreateUpdated(Oid out, long repoPtr, long baseline, long[] updates);
+
+    /** int git_tree_dup(git_tree **out, git_tree *source); */
+    static native int jniDup(AtomicLong out, long source);
+
+    /** const git_tree_entry * git_tree_entry_byid(const git_tree *tree, const git_oid *id); */
+    static native long jniEntryByid(long tree, Oid id);
+
+    /** const git_tree_entry * git_tree_entry_byindex(const git_tree *tree, size_t idx); */
+    static native long jniEntryByindex(long tree, int idx);
+
+    /** const git_tree_entry * git_tree_entry_byname(const git_tree *tree, const char *filename); */
+    static native long jniEntryByname(long tree, String filename);
+
+    /** int git_tree_entry_bypath(git_tree_entry **out, const git_tree *root, const char *path); */
+    static native int jniEntryBypath(AtomicLong out, long root, String path);
+
+    /** int git_tree_entry_cmp(const git_tree_entry *e1, const git_tree_entry *e2); */
+    static native int jniEntryCmp(long e1, long e2);
+
+    /** int git_tree_entry_dup(git_tree_entry **dest, const git_tree_entry *source); */
+    static native int jniEntryDup(AtomicLong dest, long source);
+
+    /** git_filemode_t git_tree_entry_filemode(const git_tree_entry *entry); */
+    static native int jniEntryFilemode(long entry);
+
+    /** git_filemode_t git_tree_entry_filemode_raw(const git_tree_entry *entry); */
+    static native int jniEntryFilemodeRaw(long entry);
+
+    /** void git_tree_entry_free(git_tree_entry *entry); */
+    static native void jniEntryFree(long entry);
+
+    /** const git_oid * git_tree_entry_id(const git_tree_entry *entry); */
+    static native byte[] jniEntryId(long entry);
+
+    /** const char * git_tree_entry_name(const git_tree_entry *entry); */
+    static native String jniEntryName(long entry);
+
+    /**
+     * int git_tree_entry_to_object(git_object **object_out, git_repository *repo, const
+     * git_tree_entry *entry);
+     */
+    static native int jniEntryToObject(AtomicLong objectOut, long repoPtr, long entry);
+
+    /** git_object_t git_tree_entry_type(const git_tree_entry *entry); */
+    static native int jniEntryType(long entry);
+
+    /** size_t git_tree_entrycount(const git_tree *tree); */
+    static native int jniEntrycount(long tree);
+
+    static native void jniUpdateFree(long updatePtr);
+
+    static native long jniUpdateNew(int updateType, Oid oid, int filemodeType, String path);
 
     /**
      * int git_tree_walk(const git_tree *tree, git_treewalk_mode mode, git_treewalk_cb callback,
      * void *payload);
      */
     static native int jniWalk(long treePtr, int mode, Internals.SJCallback callback);
+
+    Tree(boolean weak, long rawPointer) {
+        super(weak, rawPointer);
+    }
 
     /**
      * Look up tree object given its oid
@@ -37,84 +145,6 @@ public class Tree extends GitObject {
     public static Tree lookupPrefix(@Nonnull Repository repo, @Nonnull String shortId) {
         return (Tree) GitObject.lookupPrefix(repo, shortId, Type.TREE);
     }
-
-    /** size_t git_tree_entrycount(const git_tree *tree); */
-    static native int jniEntrycount(long tree);
-
-    /** const git_tree_entry * git_tree_entry_byname(const git_tree *tree, const char *filename); */
-    static native long jniEntryByname(long tree, String filename);
-
-    /** const git_tree_entry * git_tree_entry_byindex(const git_tree *tree, size_t idx); */
-    static native long jniEntryByindex(long tree, int idx);
-
-    // no matching type found for 'git_filemode_t filemode'
-    /**
-     * int git_treebuilder_insert(const git_tree_entry **out, git_treebuilder *bld, const char
-     * *filename, const git_oid *id, git_filemode_t filemode);
-     */
-    // no matching type found for 'git_treewalk_cb callback'
-
-    /** const git_tree_entry * git_tree_entry_byid(const git_tree *tree, const git_oid *id); */
-    static native long jniEntryByid(long tree, Oid id);
-
-    /** int git_tree_entry_bypath(git_tree_entry **out, const git_tree *root, const char *path); */
-    static native int jniEntryBypath(AtomicLong out, long root, String path);
-    /** -------- Jni Signature ---------- */
-
-    /** int git_tree_entry_dup(git_tree_entry **dest, const git_tree_entry *source); */
-    static native int jniEntryDup(AtomicLong dest, long source);
-
-    /** void git_tree_entry_free(git_tree_entry *entry); */
-    static native void jniEntryFree(long entry);
-
-    /** const char * git_tree_entry_name(const git_tree_entry *entry); */
-    static native String jniEntryName(long entry);
-
-    /** const git_oid * git_tree_entry_id(const git_tree_entry *entry); */
-    static native byte[] jniEntryId(long entry);
-
-    /** git_object_t git_tree_entry_type(const git_tree_entry *entry); */
-    static native int jniEntryType(long entry);
-
-    /** git_filemode_t git_tree_entry_filemode(const git_tree_entry *entry); */
-    static native int jniEntryFilemode(long entry);
-
-    /** git_filemode_t git_tree_entry_filemode_raw(const git_tree_entry *entry); */
-    static native int jniEntryFilemodeRaw(long entry);
-
-    /** int git_tree_entry_cmp(const git_tree_entry *e1, const git_tree_entry *e2); */
-    static native int jniEntryCmp(long e1, long e2);
-
-    /**
-     * int git_tree_entry_to_object(git_object **object_out, git_repository *repo, const
-     * git_tree_entry *entry);
-     */
-    static native int jniEntryToObject(AtomicLong objectOut, long repoPtr, long entry);
-
-    /** int git_tree_dup(git_tree **out, git_tree *source); */
-    static native int jniDup(AtomicLong out, long source);
-
-    /**
-     * int git_tree_create_updated(git_oid *out, git_repository *repo, git_tree *baseline, size_t
-     * nupdates, const git_tree_update *updates);
-     */
-    static native int jniCreateUpdated(Oid out, long repoPtr, long baseline, long[] updates);
-
-    static native long jniUpdateNew(int updateType, Oid oid, int filemodeType, String path);
-
-    static native void jniUpdateFree(long updatePtr);
-
-    /**
-     * int git_tree_builder_filter(git_tree_builder *bld, git_tree_builder_filter_cb filter, void
-     * *payload);
-     */
-    static native void jniBuilderFilter(long bldPtr, Internals.JCallback callback);
-
-    /**
-     * int git_tree_builder_new(git_tree_builder **out, git_repository *repo, const git_tree
-     * *source);
-     */
-    static native int jniBuilderNew(AtomicLong out, long repoPtr, long source);
 
     /**
      * Create a new tree builder.
@@ -144,36 +174,6 @@ public class Tree extends GitObject {
         Error.throwIfNeeded(e);
         return bld;
     }
-
-    /** int git_tree_builder_clear(git_tree_builder *bld); */
-    static native int jniBuilderClear(long bld);
-
-    /** size_t git_tree_builder_entrycount(git_tree_builder *bld); */
-    static native int jniBuilderEntrycount(long bld);
-
-    /** void git_tree_builder_free(git_tree_builder *bld); */
-    static native void jniBuilderFree(long bld);
-
-    /** const git_tree_entry * git_tree_builder_get(git_tree_builder *bld, const char *filename); */
-    static native long jniBuilderGet(long bld, String filename);
-
-    /**
-     * int git_tree_builder_insert(const git_tree_entry **out, git_tree_builder *bld, const char
-     * *filename, const git_oid *id, git_filemode_t filemode);
-     */
-    static native int jniBuilderInsert(
-            AtomicLong out, long bld, String filename, Oid id, int filemode);
-
-    /** int git_tree_builder_remove(git_tree_builder *bld, const char *filename); */
-    static native int jniBuilderRemove(long bld, String filename);
-
-    /** int git_tree_builder_write(git_oid *id, git_tree_builder *bld); */
-    static native int jniBuilderWrite(Oid id, long bld);
-
-    /**
-     * int git_tree_builder_write_with_buffer(git_oid *oid, git_tree_builder *bld, git_buf *tree);
-     */
-    static native int jniBuilderWriteWithBuffer(Oid oid, long bld, Buf tree);
 
     public int walk(WalkMode mode, WalkCb cb) {
         return jniWalk(

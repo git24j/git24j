@@ -1,11 +1,11 @@
 package com.github.git24j.core;
 
+import javax.annotation.Nullable;
 import java.io.FileNotFoundException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.concurrent.atomic.AtomicBoolean;
-import javax.annotation.Nullable;
 
 /** @author shijing Setup functions */
 public class Init {

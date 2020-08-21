@@ -3,13 +3,13 @@ package com.github.git24j.core;
 import java.util.EnumSet;
 
 public class Libgit2 {
+    static native void jniShadowFree(long ptr);
+
     public static native void init();
 
     public static native void shutdown();
 
     public static native Version version();
-
-    static native void jniShadowFree(long ptr);
 
     public static native int features();
     // TODO: git_libgit2_opts
