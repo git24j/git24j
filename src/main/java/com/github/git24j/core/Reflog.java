@@ -11,7 +11,6 @@ public class Reflog extends CAutoReleasable {
 
     /** int git_reflog_delete(git_repository *repo, const char *name); */
     static native int jniDelete(long repoPtr, String name);
-    /** -------- Jni Signature ---------- */
 
     /** int git_reflog_drop(git_reflog *reflog, size_t idx, int rewrite_previous_entry); */
     static native int jniDrop(long reflog, int idx, int rewritePreviousEntry);

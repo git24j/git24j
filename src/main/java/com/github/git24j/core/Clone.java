@@ -7,7 +7,6 @@ import java.nio.file.Path;
 import java.util.concurrent.atomic.AtomicLong;
 
 public class Clone {
-    /* -------- Jni Signature ---------- */
     static native int jniClone(AtomicLong out, String url, String localPath, long options);
 
     static native void jniOptionsFree(long optionsPtr);
@@ -30,7 +29,6 @@ public class Clone {
     /** unsigned int version */
     static native int jniOptionsGetVersion(long optionsPtr);
 
-    /** -------- Jni Signature ---------- */
     static native int jniOptionsNew(int version, AtomicLong outOpts);
 
     /** int bare */

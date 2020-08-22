@@ -34,21 +34,8 @@ public class Odb extends CAutoCloseable {
             int dirMode,
             int fileMode);
 
-    // no matching type found for 'git_odb_foreach_cb cb'
-    /** int git_odb_foreach(git_odb *db, git_odb_foreach_cb cb, void *payload); */
-    // no matching type found for 'char *buffer'
-
     /** int git_odb_backend_one_pack(git_odb_backend **out, const char *index_file); */
-    static native int jniBackendOnePack(AtomicLong out, String indexFile);
-    // no matching type found for 'git_transfer_progress_cb progress_cb'
-    /**
-     * int git_odb_write_pack(git_odb_writepack **out, git_odb *db, git_transfer_progress_cb
-     * progress_cb, void *progress_payload);
-     */
-    /** -------- Jni Signature ---------- */
-
-    /** int git_odb_backend_pack(git_odb_backend **out, const char *objects_dir); */
-    static native int jniBackendPack(AtomicLong out, String objectsDir);
+    static native int jniBackendOnePack(AtomicLong out, String objectsDir);
 
     /** int git_odb_exists(git_odb *db, const git_oid *id); */
     static native int jniExists(long db, Oid id);

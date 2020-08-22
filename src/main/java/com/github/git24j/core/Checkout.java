@@ -27,12 +27,6 @@ public class Checkout {
     static native long jniOptionsGetBaseline(long opts);
 
     static native long jniOptionsGetBaselineIndex(long opts);
-    // no matching type found for 'git_checkout_notify_t why'
-    /**
-     * int git_checkout_notify_cb(git_checkout_notify_t why, const char *path, const git_diff_file
-     * *baseline, const git_diff_file *target, const git_diff_file *workdir, void *payload);
-     */
-    /** -------- Jni Signature ---------- */
 
     /** unsigned int git_checkout_options_get_dir_mode(const git_checkout_options *opts); */
     static native int jniOptionsGetDirMode(long opts);
@@ -57,7 +51,6 @@ public class Checkout {
     static native int jniOptionsGetStrategy(long opts);
 
     /** -------- Jni Signature ---------- */
-
     static native String jniOptionsGetTargetDirectory(long opts);
 
     static native String jniOptionsGetTheirLable(long opts);

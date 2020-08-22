@@ -4,6 +4,7 @@ import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.Instant;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -59,7 +60,94 @@ public class Index extends CAutoCloseable {
 
     static native int jniEntryCount(long indexPtr);
 
+    static native int jniEntryFree(long entryPtr);
+
+    /** int ctime_nanoseconds */
+    static native long jniEntryGetCtimeNanoseconds(long entryPtr);
+
+    /** int ctime_seconds */
+    static native long jniEntryGetCtimeSeconds(long entryPtr);
+
+    /** uint32_t dev */
+    static native int jniEntryGetDev(long entryPtr);
+
+    /** uint32_t file_size */
+    static native int jniEntryGetFileSize(long entryPtr);
+
+    /** uint16_t flags */
+    static native int jniEntryGetFlags(long entryPtr);
+
+    /** uint16_t flags_extended */
+    static native int jniEntryGetFlagsExtended(long entryPtr);
+
+    /** uint32_t gid */
+    static native int jniEntryGetGid(long entryPtr);
+
+    /** git_oid id */
+    static native byte[] jniEntryGetId(long entryPtr);
+
+    /** uint32_t ino */
+    static native int jniEntryGetIno(long entryPtr);
+    /** uint32_t mode */
+    static native int jniEntryGetMode(long entryPtr);
+
+    /** int mtime_nanoseconds */
+    static native long jniEntryGetMtimeNanoseconds(long entryPtr);
+
+    /** int mtime_seconds */
+    static native long jniEntryGetMtimeSeconds(long entryPtr);
+
+    /** const char *path */
+    static native String jniEntryGetPath(long entryPtr);
+
+    /** uint32_t uid */
+    static native int jniEntryGetUid(long entryPtr);
+
     static native int jniEntryIsConflict(long entryPtr);
+
+    static native long jniEntryNew();
+
+    /** int ctime_nanoseconds */
+    static native void jniEntrySetCtimeNanoseconds(long entryPtr, long ctimeNanoseconds);
+
+    /** int ctime_seconds */
+    static native void jniEntrySetCtimeSeconds(long entryPtr, long ctimeSeconds);
+
+    /** uint32_t dev */
+    static native void jniEntrySetDev(long entryPtr, int dev);
+
+    /** uint32_t file_size */
+    static native void jniEntrySetFileSize(long entryPtr, int fileSize);
+
+    /** uint16_t flags */
+    static native void jniEntrySetFlags(long entryPtr, int flags);
+
+    /** uint16_t flags_extended */
+    static native void jniEntrySetFlagsExtended(long entryPtr, int flagsExtended);
+
+    /** uint32_t gid */
+    static native void jniEntrySetGid(long entryPtr, int gid);
+
+    /** git_oid id */
+    static native void jniEntrySetId(long entryPtr, Oid id);
+
+    /** uint32_t ino */
+    static native void jniEntrySetIno(long entryPtr, int ino);
+
+    /** uint32_t mode */
+    static native void jniEntrySetMode(long entryPtr, int mode);
+
+    /** int mtime_nanoseconds */
+    static native void jniEntrySetMtimeNanoseconds(long entryPtr, long mtimeNanoseconds);
+
+    /** int mtime_seconds */
+    static native void jniEntrySetMtimeSeconds(long entryPtr, long mtimeSeconds);
+
+    /** const char *path */
+    static native void jniEntrySetPath(long entryPtr, String path);
+
+    /** uint32_t uid */
+    static native void jniEntrySetUid(long entryPtr, int uid);
 
     static native int jniEntryStage(long entryPtr);
 
@@ -387,7 +475,7 @@ public class Index extends CAutoCloseable {
         if (sourceEntry == null) {
             return;
         }
-        Error.throwIfNeeded(jniAdd(getRawPointer(), sourceEntry._ptr.get()));
+        Error.throwIfNeeded(jniAdd(getRawPointer(), sourceEntry.getRawPointer()));
     }
 
     /**
@@ -413,7 +501,7 @@ public class Index extends CAutoCloseable {
      * @throws GitException git errors
      */
     public void addFromBuffer(Entry entry, byte[] buffer) {
-        Error.throwIfNeeded(jniAddFromBuffer(getRawPointer(), entry._ptr.get(), buffer));
+        Error.throwIfNeeded(jniAddFromBuffer(getRawPointer(), entry.getRawPointer(), buffer));
     }
 
     /**
@@ -524,9 +612,9 @@ public class Index extends CAutoCloseable {
         Error.throwIfNeeded(
                 jniConflictAdd(
                         getRawPointer(),
-                        conflict.ancestor._ptr.get(),
-                        conflict.our._ptr.get(),
-                        conflict.their._ptr.get()));
+                        conflict.ancestor.getRawPointer(),
+                        conflict.our.getRawPointer(),
+                        conflict.their.getRawPointer()));
     }
 
     /**
@@ -539,9 +627,9 @@ public class Index extends CAutoCloseable {
     Conflict conflictGet(String path) {
         Conflict conflict = new Conflict();
         jniConflictGet(
-                conflict.ancestor._ptr,
-                conflict.our._ptr,
-                conflict.their._ptr,
+                conflict.ancestor._rawPtr,
+                conflict.our._rawPtr,
+                conflict.their._rawPtr,
                 getRawPointer(),
                 path);
         return conflict;
@@ -656,12 +744,14 @@ public class Index extends CAutoCloseable {
         void accept(String path, String pathSpec);
     }
 
-    public static class Entry {
-        /** Index.Entry holds pointer to const git_index_entry and should not be free-ed. */
-        private final AtomicLong _ptr = new AtomicLong();
+    public static class Entry extends CAutoReleasable {
+        protected Entry(boolean isWeak, long rawPtr) {
+            super(isWeak, rawPtr);
+        }
 
-        Entry(long rawPtr) {
-            _ptr.set(rawPtr);
+        @Nonnull
+        public static Entry create() {
+            return new Entry(false, jniEntryNew());
         }
 
         /**
@@ -680,7 +770,7 @@ public class Index extends CAutoCloseable {
             if (ptr == 0) {
                 return null;
             }
-            return new Entry(ptr);
+            return new Entry(true, ptr);
         }
 
         /**
@@ -702,7 +792,12 @@ public class Index extends CAutoCloseable {
             if (ptr == 0) {
                 return null;
             }
-            return new Entry(ptr);
+            return new Entry(true, ptr);
+        }
+
+        @Override
+        protected void freeOnce(long cPtr) {
+            jniEntryFree(cPtr);
         }
 
         /**
@@ -715,7 +810,7 @@ public class Index extends CAutoCloseable {
          * @return the stage number
          */
         public int state() {
-            return Index.jniEntryStage(_ptr.get());
+            return Index.jniEntryStage(getRawPointer());
         }
 
         /**
@@ -725,7 +820,113 @@ public class Index extends CAutoCloseable {
          * @return if the entry is a conflict entry
          */
         public boolean isConflict() {
-            return Index.jniEntryIsConflict(_ptr.get()) == 1;
+            return Index.jniEntryIsConflict(getRawPointer()) == 1;
+        }
+
+        @Nonnull
+        public Instant getCtime() {
+            return Instant.ofEpochSecond(
+                    jniEntryGetCtimeSeconds(getRawPointer()),
+                    Index.jniEntryGetCtimeNanoseconds(getRawPointer()));
+        }
+
+        public void setCtime(@Nonnull Instant ctime) {
+            jniEntrySetCtimeSeconds(getRawPointer(), ctime.getEpochSecond());
+            jniEntrySetCtimeNanoseconds(getRawPointer(), ctime.getNano());
+        }
+
+        @Nonnull
+        public Instant getMtime() {
+            return Instant.ofEpochSecond(
+                    jniEntryGetMtimeSeconds(getRawPointer()),
+                    Index.jniEntryGetMtimeNanoseconds(getRawPointer()));
+        }
+
+        public void setMtime(@Nonnull Instant mtime) {
+            jniEntrySetMtimeSeconds(getRawPointer(), mtime.getEpochSecond());
+            jniEntrySetMtimeNanoseconds(getRawPointer(), mtime.getNano());
+        }
+
+        public int getDev() {
+            return jniEntryGetDev(getRawPointer());
+        }
+
+        public void setDev(int dev) {
+            jniEntrySetDev(getRawPointer(), dev);
+        }
+
+        public int getIno() {
+            return jniEntryGetIno(getRawPointer());
+        }
+
+        public void setIno(int ino) {
+            jniEntrySetIno(getRawPointer(), ino);
+        }
+
+        public int getMode() {
+            return jniEntryGetMode(getRawPointer());
+        }
+
+        public void setMode(int mode) {
+            jniEntrySetMode(getRawPointer(), mode);
+        }
+
+        public int getUid() {
+            return jniEntryGetUid(getRawPointer());
+        }
+
+        public void setUid(int uid) {
+            jniEntrySetUid(getRawPointer(), uid);
+        }
+
+        public int getGid() {
+            return jniEntryGetGid(getRawPointer());
+        }
+
+        public void setGid(int gid) {
+            jniEntrySetGid(getRawPointer(), gid);
+        }
+
+        public int getFileSize() {
+            return jniEntryGetFileSize(getRawPointer());
+        }
+
+        public void setFileSize(int fileSize) {
+            jniEntrySetFileSize(getRawPointer(), fileSize);
+        }
+
+        @Nonnull
+        public Oid getId() {
+            byte[] raw = jniEntryGetId(getRawPointer());
+            return Oid.of(raw);
+        }
+
+        public void setId(@Nonnull Oid id) {
+            jniEntrySetId(getRawPointer(), id);
+        }
+
+        public int getFlags() {
+            return jniEntryGetFlags(getRawPointer());
+        }
+
+        public void setFlags(int flags) {
+            jniEntrySetFlags(getRawPointer(), flags);
+        }
+
+        public int getFlagsExtended() {
+            return jniEntryGetFlagsExtended(getRawPointer());
+        }
+
+        public void setFlagsExtended(int flagsExtended) {
+            jniEntrySetFlagsExtended(getRawPointer(), flagsExtended);
+        }
+
+        public String getPath() {
+            return jniEntryGetPath(getRawPointer());
+        }
+
+        public void setPath(String path) {
+            jniEntrySetPath(getRawPointer(), path);
         }
     }
 
@@ -750,8 +951,8 @@ public class Index extends CAutoCloseable {
 
         @CheckForNull
         public Entry next() {
-            Entry nextEntry = new Entry(0);
-            int e = Index.jniIteratorNext(nextEntry._ptr, _ptr.get());
+            Entry nextEntry = new Entry(true, 0);
+            int e = Index.jniIteratorNext(nextEntry._rawPtr, _ptr.get());
             if (e == ITEROVER.getCode()) {
                 return null;
             }
@@ -767,9 +968,9 @@ public class Index extends CAutoCloseable {
         public final Entry their;
 
         Conflict() {
-            ancestor = new Entry(0);
-            our = new Entry(0);
-            their = new Entry(0);
+            ancestor = new Entry(true, 0);
+            our = new Entry(true, 0);
+            their = new Entry(true, 0);
         }
     }
 
@@ -788,9 +989,9 @@ public class Index extends CAutoCloseable {
             Conflict conflict = new Conflict();
             int e =
                     jniConflictNext(
-                            conflict.ancestor._ptr,
-                            conflict.our._ptr,
-                            conflict.their._ptr,
+                            conflict.ancestor._rawPtr,
+                            conflict.our._rawPtr,
+                            conflict.their._rawPtr,
                             _ptr.get());
             if (e == ITEROVER.getCode()) {
                 return null;

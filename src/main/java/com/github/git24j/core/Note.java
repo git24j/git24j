@@ -25,7 +25,6 @@ public class Note extends CAutoReleasable {
             Oid oid,
             String note,
             int allowNoteOverwrite);
-    // no matching type found for 'git_note_foreach_cb note_cb'
 
     /** int git_note_commit_iterator_new(git_note_iterator **out, git_commit *notes_commit); */
     static native int jniCommitIteratorNew(AtomicLong out, long notesCommit);
@@ -48,7 +47,6 @@ public class Note extends CAutoReleasable {
             long author,
             long committer,
             Oid oid);
-    /** -------- Jni Signature ---------- */
 
     /** const git_signature * git_note_committer(const git_note *note); */
     static native long jniCommitter(long note);

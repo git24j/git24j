@@ -9,7 +9,6 @@ public class Transaction extends CAutoReleasable {
 
     /** void git_transaction_free(git_transaction *tx); */
     static native void jniFree(long tx);
-    /** -------- Jni Signature ---------- */
 
     /** int git_transaction_lock_ref(git_transaction *tx, const char *refname); */
     static native int jniLockRef(long tx, String refname);

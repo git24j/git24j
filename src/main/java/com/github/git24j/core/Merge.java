@@ -251,8 +251,6 @@ public class Merge {
     /** unsigned int rename_threshold */
     static native void jniOptionsSetRenameThreshold(long optionsPtr, int renameThreshold);
 
-    /** -------- Jni Signature ---------- */
-
     /** unsigned int target_limit */
     static native void jniOptionsSetTargetLimit(long optionsPtr, int targetLimit);
 
@@ -510,7 +508,6 @@ public class Merge {
                         CAutoReleasable.rawPtr(mergeOpts), CAutoReleasable.rawPtr(checkoutOpts)));
     }
 
-    /** -------- Jni Signature ---------- */
     /**
      * Flags for `git_merge` options. A combination of these flags can be passed in
      * via the `flags` value in the `git_merge_options`.

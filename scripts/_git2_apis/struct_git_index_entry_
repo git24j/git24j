@@ -1,0 +1,16 @@
+struct git_index_entry {
+	long ctime_seconds;
+	long ctime_nanoseconds;
+	long mtime_seconds;
+	long mtime_nanoseconds;
+	uint32_t dev;
+	uint32_t ino;
+	uint32_t mode;
+	uint32_t uid;
+	uint32_t gid;
+	uint32_t file_size;
+	git_oid id;
+	uint16_t flags;
+	uint16_t flags_extended;
+	const char *path;
+} git_index_entry;

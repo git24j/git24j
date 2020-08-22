@@ -67,8 +67,6 @@ public class Blame extends CAutoReleasable {
         super(isWeak, rawPtr);
     }
 
-    /** -------- Jni Signature ---------- */
-
     /**
      * Get the blame for a single file.
      *
@@ -242,7 +240,6 @@ public class Blame extends CAutoReleasable {
             Libgit2.jniShadowFree(cPtr);
         }
 
-        /** -------- Jni Signature ---------- */
         /** size_t lines_in_hunk */
         public int getLinesInHunk() {
             return jniHunkGetLinesInHunk(getRawPointer());

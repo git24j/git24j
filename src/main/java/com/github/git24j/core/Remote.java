@@ -96,9 +96,6 @@ public class Remote extends CAutoReleasable {
 
     /** unsigned int version */
     static native void jniCreateOptionsSetVersion(long create_optionsPtr, int version);
-    // no matching type found for 'const git_remote_head ***out'
-    /** int git_remote_ls(const git_remote_head ***out, size_t *size, git_remote *remote); */
-    /** -------- Jni Signature ---------- */
 
     /**
      * int git_remote_create_with_fetchspec(git_remote **out, git_repository *repo, const char
@@ -1004,6 +1001,7 @@ public class Remote extends CAutoReleasable {
             return _bit;
         }
     }
+
     @FunctionalInterface
     public interface CredAcquireCb {
         /**
@@ -1017,6 +1015,7 @@ public class Remote extends CAutoReleasable {
          */
         Optional<Cred> acquire(String url, String usernameFromUrl, int allowedTypes);
     }
+
     @FunctionalInterface
     public interface TransportMessageCb {
         /**
@@ -1027,11 +1026,13 @@ public class Remote extends CAutoReleasable {
          */
         int accept(String message);
     }
+
     @FunctionalInterface
     public interface CompletionCb {
         /** int (*)(git_remote_completion_t, void *) completion */
         int accept(CompletionT completionT);
     }
+
     @FunctionalInterface
     public interface TransportCertificateCheckCb {
         /**
@@ -1047,6 +1048,7 @@ public class Remote extends CAutoReleasable {
          */
         int accept(Cert cert, boolean valid, String host);
     }
+
     @FunctionalInterface
     public interface TransferProgressCb {
         /**
@@ -1069,11 +1071,13 @@ public class Remote extends CAutoReleasable {
         /** Packbuilder progress notification function */
         int accept(int stage, long current, long total);
     }
+
     @FunctionalInterface
     public interface PushTransferProgressCb {
         /** Push network progress notification function */
         int accept(long current, long total, int bytes);
     }
+
     @FunctionalInterface
     public interface PushUpdateReferenceCb {
         /**
@@ -1088,6 +1092,7 @@ public class Remote extends CAutoReleasable {
          */
         int accept(String refname, String status);
     }
+
     @FunctionalInterface
     public interface PushNegotiationCb {
         /**
@@ -1098,6 +1103,7 @@ public class Remote extends CAutoReleasable {
          */
         int accept(@Nonnull List<PushUpdate> updates);
     }
+
     @FunctionalInterface
     public interface TransportCb {
         /**
@@ -1106,6 +1112,7 @@ public class Remote extends CAutoReleasable {
          */
         Optional<Transport> accept(Remote owner);
     }
+
     @FunctionalInterface
     public interface UrlResolveCb {
         /** Callback to resolve URLs before connecting to remote */

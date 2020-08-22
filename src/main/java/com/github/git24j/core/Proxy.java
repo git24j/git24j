@@ -16,7 +16,6 @@ public class Proxy {
     static native int jniOptionsGetVersion(long optionsPtr);
 
     static native int jniOptionsNew(AtomicLong outPtr, int version);
-    /** -------- Jni Signature ---------- */
 
     /** git_transport_certificate_check_cb certificate_check */
     static native void jniOptionsSetCertificateCheck(

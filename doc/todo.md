@@ -105,3 +105,4 @@
 - [x] Deprecate `j_git_oid_to_java`, return `byte[]` directly.
 - [ ] Replace Buf with AtomicString for returning String through parameters.
 - [ ] Change Index to `CAutoReleasable`
+- [ ] Remove usage of `Optional`, upstream api may change from returning nullable to non-null

@@ -14,18 +14,6 @@ public class Cred extends CAutoReleasable {
     /** int git_cred_default_new(git_cred **out); */
     static native int jniDefaultNew(AtomicLong out);
 
-    // no matching type found for 'git_cred_ssh_interactive_callback prompt_callback'
-    /**
-     * int git_cred_ssh_interactive_new(git_cred **out, const char *username,
-     * git_cred_ssh_interactive_callback prompt_callback, void *payload);
-     */
-    // no matching type found for 'git_cred_sign_callback sign_callback'
-    /**
-     * int git_cred_ssh_custom_new(git_cred **out, const char *username, const char *publickey,
-     * size_t publickey_len, git_cred_sign_callback sign_callback, void *payload);
-     */
-    /** -------- Jni Signature ---------- */
-
     /** void git_cred_free(git_cred *cred); */
     static native void jniFree(long cred);
 
