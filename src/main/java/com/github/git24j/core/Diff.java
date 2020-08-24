@@ -108,8 +108,6 @@ public class Diff extends CAutoReleasable {
     /** git_diff_file new_file */
     static native long jniDeltaGetNewFile(long deltaPtr);
 
-    /** -------- Jni Signature ---------- */
-
     /** int nfiles */
     static native int jniDeltaGetNfiles(long deltaPtr);
 
@@ -139,7 +137,6 @@ public class Diff extends CAutoReleasable {
 
     /** git_object_size_t size */
     static native int jniFileGetSize(long filePtr);
-    /** -------- Jni Signature ---------- */
 
     /** int git_diff_find_init_options(git_diff_find_options *opts, unsigned int version); */
     static native int jniFindInitOptions(AtomicLong outOpts, int version);
@@ -326,6 +323,7 @@ public class Diff extends CAutoReleasable {
      */
     static native int jniTreeToWorkdirWithIndex(
             AtomicLong diff, long repoPtr, long oldTree, long opts);
+
     AtomicLong _rawPtr = new AtomicLong();
 
     protected Diff(boolean isWeak, long rawPtr) {
@@ -1157,7 +1155,6 @@ public class Diff extends CAutoReleasable {
         }
     }
 
-    /** -------- Jni Signature ---------- */
     public enum FlagT implements IBitEnum {
         /** < file(s) treated as binary data */
         BINARY(1 << 0),
@@ -1303,7 +1300,6 @@ public class Diff extends CAutoReleasable {
         int accept(Delta delta, float progress);
     }
 
-    /** -------- Jni Signature ---------- */
     @FunctionalInterface
     interface BinaryCb {
         int accept(Delta delta, Binary binary);

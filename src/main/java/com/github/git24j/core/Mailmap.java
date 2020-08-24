@@ -29,6 +29,7 @@ public class Mailmap {
      * git_signature *sig);
      */
     static native int jniResolveSignature(AtomicLong out, long mm, long sig);
+
     private final AtomicLong _rawPtr = new AtomicLong();
 
     public Mailmap(long ptr) {

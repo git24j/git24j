@@ -17,17 +17,6 @@ public class Credential extends CAutoReleasable {
 
     /** int git_credential_has_username(git_credential *cred); */
     static native int jniHasUsername(long cred);
-    // no matching type found for 'git_credential_ssh_interactive_cb prompt_callback'
-    /**
-     * int git_credential_ssh_interactive_new(git_credential **out, const char *username,
-     * git_credential_ssh_interactive_cb prompt_callback, void *payload);
-     */
-    // no matching type found for 'git_credential_sign_cb sign_callback'
-    /**
-     * int git_credential_ssh_custom_new(git_credential **out, const char *username, const char
-     * *publickey, size_t publickey_len, git_credential_sign_cb sign_callback, void *payload);
-     */
-    /** -------- Jni Signature ---------- */
 
     /** int git_credential_ssh_key_from_agent(git_credential **out, const char *username); */
     static native int jniSshKeyFromAgent(AtomicLong out, String username);

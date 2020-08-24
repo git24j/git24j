@@ -125,6 +125,67 @@ extern "C"
     /** void git_index_conflict_iterator_free(git_index_conflict_iterator *iterator); */
     JNIEXPORT void JNICALL J_MAKE_METHOD(Index_jniConflictIteratorFree)(JNIEnv *env, jclass obj, jlong iterPtr);
 
+    /** -------- git_index_entry ---------- */
+    /** int ctime_seconds*/
+    JNIEXPORT jlong JNICALL J_MAKE_METHOD(Index_jniEntryNew)(JNIEnv *env, jclass obj);
+    JNIEXPORT void JNICALL J_MAKE_METHOD(Index_jniEntryFree)(JNIEnv *env, jclass obj, jlong entryPtr);
+    /** int ctime_seconds*/
+    JNIEXPORT jlong JNICALL J_MAKE_METHOD(Index_jniEntryGetCtimeSeconds)(JNIEnv *env, jclass obj, jlong entryPtr);
+    /** int ctime_nanoseconds*/
+    JNIEXPORT jlong JNICALL J_MAKE_METHOD(Index_jniEntryGetCtimeNanoseconds)(JNIEnv *env, jclass obj, jlong entryPtr);
+    /** int mtime_seconds*/
+    JNIEXPORT jlong JNICALL J_MAKE_METHOD(Index_jniEntryGetMtimeSeconds)(JNIEnv *env, jclass obj, jlong entryPtr);
+    /** int mtime_nanoseconds*/
+    JNIEXPORT jlong JNICALL J_MAKE_METHOD(Index_jniEntryGetMtimeNanoseconds)(JNIEnv *env, jclass obj, jlong entryPtr);
+    /** uint32_t dev*/
+    JNIEXPORT jint JNICALL J_MAKE_METHOD(Index_jniEntryGetDev)(JNIEnv *env, jclass obj, jlong entryPtr);
+    /** uint32_t ino*/
+    JNIEXPORT jint JNICALL J_MAKE_METHOD(Index_jniEntryGetIno)(JNIEnv *env, jclass obj, jlong entryPtr);
+    /** uint32_t mode*/
+    JNIEXPORT jint JNICALL J_MAKE_METHOD(Index_jniEntryGetMode)(JNIEnv *env, jclass obj, jlong entryPtr);
+    /** uint32_t uid*/
+    JNIEXPORT jint JNICALL J_MAKE_METHOD(Index_jniEntryGetUid)(JNIEnv *env, jclass obj, jlong entryPtr);
+    /** uint32_t gid*/
+    JNIEXPORT jint JNICALL J_MAKE_METHOD(Index_jniEntryGetGid)(JNIEnv *env, jclass obj, jlong entryPtr);
+    /** uint32_t file_size*/
+    JNIEXPORT jint JNICALL J_MAKE_METHOD(Index_jniEntryGetFileSize)(JNIEnv *env, jclass obj, jlong entryPtr);
+    /** git_oid id*/
+    JNIEXPORT jbyteArray JNICALL J_MAKE_METHOD(Index_jniEntryGetId)(JNIEnv *env, jclass obj, jlong entryPtr);
+    /** uint16_t flags*/
+    JNIEXPORT jint JNICALL J_MAKE_METHOD(Index_jniEntryGetFlags)(JNIEnv *env, jclass obj, jlong entryPtr);
+    /** uint16_t flags_extended*/
+    JNIEXPORT jint JNICALL J_MAKE_METHOD(Index_jniEntryGetFlagsExtended)(JNIEnv *env, jclass obj, jlong entryPtr);
+    /** const char *path*/
+    JNIEXPORT jstring JNICALL J_MAKE_METHOD(Index_jniEntryGetPath)(JNIEnv *env, jclass obj, jlong entryPtr);
+    /** int ctime_seconds*/
+    JNIEXPORT void JNICALL J_MAKE_METHOD(Index_jniEntrySetCtimeSeconds)(JNIEnv *env, jclass obj, jlong entryPtr, jlong ctimeSeconds);
+    /** int ctime_nanoseconds*/
+    JNIEXPORT void JNICALL J_MAKE_METHOD(Index_jniEntrySetCtimeNanoseconds)(JNIEnv *env, jclass obj, jlong entryPtr, jlong ctimeNanoseconds);
+    /** int mtime_seconds*/
+    JNIEXPORT void JNICALL J_MAKE_METHOD(Index_jniEntrySetMtimeSeconds)(JNIEnv *env, jclass obj, jlong entryPtr, jlong mtimeSeconds);
+    /** int mtime_nanoseconds*/
+    JNIEXPORT void JNICALL J_MAKE_METHOD(Index_jniEntrySetMtimeNanoseconds)(JNIEnv *env, jclass obj, jlong entryPtr, jlong mtimeNanoseconds);
+    /** uint32_t dev*/
+    JNIEXPORT void JNICALL J_MAKE_METHOD(Index_jniEntrySetDev)(JNIEnv *env, jclass obj, jlong entryPtr, jint dev);
+    /** uint32_t ino*/
+    JNIEXPORT void JNICALL J_MAKE_METHOD(Index_jniEntrySetIno)(JNIEnv *env, jclass obj, jlong entryPtr, jint ino);
+    /** uint32_t mode*/
+    JNIEXPORT void JNICALL J_MAKE_METHOD(Index_jniEntrySetMode)(JNIEnv *env, jclass obj, jlong entryPtr, jint mode);
+    /** uint32_t uid*/
+    JNIEXPORT void JNICALL J_MAKE_METHOD(Index_jniEntrySetUid)(JNIEnv *env, jclass obj, jlong entryPtr, jint uid);
+    /** uint32_t gid*/
+    JNIEXPORT void JNICALL J_MAKE_METHOD(Index_jniEntrySetGid)(JNIEnv *env, jclass obj, jlong entryPtr, jint gid);
+    /** uint32_t file_size*/
+    JNIEXPORT void JNICALL J_MAKE_METHOD(Index_jniEntrySetFileSize)(JNIEnv *env, jclass obj, jlong entryPtr, jint fileSize);
+    /** git_oid id*/
+    JNIEXPORT void JNICALL J_MAKE_METHOD(Index_jniEntrySetId)(JNIEnv *env, jclass obj, jlong entryPtr, jobject id);
+    /** uint16_t flags*/
+    JNIEXPORT void JNICALL J_MAKE_METHOD(Index_jniEntrySetFlags)(JNIEnv *env, jclass obj, jlong entryPtr, jint flags);
+    /** uint16_t flags_extended*/
+    JNIEXPORT void JNICALL J_MAKE_METHOD(Index_jniEntrySetFlagsExtended)(JNIEnv *env, jclass obj, jlong entryPtr, jint flagsExtended);
+    /** const char *path*/
+    JNIEXPORT void JNICALL J_MAKE_METHOD(Index_jniEntrySetPath)(JNIEnv *env, jclass obj, jlong entryPtr, jstring path);
+
 #ifdef __cplusplus
 }
 #endif

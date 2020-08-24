@@ -26,8 +26,6 @@ public class Revwalk extends CAutoReleasable {
     /** int git_revwalk_hide_glob(git_revwalk *walk, const char *glob); */
     static native int jniHideGlob(long walk, String glob);
 
-    /** -------- Jni Signature ---------- */
-
     /** int git_revwalk_hide_head(git_revwalk *walk); */
     static native int jniHideHead(long walk);
 

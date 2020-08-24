@@ -41,19 +41,11 @@ public class Tree extends GitObject {
      */
     static native int jniBuilderNew(AtomicLong out, long repoPtr, long source);
 
-    // no matching type found for 'git_filemode_t filemode'
-    /**
-     * int git_treebuilder_insert(const git_tree_entry **out, git_treebuilder *bld, const char
-     * *filename, const git_oid *id, git_filemode_t filemode);
-     */
-    // no matching type found for 'git_treewalk_cb callback'
-
     /** int git_tree_builder_remove(git_tree_builder *bld, const char *filename); */
     static native int jniBuilderRemove(long bld, String filename);
 
     /** int git_tree_builder_write(git_oid *id, git_tree_builder *bld); */
     static native int jniBuilderWrite(Oid id, long bld);
-    /** -------- Jni Signature ---------- */
 
     /**
      * int git_tree_builder_write_with_buffer(git_oid *oid, git_tree_builder *bld, git_buf *tree);
@@ -200,8 +192,6 @@ public class Tree extends GitObject {
         return ptr == 0 ? Optional.empty() : Optional.of(new Entry(true, ptr));
     }
 
-    // no matching type found for 'git_tree_builder_filter_cb filter'
-
     /**
      * Lookup a tree entry by its position in the tree
      *
@@ -216,7 +206,6 @@ public class Tree extends GitObject {
         long ptr = jniEntryByindex(getRawPointer(), idx);
         return ptr == 0 ? Optional.empty() : Optional.of(new Entry(true, ptr));
     }
-    /** -------- Jni Signature ---------- */
 
     /**
      * Lookup a tree entry by SHA value.

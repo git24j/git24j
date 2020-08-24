@@ -21,8 +21,6 @@ public class Signature extends CAutoReleasable {
     /** int git_signature_from_buffer(git_signature **out, const char *buf); */
     static native int jniFromBuffer(AtomicLong out, String buf);
 
-    /** -------- Jni Signature ---------- */
-
     static native String jniGetEmail(long sigPtr);
 
     static native long jniGetEpocSeconds(long sigPtr);

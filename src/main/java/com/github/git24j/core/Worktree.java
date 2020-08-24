@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 
 public class Worktree {
-    /** -------- Jni Signature ---------- */
     /**
      * int git_worktree_add(git_worktree **out, git_repository *repo, const char *name, const char
      * *path, const git_worktree_add_options *opts);

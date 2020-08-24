@@ -35,7 +35,6 @@ public class Patch extends CAutoReleasable {
             int bufferLen,
             String bufferAsPath,
             long opts);
-    /** -------- Jni Signature ---------- */
 
     /**
      * int git_patch_from_blobs(git_patch **out, const git_blob *old_blob, const char *old_as_path,

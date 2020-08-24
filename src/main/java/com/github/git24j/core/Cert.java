@@ -25,6 +25,7 @@ public class Cert extends CAutoReleasable {
 
     /** git_cert parent */
     static native long jniX509GetParent(long x509Ptr);
+
     protected Cert(boolean isWeak, long rawPtr) {
         super(isWeak, rawPtr);
     }
@@ -33,6 +34,7 @@ public class Cert extends CAutoReleasable {
     protected void freeOnce(long cPtr) {
         Libgit2.jniShadowFree(cPtr);
     }
+
     public enum T {
         /** No information about the certificate is available. This may happen when using curl. */
         NONE,

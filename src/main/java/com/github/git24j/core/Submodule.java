@@ -47,15 +47,11 @@ public class Submodule extends CAutoReleasable {
     /** void git_submodule_free(git_submodule *submodule); */
     static native void jniFree(long submodule);
 
-    // no matching type found for 'git_submodule_cb callback'
-
     /** const git_oid * git_submodule_head_id(git_submodule *submodule); */
     static native byte[] jniHeadId(long submodule);
 
     /** git_submodule_ignore_t git_submodule_ignore(git_submodule *submodule); */
     static native int jniIgnore(long submodule);
-
-    /** -------- Jni Signature ---------- */
 
     /** const git_oid * git_submodule_index_id(git_submodule *submodule); */
     static native byte[] jniIndexId(long submodule);
