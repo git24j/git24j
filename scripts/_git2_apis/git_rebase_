@@ -10,3 +10,8 @@ int git_rebase_commit(git_oid *id, git_rebase *rebase, const git_signature *auth
 int git_rebase_abort(git_rebase *rebase);
 int git_rebase_finish(git_rebase *rebase, const git_signature *signature);
 void git_rebase_free(git_rebase *rebase);
+const git_oid * git_rebase_onto_id(git_rebase *rebase);
+const char * git_rebase_onto_name(git_rebase *rebase);
+int git_rebase_options_init(git_rebase_options *opts, unsigned int version);
+const git_oid * git_rebase_orig_head_id(git_rebase *rebase);
+const char * git_rebase_orig_head_name(git_rebase *rebase);

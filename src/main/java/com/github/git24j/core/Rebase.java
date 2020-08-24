@@ -1,5 +1,6 @@
 package com.github.git24j.core;
 
+import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Optional;
@@ -53,6 +54,12 @@ public class Rebase extends CAutoReleasable {
     /** int git_rebase_next(git_rebase_operation **operation, git_rebase *rebase); */
     static native int jniNext(AtomicLong operation, long rebase);
 
+    /** const git_oid * git_rebase_onto_id(git_rebase *rebase); */
+    static native byte[] jniOntoId(long rebase);
+
+    /** const char * git_rebase_onto_name(git_rebase *rebase); */
+    static native String jniOntoName(long rebase);
+
     /**
      * int git_rebase_open(git_rebase **out, git_repository *repo, const git_rebase_options *opts);
      */
@@ -67,9 +74,59 @@ public class Rebase extends CAutoReleasable {
     /** size_t git_rebase_operation_entrycount(git_rebase *rebase); */
     static native int jniOperationEntrycount(long rebase);
 
+    /** const char *exec */
+    static native String jniOperationGetExec(long operationPtr);
+
+    /** const git_oid id */
+    static native byte[] jniOperationGetId(long operationPtr);
+
+    /** int type */
+    static native int jniOperationGetType(long operationPtr);
+
     static native void jniOptionsFree(long optsPtr);
 
+    /** git_checkout_options checkout_options */
+    static native long jniOptionsGetCheckoutOptions(long optionsPtr);
+
+    /** int inmemory */
+    static native int jniOptionsGetInmemory(long optionsPtr);
+
+    /** git_merge_options merge_options */
+    static native long jniOptionsGetMergeOptions(long optionsPtr);
+
+    /** int quiet */
+    static native int jniOptionsGetQuiet(long optionsPtr);
+
+    /** const char *rewrite_notes_ref */
+    static native String jniOptionsGetRewriteNotesRef(long optionsPtr);
+
+    static native int jniOptionsGetVersion(long optionsPtr);
+
+    /** int git_rebase_options_init(git_rebase_options *opts, unsigned int version); */
+    static native int jniOptionsInit(long opts, int version);
+
     static native int jniOptionsNew(AtomicLong outOpts, int version);
+
+    /** int inmemory */
+    static native void jniOptionsSetInmemory(long optionsPtr, int inmemory);
+
+    /** int quiet */
+    static native void jniOptionsSetQuiet(long optionsPtr, int quiet);
+
+    /** const char *rewrite_notes_ref */
+    static native void jniOptionsSetRewriteNotesRef(long optionsPtr, String rewriteNotesRef);
+
+    /** git_commit_signing_cb signing_cb */
+    static native void jniOptionsSetSigningCb(long optionsPtr, Internals.SSSCallback signingCb);
+
+    /** unsigned int version */
+    static native void jniOptionsSetVersion(long optionsPtr, int version);
+
+    /** const git_oid * git_rebase_orig_head_id(git_rebase *rebase); */
+    static native byte[] jniOrigHeadId(long rebase);
+
+    /** const char * git_rebase_orig_head_name(git_rebase *rebase); */
+    static native String jniOrigHeadName(long rebase);
 
     protected Rebase(boolean isWeak, long rawPtr) {
         super(isWeak, rawPtr);
@@ -125,6 +182,33 @@ public class Rebase extends CAutoReleasable {
                         repo.getRawPointer(),
                         opts == null ? 0 : opts.getRawPointer()));
         return rebase;
+    }
+
+    /** Gets the onto id for merge rebases. */
+    @CheckForNull
+    public Oid ontoId() {
+        byte[] raw = jniOntoId(getRawPointer());
+        if (raw == null) {
+            return null;
+        }
+        return Oid.of(raw);
+    }
+
+    /** Gets the onto id for merge rebases. */
+    @CheckForNull
+    public String ontoName() {
+        return jniOntoName(getRawPointer());
+    }
+
+    @CheckForNull
+    public Oid origHeadId() {
+        byte[] raw = jniOrigHeadId(getRawPointer());
+        return raw == null ? null : Oid.of(raw);
+    }
+
+    @CheckForNull
+    public String origHeadName() {
+        return jniOrigHeadName(getRawPointer());
     }
 
     @Override
@@ -256,9 +340,8 @@ public class Rebase extends CAutoReleasable {
         Error.throwIfNeeded(
                 jniFinish(getRawPointer(), signature == null ? 0 : signature.getRawPointer()));
     }
-
     /** Type of rebase operation in-progress after calling `git_rebase_next`. */
-    public enum OperationT {
+    public enum OperationT implements IBitEnum {
         /**
          * The given commit is to be cherry-picked. The client should commit the changes and
          * continue if there are no conflicts.
@@ -294,10 +377,15 @@ public class Rebase extends CAutoReleasable {
          * successful) continue.
          */
         EXEC(5);
-        private final int bit;
+        private final int _bit;
 
         OperationT(int bit) {
-            this.bit = bit;
+            this._bit = bit;
+        }
+
+        @Override
+        public int getBit() {
+            return _bit;
         }
     }
 
@@ -307,6 +395,9 @@ public class Rebase extends CAutoReleasable {
      * <p>Use to tell the rebase machinery how to operate.
      */
     public static class Options extends CAutoReleasable {
+        /** void *payload */
+        static native void jniOptionsSetPayload(long optionsPtr, long payload);
+
         protected Options(boolean isWeak, long rawPtr) {
             super(isWeak, rawPtr);
         }
@@ -322,6 +413,68 @@ public class Rebase extends CAutoReleasable {
         protected void freeOnce(long cPtr) {
             jniOptionsFree(cPtr);
         }
+
+        /** unsigned int version */
+        public int getVersion() {
+            return jniOptionsGetVersion(getRawPointer());
+        }
+
+        /** unsigned int version */
+        public void setVersion(int version) {
+            jniOptionsSetVersion(getRawPointer(), version);
+        }
+
+        /** int quiet */
+        public int getQuiet() {
+            return jniOptionsGetQuiet(getRawPointer());
+        }
+
+        /** int quiet */
+        public void setQuiet(int quiet) {
+            jniOptionsSetQuiet(getRawPointer(), quiet);
+        }
+
+        /** int inmemory */
+        public int getInmemory() {
+            return jniOptionsGetInmemory(getRawPointer());
+        }
+
+        /** int inmemory */
+        public void setInmemory(int inmemory) {
+            jniOptionsSetInmemory(getRawPointer(), inmemory);
+        }
+
+        /** const char *rewrite_notes_ref */
+        public String getRewriteNotesRef() {
+            return jniOptionsGetRewriteNotesRef(getRawPointer());
+        }
+
+        /** const char *rewrite_notes_ref */
+        public void setRewriteNotesRef(String rewriteNotesRef) {
+            jniOptionsSetRewriteNotesRef(getRawPointer(), rewriteNotesRef);
+        }
+
+        /** git_merge_options merge_options */
+        @Nonnull
+        public Merge.Options getMergeOptions() {
+            long ptr = jniOptionsGetMergeOptions(getRawPointer());
+            return new Merge.Options(true, ptr);
+        }
+
+        /** git_checkout_options checkout_options */
+        public Checkout.Options getCheckoutOptions() {
+            return new Checkout.Options(true, jniOptionsGetCheckoutOptions(getRawPointer()));
+        }
+
+        /** git_commit_signing_cb signing_cb */
+        public void setSigningCb(Commit.SigningCb signingCb) {
+            jniOptionsSetSigningCb(getRawPointer(), signingCb::accept);
+        }
+
+        // TODO: moved to Options
+        public void setPayload(long payload) {
+            jniOptionsSetPayload(getRawPointer(), payload);
+        }
     }
 
     public static class Operation extends CAutoReleasable {
@@ -330,6 +483,25 @@ public class Rebase extends CAutoReleasable {
         }
 
         @Override
-        protected void freeOnce(long cPtr) {}
+        protected void freeOnce(long cPtr) {
+            // skipped, operation are managed by native c
+        }
+
+        @CheckForNull
+        public OperationT getType() {
+            int r = jniOperationGetType(getRawPointer());
+            return IBitEnum.valueOf(r, OperationT.class);
+        }
+
+        @CheckForNull
+        public Oid getId() {
+            byte[] raw = jniOperationGetId(this.getRawPointer());
+            return raw == null ? null : Oid.of(raw);
+        }
+
+        @CheckForNull
+        public String getExec() {
+            return jniOperationGetExec(getRawPointer());
+        }
     }
 }

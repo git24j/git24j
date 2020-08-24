@@ -77,7 +77,7 @@ public class TagTest extends TestBase {
                             testRepo,
                             "unittest-annotated-tag",
                             Commit.lookup(testRepo, Oid.of(TAG_V01_TARGET)),
-                            Signature.now("tester", "tester@abc.cc"),
+                            Signature.create("tester", "tester@abc.cc"),
                             "creating annotated tag from test");
             Assert.assertFalse(out.isEmpty());
         }

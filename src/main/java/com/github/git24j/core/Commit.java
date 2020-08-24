@@ -11,6 +11,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import static com.github.git24j.core.GitException.ErrorCode.ENOTFOUND;
 
 public class Commit extends GitObject {
+
     static native int jniAmend(
             Oid outOid,
             long commitToAmend,
@@ -562,5 +563,10 @@ public class Commit extends GitObject {
         AtomicLong out = new AtomicLong();
         Error.throwIfNeeded(jniDup(out, getRawPointer()));
         return new Commit(false, out.get());
+    }
+
+    @FunctionalInterface
+    public interface SigningCb {
+        int accept(String signature, String signatureField, String commitContent);
     }
 }

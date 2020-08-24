@@ -113,16 +113,13 @@ long j_call_getter_long(JNIEnv *env, jclass clz, jobject obj, const char *method
 
 char *j_copy_of_jstring(JNIEnv *env, jstring jstr, bool nullable)
 {
+    if (!nullable)
+    {
+        assert(jstr && "cannot cast null to c string");
+    }
     if (!jstr)
     {
-        if (nullable)
-        {
-            return NULL;
-        }
-        else
-        {
-            j_throw_java_error(env, "java/lang/NullPointerException", "cannot cast null to c string");
-        }
+        return NULL;
     }
 
     const char *c_str = (*env)->GetStringUTFChars(env, jstr, NULL);
@@ -285,6 +282,7 @@ void j_git_oid_from_java(JNIEnv *env, jobject oid, git_oid *c_oid)
 {
     if (oid == NULL)
     {
+        git_oid_fromstr(c_oid, "");
         return;
     }
     assert(c_oid && "receiving oid must not be null");
