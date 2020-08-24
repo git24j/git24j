@@ -14,7 +14,7 @@ public class SignatureTest extends TestBase {
 
     @Test
     public void common() {
-        Assert.assertEquals(Signature.now(_tester, _email).getName(), _tester);
+        Assert.assertEquals(Signature.create(_tester, _email).getName(), _tester);
         Signature sig1 =
                 Signature.fromBuffer(String.format("%s <%s> 1590369132 -0400", _tester, _email));
         Assert.assertEquals(sig1.getEmail(), _email);

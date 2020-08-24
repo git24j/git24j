@@ -1,12 +1,12 @@
 package com.github.git24j.core;
 
-import javax.annotation.Nonnull;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
+import javax.annotation.Nonnull;
 
 public class Signature extends CAutoReleasable {
     /** int git_signature_default(git_signature **out, git_repository *repo); */
@@ -81,7 +81,7 @@ public class Signature extends CAutoReleasable {
      * @throws GitException git errors
      */
     @Nonnull
-    public static Signature now(@Nonnull String name, @Nonnull String email) {
+    public static Signature create(@Nonnull String name, @Nonnull String email) {
         Signature out = new Signature(false, 0);
         Error.throwIfNeeded(jniNow(out._rawPtr, name, email));
         if (out.isNull()) {

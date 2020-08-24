@@ -252,8 +252,8 @@ public class CommitTest extends TestBase {
                     Commit.create(
                             testRepo,
                             "NEW_HEAD",
-                            Signature.now("tester", "test@ab.cc"),
-                            Signature.now("admin", "admin@ab.cc"),
+                            Signature.create("tester", "test@ab.cc"),
+                            Signature.create("admin", "admin@ab.cc"),
                             null,
                             "some commit message",
                             masterTree,
@@ -284,8 +284,8 @@ public class CommitTest extends TestBase {
             Buf buf =
                     Commit.createBuffer(
                             testRepo,
-                            Signature.now("tester", "test@ab.cc"),
-                            Signature.now("admin", "admin@ab.cc"),
+                            Signature.create("tester", "test@ab.cc"),
+                            Signature.create("admin", "admin@ab.cc"),
                             null,
                             "some commit message",
                             masterTree,
@@ -316,8 +316,8 @@ public class CommitTest extends TestBase {
             Buf buf =
                     Commit.createBuffer(
                             testRepo,
-                            Signature.now("tester", "test@ab.cc"),
-                            Signature.now("admin", "admin@ab.cc"),
+                            Signature.create("tester", "test@ab.cc"),
+                            Signature.create("admin", "admin@ab.cc"),
                             null,
                             "some commit message",
                             masterTree,

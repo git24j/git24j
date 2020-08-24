@@ -324,7 +324,6 @@ public class Diff extends CAutoReleasable {
     static native int jniTreeToWorkdirWithIndex(
             AtomicLong diff, long repoPtr, long oldTree, long opts);
 
-    AtomicLong _rawPtr = new AtomicLong();
 
     protected Diff(boolean isWeak, long rawPtr) {
         super(isWeak, rawPtr);
@@ -346,15 +345,15 @@ public class Diff extends CAutoReleasable {
      * @return Diff between {@code oldTree} and {@code newTree}
      * @throws GitException git errors
      */
-    public static Diff treeToTree(Repository repo, Tree oldTree, Tree newTree, Options opts) {
+    public static Diff treeToTree(@Nonnull Repository repo, @Nullable Tree oldTree, @Nullable Tree newTree, @Nullable Options opts) {
         Diff diff = new Diff(false, 0);
         int e =
                 jniTreeToTree(
                         diff._rawPtr,
                         repo.getRawPointer(),
-                        oldTree.getRawPointer(),
-                        newTree.getRawPointer(),
-                        opts.getRawPointer());
+                        oldTree == null ? 0 : oldTree.getRawPointer(),
+                        newTree == null ? 0 : newTree.getRawPointer(),
+                        opts == null ? 0 : opts.getRawPointer());
         Error.throwIfNeeded(e);
         return diff;
     }
@@ -1704,7 +1703,12 @@ public class Diff extends CAutoReleasable {
         }
 
         public String getContent() {
-            return jniLineGetContent(getRawPointer());
+            String content = jniLineGetContent(getRawPointer());
+            int contentLen = jniLineGetContentLen(getRawPointer());
+            if (content.length() >= contentLen) {
+                return content.substring(0, contentLen);
+            }
+            return content;
         }
     }
 

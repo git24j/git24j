@@ -1,5 +1,6 @@
 package com.github.git24j.core;
 
+import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Optional;
@@ -140,14 +141,14 @@ public class Patch extends CAutoReleasable {
      * @param idx Index into diff list
      * @throws GitException git errors
      */
-    @Nonnull
-    public static Optional<Patch> fromDiff(@Nonnull Diff diff, int idx) {
+    @CheckForNull
+    public static Patch fromDiff(@Nonnull Diff diff, int idx) {
         Patch out = new Patch(false, 0);
         Error.throwIfNeeded(jniFromDiff(out._rawPtr, diff.getRawPointer(), idx));
         if (out._rawPtr.get() == 0) {
-            return Optional.empty();
+            return null;
         }
-        return Optional.of(out);
+        return out;
     }
 
     /**
