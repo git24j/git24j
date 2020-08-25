@@ -7,25 +7,6 @@
 #include <stdio.h>
 
 /** -------- Wrapper Body ---------- */
-/** int git_rebase_init_options(git_rebase_options *opts, unsigned int version); */
-JNIEXPORT jint JNICALL J_MAKE_METHOD(Rebase_jniInitOptions)(JNIEnv *env, jclass obj, jlong optsPtr, jint version)
-{
-    int r = git_rebase_init_options((git_rebase_options *)optsPtr, version);
-    return r;
-}
-
-JNIEXPORT jint JNICALL J_MAKE_METHOD(Rebase_jniOptionsNew)(JNIEnv *env, jclass obj, jobject outOpts, jint version)
-{
-    git_rebase_options *opts = (git_rebase_options *)malloc(sizeof(git_rebase_options));
-    int r = git_rebase_init_options(opts, version);
-    (*env)->CallVoidMethod(env, outOpts, jniConstants->midAtomicLongSet, (long)opts);
-    return r;
-}
-
-JNIEXPORT void JNICALL J_MAKE_METHOD(Rebase_jniOptionsFree)(JNIEnv *env, jclass obj, jlong optsPtr)
-{
-    free((git_rebase_options *)optsPtr);
-}
 
 /** int git_rebase_init(git_rebase **out, git_repository *repo, const git_annotated_commit *branch, const git_annotated_commit *upstream, const git_annotated_commit *onto, const git_rebase_options *opts); */
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Rebase_jniInit)(JNIEnv *env, jclass obj, jobject out, jlong repoPtr, jlong branchPtr, jlong upstreamPtr, jlong ontoPtr, jlong optsPtr)
@@ -115,4 +96,190 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Rebase_jniFinish)(JNIEnv *env, jclass obj, 
 JNIEXPORT void JNICALL J_MAKE_METHOD(Rebase_jniFree)(JNIEnv *env, jclass obj, jlong rebasePtr)
 {
     git_rebase_free((git_rebase *)rebasePtr);
+}
+
+/** const git_oid * git_rebase_onto_id(git_rebase *rebase); */
+JNIEXPORT jbyteArray JNICALL J_MAKE_METHOD(Rebase_jniOntoId)(JNIEnv *env, jclass obj, jlong rebasePtr)
+{
+    const git_oid *r = git_rebase_onto_id((git_rebase *)rebasePtr);
+    return j_git_oid_to_bytearray(env, r);
+}
+
+/** const char * git_rebase_onto_name(git_rebase *rebase); */
+JNIEXPORT jstring JNICALL J_MAKE_METHOD(Rebase_jniOntoName)(JNIEnv *env, jclass obj, jlong rebasePtr)
+{
+    const char *r = git_rebase_onto_name((git_rebase *)rebasePtr);
+    return (*env)->NewStringUTF(env, r);
+}
+
+/** int git_rebase_options_init(git_rebase_options *opts, unsigned int version); */
+JNIEXPORT jint JNICALL J_MAKE_METHOD(Rebase_jniOptionsInit)(JNIEnv *env, jclass obj, jlong optsPtr, jint version)
+{
+    int r = git_rebase_options_init((git_rebase_options *)optsPtr, version);
+    return r;
+}
+
+/** const git_oid * git_rebase_orig_head_id(git_rebase *rebase); */
+JNIEXPORT jbyteArray JNICALL J_MAKE_METHOD(Rebase_jniOrigHeadId)(JNIEnv *env, jclass obj, jlong rebasePtr)
+{
+    const git_oid *r = git_rebase_orig_head_id((git_rebase *)rebasePtr);
+    return j_git_oid_to_bytearray(env, r);
+}
+
+/** const char * git_rebase_orig_head_name(git_rebase *rebase); */
+JNIEXPORT jstring JNICALL J_MAKE_METHOD(Rebase_jniOrigHeadName)(JNIEnv *env, jclass obj, jlong rebasePtr)
+{
+    const char *r = git_rebase_orig_head_name((git_rebase *)rebasePtr);
+    return (*env)->NewStringUTF(env, r);
+}
+
+/** -------- git_rebase_operation ---------- */
+/** int type*/
+JNIEXPORT jint JNICALL J_MAKE_METHOD(Rebase_jniOperationGetType)(JNIEnv *env, jclass obj, jlong operationPtr)
+{
+    return ((git_rebase_operation *)operationPtr)->type;
+}
+
+/** const git_oid id*/
+JNIEXPORT jbyteArray JNICALL J_MAKE_METHOD(Rebase_jniOperationGetId)(JNIEnv *env, jclass obj, jlong operationPtr)
+{
+    return j_git_oid_to_bytearray(env, &(((git_rebase_operation *)operationPtr)->id));
+}
+
+/** const char *exec*/
+JNIEXPORT jstring JNICALL J_MAKE_METHOD(Rebase_jniOperationGetExec)(JNIEnv *env, jclass obj, jlong operationPtr)
+{
+    const char *exec = ((git_rebase_operation *)operationPtr)->exec;
+    return (*env)->NewStringUTF(env, exec);
+}
+
+/** -------- git_rebase_options ---------- */
+/** int git_rebase_init_options(git_rebase_options *opts, unsigned int version); */
+JNIEXPORT jint JNICALL J_MAKE_METHOD(Rebase_jniInitOptions)(JNIEnv *env, jclass obj, jlong optsPtr, jint version)
+{
+    int r = git_rebase_init_options((git_rebase_options *)optsPtr, version);
+    return r;
+}
+
+JNIEXPORT jint JNICALL J_MAKE_METHOD(Rebase_jniOptionsNew)(JNIEnv *env, jclass obj, jobject outOpts, jint version)
+{
+    git_rebase_options *opts = (git_rebase_options *)malloc(sizeof(git_rebase_options));
+    int r = git_rebase_init_options(opts, version);
+    opts->rewrite_notes_ref = NULL;
+    (*env)->CallVoidMethod(env, outOpts, jniConstants->midAtomicLongSet, (long)opts);
+    return r;
+}
+
+JNIEXPORT void JNICALL J_MAKE_METHOD(Rebase_jniOptionsFree)(JNIEnv *env, jclass obj, jlong optsPtr)
+{
+    git_rebase_options *opts = (git_rebase_options *)optsPtr;
+    opts->signing_cb = NULL;
+    j_cb_payload_release(env, opts->payload);
+    free(opts->payload);
+    free((void *)opts->rewrite_notes_ref);
+    free(opts);
+}
+
+/** unsigned int version*/
+JNIEXPORT jint JNICALL J_MAKE_METHOD(Rebase_jniOptionsGetVersion)(JNIEnv *env, jclass obj, jlong optionsPtr)
+{
+    return ((git_rebase_options *)optionsPtr)->version;
+}
+
+/** int quiet*/
+JNIEXPORT jint JNICALL J_MAKE_METHOD(Rebase_jniOptionsGetQuiet)(JNIEnv *env, jclass obj, jlong optionsPtr)
+{
+    return ((git_rebase_options *)optionsPtr)->quiet;
+}
+
+/** int inmemory*/
+JNIEXPORT jint JNICALL J_MAKE_METHOD(Rebase_jniOptionsGetInmemory)(JNIEnv *env, jclass obj, jlong optionsPtr)
+{
+    return ((git_rebase_options *)optionsPtr)->inmemory;
+}
+
+/** const char *rewrite_notes_ref*/
+JNIEXPORT jstring JNICALL J_MAKE_METHOD(Rebase_jniOptionsGetRewriteNotesRef)(JNIEnv *env, jclass obj, jlong optionsPtr)
+{
+    const char *res = ((git_rebase_options *)optionsPtr)->rewrite_notes_ref;
+    return (*env)->NewStringUTF(env, res);
+}
+
+/** git_merge_options merge_options*/
+JNIEXPORT jlong JNICALL J_MAKE_METHOD(Rebase_jniOptionsGetMergeOptions)(JNIEnv *env, jclass obj, jlong optionsPtr)
+{
+    return (jlong) & (((git_rebase_options *)optionsPtr)->merge_options);
+}
+
+/** git_checkout_options checkout_options*/
+JNIEXPORT jlong JNICALL J_MAKE_METHOD(Rebase_jniOptionsGetCheckoutOptions)(JNIEnv *env, jclass obj, jlong optionsPtr)
+{
+    git_checkout_options *r = &((git_rebase_options *)optionsPtr)->checkout_options;
+    return (jlong)r;
+}
+
+/** unsigned int version*/
+JNIEXPORT void JNICALL J_MAKE_METHOD(Rebase_jniOptionsSetVersion)(JNIEnv *env, jclass obj, jlong optionsPtr, jint version)
+{
+    ((git_rebase_options *)optionsPtr)->version = (unsigned int)version;
+}
+
+/** int quiet*/
+JNIEXPORT void JNICALL J_MAKE_METHOD(Rebase_jniOptionsSetQuiet)(JNIEnv *env, jclass obj, jlong optionsPtr, jint quiet)
+{
+    ((git_rebase_options *)optionsPtr)->quiet = (int)quiet;
+}
+
+/** int inmemory*/
+JNIEXPORT void JNICALL J_MAKE_METHOD(Rebase_jniOptionsSetInmemory)(JNIEnv *env, jclass obj, jlong optionsPtr, jint inmemory)
+{
+    ((git_rebase_options *)optionsPtr)->inmemory = (int)inmemory;
+}
+
+/** const char *rewrite_notes_ref*/
+JNIEXPORT void JNICALL J_MAKE_METHOD(Rebase_jniOptionsSetRewriteNotesRef)(JNIEnv *env, jclass obj, jlong optionsPtr, jstring rewriteNotesRef)
+{
+    char *ref = j_copy_of_jstring(env, rewriteNotesRef, true);
+    ((git_rebase_options *)optionsPtr)->rewrite_notes_ref = ref;
+}
+
+int j_rebase_git_commit_signing_cb(git_buf *signature, git_buf *signature_field, const char *commit_content, void *payload)
+{
+    assert(payload && "git_rebase_options.siging_cb must be called with payload");
+    j_cb_payload *j_payload = (j_cb_payload *)payload;
+    JNIEnv *env = getEnv();
+    jstring jSig = j_git_buf_to_jstring(env, signature);
+    jstring jSigField = j_git_buf_to_jstring(env, signature_field);
+    jstring commitContent = (*env)->NewStringUTF(env, commit_content);
+    int r = (*env)->CallIntMethod(env, j_payload->callback, j_payload->mid, jSig, jSigField, commitContent);
+    if (jSig)
+    {
+        (*env)->DeleteLocalRef(env, jSig);
+    }
+    if (jSigField)
+    {
+        (*env)->DeleteLocalRef(env, jSigField);
+    }
+    if (commitContent)
+    {
+        (*env)->DeleteLocalRef(env, commitContent);
+    }
+    return r;
+}
+
+/** git_commit_signing_cb signing_cb*/
+JNIEXPORT void JNICALL J_MAKE_METHOD(Rebase_jniOptionsSetSigningCb)(JNIEnv *env, jclass obj, jlong optionsPtr, jobject signingCb)
+{
+    git_rebase_options *opts = (git_rebase_options *)optionsPtr;
+    j_cb_payload *payload = (j_cb_payload *)malloc(sizeof(j_cb_payload));
+    j_cb_payload_init(env, payload, signingCb, "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)I");
+    opts->payload = payload;
+    opts->signing_cb = j_rebase_git_commit_signing_cb;
+}
+
+/** void *payload*/
+JNIEXPORT void JNICALL J_MAKE_METHOD(Rebase_jniOptionsSetPayload)(JNIEnv *env, jclass obj, jlong optionsPtr, jlong payload)
+{
+    /**FIXME: callback and payload needs human review*/
+    ((git_rebase_options *)optionsPtr)->payload = (void *)payload;
 }

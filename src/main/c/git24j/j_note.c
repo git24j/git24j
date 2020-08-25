@@ -33,7 +33,7 @@ int j_git_note_foreach_cb(const git_oid *blob_id, const git_oid *annotated_objec
 
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Note_jniForeach)(JNIEnv *env, jclass obj, jlong repoPtr, jstring notesRef, jobject foreachCb)
 {
-    char *notes_ref = j_copy_of_jstring(env, notesRef, false);
+    char *notes_ref = j_copy_of_jstring(env, notesRef, true);
     int r;
     if (foreachCb)
     {

@@ -1,0 +1,10 @@
+typedef struct {
+	unsigned int version;
+	int quiet;
+	int inmemory;
+	const char *rewrite_notes_ref;
+	git_merge_options merge_options;
+	git_checkout_options checkout_options;
+	git_commit_signing_cb signing_cb;
+	void *payload;
+} git_rebase_options;

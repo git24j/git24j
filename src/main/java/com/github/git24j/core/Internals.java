@@ -70,6 +70,11 @@ class Internals {
         int accept(long ptr, int i, String s);
     }
 
+    @FunctionalInterface
+    interface SSSCallback {
+        int accept(String s1, String s2, String s3);
+    }
+
     /** Class to hold */
     static class OidArray {
         private final List<Oid> _oids = new ArrayList<>();

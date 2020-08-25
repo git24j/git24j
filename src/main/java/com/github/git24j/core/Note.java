@@ -1,10 +1,10 @@
 package com.github.git24j.core;
 
+import java.util.Optional;
+import java.util.concurrent.atomic.AtomicLong;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.Optional;
-import java.util.concurrent.atomic.AtomicLong;
 
 public class Note extends CAutoReleasable {
     /** const git_signature * git_note_author(const git_note *note); */
@@ -25,9 +25,6 @@ public class Note extends CAutoReleasable {
             Oid oid,
             String note,
             int allowNoteOverwrite);
-
-    /** int git_note_commit_iterator_new(git_note_iterator **out, git_commit *notes_commit); */
-    static native int jniCommitIteratorNew(AtomicLong out, long notesCommit);
 
     /**
      * int git_note_commit_read(git_note **out, git_repository *repo, git_commit *notes_commit,
@@ -82,20 +79,8 @@ public class Note extends CAutoReleasable {
     /** const git_oid * git_note_id(const git_note *note); */
     static native byte[] jniId(long note);
 
-    /** void git_note_iterator_free(git_note_iterator *it); */
-    static native void jniIteratorFree(long it);
-
-    /**
-     * int git_note_iterator_new(git_note_iterator **out, git_repository *repo, const char
-     * *notes_ref);
-     */
-    static native int jniIteratorNew(AtomicLong out, long repoPtr, String notesRef);
-
     /** const char * git_note_message(const git_note *note); */
     static native String jniMessage(long note);
-
-    /** int git_note_next(git_oid *note_id, git_oid *annotated_id, git_note_iterator *it); */
-    static native int jniNext(Oid note_id, Oid annotated_id, long it);
 
     /**
      * int git_note_read(git_note **out, git_repository *repo, const char *notes_ref, const git_oid
@@ -127,12 +112,13 @@ public class Note extends CAutoReleasable {
      * @throws GitException git errors
      */
     @CheckForNull
-    public static Note read(@Nonnull Repository repo, @Nonnull String notesRef, @Nonnull Oid oid) {
+    public static Note read(@Nonnull Repository repo, @Nullable String notesRef, @Nonnull Oid oid) {
         Note out = new Note(false, 0);
-        Error.throwIfNeeded(jniRead(out._rawPtr, repo.getRawPointer(), notesRef, oid));
-        if (out._rawPtr.get() == 0) {
+        int e = jniRead(out._rawPtr, repo.getRawPointer(), notesRef, oid);
+        if (e == GitException.ErrorCode.ENOTFOUND.getCode()) {
             return null;
         }
+        Error.throwIfNeeded(e);
         return out;
     }
 
@@ -151,12 +137,11 @@ public class Note extends CAutoReleasable {
     public static Note commitRead(
             @Nonnull Repository repo, @Nonnull Commit notesCommit, @Nonnull Oid oid) {
         Note note = new Note(false, 0);
-        Error.throwIfNeeded(
-                jniCommitRead(
-                        note._rawPtr, repo.getRawPointer(), notesCommit.getRawPointer(), oid));
-        if (note._rawPtr.get() == 0) {
+        int e = jniCommitRead(note._rawPtr, repo.getRawPointer(), notesCommit.getRawPointer(), oid);
+        if (e == GitException.ErrorCode.ENOTFOUND.getCode()) {
             return null;
         }
+        Error.throwIfNeeded(e);
         return note;
     }
 
@@ -174,8 +159,8 @@ public class Note extends CAutoReleasable {
      * @return oid to the the crated note or empty in case of error
      * @throws GitException git errors
      */
-    @Nonnull
-    public static Optional<Oid> create(
+    @CheckForNull
+    public static Oid create(
             @Nonnull Repository repo,
             @Nullable String notesRef,
             @Nonnull Signature author,
@@ -194,7 +179,7 @@ public class Note extends CAutoReleasable {
                         oid,
                         note,
                         force ? 1 : 0));
-        return outOid.getId() == null ? Optional.empty() : Optional.of(outOid);
+        return outOid.getId() == null ? null : outOid;
     }
 
     /**
@@ -303,49 +288,16 @@ public class Note extends CAutoReleasable {
      * @return the name of the default notes reference
      * @throws GitException git errors
      */
-    public static Optional<String> defaultRef(Repository repo) {
+    @CheckForNull
+    public static String defaultRef(Repository repo) {
         Buf out = new Buf();
         Error.throwIfNeeded(jniDefaultRef(out, repo.getRawPointer()));
-        return out.getString();
+        return out.getString().orElse(null);
     }
 
     @Override
     protected void freeOnce(long cPtr) {
         jniFree(cPtr);
-    }
-
-    /**
-     * Creates a new iterator for notes
-     *
-     * <p>The iterator must be freed manually by the user.
-     *
-     * @param repo repository where to look up the note
-     * @param notesRef canonical name of the reference to use (optional); defaults to
-     *     "refs/notes/commits"
-     * @return iterator
-     * @throws GitException git errors
-     */
-    @Nonnull
-    public Iterator iteratorNew(@Nonnull Repository repo, @Nullable String notesRef) {
-        Iterator out = new Iterator(false, 0);
-        Error.throwIfNeeded(jniIteratorNew(out._rawPtr, repo.getRawPointer(), notesRef));
-        return out;
-    }
-
-    /**
-     * Creates a new iterator for notes from a commit
-     *
-     * <p>The iterator must be freed manually by the user.
-     *
-     * @param notesCommit a pointer to the notes commit object
-     * @return iterator
-     * @throws GitException git errors
-     */
-    @Nonnull
-    public Iterator commitIteratorNew(@Nonnull Commit notesCommit) {
-        Iterator out = new Iterator(false, 0);
-        Error.throwIfNeeded(jniCommitIteratorNew(out._rawPtr, notesCommit.getRawPointer()));
-        return out;
     }
 
     /** @return the note author */
@@ -355,13 +307,13 @@ public class Note extends CAutoReleasable {
         if (ptr == 0) {
             return null;
         }
-        return new Signature(false, ptr);
+        return new Signature(true, ptr);
     }
 
     /** @return the note committer */
     public Signature committer() {
         long ptr = jniCommitter(getRawPointer());
-        return ptr == 0 ? null : new Signature(false, ptr);
+        return ptr == 0 ? null : new Signature(true, ptr);
     }
 
     /** @return the note message */
@@ -392,29 +344,8 @@ public class Note extends CAutoReleasable {
      * note_cb, void *payload);
      */
     @FunctionalInterface
-    interface ForeachCb {
+    public interface ForeachCb {
         int accept(Oid blobId, Oid annotatedObjectId);
-    }
-
-    public static class Iterator extends CAutoReleasable {
-        protected Iterator(boolean isWeak, long rawPtr) {
-            super(isWeak, rawPtr);
-        }
-
-        @Override
-        protected void freeOnce(long cPtr) {
-            jniIteratorFree(cPtr);
-        }
-    }
-
-    public static class Entry {
-        private final Oid oid;
-        private final Oid annotatedId;
-
-        public Entry(Oid oid, Oid annotatedId) {
-            this.oid = oid;
-            this.annotatedId = annotatedId;
-        }
     }
 
     /** result of adding note for an object from a commit */

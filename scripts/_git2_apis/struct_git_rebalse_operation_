@@ -1,0 +1,5 @@
+typedef struct {
+	int type;
+	const git_oid id;
+	const char *exec;
+} git_rebase_operation;
