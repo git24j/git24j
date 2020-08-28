@@ -1,10 +1,10 @@
 package com.github.git24j.core;
 
+import java.nio.charset.Charset;
+import java.util.concurrent.atomic.AtomicLong;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.Optional;
-import java.util.concurrent.atomic.AtomicLong;
 
 public class Rebase extends CAutoReleasable {
 
@@ -240,15 +240,15 @@ public class Rebase extends CAutoReleasable {
      * Gets the rebase operation specified by the given index.
      *
      * @param idx The index of the rebase operation to retrieve
-     * @return The rebase operation or empty if `idx` was out of bounds
+     * @return The rebase operation or null if `idx` was out of bounds
      */
-    @Nonnull
-    public Optional<Operation> operationByIndex(int idx) {
+    @Nullable
+    public Operation operationByIndex(int idx) {
         long ptr = jniOperationByindex(getRawPointer(), idx);
         if (ptr == 0) {
-            return Optional.empty();
+            return null;
         }
-        return Optional.of(new Operation(ptr));
+        return new Operation(ptr);
     }
 
     /**
@@ -260,13 +260,11 @@ public class Rebase extends CAutoReleasable {
      * @return Pointer to store the rebase operation that is to be performed next
      * @throws GitException git errors
      */
-    public Optional<Operation> next() {
+    @Nonnull
+    public Operation next() {
         Operation out = new Operation(0);
         Error.throwIfNeeded(jniNext(out._rawPtr, getRawPointer()));
-        if (out._rawPtr.get() == 0) {
-            return Optional.empty();
-        }
-        return Optional.of(out);
+        return out;
     }
 
     /**
@@ -306,7 +304,7 @@ public class Rebase extends CAutoReleasable {
     public Oid commit(
             @Nullable Signature author,
             @Nonnull Signature committer,
-            @Nullable String messageEncoding,
+            @Nullable Charset messageEncoding,
             @Nullable String message) {
         Oid oid = new Oid();
         Error.throwIfNeeded(
@@ -315,7 +313,7 @@ public class Rebase extends CAutoReleasable {
                         getRawPointer(),
                         author == null ? 0 : author.getRawPointer(),
                         committer.getRawPointer(),
-                        messageEncoding,
+                        messageEncoding == null ? null : messageEncoding.name(),
                         message));
         return oid;
     }
