@@ -19,6 +19,7 @@ import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import javax.annotation.Nonnull;
 import org.junit.Assert;
 import org.junit.Rule;
@@ -42,7 +43,7 @@ public class StatusExampleTest extends TestBase {
 
     private static String showBranch(@Nonnull Repository repo) {
         String r =
-                repo.head()
+                Optional.ofNullable(repo.head())
                         .map(Reference::shorthand)
                         .map(br -> String.format("## %s\n", br))
                         .orElse("HEAD (no branch)");
@@ -76,7 +77,7 @@ public class StatusExampleTest extends TestBase {
         int entryCnt = statusList.entryCount();
         for (int i = 0; i < entryCnt; i++) {
             Status.Entry entry = statusList.byIndex(i);
-            Diff.Delta delta = entry.getHeadToIndex().orElse(null);
+            Diff.Delta delta = entry.getHeadToIndex();
             if (delta == null) {
                 continue;
             }
@@ -84,20 +85,28 @@ public class StatusExampleTest extends TestBase {
             if (flags.contains(WT_NEW)) {
                 untracked.add(
                         String.format(
-                                "#\t%s%n", delta.getOldFile().map(Diff.File::getPath).orElse("")));
+                                "#\t%s%n",
+                                Optional.ofNullable(delta.getOldFile())
+                                        .map(Diff.File::getPath)
+                                        .orElse("")));
                 continue;
             }
             if (flags.contains(IGNORED)) {
                 ignored.add(
                         String.format(
-                                "#\t%s%n", delta.getOldFile().map(Diff.File::getPath).orElse("")));
+                                "#\t%s%n",
+                                Optional.ofNullable(delta.getOldFile())
+                                        .map(Diff.File::getPath)
+                                        .orElse("")));
                 continue;
             }
             if (flags.contains(CONFLICTED)) {
                 conflicted.add(
                         String.format(
                                 "#\tboth modified: %s",
-                                delta.getOldFile().map(Diff.File::getPath).orElse("")));
+                                Optional.of(delta.getOldFile())
+                                        .map(Diff.File::getPath)
+                                        .orElse("")));
             }
             if (flags.contains(CURRENT)) {
                 continue;
@@ -122,8 +131,10 @@ public class StatusExampleTest extends TestBase {
                 continue;
             }
 
-            String oldPath = delta.getOldFile().map(Diff.File::getPath).orElse(null);
-            String newPath = delta.getNewFile().map(Diff.File::getPath).orElse(null);
+            String oldPath =
+                    Optional.ofNullable(delta.getOldFile()).map(Diff.File::getPath).orElse(null);
+            String newPath =
+                    Optional.ofNullable(delta.getNewFile()).map(Diff.File::getPath).orElse(null);
             boolean isStaged =
                     Collections.disjoint(
                             flags, EnumSet.of(WT_DELETED, WT_MODIFIED, WT_RENAMED, WT_TYPECHANGE));

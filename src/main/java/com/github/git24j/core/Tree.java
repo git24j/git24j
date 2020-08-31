@@ -1,12 +1,11 @@
 package com.github.git24j.core;
 
+import java.nio.file.Path;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicLong;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.nio.file.Path;
-import java.util.List;
-import java.util.Optional;
-import java.util.concurrent.atomic.AtomicLong;
 
 public class Tree extends GitObject {
 
@@ -186,10 +185,10 @@ public class Tree extends GitObject {
      * @param filename the filename of the desired entry
      * @return the tree entry; empty if not found
      */
-    @Nonnull
-    public Optional<Entry> entryByName(@Nonnull String filename) {
+    @Nullable
+    public Entry entryByName(@Nonnull String filename) {
         long ptr = jniEntryByname(getRawPointer(), filename);
-        return ptr == 0 ? Optional.empty() : Optional.of(new Entry(true, ptr));
+        return ptr == 0 ? null : new Entry(true, ptr);
     }
 
     /**
@@ -201,10 +200,10 @@ public class Tree extends GitObject {
      * @param idx the position in the entry list
      * @return the tree entry; empty if not found
      */
-    @Nonnull
-    public Optional<Entry> entryByIndex(int idx) {
+    @Nullable
+    public Entry entryByIndex(int idx) {
         long ptr = jniEntryByindex(getRawPointer(), idx);
-        return ptr == 0 ? Optional.empty() : Optional.of(new Entry(true, ptr));
+        return ptr == 0 ? null : new Entry(true, ptr);
     }
 
     /**
@@ -218,10 +217,10 @@ public class Tree extends GitObject {
      * @param id the sha being looked for
      * @return the tree entry; empty if not found
      */
-    @Nonnull
-    public Optional<Entry> entryById(@Nonnull Oid id) {
+    @Nullable
+    public Entry entryById(@Nonnull Oid id) {
         long ptr = jniEntryByid(getRawPointer(), id);
-        return ptr == 0 ? Optional.empty() : Optional.of(new Entry(true, ptr));
+        return ptr == 0 ? null : new Entry(true, ptr);
     }
 
     /**
@@ -231,15 +230,15 @@ public class Tree extends GitObject {
      * @return found tree entry; empty if not found
      * @throws GitException 0 on success; GIT_ENOTFOUND if the path does not exist
      */
-    @Nonnull
-    public Optional<Entry> entryByPath(@Nonnull Path path) {
+    @Nullable
+    public Entry entryByPath(@Nonnull Path path) {
         Entry out = new Entry(false, 0);
         int e = jniEntryBypath(out._rawPtr, getRawPointer(), path.toString());
         if (e == GitException.ErrorCode.ENOTFOUND.getCode()) {
-            return Optional.empty();
+            return null;
         }
         Error.throwIfNeeded(e);
-        return Optional.of(out);
+        return out;
     }
 
     @Override
@@ -463,12 +462,13 @@ public class Tree extends GitObject {
          * @param filename Name of the entry
          * @return entry if found
          */
-        public Optional<Entry> get(@Nonnull String filename) {
+        @Nullable
+        public Entry get(@Nonnull String filename) {
             long ptr = jniBuilderGet(this.getRawPointer(), filename);
             if (ptr == 0) {
-                return Optional.empty();
+                return null;
             }
-            return Optional.of(new Entry(true, ptr));
+            return new Entry(true, ptr);
         }
 
         /**

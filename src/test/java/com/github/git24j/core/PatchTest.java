@@ -1,15 +1,12 @@
 package com.github.git24j.core;
 
+import java.util.LinkedHashSet;
+import java.util.Set;
+import java.util.stream.Collectors;
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
-
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.Set;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
 
 public class PatchTest extends TestBase {
 
@@ -21,8 +18,7 @@ public class PatchTest extends TestBase {
     private static final String README_BLOB1 = "08f8e5eba8074e2d3d5e17a8902eaea07633d0af";
     private static final String README_BLOB2 = "d628ad3b584b5ab3fa93dbdbcc66a15e4413d9b2";
 
-    @Rule
-    public TemporaryFolder folder = new TemporaryFolder();
+    @Rule public TemporaryFolder folder = new TemporaryFolder();
 
     @Test
     public void getDelta() {
@@ -33,13 +29,12 @@ public class PatchTest extends TestBase {
             Patch patch = Patch.fromDiff(diff, 0);
             Assert.assertNotNull(patch);
             Assert.assertEquals(Diff.DeltaT.MODIFIED, patch.getDelta().getStatus());
-            Assert.assertTrue(patch.getHunk(0).get().getLines() > 0);
+            Assert.assertTrue(patch.getHunk(0).getLines() > 0);
             Patch.LineStats lineStats = patch.lineStats();
             Assert.assertEquals(13, lineStats.getTotalAdditions());
             Assert.assertEquals(4, lineStats.getTotalDeletions());
             Assert.assertEquals(
-                    "commit 0: add .gitignore\n",
-                    patch.getLineInHunk(0, 0).get().getContent());
+                    "commit 0: add .gitignore\n", patch.getLineInHunk(0, 0).getContent());
             Assert.assertEquals(18, patch.numLinesInHunk(0));
             Assert.assertTrue(patch.size(true, true, true) > 0);
             Set<String> hunks = new LinkedHashSet<>();

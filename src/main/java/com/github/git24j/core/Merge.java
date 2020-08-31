@@ -5,7 +5,6 @@ import static com.github.git24j.core.Internals.OidArray;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import javax.annotation.Nonnull;
@@ -280,15 +279,15 @@ public class Merge {
      * @return the OID of a merge base between 'one' and 'two'
      * @throws GitException git errors 0 on success, GIT_ENOTFOUND if not found or error code
      */
-    @Nonnull
-    public static Optional<Oid> base(@Nonnull Repository repo, @Nonnull Oid one, @Nonnull Oid two) {
+    @Nullable
+    public static Oid base(@Nonnull Repository repo, @Nonnull Oid one, @Nonnull Oid two) {
         Oid out = new Oid();
         int e = jniBase(out, repo.getRawPointer(), one, two);
         if (ENOTFOUND.getCode() == e) {
-            return Optional.empty();
+            return null;
         }
         Error.throwIfNeeded(e);
-        return Optional.of(out);
+        return out;
     }
 
     /**
@@ -438,15 +437,15 @@ public class Merge {
      * @return the OID of a merge base considering all the commits
      * @throws GitException git errors
      */
-    @Nonnull
-    public static Optional<Oid> baseMany(@Nonnull Repository repo, @Nonnull Oid[] inputArray) {
+    @Nullable
+    public static Oid baseMany(@Nonnull Repository repo, @Nonnull Oid[] inputArray) {
         Oid outOid = new Oid();
         int e = jniBaseMany(outOid, repo.getRawPointer(), inputArray);
         if (ENOTFOUND.getCode() == e) {
-            return Optional.empty();
+            return null;
         }
         Error.throwIfNeeded(e);
-        return Optional.of(outOid);
+        return outOid;
     }
 
     /**
@@ -476,15 +475,15 @@ public class Merge {
      * @return the OID of a merge base considering all the commits or empty if not found
      * @throws GitException git errors
      */
-    @Nonnull
-    public static Optional<Oid> baseOctopus(@Nonnull Repository repo, @Nonnull Oid[] inputArray) {
+    @Nullable
+    public static Oid baseOctopus(@Nonnull Repository repo, @Nonnull Oid[] inputArray) {
         Oid outOid = new Oid();
         int e = jniBaseOctopus(outOid, repo.getRawPointer(), inputArray);
         if (ENOTFOUND.getCode() == e) {
-            return Optional.empty();
+            return null;
         }
         Error.throwIfNeeded(e);
-        return Optional.of(outOid);
+        return outOid;
     }
 
     /**

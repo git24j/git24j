@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import org.junit.Assert;
 import org.junit.Ignore;
@@ -50,10 +51,10 @@ public class OdbTest extends TestBase {
             Path objectsDir = testRepo.workdir().resolve(".git").resolve("objects");
 
             Odb odb = Odb.create(objectsDir);
-            Optional<OdbObject> odbObject = odb.read(Oid.of(README_SHA_HEAD));
-            Assert.assertTrue(odbObject.isPresent());
-            Assert.assertEquals(README_SHA_HEAD, odbObject.get().id().toString());
-            Assert.assertEquals(GitObject.Type.BLOB, odbObject.get().type());
+            OdbObject odbObject = odb.read(Oid.of(README_SHA_HEAD));
+            Assert.assertNotNull(odbObject);
+            Assert.assertEquals(README_SHA_HEAD, odbObject.id().toString());
+            Assert.assertEquals(GitObject.Type.BLOB, odbObject.type());
         }
     }
 
@@ -61,8 +62,9 @@ public class OdbTest extends TestBase {
     public void readPrefix() {
         try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {
             Odb odb = Odb.create(testRepo.workdir().resolve(".git/objects"));
-            Optional<OdbObject> odbObject = odb.readPrefix(README_SHORT_SHA_HEAD);
-            Assert.assertNotNull(odb.existsPrefix(README_SHORT_SHA_HEAD).orElse(null));
+            Optional<OdbObject> odbObject =
+                    Optional.ofNullable(odb.readPrefix(README_SHORT_SHA_HEAD));
+            Assert.assertNotNull(odb.existsPrefix(README_SHORT_SHA_HEAD));
             Assert.assertTrue(odbObject.isPresent());
             Assert.assertEquals(README_SHA_HEAD, odbObject.get().id().toString());
             Assert.assertEquals(GitObject.Type.BLOB, odbObject.get().type());
@@ -76,7 +78,7 @@ public class OdbTest extends TestBase {
             Oid oidReadMe = Oid.of(README_SHA_HEAD);
             Assert.assertTrue(odb.exists(oidReadMe));
             odb.refresh();
-            OdbObject.Header header = odb.readHeader(oidReadMe).orElse(null);
+            OdbObject.Header header = odb.readHeader(oidReadMe);
             Assert.assertNotNull(header);
             Assert.assertTrue(header.getLen() > 0);
             Assert.assertEquals(header.getType(), GitObject.Type.BLOB);
@@ -144,7 +146,7 @@ public class OdbTest extends TestBase {
     public void addBackend() {
         try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {
             Odb odb = Odb.create(testRepo.workdir().resolve(".git/objects"));
-            odb.addBackend(odb.getBackend(0).get(), 99);
+            odb.addBackend(Objects.requireNonNull(odb.getBackend(0)), 99);
         }
     }
 
@@ -170,7 +172,7 @@ public class OdbTest extends TestBase {
     public void getBackend() {
         try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {
             Odb odb = Odb.create(testRepo.workdir().resolve(".git/objects"));
-            OdbBackend backend = odb.getBackend(0).orElse(null);
+            OdbBackend backend = odb.getBackend(0);
             Assert.assertNotNull(backend);
         }
     }

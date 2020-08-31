@@ -66,7 +66,8 @@
 ## API polishing
 - [ ] Make sure APIs have consistent behavior, for example, return null object vs. throwing `ENOTFOUND` error.
 - [ ] Annotate nullabilities
-- [ ] Return Optionals instead of nullable entities
+- [x] Return Optionals instead of nullable entities
+- [x] Remove usage of `Optional`, upstream api may change from returning nullable to non-null
 - [ ] Many APIs can also be part of `Repository`, for example `Commit.lookup(Repository repo)` can be `repo.lookupCommit(...)`
 - [ ] Formalize class and enum naming, move some java inner classes to separate class files. Names of classes and enums should follow `git_classname_methodname` convention. 
 
@@ -104,5 +105,4 @@
 - [ ] All places that have `type foo(References **out)`, should return weak reference unless specified
 - [x] Deprecate `j_git_oid_to_java`, return `byte[]` directly.
 - [ ] Replace Buf with AtomicString for returning String through parameters.
-- [ ] Change Index to `CAutoReleasable`
-- [ ] Remove usage of `Optional`, upstream api may change from returning nullable to non-null
+- [x] Change Index to `CAutoReleasable`

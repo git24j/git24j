@@ -1,11 +1,11 @@
 package com.github.git24j.core;
 
-import javax.annotation.Nonnull;
 import java.util.AbstractMap;
 import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 public class Mailmap {
     static native int jniAddEntry(
@@ -136,10 +136,11 @@ public class Mailmap {
      * @return resolved signature or empty if resolve failed.
      * @throws GitException git errors
      */
-    public Optional<Signature> resolveSignature(@Nonnull Signature sig) {
+    @Nullable
+    public Signature resolveSignature(@Nonnull Signature sig) {
         Signature outSig = new Signature(false, 0);
         Error.throwIfNeeded(
                 jniResolveSignature(outSig._rawPtr, getRawPointer(), sig.getRawPointer()));
-        return outSig.isNull() ? Optional.empty() : Optional.of(outSig);
+        return outSig.isNull() ? null : outSig;
     }
 }

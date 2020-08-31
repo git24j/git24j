@@ -1,14 +1,13 @@
 package com.github.git24j.core;
 
+import static com.github.git24j.core.GitException.ErrorCode.ENOTFOUND;
+
+import java.time.Instant;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicLong;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.time.Instant;
-import java.util.List;
-import java.util.Optional;
-import java.util.concurrent.atomic.AtomicLong;
-
-import static com.github.git24j.core.GitException.ErrorCode.ENOTFOUND;
 
 public class Commit extends GitObject {
 
@@ -419,15 +418,15 @@ public class Commit extends GitObject {
      * @return signature that contains the committer identity
      * @throws GitException git errors
      */
-    @Nonnull
-    public Optional<Signature> committerWithMailmap(@Nullable Mailmap mailmap) {
+    @Nullable
+    public Signature committerWithMailmap(@Nullable Mailmap mailmap) {
         Signature outSig = new Signature(false, 0);
         Error.throwIfNeeded(
                 jniCommitterWithMailmap(
                         outSig._rawPtr,
                         getRawPointer(),
                         mailmap == null ? 0 : mailmap.getRawPointer()));
-        return outSig.isNull() ? Optional.empty() : Optional.of(outSig);
+        return outSig.isNull() ? null : outSig;
     }
 
     /**
@@ -438,15 +437,15 @@ public class Commit extends GitObject {
      * @return signature that contains the author information
      * @throws GitException git errors
      */
-    @Nonnull
-    public Optional<Signature> authorWithMailmap(@Nullable Mailmap mailmap) {
+    @Nullable
+    public Signature authorWithMailmap(@Nullable Mailmap mailmap) {
         Signature outSig = new Signature(false, 0);
         Error.throwIfNeeded(
                 jniAuthorWithMailmap(
                         outSig._rawPtr,
                         getRawPointer(),
                         mailmap == null ? 0 : mailmap.getRawPointer()));
-        return outSig.isNull() ? Optional.empty() : Optional.of(outSig);
+        return outSig.isNull() ? null : outSig;
     }
 
     /**
@@ -545,17 +544,18 @@ public class Commit extends GitObject {
      * Get an arbitrary header field
      *
      * @param field the header field to return
-     * @return git header field, return empty if the field does not exist
+     * @return git header field, return null if the field does not exist
      * @throws GitException git errors
      */
-    public Optional<String> headerField(String field) {
+    @Nullable
+    public String headerField(String field) {
         Buf buf = new Buf();
         int e = jniHeaderField(buf, getRawPointer(), field);
         if (e == ENOTFOUND.getCode()) {
-            return Optional.empty();
+            return null;
         }
         Error.throwIfNeeded(e);
-        return buf.getString();
+        return buf.getString().orElse(null);
     }
 
     @Override

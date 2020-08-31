@@ -4,10 +4,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.Optional;
 import java.util.Set;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -33,13 +31,13 @@ public class TreeTest extends TestBase {
             Tree tree = (Tree) obj;
             Assert.assertNotNull(tree);
             Assert.assertTrue(tree.entryCount() > 1);
-            Optional<Tree.Entry> maybeE0 = tree.entryByIndex(0);
-            Assert.assertTrue(maybeE0.isPresent());
-            GitObject.Type t = maybeE0.get().type();
+            Tree.Entry maybeE0 = tree.entryByIndex(0);
+            Assert.assertNotNull(maybeE0);
+            GitObject.Type t = maybeE0.type();
             Assert.assertTrue(t == GitObject.Type.BLOB || t == GitObject.Type.TREE);
 
-            Optional<Tree.Entry> maybeE1 = tree.entryByName("README.md");
-            Assert.assertTrue(maybeE1.isPresent());
+            Tree.Entry maybeE1 = tree.entryByName("README.md");
+            Assert.assertNotNull(maybeE1);
         }
     }
 
@@ -84,9 +82,9 @@ public class TreeTest extends TestBase {
     public void entry() {
         try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {
             Tree t1 = Tree.lookup(testRepo, Oid.of(MASTER_TREE_SHA));
-            Tree.Entry e1 = t1.entryById(Oid.of(README_SHA_IN_MASTER)).orElse(null);
-            Tree.Entry e2 = t1.entryByPath(Paths.get("README.md")).orElse(null);
-            Tree.Entry e3 = t1.entryByName("a").orElse(null);
+            Tree.Entry e1 = t1.entryById(Oid.of(README_SHA_IN_MASTER));
+            Tree.Entry e2 = t1.entryByPath(Paths.get("README.md"));
+            Tree.Entry e3 = t1.entryByName("a");
             Assert.assertNotNull(e1);
             Assert.assertNotNull(e2);
             Assert.assertNotNull(e3);
@@ -118,7 +116,7 @@ public class TreeTest extends TestBase {
             Oid o2 = t1.createUpdated(testRepo, t1, Collections.singletonList(update));
             Assert.assertNotNull(o2);
             Tree t2 = Tree.lookup(testRepo, o2);
-            Assert.assertFalse(t2.entryByPath(readme).isPresent());
+            Assert.assertNull(t2.entryByPath(readme));
         }
     }
 }

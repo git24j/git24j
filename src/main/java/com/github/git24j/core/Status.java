@@ -1,14 +1,13 @@
 package com.github.git24j.core;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 public class Status {
 
@@ -434,18 +433,18 @@ public class Status {
          * @return detailed information about the differences between the file in HEAD and the file
          *     in the index.
          */
-        @Nonnull
-        public Optional<Diff.Delta> getHeadToIndex() {
-            return Optional.ofNullable(Diff.Delta.of(jniEntryGetHeadToIndex(getRawPointer())));
+        @Nullable
+        public Diff.Delta getHeadToIndex() {
+            return Diff.Delta.of(jniEntryGetHeadToIndex(getRawPointer()));
         }
 
         /**
          * @return detailed information about the * differences between the file in the index and
          *     the file in the working directory.
          */
-        @Nonnull
-        public Optional<Diff.Delta> getIndexToWorkdir() {
-            return Optional.ofNullable(Diff.Delta.of(jniEntryGetIndexToWorkdir(getRawPointer())));
+        @Nullable
+        public Diff.Delta getIndexToWorkdir() {
+            return Diff.Delta.of(jniEntryGetIndexToWorkdir(getRawPointer()));
         }
     }
 }

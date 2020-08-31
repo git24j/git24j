@@ -21,10 +21,8 @@ public class RefspecTest extends TestBase {
         Assert.assertFalse(spec.srcMatches("refs/tags/master"));
         Assert.assertTrue(spec.dstMatches("refs/remotes/origin/test-br"));
         Assert.assertFalse(spec.dstMatches("refs/origin/test-br"));
-        Assert.assertEquals(
-                "refs/remotes/origin/master", spec.transform("refs/heads/master").orElse(""));
-        Assert.assertEquals(
-                "refs/heads/master", spec.rtransform("refs/remotes/origin/master").orElse(""));
+        Assert.assertEquals("refs/remotes/origin/master", spec.transform("refs/heads/master"));
+        Assert.assertEquals("refs/heads/master", spec.rtransform("refs/remotes/origin/master"));
 
         try {
             spec.transform("refs/remotes/heads/master");

@@ -1,10 +1,9 @@
 package com.github.git24j.core;
 
+import java.util.concurrent.atomic.AtomicLong;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.Optional;
-import java.util.concurrent.atomic.AtomicLong;
 
 public class Blob extends GitObject {
     static native int jniCreateFromBuffer(Oid oid, long repoPtr, final byte[] buf);
@@ -202,11 +201,11 @@ public class Blob extends GitObject {
      *     binary data before applying filters?
      * @throws GitException git errors
      */
-    @Nonnull
-    public Optional<String> filteredContent(@Nonnull String asPath, boolean checkForBinaryData) {
+    @Nullable
+    public String filteredContent(@Nonnull String asPath, boolean checkForBinaryData) {
         Buf out = new Buf();
         Error.throwIfNeeded(
                 jniFilteredContent(out, getRawPointer(), asPath, checkForBinaryData ? 1 : 0));
-        return out.getString();
+        return out.getString().orElse(null);
     }
 }
