@@ -27,10 +27,8 @@ public class IndexTest extends TestBase {
     @Test
     public void open() {
         try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {
-            try (Index idx =
-                    Index.open(Paths.get(testRepo.getPath()).resolve("index").toString())) {
-                Assert.assertNotNull(idx);
-            }
+            Index idx = Index.open(Paths.get(testRepo.getPath()).resolve("index").toString());
+            Assert.assertNotNull(idx);
         }
     }
 
@@ -38,63 +36,58 @@ public class IndexTest extends TestBase {
     public void updateAll() throws IOException {
         final String fname = "a";
         try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {
-            try (Index idx = testRepo.index()) {
-                Map<String, String> cache = new HashMap<>();
-                Path p = testRepo.workdir().resolve(fname);
-                Files.write(p, Arrays.asList("line1", "line2"));
-                idx.updateAll(Arrays.asList(fname), cache::put);
-                idx.write();
-                Assert.assertEquals(fname, cache.get(fname));
-            }
+
+            Index idx = testRepo.index();
+            Map<String, String> cache = new HashMap<>();
+            Path p = testRepo.workdir().resolve(fname);
+            Files.write(p, Arrays.asList("line1", "line2"));
+            idx.updateAll(Arrays.asList(fname), cache::put);
+            idx.write();
+            Assert.assertEquals(fname, cache.get(fname));
         }
     }
 
     @Test
     public void owner() {
         try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {
-            try (Index idx = testRepo.index()) {
-                Assert.assertEquals(testRepo, idx.owner());
-            }
+            Index idx = testRepo.index();
+            Assert.assertEquals(testRepo, idx.owner());
         }
     }
 
     @Test
     public void caps() {
         try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {
-            try (Index idx = testRepo.index()) {
-                EnumSet<Index.Capability> caps = EnumSet.of(IGNORE_CASE, NO_SYMLINKS);
-                idx.setCaps(caps);
-                Assert.assertEquals(caps, idx.caps());
-            }
+            Index idx = testRepo.index();
+            EnumSet<Index.Capability> caps = EnumSet.of(IGNORE_CASE, NO_SYMLINKS);
+            idx.setCaps(caps);
+            Assert.assertEquals(caps, idx.caps());
         }
     }
 
     @Test
     public void version() {
         try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {
-            try (Index idx = testRepo.index()) {
-                idx.setVersion(3);
-                Assert.assertEquals(3, idx.version());
-            }
+            Index idx = testRepo.index();
+            idx.setVersion(3);
+            Assert.assertEquals(3, idx.version());
         }
     }
 
     @Test
     public void read() {
         try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {
-            try (Index idx = testRepo.index()) {
-                idx.read(true);
-            }
+            Index idx = testRepo.index();
+            idx.read(true);
         }
     }
 
     @Test
     public void checksum() {
         try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {
-            try (Index idx = testRepo.index()) {
-                Oid oid = idx.checksum();
-                Assert.assertTrue(oid.toString().length() > 0);
-            }
+            Index idx = testRepo.index();
+            Oid oid = idx.checksum();
+            Assert.assertTrue(oid.toString().length() > 0);
         }
     }
 
@@ -111,87 +104,85 @@ public class IndexTest extends TestBase {
     public void readWriteTree() {
         try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {
             Tree dev = (Tree) Tree.lookup(testRepo, Oid.of(FEATURE_DEV_TREE_SHA), TREE);
-            try (Index idx = testRepo.index()) {
-                idx.readTree(dev);
-                Oid oid1 = idx.writeTree();
-                Assert.assertEquals("3b597d284bc12d61638124054b19889587127208", oid1.toString());
-                Oid oid2 = idx.writeTreeTo(testRepo);
-                Assert.assertEquals(oid1, oid2);
-            }
+
+            Index idx = testRepo.index();
+            idx.readTree(dev);
+            Oid oid1 = idx.writeTree();
+            Assert.assertEquals("3b597d284bc12d61638124054b19889587127208", oid1.toString());
+            Oid oid2 = idx.writeTreeTo(testRepo);
+            Assert.assertEquals(oid1, oid2);
         }
     }
 
     @Test
     public void entryCount() {
         try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {
-            try (Index idx = testRepo.index()) {
-                Assert.assertTrue(idx.entryCount() > 0);
-            }
+            Index idx = testRepo.index();
+            Assert.assertTrue(idx.entryCount() > 0);
         }
     }
 
     @Test
     public void getEntryByPath() {
         try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {
-            try (Index idx = testRepo.index()) {
-                Index.Entry entry = idx.getEntryByPath("a", Index.Stage.NORMAL);
-                Assert.assertNotNull(entry);
-            }
+
+            Index idx = testRepo.index();
+            Index.Entry entry = idx.getEntryByPath("a", Index.Stage.NORMAL);
+            Assert.assertNotNull(entry);
         }
     }
 
     @Test
     public void clear() {
         try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {
-            try (Index idx = testRepo.index()) {
-                idx.clear();
-            }
+
+            Index idx = testRepo.index();
+            idx.clear();
         }
     }
 
     @Test
     public void getEntry() {
         try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {
-            try (Index idx = testRepo.index()) {
-                Index.Entry e1 = Index.Entry.getByIndex(idx, 0);
-                Assert.assertNotNull(e1);
-                Index.Entry e2 = Index.Entry.getByPath(idx, "a", Index.Stage.NORMAL);
-                Assert.assertNotNull(e2);
-            }
+
+            Index idx = testRepo.index();
+            Index.Entry e1 = Index.Entry.getByIndex(idx, 0);
+            Assert.assertNotNull(e1);
+            Index.Entry e2 = Index.Entry.getByPath(idx, "a", Index.Stage.NORMAL);
+            Assert.assertNotNull(e2);
         }
     }
 
     @Test
     public void remove() {
         try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {
-            try (Index idx = testRepo.index()) {
-                int originalCount = idx.entryCount();
-                idx.remove("a", 0);
-                Assert.assertEquals(originalCount - 1, idx.entryCount());
-                idx.removeDirectory("non-exist", 0);
-                Assert.assertEquals(originalCount - 1, idx.entryCount());
 
-            }
+            Index idx = testRepo.index();
+            int originalCount = idx.entryCount();
+            idx.remove("a", 0);
+            Assert.assertEquals(originalCount - 1, idx.entryCount());
+            idx.removeDirectory("non-exist", 0);
+            Assert.assertEquals(originalCount - 1, idx.entryCount());
         }
     }
 
     @Test
     public void add() {
         try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {
-            try (Index idx = testRepo.index()) {
-                idx.add(Index.Entry.getByIndex(idx, 1));
-            }
+
+            Index idx = testRepo.index();
+            idx.add(Index.Entry.getByIndex(idx, 1));
         }
     }
 
     @Test
     public void entry() {
         try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {
-            try (Index idx = testRepo.index()) {
-                Index.Entry entry = Index.Entry.getByIndex(idx, 1);
-                Assert.assertEquals(0, entry.state());
-                Assert.assertFalse(entry.isConflict());
-            }
+
+            Index idx = testRepo.index();
+            Index.Entry entry = Index.Entry.getByIndex(idx, 1);
+            Assert.assertEquals(0, entry.state());
+            Assert.assertFalse(entry.isConflict());
         }
     }
 
@@ -201,11 +192,10 @@ public class IndexTest extends TestBase {
         FileUtils.writeStringToFile(repoPath.resolve("a").toFile(), "test");
         Map<String, String> cbParams = new HashMap<>();
         try (Repository repo = Repository.open(repoPath)) {
-            try (Index index = repo.index()) {
-                index.addAll(
-                        new String[] {"."}, EnumSet.of(Index.AddOption.DEFAULT), cbParams::put);
-                index.write();
-            }
+
+            Index index = repo.index();
+            index.addAll(new String[] {"."}, EnumSet.of(Index.AddOption.DEFAULT), cbParams::put);
+            index.write();
         }
         Assert.assertEquals(cbParams.get("a"), ".");
     }
@@ -215,10 +205,10 @@ public class IndexTest extends TestBase {
         Path repoPath = tempCopyOf(TestRepo.SIMPLE1, folder.getRoot().toPath());
         FileUtils.writeStringToFile(repoPath.resolve("a").toFile(), "add index by path");
         try (Repository repo = Repository.open(repoPath)) {
-            try (Index index = repo.index()) {
-                index.add("a");
-                index.write();
-            }
+
+            Index index = repo.index();
+            index.add("a");
+            index.write();
         }
         FileUtils.copyDirectory(repoPath.toFile(), new File("/tmp/test-indexAddByPath"));
     }
@@ -226,94 +216,93 @@ public class IndexTest extends TestBase {
     @Test
     public void addFromBuffer() {
         try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {
-            try (Index idx = testRepo.index()) {
-                Index.Entry e = idx.getEntryByIndex(0);
-                idx.addFromBuffer(e, "abc".getBytes());
-            }
+
+            Index idx = testRepo.index();
+            Index.Entry e = idx.getEntryByIndex(0);
+            idx.addFromBuffer(e, "abc".getBytes());
         }
     }
 
     @Test
     public void removeByPath() {
         try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {
-            try (Index idx = testRepo.index()) {
-                int originalCount = idx.entryCount();
-                idx.removeByPath("a");
-                Assert.assertEquals(originalCount - 1, idx.entryCount());
-            }
+
+            Index idx = testRepo.index();
+            int originalCount = idx.entryCount();
+            idx.removeByPath("a");
+            Assert.assertEquals(originalCount - 1, idx.entryCount());
         }
     }
 
     @Test
     public void find() {
         try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {
-            try (Index idx = testRepo.index()) {
-                int ia = idx.find("a");
-                AtomicInteger outPos = new AtomicInteger();
-                int ib = idx.findPrefix("b");
-                Assert.assertTrue(ia + ib > 0);
-            }
+
+            Index idx = testRepo.index();
+            int ia = idx.find("a");
+            AtomicInteger outPos = new AtomicInteger();
+            int ib = idx.findPrefix("b");
+            Assert.assertTrue(ia + ib > 0);
         }
     }
 
     @Test
     public void conflict() {
         try (Repository testRepo = TestRepo.CONFLICT.tempRepo(folder)) {
-            try (Index idx = testRepo.index()) {
-                Index.Conflict conflict = idx.conflictGet("README.md");
-                Assert.assertTrue(idx.hasConflicts());
-                Assert.assertTrue(conflict.ancestor.isConflict());
-                idx.conflictRemove("README.md");
-                Assert.assertFalse(idx.hasConflicts());
-            }
+
+            Index idx = testRepo.index();
+            Index.Conflict conflict = idx.conflictGet("README.md");
+            Assert.assertTrue(idx.hasConflicts());
+            Assert.assertTrue(conflict.ancestor.isConflict());
+            idx.conflictRemove("README.md");
+            Assert.assertFalse(idx.hasConflicts());
         }
     }
 
     @Test
     public void conflictCleanup() {
         try (Repository testRepo = TestRepo.CONFLICT.tempRepo(folder)) {
-            try (Index idx = testRepo.index()) {
-                Index.Conflict conflict = idx.conflictGet("README.md");
-                idx.conflictAdd(conflict);
-                Assert.assertTrue(idx.hasConflicts());
-                idx.conflictCleanup();
-                Assert.assertFalse(idx.hasConflicts());
-            }
+
+            Index idx = testRepo.index();
+            Index.Conflict conflict = idx.conflictGet("README.md");
+            idx.conflictAdd(conflict);
+            Assert.assertTrue(idx.hasConflicts());
+            idx.conflictCleanup();
+            Assert.assertFalse(idx.hasConflicts());
         }
     }
 
     @Test
     public void conflictIterator() {
         try (Repository testRepo = TestRepo.CONFLICT.tempRepo(folder)) {
-            try (Index idx = testRepo.index()) {
-                Index.ConflictIterator iter = idx.conflictIteratorNew();
-                Index.Conflict conflict = iter.next();
-                Assert.assertTrue(conflict.our.isConflict());
-                Assert.assertNull(iter.next());
-            }
+
+            Index idx = testRepo.index();
+            Index.ConflictIterator iter = idx.conflictIteratorNew();
+            Index.Conflict conflict = iter.next();
+            Assert.assertTrue(conflict.our.isConflict());
+            Assert.assertNull(iter.next());
         }
     }
 
     @Test
     public void path() {
         try (Repository testRepo = TestRepo.CONFLICT.tempRepo(folder)) {
-            try (Index idx = testRepo.index()) {
-                Assert.assertEquals(testRepo.workdir().resolve(".git/index"), idx.path());
-            }
+            Index idx = testRepo.index();
+            Assert.assertEquals(testRepo.workdir().resolve(".git/index"), idx.path());
         }
     }
 
     @Test
     public void iterator() {
         try (Repository testRepo = TestRepo.CONFLICT.tempRepo(folder)) {
-            try (Index idx = testRepo.index()) {
-                Index.Iterator idxIter = Index.Iterator.of(idx);
-                int count = 0;
-                for (Index.Entry entry = idxIter.next(); entry != null; entry = idxIter.next()) {
-                    count += 1;
-                }
-                Assert.assertEquals(count, idx.entryCount());
+
+            Index idx = testRepo.index();
+            Index.Iterator idxIter = Index.Iterator.of(idx);
+            int count = 0;
+            for (Index.Entry entry = idxIter.next(); entry != null; entry = idxIter.next()) {
+                count += 1;
             }
+            Assert.assertEquals(count, idx.entryCount());
         }
     }
 }

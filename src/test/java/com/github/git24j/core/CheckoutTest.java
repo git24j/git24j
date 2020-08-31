@@ -21,8 +21,8 @@ public class CheckoutTest extends TestBase {
 
     @Test
     public void index() {
-        try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder);
-                Index idx = testRepo.index()) {
+        try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {
+            Index idx = testRepo.index();
             Assert.assertEquals(
                     0, Checkout.index(testRepo, idx, Checkout.Options.defaultOptions()));
         }

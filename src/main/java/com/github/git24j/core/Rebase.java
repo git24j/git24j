@@ -278,7 +278,7 @@ public class Rebase extends CAutoReleasable {
      */
     @Nonnull
     public Index inmemoryIndex() {
-        Index outIdx = new Index(0);
+        Index outIdx = new Index(false, 0);
         Error.throwIfNeeded(jniInmemoryIndex(outIdx._rawPtr, getRawPointer()));
         return outIdx;
     }
