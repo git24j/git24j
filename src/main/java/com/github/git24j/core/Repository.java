@@ -1,17 +1,17 @@
 package com.github.git24j.core;
 
-import javax.annotation.CheckForNull;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import static com.github.git24j.core.GitException.ErrorCode.ENOTFOUND;
+import static com.github.git24j.core.GitException.ErrorCode.EUNBORNBRANCH;
+
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.EnumSet;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
-
-import static com.github.git24j.core.GitException.ErrorCode.ENOTFOUND;
-import static com.github.git24j.core.GitException.ErrorCode.EUNBORNBRANCH;
+import javax.annotation.CheckForNull;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 public class Repository extends CAutoCloseable {
     static native String jniCommondir(long repoPtr);
@@ -314,7 +314,7 @@ public class Repository extends CAutoCloseable {
     public Odb odb() {
         AtomicLong outOdb = new AtomicLong();
         Error.throwIfNeeded(jniOdb(outOdb, getRawPointer()));
-        return new Odb(outOdb.get());
+        return new Odb(false, outOdb.get());
     }
 
     /**
@@ -326,7 +326,7 @@ public class Repository extends CAutoCloseable {
     public Refdb refdb() {
         AtomicLong outRefdb = new AtomicLong();
         Error.throwIfNeeded(jniRefdb(outRefdb, getRawPointer()));
-        return new Refdb(outRefdb.get());
+        return new Refdb(false, outRefdb.get());
     }
 
     /**
@@ -602,7 +602,7 @@ public class Repository extends CAutoCloseable {
      */
     @Nonnull
     public Index index() {
-        Index index = new Index(0);
+        Index index = new Index(false, 0);
         int error = jniIndex(index._rawPtr, getRawPointer());
         Error.throwIfNeeded(error);
         return index;

@@ -1,7 +1,7 @@
 package com.github.git24j.core;
 
-import javax.annotation.CheckForNull;
-import javax.annotation.Nonnull;
+import static com.github.git24j.core.GitException.ErrorCode.ITEROVER;
+
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Instant;
@@ -10,10 +10,10 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.BiConsumer;
+import javax.annotation.CheckForNull;
+import javax.annotation.Nonnull;
 
-import static com.github.git24j.core.GitException.ErrorCode.ITEROVER;
-
-public class Index extends CAutoCloseable {
+public class Index extends CAutoReleasable {
     static native int jniAdd(long idxPtr, long entryPtr);
 
     static native int jniAddAll(long idxPtr, String[] pathSpec, int flags, Callback callback);
@@ -200,8 +200,13 @@ public class Index extends CAutoCloseable {
 
     static native int jniWriteTreeTo(Oid outOid, long indexPtr, long repoPtr);
 
-    protected Index(long rawPointer) {
-        super(rawPointer);
+    protected Index(boolean isWeak, long rawPtr) {
+        super(isWeak, rawPtr);
+    }
+
+    @Override
+    protected void freeOnce(long cPtr) {
+        jniFree(cPtr);
     }
 
     /**
@@ -221,14 +226,9 @@ public class Index extends CAutoCloseable {
      * @throws GitException git errors
      */
     public static Index open(String indexPath) {
-        Index outIdx = new Index(0);
+        Index outIdx = new Index(false, 0);
         Error.throwIfNeeded(jniOpen(outIdx._rawPtr, indexPath));
         return outIdx;
-    }
-
-    @Override
-    protected void releaseOnce(long cPtr) {
-        jniFree(cPtr);
     }
 
     /**

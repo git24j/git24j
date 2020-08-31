@@ -24,43 +24,43 @@ public class OdbTest extends TestBase {
 
     @Test
     public void create() {
-        try (Odb odb = Odb.create()) {
-            Assert.assertEquals(0, odb.numBackends());
-        }
+
+        Odb odb = Odb.create();
+        Assert.assertEquals(0, odb.numBackends());
     }
 
     @Test
     public void open() throws IOException {
-        try (Odb odb = Odb.create(folder.newFolder("test").toPath())) {
-            Assert.assertEquals(2, odb.numBackends());
-        }
+
+        Odb odb = Odb.create(folder.newFolder("test").toPath());
+        Assert.assertEquals(2, odb.numBackends());
     }
 
     @Test
     public void addDiskAlternate() throws IOException {
-        try (Odb odb = Odb.create()) {
-            odb.addDiskAlternate(folder.newFolder("objects").toPath());
-            Assert.assertEquals(2, odb.numBackends());
-        }
+
+        Odb odb = Odb.create();
+        odb.addDiskAlternate(folder.newFolder("objects").toPath());
+        Assert.assertEquals(2, odb.numBackends());
     }
 
     @Test
     public void read() {
         try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {
             Path objectsDir = testRepo.workdir().resolve(".git").resolve("objects");
-            try (Odb odb = Odb.create(objectsDir)) {
-                Optional<OdbObject> odbObject = odb.read(Oid.of(README_SHA_HEAD));
-                Assert.assertTrue(odbObject.isPresent());
-                Assert.assertEquals(README_SHA_HEAD, odbObject.get().id().toString());
-                Assert.assertEquals(GitObject.Type.BLOB, odbObject.get().type());
-            }
+
+            Odb odb = Odb.create(objectsDir);
+            Optional<OdbObject> odbObject = odb.read(Oid.of(README_SHA_HEAD));
+            Assert.assertTrue(odbObject.isPresent());
+            Assert.assertEquals(README_SHA_HEAD, odbObject.get().id().toString());
+            Assert.assertEquals(GitObject.Type.BLOB, odbObject.get().type());
         }
     }
 
     @Test
     public void readPrefix() {
-        try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder);
-                Odb odb = Odb.create(testRepo.workdir().resolve(".git/objects"))) {
+        try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {
+            Odb odb = Odb.create(testRepo.workdir().resolve(".git/objects"));
             Optional<OdbObject> odbObject = odb.readPrefix(README_SHORT_SHA_HEAD);
             Assert.assertNotNull(odb.existsPrefix(README_SHORT_SHA_HEAD).orElse(null));
             Assert.assertTrue(odbObject.isPresent());
@@ -71,8 +71,8 @@ public class OdbTest extends TestBase {
 
     @Test
     public void readHeader() {
-        try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder);
-                Odb odb = Odb.create(testRepo.workdir().resolve(".git/objects"))) {
+        try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {
+            Odb odb = Odb.create(testRepo.workdir().resolve(".git/objects"));
             Oid oidReadMe = Oid.of(README_SHA_HEAD);
             Assert.assertTrue(odb.exists(oidReadMe));
             odb.refresh();
@@ -85,8 +85,8 @@ public class OdbTest extends TestBase {
 
     @Test
     public void expandIds() {
-        try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder);
-                Odb odb = Odb.create(testRepo.workdir().resolve(".git/objects"))) {
+        try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {
+            Odb odb = Odb.create(testRepo.workdir().resolve(".git/objects"));
             List<Oid> res =
                     odb.expandIds(Arrays.asList(README_SHORT_SHA_HEAD, A_SHORT_SHA_HEAD), ANY);
             Assert.assertEquals(2, res.size());
@@ -98,8 +98,8 @@ public class OdbTest extends TestBase {
 
     @Test
     public void write() {
-        try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder);
-                Odb odb = Odb.create(testRepo.workdir().resolve(".git/objects"))) {
+        try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {
+            Odb odb = Odb.create(testRepo.workdir().resolve(".git/objects"));
             Oid out = odb.write("test data".getBytes(), BLOB);
             Assert.assertFalse(out.isZero());
         }
@@ -107,8 +107,8 @@ public class OdbTest extends TestBase {
 
     @Test
     public void openWstream() {
-        try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder);
-                Odb odb = Odb.create(testRepo.workdir().resolve(".git/objects"))) {
+        try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {
+            Odb odb = Odb.create(testRepo.workdir().resolve(".git/objects"));
             byte[] bytes = "test data".getBytes();
             Odb.Stream ws = odb.openWstream(bytes.length, BLOB);
             ws.write("test ");
@@ -122,8 +122,8 @@ public class OdbTest extends TestBase {
 
     @Test
     public void openRstream() {
-        try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder);
-                Odb odb = Odb.create(testRepo.workdir().resolve(".git/objects"))) {
+        try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {
+            Odb odb = Odb.create(testRepo.workdir().resolve(".git/objects"));
             Oid oidReadMe = Oid.of(README_SHA_HEAD);
             Odb.RStream rs = odb.openRstream(oidReadMe);
             Assert.assertTrue(rs.getSize() > 0);
@@ -142,8 +142,8 @@ public class OdbTest extends TestBase {
     @Ignore
     @Test
     public void addBackend() {
-        try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder);
-                Odb odb = Odb.create(testRepo.workdir().resolve(".git/objects"))) {
+        try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {
+            Odb odb = Odb.create(testRepo.workdir().resolve(".git/objects"));
             odb.addBackend(odb.getBackend(0).get(), 99);
         }
     }
@@ -151,16 +151,16 @@ public class OdbTest extends TestBase {
     @Test
     public void addAlternate() throws IOException {
         File odbAlternate = folder.newFolder(".test", "objects");
-        try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder);
-                Odb odb = Odb.create(testRepo.workdir().resolve(".git/objects"))) {
+        try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {
+            Odb odb = Odb.create(testRepo.workdir().resolve(".git/objects"));
             odb.addDiskAlternate(odbAlternate.toPath());
         }
     }
 
     @Test
     public void numBackends() {
-        try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder);
-                Odb odb = Odb.create(testRepo.workdir().resolve(".git/objects"))) {
+        try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {
+            Odb odb = Odb.create(testRepo.workdir().resolve(".git/objects"));
             Assert.assertTrue(odb.numBackends() >= 1);
         }
     }
@@ -168,8 +168,8 @@ public class OdbTest extends TestBase {
     @Ignore
     @Test
     public void getBackend() {
-        try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder);
-                Odb odb = Odb.create(testRepo.workdir().resolve(".git/objects"))) {
+        try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {
+            Odb odb = Odb.create(testRepo.workdir().resolve(".git/objects"));
             OdbBackend backend = odb.getBackend(0).orElse(null);
             Assert.assertNotNull(backend);
         }

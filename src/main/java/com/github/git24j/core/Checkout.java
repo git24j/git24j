@@ -1,12 +1,12 @@
 package com.github.git24j.core;
 
-import javax.annotation.CheckForNull;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
+import javax.annotation.CheckForNull;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 public class Checkout {
 
@@ -474,7 +474,7 @@ public class Checkout {
         @Nullable
         public Index getBaselineIndex() {
             long ptr = jniOptionsGetBaselineIndex(getRawPointer());
-            return ptr == 0 ? null : new Index(ptr);
+            return ptr == 0 ? null : new Index(true, ptr);
         }
 
         public void setBaselineIndex(@Nonnull Index baselineIndex) {

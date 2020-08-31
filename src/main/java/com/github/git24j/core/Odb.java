@@ -1,7 +1,7 @@
 package com.github.git24j.core;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import static com.github.git24j.core.GitException.ErrorCode.ENOTFOUND;
+
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
@@ -9,10 +9,10 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
-import static com.github.git24j.core.GitException.ErrorCode.ENOTFOUND;
-
-public class Odb extends CAutoCloseable {
+public class Odb extends CAutoReleasable {
     /** int git_odb_add_alternate(git_odb *odb, git_odb_backend *backend, int priority); */
     static native int jniAddAlternate(long odb, long backend, int priority);
 
@@ -144,8 +144,13 @@ public class Odb extends CAutoCloseable {
      */
     static native int jniWrite(Oid out, long odb, byte[] data, int len, int type);
 
-    Odb(long rawPointer) {
-        super(rawPointer);
+    protected Odb(boolean isWeak, long rawPtr) {
+        super(isWeak, rawPtr);
+    }
+
+    @Override
+    protected void freeOnce(long cPtr) {
+        jniFree(cPtr);
     }
 
     /**
@@ -159,7 +164,7 @@ public class Odb extends CAutoCloseable {
      */
     @Nonnull
     public static Odb create() {
-        Odb out = new Odb(0);
+        Odb out = new Odb(false, 0);
         Error.throwIfNeeded(jniNew(out._rawPtr));
         if (out.isNull()) {
             throw new GitException(GitException.ErrorClass.ODB, "Failed to create object database");
@@ -182,7 +187,7 @@ public class Odb extends CAutoCloseable {
      */
     @Nonnull
     public static Odb create(@Nonnull Path objectsDir) {
-        Odb out = new Odb(0);
+        Odb out = new Odb(false, 0);
         Error.throwIfNeeded(jniOpen(out._rawPtr, objectsDir.toString()));
         if (out.isNull()) {
             throw new GitException(GitException.ErrorClass.ODB, "Failed to create object database");
@@ -269,11 +274,6 @@ public class Odb extends CAutoCloseable {
         OdbBackend out = new OdbBackend(false, 0);
         Error.throwIfNeeded(jniBackendOnePack(out._rawPtr, indexFile.toString()));
         return out;
-    }
-
-    @Override
-    protected void releaseOnce(long cPtr) {
-        jniFree(cPtr);
     }
 
     /**

@@ -184,9 +184,8 @@ public class RepositoryTest extends TestBase {
     public void odb() {
         Path path = TestRepo.SIMPLE1.tempCopy(folder);
         try (Repository repository = Repository.open(path)) {
-            try (Odb odb = repository.odb()) {
-                Assert.assertNotNull(odb);
-            }
+            Odb odb = repository.odb();
+            Assert.assertNotNull(odb);
         }
     }
 
@@ -194,9 +193,8 @@ public class RepositoryTest extends TestBase {
     public void refdb() {
         Path path = TestRepo.SIMPLE1.tempCopy(folder);
         try (Repository repository = Repository.open(path)) {
-            try (Refdb refdb = repository.refdb()) {
-                Assert.assertNotNull(refdb);
-            }
+            Refdb refdb = repository.refdb();
+            Assert.assertNotNull(refdb);
         }
     }
 
