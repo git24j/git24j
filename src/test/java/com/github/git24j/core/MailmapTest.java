@@ -48,7 +48,7 @@ public class MailmapTest extends TestBase {
         try (Repository testRepo = TestRepo.MAILMAP.tempRepo(folder)) {
             Mailmap mm = Mailmap.fromRepository(testRepo);
             Signature sig = new Signature("nick1", "bugs@company.xx", 1577320750L, -240);
-            Optional<Signature> outSig = mm.resolveSignature(sig);
+            Optional<Signature> outSig = Optional.ofNullable(mm.resolveSignature(sig));
             Assert.assertEquals("Some Dude", outSig.map(Signature::getName).orElse(""));
             Assert.assertEquals("some@dude.xx", outSig.map(Signature::getEmail).orElse(""));
         }

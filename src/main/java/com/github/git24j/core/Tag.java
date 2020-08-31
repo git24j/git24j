@@ -1,11 +1,11 @@
 package com.github.git24j.core;
 
-import javax.annotation.CheckForNull;
-import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
+import javax.annotation.CheckForNull;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 public class Tag extends GitObject {
     static native int jniAnnotationCreate(
@@ -287,9 +287,10 @@ public class Tag extends GitObject {
     }
 
     /** @return Signature of the tagger */
-    public Optional<Signature> tagger() {
+    @Nullable
+    public Signature tagger() {
         long ptr = jniTagger(getRawPointer());
-        return ptr == 0 ? Optional.empty() : Optional.of(new Signature(true, ptr));
+        return ptr == 0 ? null : new Signature(true, ptr);
     }
 
     /**

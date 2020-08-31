@@ -6,7 +6,6 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import javax.annotation.Nonnull;
@@ -306,15 +305,15 @@ public class Odb extends CAutoReleasable {
      * @param id identity of the object to read.
      * @throws GitException git errors
      */
-    @Nonnull
-    public Optional<OdbObject> read(@Nonnull Oid id) {
+    @Nullable
+    public OdbObject read(@Nonnull Oid id) {
         OdbObject out = new OdbObject(false, 0);
         int e = jniRead(out._rawPtr, getRawPointer(), id);
         if (e == ENOTFOUND.getCode()) {
-            return Optional.empty();
+            return null;
         }
         Error.throwIfNeeded(e);
-        return Optional.of(out);
+        return out;
     }
 
     /**
@@ -332,15 +331,15 @@ public class Odb extends CAutoReleasable {
      * @return - 0 if the object was read; - GIT_ENOTFOUND if the object is not in the database. -
      *     GIT_EAMBIGUOUS if the prefix is ambiguous (several objects match the prefix)
      */
-    @Nonnull
-    public Optional<OdbObject> readPrefix(String shortId) {
+    @Nullable
+    public OdbObject readPrefix(String shortId) {
         OdbObject out = new OdbObject(false, 0);
         int e = jniReadPrefix(out._rawPtr, getRawPointer(), shortId);
         if (e == ENOTFOUND.getCode()) {
-            return Optional.empty();
+            return null;
         }
         Error.throwIfNeeded(e);
-        return Optional.of(out);
+        return out;
     }
 
     /**
@@ -355,18 +354,17 @@ public class Odb extends CAutoReleasable {
      * @return OdbObject.Type object
      * @throws GitException git errors
      */
-    @Nonnull
-    public Optional<OdbObject.Header> readHeader(@Nonnull Oid id) {
+    @Nullable
+    public OdbObject.Header readHeader(@Nonnull Oid id) {
         AtomicInteger lenOut = new AtomicInteger();
         AtomicInteger typeOut = new AtomicInteger();
         int e = jniReadHeader(lenOut, typeOut, getRawPointer(), id);
         if (e == ENOTFOUND.getCode()) {
-            return Optional.empty();
+            return null;
         }
         Error.throwIfNeeded(e);
-        return Optional.of(
-                new OdbObject.Header(
-                        lenOut.get(), IBitEnum.valueOf(typeOut.get(), GitObject.Type.class)));
+        return new OdbObject.Header(
+                lenOut.get(), IBitEnum.valueOf(typeOut.get(), GitObject.Type.class));
     }
 
     /**
@@ -386,15 +384,15 @@ public class Odb extends CAutoReleasable {
      * @param shortId A prefix of the id of the object to read.
      * @throws GitException GIT_EAMBIGUOUS if multiple or other read errors
      */
-    @Nonnull
-    public Optional<Oid> existsPrefix(@Nonnull String shortId) {
+    @Nullable
+    public Oid existsPrefix(@Nonnull String shortId) {
         Oid fullId = new Oid();
         int e = jniExistsPrefix(fullId, getRawPointer(), shortId);
         if (e == ENOTFOUND.getCode()) {
-            return Optional.empty();
+            return null;
         }
         Error.throwIfNeeded(e);
-        return Optional.of(fullId);
+        return fullId;
     }
 
     /**
@@ -570,14 +568,15 @@ public class Odb extends CAutoReleasable {
      * @param pos index into object database backend list
      * @throws GitException git errors
      */
-    public Optional<OdbBackend> getBackend(int pos) {
+    @Nullable
+    public OdbBackend getBackend(int pos) {
         OdbBackend backend = new OdbBackend(false, 0);
         int e = jniGetBackend(backend._rawPtr, getRawPointer(), pos);
         if (e == ENOTFOUND.getCode()) {
-            return Optional.empty();
+            return null;
         }
         Error.throwIfNeeded(e);
-        return Optional.of(backend);
+        return backend;
     }
 
     public static class ExpandId {

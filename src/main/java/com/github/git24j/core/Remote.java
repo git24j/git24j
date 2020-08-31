@@ -1,8 +1,7 @@
 package com.github.git24j.core;
 
-import javax.annotation.CheckForNull;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import static com.github.git24j.core.GitException.ErrorCode.ENOTFOUND;
+
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -12,8 +11,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
-
-import static com.github.git24j.core.GitException.ErrorCode.ENOTFOUND;
+import javax.annotation.CheckForNull;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 public class Remote extends CAutoReleasable {
     /** int git_remote_add_fetch(git_repository *repo, const char *remote, const char *refspec); */
@@ -666,13 +666,14 @@ public class Remote extends CAutoReleasable {
      * @throws GitException GIT_ENOTFOUND if the remote does not have any references or none of them
      *     point to HEAD's commit, or an error message.
      */
-    public Optional<String> defaultBranch() {
+    @Nullable
+    public String defaultBranch() {
         Buf out = new Buf();
         int e = jniDefaultBranch(out, getRawPointer());
         if (ENOTFOUND.getCode() == e) {
-            return Optional.empty();
+            return null;
         }
-        return out.getString();
+        return out.getString().orElse(null);
     }
 
     /**
@@ -760,12 +761,13 @@ public class Remote extends CAutoReleasable {
      * @param n the refspec to get
      * @return the nth refspec
      */
-    public Optional<Refspec> getRefspec(int n) {
+    @Nullable
+    public Refspec getRefspec(int n) {
         long ptr = jniGetRefspec(getRawPointer(), n);
         if (ptr == 0) {
-            return Optional.empty();
+            return null;
         }
-        return Optional.of(new Refspec(false, ptr));
+        return new Refspec(false, ptr);
     }
 
     /**
@@ -782,8 +784,9 @@ public class Remote extends CAutoReleasable {
      *
      * @return a pointer to the name or empty for in-memory remotes
      */
-    public Optional<String> name() {
-        return Optional.ofNullable(jniName(getRawPointer()));
+    @Nullable
+    public String name() {
+        return jniName(getRawPointer());
     }
 
     /**
@@ -791,12 +794,13 @@ public class Remote extends CAutoReleasable {
      *
      * @return a pointer to the repository
      */
-    public Optional<Repository> owner() {
+    @Nullable
+    public Repository owner() {
         long ptr = jniOwner(getRawPointer());
         if (ptr == 0) {
-            return Optional.empty();
+            return null;
         }
-        return Optional.of(new Repository(ptr));
+        return new Repository(ptr);
     }
 
     /**
@@ -843,8 +847,9 @@ public class Remote extends CAutoReleasable {
      *
      * @return the url or empty if no special url for pushing is set
      */
-    public Optional<URI> pushurl() {
-        return Optional.ofNullable(jniPushurl(getRawPointer())).map(URI::create);
+    @Nullable
+    public URI pushurl() {
+        return Optional.ofNullable(jniPushurl(getRawPointer())).map(URI::create).orElse(null);
     }
 
     /**
@@ -1013,7 +1018,8 @@ public class Remote extends CAutoReleasable {
          * @param allowedTypes A bitmask stating which cred types are OK to return.
          * @return Credential or empty
          */
-        Optional<Cred> acquire(String url, String usernameFromUrl, int allowedTypes);
+        @Nullable
+        Cred acquire(String url, String usernameFromUrl, int allowedTypes);
     }
 
     @FunctionalInterface
@@ -1110,7 +1116,8 @@ public class Remote extends CAutoReleasable {
          * Callback that can create the transport to use for this operation. Leave empty to
          * auto-detect.
          */
-        Optional<Transport> accept(Remote owner);
+        @Nullable
+        Transport accept(Remote owner);
     }
 
     @FunctionalInterface
@@ -1366,8 +1373,8 @@ public class Remote extends CAutoReleasable {
          */
         long acquireCred(String url, String usernameFromUrl, int allowedTypes) {
             if (_credAcquireCb != null) {
-                return _credAcquireCb
-                        .acquire(url, usernameFromUrl, allowedTypes)
+                return Optional.ofNullable(
+                                _credAcquireCb.acquire(url, usernameFromUrl, allowedTypes))
                         .map(CAutoReleasable::getRawPointer)
                         .orElse(0L);
             }
@@ -1477,7 +1484,9 @@ public class Remote extends CAutoReleasable {
         long transport(long ownerPtr) {
             if (_transportCb != null) {
                 Remote remote = ownerPtr == 0 ? null : new Remote(true, ownerPtr);
-                return _transportCb.accept(remote).map(CAutoReleasable::getRawPointer).orElse(0L);
+                return Optional.ofNullable(_transportCb.accept(remote))
+                        .map(CAutoReleasable::getRawPointer)
+                        .orElse(0L);
             }
             return 0L;
         }

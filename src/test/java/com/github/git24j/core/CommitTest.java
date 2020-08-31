@@ -150,7 +150,7 @@ public class CommitTest extends TestBase {
     public void committerWithMailmap() {
         try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {
             Commit commit = Commit.lookup(testRepo, MASTER_OID);
-            Signature sig = commit.committerWithMailmap(null).orElseThrow(RuntimeException::new);
+            Signature sig = commit.committerWithMailmap(null);
             Assert.assertNotNull(sig.getName());
             Assert.assertNotNull(sig.getEmail());
             Assert.assertNotNull(sig.getWhen());
@@ -161,7 +161,7 @@ public class CommitTest extends TestBase {
     public void authorWithMailmap() {
         try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {
             Commit commit = Commit.lookup(testRepo, MASTER_OID);
-            Signature sig = commit.authorWithMailmap(null).orElseThrow(RuntimeException::new);
+            Signature sig = commit.authorWithMailmap(null);
             Assert.assertNotNull(sig.getName());
             Assert.assertNotNull(sig.getEmail());
             Assert.assertNotNull(sig.getWhen());
@@ -235,8 +235,8 @@ public class CommitTest extends TestBase {
     public void headerField() {
         try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {
             Commit commit = Commit.lookup(testRepo, MASTER_OID);
-            String parent = commit.headerField("parent").orElse("");
-            String author = commit.headerField("author").orElse("");
+            String parent = commit.headerField("parent");
+            String author = commit.headerField("author");
             Assert.assertEquals(MASTER_PARENT_HASH, parent);
             Assert.assertEquals("Shijing Lu", author.substring(0, 10));
         }
@@ -332,8 +332,8 @@ public class CommitTest extends TestBase {
         try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {
             Commit commit = Commit.lookup(testRepo, MASTER_OID);
             Commit commit2 = commit.dup();
-            String parent = commit2.headerField("parent").orElse("");
-            String author = commit2.headerField("author").orElse("");
+            String parent = commit2.headerField("parent");
+            String author = commit2.headerField("author");
             Assert.assertEquals(MASTER_PARENT_HASH, parent);
             Assert.assertEquals("Shijing Lu", author.substring(0, 10));
         }

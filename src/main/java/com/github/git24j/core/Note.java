@@ -1,6 +1,5 @@
 package com.github.git24j.core;
 
-import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
@@ -263,7 +262,7 @@ public class Note extends CAutoReleasable {
      * @return the new notes commit or empty in case of error.
      * @throws GitException git errors
      */
-    public static Optional<Oid> commitRemove(
+    public static Oid commitRemove(
             @Nonnull Repository repo,
             @Nonnull Commit notesCommit,
             @Nonnull Signature author,
@@ -278,7 +277,7 @@ public class Note extends CAutoReleasable {
                         author.getRawPointer(),
                         committer.getRawPointer(),
                         oid));
-        return out.getId() == null ? Optional.empty() : Optional.of(out);
+        return out.getId() == null ? null : out;
     }
 
     /**

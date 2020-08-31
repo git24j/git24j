@@ -24,20 +24,21 @@ public class MergeTest extends TestBase {
         try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {
             Oid dev = Oid.of(SHA_DEV);
             Oid c = Oid.of(SHA_C);
-            Optional<Oid> mergeBase = Merge.base(testRepo, dev, c);
+            Optional<Oid> mergeBase = Optional.ofNullable(Merge.base(testRepo, dev, c));
             Assert.assertEquals(SHA_C_DEV_BASE, mergeBase.map(Oid::toString).orElse(null));
             List<Oid> bases = Merge.bases(testRepo, dev, c);
             Assert.assertEquals(1, bases.size());
             Assert.assertEquals(SHA_C_DEV_BASE, bases.get(0).toString());
 
-            Optional<Oid> base2 = Merge.baseMany(testRepo, new Oid[] {dev, c});
+            Optional<Oid> base2 = Optional.ofNullable(Merge.baseMany(testRepo, new Oid[] {dev, c}));
             Assert.assertEquals(SHA_C_DEV_BASE, base2.map(Oid::toString).orElse(null));
 
             List<Oid> bases2 = Merge.basesMany(testRepo, new Oid[] {dev, c});
             Assert.assertEquals(1, bases2.size());
             Assert.assertEquals(SHA_C_DEV_BASE, bases2.get(0).toString());
 
-            Optional<Oid> base4 = Merge.baseOctopus(testRepo, new Oid[] {dev, c});
+            Optional<Oid> base4 =
+                    Optional.ofNullable(Merge.baseOctopus(testRepo, new Oid[] {dev, c}));
             Assert.assertEquals(SHA_C_DEV_BASE, base4.map(Oid::toString).orElse(null));
         }
     }

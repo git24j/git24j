@@ -1,16 +1,15 @@
 package com.github.git24j.core;
 
-import javax.annotation.CheckForNull;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import java.nio.file.Path;
-import java.util.EnumSet;
-import java.util.Optional;
-import java.util.concurrent.atomic.AtomicLong;
-
 import static com.github.git24j.core.Internals.JFCallback;
 import static com.github.git24j.core.Internals.JJCallback;
 import static com.github.git24j.core.Internals.JJJCallback;
+
+import java.nio.file.Path;
+import java.util.EnumSet;
+import java.util.concurrent.atomic.AtomicLong;
+import javax.annotation.CheckForNull;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 public class Diff extends CAutoReleasable {
     /** const char *data */
@@ -324,7 +323,6 @@ public class Diff extends CAutoReleasable {
     static native int jniTreeToWorkdirWithIndex(
             AtomicLong diff, long repoPtr, long oldTree, long opts);
 
-
     protected Diff(boolean isWeak, long rawPtr) {
         super(isWeak, rawPtr);
     }
@@ -345,7 +343,11 @@ public class Diff extends CAutoReleasable {
      * @return Diff between {@code oldTree} and {@code newTree}
      * @throws GitException git errors
      */
-    public static Diff treeToTree(@Nonnull Repository repo, @Nullable Tree oldTree, @Nullable Tree newTree, @Nullable Options opts) {
+    public static Diff treeToTree(
+            @Nonnull Repository repo,
+            @Nullable Tree oldTree,
+            @Nullable Tree newTree,
+            @Nullable Options opts) {
         Diff diff = new Diff(false, 0);
         int e =
                 jniTreeToTree(
@@ -1464,12 +1466,12 @@ public class Diff extends CAutoReleasable {
             return jniDeltaGetNfiles(getRawPointer());
         }
 
-        public Optional<File> getOldFile() {
-            return Optional.ofNullable(File.ofWeak(jniDeltaGetOldFile(getRawPointer())));
+        public File getOldFile() {
+            return File.ofWeak(jniDeltaGetOldFile(getRawPointer()));
         }
 
-        public Optional<File> getNewFile() {
-            return Optional.ofNullable(File.ofWeak(jniDeltaGetNewFile(getRawPointer())));
+        public File getNewFile() {
+            return File.ofWeak(jniDeltaGetNewFile(getRawPointer()));
         }
     }
 

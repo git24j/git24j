@@ -1,14 +1,13 @@
 package com.github.git24j.core;
 
+import static com.github.git24j.core.GitException.ErrorCode.ENOTFOUND;
+import static com.github.git24j.core.Internals.JJJCallback;
+
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.Optional;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicLong;
-
-import static com.github.git24j.core.GitException.ErrorCode.ENOTFOUND;
-import static com.github.git24j.core.Internals.JJJCallback;
 
 public class Patch extends CAutoReleasable {
     /** void git_patch_free(git_patch *patch); */
@@ -167,7 +166,7 @@ public class Patch extends CAutoReleasable {
      * @throws GitException git errors
      */
     @Nonnull
-    public static Optional<Patch> fromBlobs(
+    public static Patch fromBlobs(
             @Nullable Blob oldBlob,
             @Nullable String oldAsPath,
             @Nullable Blob newBlob,
@@ -183,9 +182,9 @@ public class Patch extends CAutoReleasable {
                         newAsPath,
                         opts == null ? 0 : opts.getRawPointer()));
         if (out._rawPtr.get() == 0) {
-            return Optional.empty();
+            return null;
         }
-        return Optional.of(out);
+        return out;
     }
 
     /**
@@ -204,8 +203,8 @@ public class Patch extends CAutoReleasable {
      * @param opts Options for diff, or NULL for default options
      * @throws GitException git errors
      */
-    @Nonnull
-    public static Optional<Patch> fromBlobAndBuffer(
+    @Nullable
+    public static Patch fromBlobAndBuffer(
             @Nullable Blob oldBlob,
             @Nullable String oldAsPath,
             @Nullable byte[] buffer,
@@ -222,9 +221,9 @@ public class Patch extends CAutoReleasable {
                         bufferAsPath,
                         opts == null ? 0 : opts.getRawPointer()));
         if (out._rawPtr.get() == 0) {
-            return Optional.empty();
+            return null;
         }
-        return Optional.of(out);
+        return out;
     }
 
     /**
@@ -243,8 +242,8 @@ public class Patch extends CAutoReleasable {
      * @param opts Options for diff, or NULL for default options
      * @throws GitException git errors
      */
-    @Nonnull
-    public static Optional<Patch> fromBuffers(
+    @Nullable
+    public static Patch fromBuffers(
             @Nullable byte[] oldBuffer,
             @Nullable String oldAsPath,
             @Nullable byte[] newBuffer,
@@ -262,9 +261,9 @@ public class Patch extends CAutoReleasable {
                         newAsPath,
                         opts == null ? 0 : opts.getRawPointer()));
         if (out._rawPtr.get() == 0) {
-            return Optional.empty();
+            return null;
         }
-        return Optional.of(out);
+        return out;
     }
 
     @Override
@@ -320,15 +319,16 @@ public class Patch extends CAutoReleasable {
      * @param hunkIdx Input index of hunk to get information about
      * @throws GitException git errors
      */
-    public Optional<HunkInfo> getHunk(int hunkIdx) {
+    @Nullable
+    public HunkInfo getHunk(int hunkIdx) {
         AtomicLong outHunk = new AtomicLong();
         AtomicInteger linesInHunk = new AtomicInteger();
         int e = jniGetHunk(outHunk, linesInHunk, getRawPointer(), hunkIdx);
         if (ENOTFOUND.getCode() == e || outHunk.get() == 0) {
-            return Optional.empty();
+            return null;
         }
         Error.throwIfNeeded(e);
-        return Optional.of(new HunkInfo(new Diff.Hunk(outHunk.get()), linesInHunk.get()));
+        return new HunkInfo(new Diff.Hunk(outHunk.get()), linesInHunk.get());
     }
 
     /**
@@ -357,15 +357,15 @@ public class Patch extends CAutoReleasable {
      * @param lineOfHunk The index of the line in the hunk
      * @throws GitException git errors
      */
-    @Nonnull
-    public Optional<Diff.Line> getLineInHunk(int hunkIdx, int lineOfHunk) {
+    @Nullable
+    public Diff.Line getLineInHunk(int hunkIdx, int lineOfHunk) {
         AtomicLong out = new AtomicLong();
         int e = jniGetLineInHunk(out, getRawPointer(), hunkIdx, lineOfHunk);
         if (ENOTFOUND.getCode() == e) {
-            return Optional.empty();
+            return null;
         }
         Error.throwIfNeeded(e);
-        return Optional.of(new Diff.Line(out.get()));
+        return new Diff.Line(out.get());
     }
 
     /**

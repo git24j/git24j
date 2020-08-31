@@ -1,7 +1,6 @@
 package com.github.git24j.core;
 
 import java.nio.charset.StandardCharsets;
-import java.util.Optional;
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
@@ -31,8 +30,8 @@ public class BlobTest extends TestBase {
         try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {
             Blob blob1 = Blob.lookup(testRepo, Oid.of(BLOB_README));
             Assert.assertNotNull(blob1);
-            Optional<String> maybeContent = blob1.filteredContent("README.md", true);
-            Assert.assertTrue(maybeContent.isPresent());
+            String maybeContent = blob1.filteredContent("README.md", true);
+            Assert.assertNotNull(maybeContent);
         }
     }
 

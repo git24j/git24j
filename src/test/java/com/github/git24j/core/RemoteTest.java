@@ -1,20 +1,18 @@
 package com.github.git24j.core;
 
+import static com.github.git24j.core.Remote.CreateOptions.Flag.SKIP_DEFAULT_FETCHSPEC;
+import static com.github.git24j.core.Remote.CreateOptions.Flag.SKIP_INSTEADOF;
+
+import java.net.URI;
+import java.util.EnumSet;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
+import javax.annotation.Nonnull;
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
-
-import javax.annotation.Nonnull;
-import java.net.URI;
-import java.util.EnumSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.concurrent.atomic.AtomicInteger;
-
-import static com.github.git24j.core.Remote.CreateOptions.Flag.SKIP_DEFAULT_FETCHSPEC;
-import static com.github.git24j.core.Remote.CreateOptions.Flag.SKIP_INSTEADOF;
 
 public class RemoteTest extends TestBase {
     @Rule public TemporaryFolder folder = new TemporaryFolder();
@@ -24,7 +22,8 @@ public class RemoteTest extends TestBase {
         try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {
             Remote.addFetch(testRepo, "origin", "+refs/heads/*:refs/remotes/origin/*");
             Remote r = Remote.lookup(testRepo, "origin");
-            Assert.assertTrue(r.getRefspec(0).isPresent());
+            Assert.assertNotNull(r);
+            Assert.assertNotNull(r.getRefspec(0));
             Assert.assertFalse(r.getFetchRefspecs().isEmpty());
             Assert.assertTrue(r.getPushRefspecs().isEmpty());
             Remote.AutotagOptionT optionT = r.autotag();
@@ -91,7 +90,7 @@ public class RemoteTest extends TestBase {
         URI url = URI.create("https://github.com/git24j/git24j.git");
         Remote r = Remote.createWithOpts(url, null);
         Assert.assertEquals(url, r.url());
-        Assert.assertFalse(r.defaultBranch().isPresent());
+        Assert.assertNull(r.defaultBranch());
     }
 
     @Test
@@ -200,7 +199,7 @@ public class RemoteTest extends TestBase {
                     Assert.assertEquals("credentials.user_name_from_url", usernameFromUrl);
                     Assert.assertEquals(1, allowedTypes);
                     counter.incrementAndGet();
-                    return Optional.empty();
+                    return null;
                 });
         // cb->certificate_check(NULL, 1, "certificate_check.host", payload);
         cb.setCertificateCheckCb(
@@ -271,23 +270,25 @@ public class RemoteTest extends TestBase {
         cb.setTransportCb(
                 new Remote.TransportCb() {
                     @Override
-                    public Optional<Transport> accept(Remote owner) {
+                    public Transport accept(Remote owner) {
                         Assert.assertNull(owner);
                         counter.incrementAndGet();
-                        return Optional.empty();
+                        return null;
                     }
                 });
         // cb->resolve_url(NULL, "resolve_url.url", 1, payload);
-        cb.setUrlResolveCbCb(new Remote.UrlResolveCb() {
-            @Override
-            public int accept(String urlResolved, String url, @Nonnull Remote.Direction direction) {
-                Assert.assertNull(urlResolved);
-                Assert.assertEquals("resolve_url.url", url);
-                Assert.assertEquals(1, direction.ordinal());
-                counter.incrementAndGet();
-                return 0;
-            }
-        });
+        cb.setUrlResolveCbCb(
+                new Remote.UrlResolveCb() {
+                    @Override
+                    public int accept(
+                            String urlResolved, String url, @Nonnull Remote.Direction direction) {
+                        Assert.assertNull(urlResolved);
+                        Assert.assertEquals("resolve_url.url", url);
+                        Assert.assertEquals(1, direction.ordinal());
+                        counter.incrementAndGet();
+                        return 0;
+                    }
+                });
         Remote.jniCallbacksTest(cb.getRawPointer(), cb);
         Assert.assertEquals(12, counter.get());
     }

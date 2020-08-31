@@ -1,12 +1,9 @@
 package com.github.git24j.core;
 
-import org.apache.commons.io.FileUtils;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
@@ -20,12 +17,15 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import org.apache.commons.io.FileUtils;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Ignore;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 
 public class ConfigTest extends TestBase {
     private static final String MASTER_HASH = "476f0c95825ef4479cab580b71f8b85f9dea4ee4";
@@ -64,10 +64,10 @@ public class ConfigTest extends TestBase {
 
     @Test
     public void find() {
-        Config.findGlobal().ifPresent(this::verifyConfigPath);
-        Config.findXdg().ifPresent(this::verifyConfigPath);
-        Config.findSystem().ifPresent(this::verifyConfigPath);
-        Config.findProgramdata().ifPresent(this::verifyConfigPath);
+        Optional.ofNullable(Config.findGlobal()).ifPresent(this::verifyConfigPath);
+        Optional.ofNullable(Config.findXdg()).ifPresent(this::verifyConfigPath);
+        Optional.ofNullable(Config.findSystem()).ifPresent(this::verifyConfigPath);
+        Optional.ofNullable(Config.findProgramdata()).ifPresent(this::verifyConfigPath);
     }
 
     @Test

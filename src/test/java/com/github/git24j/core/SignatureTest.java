@@ -24,7 +24,7 @@ public class SignatureTest extends TestBase {
         Assert.assertEquals(sig1, sig2);
 
         try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(_folder)) {
-            Signature sig3 = Signature.getDefault(testRepo).orElse(null);
+            Signature sig3 = Signature.getDefault(testRepo);
             Assert.assertNotNull(sig3);
         }
     }

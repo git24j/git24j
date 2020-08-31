@@ -1,8 +1,8 @@
 package com.github.git24j.core;
 
-import javax.annotation.CheckForNull;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import static com.github.git24j.core.GitException.ErrorCode.ENOTFOUND;
+import static com.github.git24j.core.GitException.ErrorCode.ITEROVER;
+
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -11,9 +11,9 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
-
-import static com.github.git24j.core.GitException.ErrorCode.ENOTFOUND;
-import static com.github.git24j.core.GitException.ErrorCode.ITEROVER;
+import javax.annotation.CheckForNull;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 /** Memory representation of a set of config files */
 public class Config extends CAutoReleasable {
@@ -190,17 +190,18 @@ public class Config extends CAutoReleasable {
      *
      * @return path where global configuration is stored.
      */
-    public static Optional<Path> findGlobal() {
+    @Nullable
+    public static Path findGlobal() {
         Buf buf = new Buf();
         int e = jniFindGlobal(buf);
         if (e == ENOTFOUND.getCode()) {
-            return Optional.empty();
+            return null;
         }
         Error.throwIfNeeded(e);
         if (buf.getSize() == 0 || buf.getPtr() == null) {
-            return Optional.empty();
+            return null;
         }
-        return Optional.of(Paths.get(buf.toString()));
+        return Paths.get(buf.toString());
     }
 
     /**
@@ -217,17 +218,18 @@ public class Config extends CAutoReleasable {
      * @return the path to the global configuration file or empty
      * @throws GitException git errors
      */
-    public static Optional<Path> findXdg() {
+    @Nullable
+    public static Path findXdg() {
         Buf buf = new Buf();
         int e = jniFindXdg(buf);
         if (e == ENOTFOUND.getCode()) {
-            return Optional.empty();
+            return null;
         }
         Error.throwIfNeeded(e);
         if (buf.getSize() == 0 || buf.getPtr() == null) {
-            return Optional.empty();
+            return null;
         }
-        return Optional.of(Paths.get(buf.toString()));
+        return Paths.get(buf.toString());
     }
 
     /**
@@ -238,17 +240,18 @@ public class Config extends CAutoReleasable {
      * @return found config file
      * @throws GitException git errors
      */
-    public static Optional<Path> findSystem() {
+    @Nullable
+    public static Path findSystem() {
         Buf buf = new Buf();
         int e = jniFindSystem(buf);
         if (e == ENOTFOUND.getCode()) {
-            return Optional.empty();
+            return null;
         }
         Error.throwIfNeeded(e);
         if (buf.getSize() == 0 || buf.getPtr() == null) {
-            return Optional.empty();
+            return null;
         }
-        return Optional.of(Paths.get(buf.toString()));
+        return Paths.get(buf.toString());
     }
 
     /**
@@ -259,17 +262,18 @@ public class Config extends CAutoReleasable {
      * @return the path to the configuration file in ProgramData
      * @throws GitException git errors
      */
-    public static Optional<Path> findProgramdata() {
+    @Nullable
+    public static Path findProgramdata() {
         Buf buf = new Buf();
         int e = jniFindProgramdata(buf);
         if (e == ENOTFOUND.getCode()) {
-            return Optional.empty();
+            return null;
         }
         Error.throwIfNeeded(e);
         if (buf.getSize() == 0 || buf.getPtr() == null) {
-            return Optional.empty();
+            return null;
         }
-        return Optional.of(Paths.get(buf.toString()));
+        return Paths.get(buf.toString());
     }
 
     public static Config openDefault() {

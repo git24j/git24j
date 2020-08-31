@@ -14,7 +14,7 @@ public class BlameTest extends TestBase {
             Blame blame = Blame.file(testRepo, "README.md", null);
             Assert.assertFalse(blame.isNull());
             Assert.assertTrue(blame.getHunkCount() > 0);
-            Blame.Hunk hunk1 = blame.getHunkByIndex(0).orElse(null);
+            Blame.Hunk hunk1 = blame.getHunkByIndex(0);
             Assert.assertNotNull(hunk1);
             System.out.println("--------------------Hunk[0]----------------------");
             System.out.println("               boundary:" + hunk1.getBoundary());
@@ -27,7 +27,7 @@ public class BlameTest extends TestBase {
             System.out.println("       getOrigSignature:" + hunk1.getOrigSignature());
             System.out.println(" getOrigStartLineNumber:" + hunk1.getOrigStartLineNumber());
             System.out.println("--------------------Hunk@line1---------------------");
-            Blame.Hunk hunk2 = blame.getHunkByLine(1).orElse(null);
+            Blame.Hunk hunk2 = blame.getHunkByLine(1);
             Assert.assertNotNull(hunk2);
             System.out.println("               boundary:" + hunk2.getBoundary());
             System.out.println("       getFinalCommitId:" + hunk2.getFinalCommitId());

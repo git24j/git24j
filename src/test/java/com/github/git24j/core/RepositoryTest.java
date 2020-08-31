@@ -85,19 +85,22 @@ public class RepositoryTest extends TestBase {
         Path repoPath = TestRepo.SIMPLE1.tempCopy(folder);
         Path sub = repoPath.resolve("sub");
         Files.createDirectories(sub);
-        Optional<String> path1 = Repository.discover(sub, true, "/tmp:/home");
-        Assert.assertTrue(sameFile(repoPath.resolve(".git/"), path1.map(Paths::get).orElse(null)));
-        Optional<String> path2 =
+        String path1 = Repository.discover(sub, true, "/tmp:/home");
+        Assert.assertTrue(
+                sameFile(
+                        repoPath.resolve(".git/"),
+                        Optional.ofNullable(path1).map(Paths::get).orElse(null)));
+        String path2 =
                 Repository.discover(folder.newFolder("not-a-repo").toPath(), false, "/tmp:/home");
-        Assert.assertFalse(path2.isPresent());
+        Assert.assertNull(path2);
     }
 
     @Test
     public void headForWorkTree() {
         Path path = TestRepo.WORKTREE1.tempCopy(folder);
         try (Repository repository = Repository.open(path)) {
-            Optional<Reference> ref = repository.headForWorkTree("wt1");
-            Assert.assertTrue(ref.get().getRawPointer() > 0);
+            Reference ref = repository.headForWorkTree("wt1");
+            Assert.assertTrue(ref.getRawPointer() > 0);
         }
     }
 
@@ -202,15 +205,10 @@ public class RepositoryTest extends TestBase {
     public void message() {
         Path path = TestRepo.SIMPLE1.tempCopy(folder);
         try (Repository repository = Repository.open(path)) {
-            Optional<String> maybeMsg = repository.message();
-            Assert.assertEquals("prepared commit message file", maybeMsg.orElse("").trim());
+            String maybeMsg = repository.message();
+            Assert.assertEquals("prepared commit message file", maybeMsg.trim());
             repository.messageRemove();
-            try {
-                repository.message();
-                Assert.fail("should have throw error, because original valuek");
-            } catch (GitException e) {
-                // ignore
-            }
+            Assert.assertNull(repository.message());
         }
     }
 
@@ -218,15 +216,10 @@ public class RepositoryTest extends TestBase {
     public void stateCleanup() {
         Path path = TestRepo.SIMPLE1.tempCopy(folder);
         try (Repository repository = Repository.open(path)) {
-            Optional<String> maybeMsg = repository.message();
-            Assert.assertEquals("prepared commit message file", maybeMsg.orElse("").trim());
+            String maybeMsg = repository.message();
+            Assert.assertEquals("prepared commit message file", maybeMsg.trim());
             repository.stateCleanup();
-            try {
-                repository.message();
-                Assert.fail("should have throw error, because original valuek");
-            } catch (GitException e) {
-                // ignore
-            }
+            Assert.assertNull(repository.message());
         }
     }
 

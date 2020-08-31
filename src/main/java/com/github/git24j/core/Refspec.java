@@ -1,8 +1,8 @@
 package com.github.git24j.core;
 
-import javax.annotation.Nonnull;
-import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 public class Refspec extends CAutoReleasable {
     /** git_direction git_refspec_direction(const git_refspec *spec); */
@@ -119,11 +119,11 @@ public class Refspec extends CAutoReleasable {
      * @param name the name of the reference to transform
      * @throws GitException GIT_EBUFS or other errors
      */
-    @Nonnull
-    public Optional<String> transform(@Nonnull String name) {
+    @Nullable
+    public String transform(@Nonnull String name) {
         Buf out = new Buf();
         Error.throwIfNeeded(jniTransform(out, getRawPointer(), name));
-        return out.getString();
+        return out.getString().orElse(null);
     }
 
     /**
@@ -133,10 +133,10 @@ public class Refspec extends CAutoReleasable {
      * @param name the name of the reference to transform
      * @throws GitException GIT_EBUFS or another error
      */
-    @Nonnull
-    public Optional<String> rtransform(@Nonnull String name) {
+    @Nullable
+    public String rtransform(@Nonnull String name) {
         Buf out = new Buf();
         Error.throwIfNeeded(jniRtransform(out, getRawPointer(), name));
-        return out.getString();
+        return out.getString().orElse(null);
     }
 }

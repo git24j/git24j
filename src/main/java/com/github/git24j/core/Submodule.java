@@ -1,8 +1,7 @@
 package com.github.git24j.core;
 
-import javax.annotation.CheckForNull;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import static com.github.git24j.core.GitException.ErrorCode.ENOTFOUND;
+
 import java.net.URI;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -10,8 +9,9 @@ import java.util.EnumSet;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
-
-import static com.github.git24j.core.GitException.ErrorCode.ENOTFOUND;
+import javax.annotation.CheckForNull;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 public class Submodule extends CAutoReleasable {
     /** int git_submodule_add_finalize(git_submodule *submodule); */
@@ -247,15 +247,15 @@ public class Submodule extends CAutoReleasable {
      * @throws GitException GIT_EEXISTS if a repository is found in working directory only, -1 on
      *     other errors.
      */
-    @Nonnull
-    public static Optional<Submodule> lookup(@Nonnull Repository repo, @Nonnull String name) {
+    @Nullable
+    public static Submodule lookup(@Nonnull Repository repo, @Nonnull String name) {
         Submodule out = new Submodule(false, 0);
         int e = jniLookup(out._rawPtr, repo.getRawPointer(), name);
         if (ENOTFOUND.getCode() == e) {
-            return Optional.empty();
+            return null;
         }
         Error.throwIfNeeded(e);
-        return Optional.of(out);
+        return out;
     }
 
     /**
@@ -692,8 +692,9 @@ public class Submodule extends CAutoReleasable {
      *
      * @return submodule oid or empty if submodule is not checked out.
      */
-    public Optional<Oid> wdId() {
-        return Optional.ofNullable(jniWdId(getRawPointer())).map(Oid::of);
+    @Nullable
+    public Oid wdId() {
+        return Optional.ofNullable(jniWdId(getRawPointer())).map(Oid::of).orElse(null);
     }
 
     /**

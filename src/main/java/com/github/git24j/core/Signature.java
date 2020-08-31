@@ -4,9 +4,9 @@ import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 public class Signature extends CAutoReleasable {
     /** int git_signature_default(git_signature **out, git_repository *repo); */
@@ -101,15 +101,15 @@ public class Signature extends CAutoReleasable {
      * @param repo repository pointer
      * @throws GitException git errors
      */
-    @Nonnull
-    public static Optional<Signature> getDefault(@Nonnull Repository repo) {
+    @Nullable
+    public static Signature getDefault(@Nonnull Repository repo) {
         Signature sig = new Signature(false, 0);
         int e = jniDefault(sig._rawPtr, repo.getRawPointer());
         if (e == GitException.ErrorCode.ENOTFOUND.getCode()) {
-            return Optional.empty();
+            return null;
         }
         Error.throwIfNeeded(e);
-        return sig.isNull() ? Optional.empty() : Optional.of(sig);
+        return sig.isNull() ? null : sig;
     }
 
     /**

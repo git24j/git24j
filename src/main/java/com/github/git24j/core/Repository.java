@@ -7,7 +7,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.EnumSet;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
@@ -173,11 +172,12 @@ public class Repository extends CAutoCloseable {
      * @return the found path or empty string
      * @throws GitException git errors
      */
-    public static Optional<String> discover(
+    @Nullable
+    public static String discover(
             @Nonnull Path startPath, boolean acrossFs, @Nullable String ceilingDirs) {
         Buf outBuf = new Buf();
         jniDiscover(outBuf, startPath.toString(), acrossFs ? 1 : 0, ceilingDirs);
-        return outBuf.getString();
+        return outBuf.getString().orElse(null);
     }
 
     /**
@@ -333,10 +333,15 @@ public class Repository extends CAutoCloseable {
      * @return git's prepared message
      * @throws GitException git error
      */
-    public Optional<String> message() {
+    @Nullable
+    public String message() {
         Buf buf = new Buf();
-        Error.throwIfNeeded(jniMessage(buf, getRawPointer()));
-        return buf.getString();
+        int e = jniMessage(buf, getRawPointer());
+        if (e == ENOTFOUND.getCode()) {
+            return null;
+        }
+        Error.throwIfNeeded(e);
+        return buf.getString().orElse(null);
     }
     //    static native int jniMessageRemove(long repoPtr);
 
@@ -514,15 +519,15 @@ public class Repository extends CAutoCloseable {
      * @return the reference pointed at by HEAD, return empty if GIT_EUNBORNBRANCH when HEAD points
      *     to a non existing branch, GIT_ENOTFOUND when HEAD is missing
      */
-    @Nonnull
-    public Optional<Reference> head() {
+    @Nullable
+    public Reference head() {
         Reference out = new Reference(true, 0);
         int e = jniHead(out._rawPtr, getRawPointer());
         Error.throwIfNeeded(e);
         if (ENOTFOUND.getCode() == e || EUNBORNBRANCH.getCode() == e) {
-            return Optional.empty();
+            return null;
         }
-        return Optional.of(out);
+        return out;
     }
 
     /**
@@ -533,15 +538,15 @@ public class Repository extends CAutoCloseable {
      *     branch, GIT_ENOTFOUND when HEAD is missing
      * @throws GitException git error.
      */
-    @Nonnull
-    public Optional<Reference> headForWorkTree(@Nonnull String name) {
+    @Nullable
+    public Reference headForWorkTree(@Nonnull String name) {
         Reference out = new Reference(true, 0);
         int e = jniHeadForWorktree(out._rawPtr, _rawPtr.get(), name);
         if (ENOTFOUND.getCode() == e || EUNBORNBRANCH.getCode() == e) {
-            return Optional.empty();
+            return null;
         }
         Error.throwIfNeeded(e);
-        return Optional.of(out);
+        return out;
     }
 
     /**

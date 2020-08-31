@@ -1,10 +1,9 @@
 package com.github.git24j.core;
 
+import java.util.concurrent.atomic.AtomicLong;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.Optional;
-import java.util.concurrent.atomic.AtomicLong;
 
 public class Blame extends CAutoReleasable {
     /**
@@ -106,12 +105,10 @@ public class Blame extends CAutoReleasable {
      * @return the hunk at the given index, or empty if non is available
      * @throws GitException git errors
      */
-    public Optional<Hunk> getHunkByIndex(int index) {
+    @Nullable
+    public Hunk getHunkByIndex(int index) {
         long ptr = jniGetHunkByindex(getRawPointer(), index);
-        if (ptr == 0) {
-            return Optional.empty();
-        }
-        return Optional.of(new Hunk(true, ptr));
+        return ptr == 0 ? null : new Hunk(true, ptr);
     }
 
     /**
@@ -120,9 +117,10 @@ public class Blame extends CAutoReleasable {
      * @param lineno the (1-based) line number to find a hunk for
      * @return the hunk that contains the given line, or NULL on error
      */
-    public Optional<Hunk> getHunkByLine(int lineno) {
+    @Nullable
+    public Hunk getHunkByLine(int lineno) {
         long ptr = jniGetHunkByline(getRawPointer(), lineno);
-        return ptr == 0 ? Optional.empty() : Optional.of(new Hunk(true, ptr));
+        return ptr == 0 ? null : new Hunk(true, ptr);
     }
 
     /**
