@@ -2,7 +2,7 @@
 
 ## Core APIs
 - [x] Annotated
-- [ ] Apply
+- [x] Apply
 - [ ] Attr
 - [x] Blame
 - [x] Blob
@@ -17,7 +17,7 @@
 - [ ] Describe
 - [x] Diff
 - [x] Error
-- [ ] Fetch
+- [x] Fetch
 - [ ] Filter
 - [ ] Giterr
 - [ ] Graph
@@ -37,7 +37,7 @@
 - [x] Patch
 - [ ] Pathspec
 - [ ] Proxy
-- [ ] Push
+- [x] Push
 - [x] Rebase
 - [ ] Refdb
 - [x] Reference
