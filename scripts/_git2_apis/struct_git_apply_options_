@@ -1,0 +1,7 @@
+typedef struct {
+	unsigned int version;
+	git_apply_delta_cb delta_cb;
+	git_apply_hunk_cb hunk_cb;
+	void *payload;
+	unsigned int flags;
+} git_apply_options;

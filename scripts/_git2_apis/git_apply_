@@ -1,0 +1,2 @@
+int git_apply_to_tree(git_index **out, git_repository *repo, git_tree *preimage, git_diff *diff, const git_apply_options *options);
+int git_apply_apply(git_repository *repo, git_diff *diff, int location, const git_apply_options *options);
