@@ -1,0 +1,8 @@
+typedef struct git_describe_options {
+	unsigned int version;
+	unsigned int max_candidates_tags;
+	unsigned int describe_strategy;
+	const char *pattern;
+	int only_follow_first_parent;
+	int show_commit_oid_as_fallback;
+} git_describe_options;
