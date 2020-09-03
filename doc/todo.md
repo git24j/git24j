@@ -3,13 +3,13 @@
 ## Core APIs
 - [x] Annotated
 - [x] Apply
-- [ ] Attr
+- [x] Attr
 - [x] Blame
 - [x] Blob
 - [x] Branch
 - [x] Buf
 - [x] Checkout
-- [ ] Cherrypick
+- [x] Cherrypick
 - [x] Clone
 - [x] Commit
 - [x] Config

@@ -6,7 +6,7 @@
 #ifdef __cplusplus
 extern "C"
 {
-    #endif
+#endif
 
     /** Save jni objects to be passed to async callbacks. */
     typedef struct
@@ -193,7 +193,7 @@ extern "C"
     /** FOR DEBUG: inspect object class */
     void __debug_inspect(JNIEnv *env, jobject obj);
     void __debug_inspect2(JNIEnv *env, jobject obj, const char *message, const char *fname);
-    #ifdef __cplusplus
+#ifdef __cplusplus
 }
 #endif
 #endif
