@@ -20,7 +20,7 @@
 - [x] Fetch
 - [x] Filter
 - [x] Giterr
-- [ ] Graph
+- [x] Graph
 - [ ] Ignore
 - [x] Index (IndexEntry)
 - [ ] Indexer
