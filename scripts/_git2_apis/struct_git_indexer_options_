@@ -1,0 +1,6 @@
+struct git_indexer_options {
+	unsigned int version;
+	git_indexer_progress_cb progress_cb;
+	void *progress_cb_payload;
+	unsigned char verify;
+} git_indexer_options;
