@@ -21,9 +21,9 @@
 - [x] Filter
 - [x] Giterr
 - [x] Graph
-- [ ] Ignore
+- [x] Ignore
 - [x] Index (IndexEntry)
-- [ ] Indexer
+- [x] Indexer
 - [x] Libgit2
 - [x] Mailmap
 - [x] Merge
