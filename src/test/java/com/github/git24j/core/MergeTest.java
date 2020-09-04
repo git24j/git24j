@@ -1,13 +1,12 @@
 package com.github.git24j.core;
 
+import org.junit.Assert;
+import org.junit.Test;
+
 import java.nio.file.Path;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import org.junit.Assert;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
 
 public class MergeTest extends TestBase {
     // git rev-parse HEAD^{tree}
@@ -17,7 +16,6 @@ public class MergeTest extends TestBase {
     private static final String SHA_DEV = "e5b28427ba064002e0e343e783ea3095018ce72c";
     private static final String SHA_C = "f80e0b10f83e512d1fae0142d000cceba3aca721";
     private static final String SHA_C_DEV_BASE = "67a36754360b373d391af2182f9ad8929fed54d8";
-    @Rule public TemporaryFolder folder = new TemporaryFolder();
 
     @Test
     public void base() {

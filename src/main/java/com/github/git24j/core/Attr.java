@@ -1,10 +1,10 @@
 package com.github.git24j.core;
 
-import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
+import javax.annotation.Nonnull;
 
 public class Attr {
     /** int git_attr_add_macro(git_repository *repo, const char *name, const char *values); */
@@ -143,7 +143,7 @@ public class Attr {
 
         @Override
         public int getBit() {
-            return 0;
+            return _bit;
         }
     }
 
@@ -161,7 +161,7 @@ public class Attr {
 
         @Override
         public int getBit() {
-            return 0;
+            return _bit;
         }
     }
 

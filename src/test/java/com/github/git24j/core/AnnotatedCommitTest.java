@@ -1,14 +1,10 @@
 package com.github.git24j.core;
 
 import org.junit.Assert;
-import org.junit.Ignore;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
 
 public class AnnotatedCommitTest extends TestBase {
     private final String MASTER_HASH = "476f0c95825ef4479cab580b71f8b85f9dea4ee4";
-    @Rule public TemporaryFolder folder = new TemporaryFolder();
 
     @Test
     public void fromRef() {

@@ -1,15 +1,17 @@
 package com.github.git24j.core;
 
+import org.junit.Test;
+
+import java.util.Arrays;
+import java.util.EnumSet;
+
 import static com.github.git24j.core.Checkout.NotifyT.CONFLICT;
 import static com.github.git24j.core.Checkout.NotifyT.UNTRACKED;
 import static com.github.git24j.core.Checkout.StrategyT.ALLOW_CONFLICTS;
 import static com.github.git24j.core.Checkout.StrategyT.FORCE;
 import static com.github.git24j.core.Clone.LocalT.LOCAL_NO_LINKS;
-import static org.junit.Assert.*;
-
-import java.util.Arrays;
-import java.util.EnumSet;
-import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class CloneTest extends TestBase {
 

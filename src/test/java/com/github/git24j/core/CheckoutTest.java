@@ -1,15 +1,9 @@
 package com.github.git24j.core;
 
-import static org.junit.Assert.*;
-
 import org.junit.Assert;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
 
 public class CheckoutTest extends TestBase {
-
-    @Rule public TemporaryFolder folder = new TemporaryFolder();
 
     @Test
     public void head() {

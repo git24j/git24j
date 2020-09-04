@@ -1,12 +1,11 @@
 package com.github.git24j.core;
 
+import org.junit.Assert;
+import org.junit.Test;
+
 import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
-import org.junit.Assert;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
 
 public class PatchTest extends TestBase {
 
@@ -17,8 +16,6 @@ public class PatchTest extends TestBase {
 
     private static final String README_BLOB1 = "08f8e5eba8074e2d3d5e17a8902eaea07633d0af";
     private static final String README_BLOB2 = "d628ad3b584b5ab3fa93dbdbcc66a15e4413d9b2";
-
-    @Rule public TemporaryFolder folder = new TemporaryFolder();
 
     @Test
     public void getDelta() {

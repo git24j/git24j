@@ -1,16 +1,13 @@
 package com.github.git24j.core;
 
+import org.junit.Assert;
+import org.junit.Test;
+
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
-import org.junit.Assert;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
 
 public class MailmapTest extends TestBase {
-
-    @Rule public TemporaryFolder folder = new TemporaryFolder();
 
     @Test
     public void addEntry() {

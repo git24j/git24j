@@ -1,7 +1,8 @@
 package com.github.git24j.core;
 
-import static com.github.git24j.core.GitObject.Type.ANY;
-import static com.github.git24j.core.GitObject.Type.BLOB;
+import org.junit.Assert;
+import org.junit.Ignore;
+import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
@@ -10,18 +11,14 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import org.junit.Assert;
-import org.junit.Ignore;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
+
+import static com.github.git24j.core.GitObject.Type.ANY;
+import static com.github.git24j.core.GitObject.Type.BLOB;
 
 public class OdbTest extends TestBase {
     private static final String README_SHORT_SHA_HEAD = "d628ad3b";
     private static final String A_SHORT_SHA_HEAD = "7898192261";
     private static final String README_SHA_HEAD = "d628ad3b584b5ab3fa93dbdbcc66a15e4413d9b2";
-
-    @Rule public TemporaryFolder folder = new TemporaryFolder();
 
     @Test
     public void create() {

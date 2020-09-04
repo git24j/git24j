@@ -1,15 +1,11 @@
 package com.github.git24j.core;
 
 import org.junit.Assert;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
 
 public class NoteTest extends TestBase {
     private final String MASTER_HASH = "476f0c95825ef4479cab580b71f8b85f9dea4ee4";
     private final Signature SIG = Signature.create("tester", "tester@example.com");
-
-    @Rule public TemporaryFolder folder = new TemporaryFolder();
 
     @Test
     public void create() {

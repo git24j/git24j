@@ -1,9 +1,9 @@
 package com.github.git24j.core;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.EnumSet;
 import java.util.concurrent.atomic.AtomicLong;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 public class Apply {
 
@@ -52,16 +52,25 @@ public class Apply {
     }
 
     /**
-     * Apply a `git_diff` to the given repository, making changes directly
-     * in the working directory, the index, or both.
+     * Apply a `git_diff` to the given repository, making changes directly in the working directory,
+     * the index, or both.
      *
      * @param repo the repository to apply to
      * @param diff the diff to apply
      * @param location the location to apply (workdir, index or both)
      * @param options the options for the apply (or null for defaults)
      */
-    public void apply(@Nonnull Repository repo, @Nonnull Diff diff, @Nonnull LocationT location, @Nullable Options options) {
-        int e = jniApply(repo.getRawPointer(), diff.getRawPointer(), location.getBit(), options == null ? 0 : options.getRawPointer());
+    public void apply(
+            @Nonnull Repository repo,
+            @Nonnull Diff diff,
+            @Nonnull LocationT location,
+            @Nullable Options options) {
+        int e =
+                jniApply(
+                        repo.getRawPointer(),
+                        diff.getRawPointer(),
+                        location.getBit(),
+                        options == null ? 0 : options.getRawPointer());
         Error.throwIfNeeded(e);
     }
 
@@ -79,7 +88,7 @@ public class Apply {
 
         @Override
         public int getBit() {
-            return 0;
+            return _bit;
         }
     }
 
@@ -87,16 +96,16 @@ public class Apply {
         WORKDIR(0),
 
         /**
-         * Apply the patch to the index, leaving the working directory
-         * untouched.  This is the equivalent of `git apply --cached`.
+         * Apply the patch to the index, leaving the working directory untouched. This is the
+         * equivalent of `git apply --cached`.
          */
-        INDEX ( 1),
+        INDEX(1),
 
         /**
-         * Apply the patch to both the working directory and the index.
-         * This is the equivalent of `git apply --index`.
+         * Apply the patch to both the working directory and the index. This is the equivalent of
+         * `git apply --index`.
          */
-        BOTH ( 2),
+        BOTH(2),
         ;
         private final int _bit;
 
@@ -106,7 +115,7 @@ public class Apply {
 
         @Override
         public int getBit() {
-            return 0;
+            return _bit;
         }
     }
 

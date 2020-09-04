@@ -2,8 +2,6 @@ package com.github.git24j.core;
 
 import org.junit.Test;
 
-import static org.junit.Assert.*;
-
 public class CertTest extends TestBase {
 
     @Test

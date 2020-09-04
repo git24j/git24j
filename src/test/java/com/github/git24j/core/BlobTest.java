@@ -1,10 +1,9 @@
 package com.github.git24j.core;
 
-import java.nio.charset.StandardCharsets;
 import org.junit.Assert;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
+
+import java.nio.charset.StandardCharsets;
 
 public class BlobTest extends TestBase {
     private static final String MASTER_HASH = "476f0c95825ef4479cab580b71f8b85f9dea4ee4";
@@ -12,8 +11,6 @@ public class BlobTest extends TestBase {
     private static final String BLOB_A = "78981922613b2afb6025042ff6bd878ac1994e85";
     /** from {@code git ls-tree HEAD^tree | grep README.md } */
     private static final String BLOB_README = "d628ad3b584b5ab3fa93dbdbcc66a15e4413d9b2";
-
-    @Rule public TemporaryFolder folder = new TemporaryFolder();
 
     @Test
     public void lookup() {

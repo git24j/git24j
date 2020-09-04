@@ -1,0 +1,9 @@
+int git_filterList_load(git_filter_list **filters, git_repository *repo, git_blob *blob, const char *path, int mode, int flags);
+int git_filterList_contains(git_filter_list *filters, const char *name);
+int git_filterList_apply_to_data(git_buf *out, git_filter_list *filters, git_buf *in);
+int git_filterList_apply_to_file(git_buf *out, git_filter_list *filters, git_repository *repo, const char *path);
+int git_filterList_apply_to_blob(git_buf *out, git_filter_list *filters, git_blob *blob);
+int git_filterList_stream_data(git_filter_list *filters, git_buf *data, git_writestream *target);
+int git_filterList_stream_file(git_filter_list *filters, git_repository *repo, const char *path, git_writestream *target);
+int git_filterList_stream_blob(git_filter_list *filters, git_blob *blob, git_writestream *target);
+void git_filterList_free(git_filter_list *filters);

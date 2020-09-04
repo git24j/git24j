@@ -1,13 +1,9 @@
 package com.github.git24j.core;
 
 import org.junit.Assert;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
 
 public class RefspecTest extends TestBase {
-    @Rule public TemporaryFolder folder = new TemporaryFolder();
-
     @Test
     public void common() {
         String refspecStr = "+refs/heads/*:refs/remotes/origin/*";

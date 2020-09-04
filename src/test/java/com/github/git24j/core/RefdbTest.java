@@ -8,8 +8,7 @@ import org.junit.rules.TemporaryFolder;
 import java.nio.file.Path;
 
 public class RefdbTest extends TestBase {
-    @Rule
-    public TemporaryFolder folder = new TemporaryFolder();
+    @Rule public TemporaryFolder folder = new TemporaryFolder();
 
     @Test
     public void open() {

@@ -1,5 +1,18 @@
 package com.github.git24j.core;
 
+import org.junit.Assert;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
+
+import javax.annotation.Nonnull;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.EnumSet;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+
 import static com.github.git24j.core.Status.StatusT.CONFLICTED;
 import static com.github.git24j.core.Status.StatusT.CURRENT;
 import static com.github.git24j.core.Status.StatusT.IGNORED;
@@ -14,18 +27,6 @@ import static com.github.git24j.core.Status.StatusT.WT_NEW;
 import static com.github.git24j.core.Status.StatusT.WT_RENAMED;
 import static com.github.git24j.core.Status.StatusT.WT_TYPECHANGE;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.EnumSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import javax.annotation.Nonnull;
-import org.junit.Assert;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
-
 /**
  * This test demonstrates usage of {@code Status}, similar to
  * https://libgit2.org/libgit2/ex/v1.0.0/status.html
@@ -33,13 +34,6 @@ import org.junit.rules.TemporaryFolder;
 public class StatusExampleTest extends TestBase {
 
     @Rule public TemporaryFolder _folder = new TemporaryFolder();
-
-    public enum FormatT {
-        DEFAULT,
-        LONG,
-        SHORT,
-        PORCELAIN
-    }
 
     private static String showBranch(@Nonnull Repository repo) {
         String r =
@@ -211,5 +205,12 @@ public class StatusExampleTest extends TestBase {
             Assert.assertTrue(prints.size() > 1);
             prints.forEach(System.out::print);
         }
+    }
+
+    public enum FormatT {
+        DEFAULT,
+        LONG,
+        SHORT,
+        PORCELAIN
     }
 }

@@ -6,7 +6,7 @@ import stringcase
 
 class Git2Function(object):
     PAT = re.compile(
-        r"^(?P<return_type>[\w *]+)\s+git_(?P<obj_name>[a-z0-9]+)_(?P<func_name>\w+)\((?P<param_list>[^()]*)\)\;$")
+        r"^(?P<return_type>[\w *]+)\s+git_(?P<obj_name>[a-zA-Z0-9]+)_(?P<func_name>\w+)\((?P<param_list>[^()]*)\)\;$")
     PAT_0 = r"^(?P<return_type>\w+)\s+git_"
     PAT_1 = "_(?P<func_name>\w+)(?P<param_lsit>\([^()]*\))\;$"
     TPL_HEADER = "JNIEXPORT {jni_return_type} JNICALL J_MAKE_METHOD({jni_obj_name}_jni{jni_func_name})(JNIEnv *env, jclass obj, {c_wrapper_param_list});"

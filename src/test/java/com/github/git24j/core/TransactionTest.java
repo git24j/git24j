@@ -1,14 +1,10 @@
 package com.github.git24j.core;
 
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
 
 public class TransactionTest extends TestBase {
 
     private static final String FEATURE_DEV_SHA = "e5b28427ba064002e0e343e783ea3095018ce72c";
-
-    @Rule public TemporaryFolder folder = new TemporaryFolder();
 
     @Test
     public void create() {

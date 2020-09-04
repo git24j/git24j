@@ -1,18 +1,15 @@
 package com.github.git24j.core;
 
+import org.junit.Assert;
+import org.junit.Test;
+
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import org.junit.Assert;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
 
 public class BranchTest extends TestBase {
     private final String MASTER_HASH = "476f0c95825ef4479cab580b71f8b85f9dea4ee4";
     private final String FEATURE_DEV_HASH = "e5b28427ba064002e0e343e783ea3095018ce72c";
-
-    @Rule public TemporaryFolder folder = new TemporaryFolder();
 
     @Test
     public void create() {
