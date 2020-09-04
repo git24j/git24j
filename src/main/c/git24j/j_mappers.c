@@ -128,6 +128,21 @@ char *j_copy_of_jstring(JNIEnv *env, jstring jstr, bool nullable)
     return copy;
 }
 
+void j_git_buf_of_jstring(JNIEnv *env, git_buf *out_buf, jstring jstr)
+{
+    if (jstr == NULL)
+    {
+        return;
+    }
+    assert(out_buf && "out_buf must not be null");
+    git_buf_dispose(out_buf);
+    int size = (*env)->GetStringLength(env, jstr);
+    const char *c_str = (*env)->GetStringUTFChars(env, jstr, NULL);
+    strncpy(out_buf->ptr, c_str, size);
+    out_buf->asize = size + 1;
+    out_buf->size = size;
+}
+
 int j_get_int_field(JNIEnv *env, jclass jclz, jobject obj, const char *fieldName)
 {
     jfieldID fid = (*env)->GetFieldID(env, jclz, fieldName, "I");

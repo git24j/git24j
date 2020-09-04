@@ -1,6 +1,7 @@
 package com.github.git24j.core;
 
-import static com.github.git24j.core.Repository.InitFlagT.MKPATH;
+import org.junit.Assert;
+import org.junit.Test;
 
 import java.io.IOException;
 import java.net.URI;
@@ -9,13 +10,10 @@ import java.nio.file.Paths;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
-import org.junit.Assert;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
+
+import static com.github.git24j.core.Repository.InitFlagT.MKPATH;
 
 public class BasicOperationsTest extends TestBase {
-    @Rule public TemporaryFolder folder = new TemporaryFolder();
 
     @Test
     public void initSimple() throws Exception {

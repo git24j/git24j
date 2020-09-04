@@ -14,18 +14,18 @@
 - [x] Commit
 - [x] Config
 - [x] Credential
-- [ ] Describe
+- [x] Describe
 - [x] Diff
 - [x] Error
 - [x] Fetch
-- [ ] Filter
-- [ ] Giterr
+- [x] Filter
+- [x] Giterr
 - [ ] Graph
 - [ ] Ignore
 - [x] Index (IndexEntry)
 - [ ] Indexer
 - [x] Libgit2
-- [ ] Mailmap
+- [x] Mailmap
 - [x] Merge
 - [ ] Message
 - [x] Note
@@ -39,9 +39,9 @@
 - [ ] Proxy
 - [x] Push
 - [x] Rebase
-- [ ] Refdb
+- [x] Refdb
 - [x] Reference
-- [ ] Reflog
+- [x] Reflog
 - [x] Refspec
 - [x] Remote
 - [x] Repository

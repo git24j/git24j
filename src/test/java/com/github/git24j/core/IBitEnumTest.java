@@ -1,14 +1,15 @@
 package com.github.git24j.core;
 
+import org.junit.Assert;
+import org.junit.Test;
+
+import java.util.EnumSet;
+
 import static com.github.git24j.core.IBitEnumTest.Example.EIGHT;
 import static com.github.git24j.core.IBitEnumTest.Example.FOUR;
 import static com.github.git24j.core.IBitEnumTest.Example.ONE;
 import static com.github.git24j.core.IBitEnumTest.Example.TWO;
 import static org.junit.Assert.assertEquals;
-
-import java.util.EnumSet;
-import org.junit.Assert;
-import org.junit.Test;
 
 public class IBitEnumTest {
 
@@ -34,6 +35,11 @@ public class IBitEnumTest {
         assertEquals(8, IBitEnum.bitOrAll(EnumSet.of(EIGHT)));
     }
 
+    @Test
+    public void valueOf() {
+        Assert.assertEquals(FOUR, IBitEnum.valueOf(1 << 2, Example.class));
+    }
+
     enum Example implements IBitEnum {
         ONE(1 << 0),
         TWO(1 << 1),
@@ -49,10 +55,5 @@ public class IBitEnumTest {
         public int getBit() {
             return _bit;
         }
-    }
-
-    @Test
-    public void valueOf() {
-        Assert.assertEquals(FOUR, IBitEnum.valueOf(1 << 2, Example.class));
     }
 }

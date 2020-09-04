@@ -1,9 +1,9 @@
 package com.github.git24j.core;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.EnumSet;
 import java.util.concurrent.atomic.AtomicLong;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 public class Credential extends CAutoReleasable {
     /** int git_credential_default_new(git_credential **out); */
@@ -205,7 +205,7 @@ public class Credential extends CAutoReleasable {
 
         @Override
         public int getBit() {
-            return 0;
+            return _bit;
         }
     }
 

@@ -1,8 +1,6 @@
 package com.github.git24j.core;
 
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
 
 import java.util.Arrays;
 import java.util.EnumSet;
@@ -14,7 +12,6 @@ import static com.github.git24j.core.Attr.CheckFlags.CHECK_INCLUDE_HEAD;
 import static com.github.git24j.core.Attr.CheckFlags.CHECK_INDEX_THEN_FILE;
 
 public class AttrTest extends TestBase {
-    @Rule public TemporaryFolder folder = new TemporaryFolder();
 
     @Test
     public void addMacro() {

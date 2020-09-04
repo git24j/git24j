@@ -1,15 +1,11 @@
 package com.github.git24j.core;
 
 import org.junit.Assert;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
 
 public class RebaseTest extends TestBase {
     private static final String SOURCE_SHA = "e5b28427ba064002e0e343e783ea3095018ce72c";
     private static final String TARGET_SHA = "f80e0b10f83e512d1fae0142d000cceba3aca721";
-
-    @Rule public TemporaryFolder folder = new TemporaryFolder();
 
     @Test
     public void open() {

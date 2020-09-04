@@ -87,6 +87,12 @@ extern "C"
      */
     char *j_copy_of_jstring(JNIEnv *env, jstring jstr, bool nullable);
 
+    /**
+     * Copy content of `jstr` to `out_buf`. Result out_buf must be disposed by 
+     * `git_buf_dispose`.
+     */
+    void j_git_buf_of_jstring(JNIEnv *env, git_buf *out_buf, jstring jstr);
+
     /** Copy values of git_buf to java::Buf */
     void j_git_buf_to_java(JNIEnv *env, git_buf *c_buf, jobject buf);
 

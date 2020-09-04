@@ -1,9 +1,9 @@
 package com.github.git24j.core;
 
+import java.util.concurrent.atomic.AtomicLong;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.concurrent.atomic.AtomicLong;
 
 public class Describe {
     /**
@@ -137,7 +137,7 @@ public class Describe {
 
         @Override
         public int getBit() {
-            return 0;
+            return _bit;
         }
     }
 

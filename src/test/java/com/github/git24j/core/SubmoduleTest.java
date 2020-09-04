@@ -1,18 +1,13 @@
 package com.github.git24j.core;
 
-import static org.junit.Assert.*;
+import org.junit.Assert;
+import org.junit.Test;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
-import org.junit.Assert;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
 
 public class SubmoduleTest extends TestBase {
-
-    @Rule public TemporaryFolder folder = new TemporaryFolder();
 
     private Repository openSubmoduleRepo() {
         Path repoPath = TestRepo.SUBMODULE.tempCopy(folder);

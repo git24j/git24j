@@ -1,19 +1,17 @@
 package com.github.git24j.core;
 
+import org.junit.Assert;
+import org.junit.Test;
+
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
-import org.junit.Assert;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
 
 public class TreeTest extends TestBase {
     private static final String MASTER_TREE_SHA = "8c5f4d727b339fe7d9ee4d1806aa9ca3a5cc5b3e";
     private static final String README_SHA_IN_MASTER = "d628ad3b584b5ab3fa93dbdbcc66a15e4413d9b2";
-    @Rule public TemporaryFolder folder = new TemporaryFolder();
 
     @Test
     public void lookup() {

@@ -1,22 +1,19 @@
 package com.github.git24j.core;
 
-import static com.github.git24j.core.Remote.CreateOptions.Flag.SKIP_DEFAULT_FETCHSPEC;
-import static com.github.git24j.core.Remote.CreateOptions.Flag.SKIP_INSTEADOF;
+import org.junit.Assert;
+import org.junit.Ignore;
+import org.junit.Test;
 
+import javax.annotation.Nonnull;
 import java.net.URI;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
-import javax.annotation.Nonnull;
-import org.junit.Assert;
-import org.junit.Ignore;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
+
+import static com.github.git24j.core.Remote.CreateOptions.Flag.SKIP_DEFAULT_FETCHSPEC;
+import static com.github.git24j.core.Remote.CreateOptions.Flag.SKIP_INSTEADOF;
 
 public class RemoteTest extends TestBase {
-    @Rule public TemporaryFolder folder = new TemporaryFolder();
-
     @Test
     public void basics() {
         try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {

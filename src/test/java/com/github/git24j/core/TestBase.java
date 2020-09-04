@@ -1,5 +1,10 @@
 package com.github.git24j.core;
 
+import org.apache.commons.io.IOUtils;
+import org.junit.AfterClass;
+import org.junit.Rule;
+import org.junit.rules.TemporaryFolder;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -11,12 +16,10 @@ import java.util.Enumeration;
 import java.util.Optional;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
-import org.apache.commons.io.IOUtils;
-import org.junit.AfterClass;
-import org.junit.rules.TemporaryFolder;
 
 public class TestBase {
     private static final String RESOURCE_ROOT = "";
+    @Rule public TemporaryFolder folder = new TemporaryFolder();
 
     public TestBase() {
         Init.loadLibraries(null, null);
@@ -94,6 +97,10 @@ public class TestBase {
             throw new RuntimeException(e);
         }
         return false;
+    }
+
+    protected Repository creteTestRepo(TestRepo testRepo) {
+        return testRepo.tempRepo(folder);
     }
 
     public enum TestRepo {

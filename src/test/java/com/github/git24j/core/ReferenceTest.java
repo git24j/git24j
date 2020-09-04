@@ -1,12 +1,11 @@
 package com.github.git24j.core;
 
+import org.junit.Assert;
+import org.junit.Test;
+
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
-import org.junit.Assert;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
 
 public class ReferenceTest extends TestBase {
     private static final String REF_NAME_DEV = "refs/heads/feature/dev";
@@ -18,8 +17,6 @@ public class ReferenceTest extends TestBase {
 
     private static final String ANNO_TAG_1_NAME = "refs/tags/annotated_tag_3";
     private static final String ANNO_TAG_1_SHA = "db179e4ff84cab6fad68b0e979f85937c4d85a90";
-
-    @Rule public TemporaryFolder folder = new TemporaryFolder();
 
     @Test
     public void lookup() {
