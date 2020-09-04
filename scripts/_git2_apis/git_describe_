@@ -1,0 +1,8 @@
+int git_describe_options_new(git_describe_options **out_opts, unsigned int version);
+void git_describe_options_free(git_describe_options *opts);
+int git_describe_format_options_new(git_describe_format_options **out_opts, unsigned int version);
+void git_describe_format_options_free(git_describe_format_options *opts);
+int git_describe_commit(git_describe_result **result, git_object *committish, git_describe_options *opts);
+int git_describe_workdir(git_describe_result **out, git_repository *repo, git_describe_options *opts);
+int git_describe_format(git_buf *out, const git_describe_result *result, const git_describe_format_options *opts);
+void git_describe_result_free(git_describe_result *result);

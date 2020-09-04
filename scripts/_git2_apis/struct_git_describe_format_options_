@@ -1,0 +1,6 @@
+typedef struct {
+	unsigned int version;
+	unsigned int abbreviated_size;
+	int always_use_long_format;
+	const char *dirty_suffix;
+} git_describe_format_options;
