@@ -27,12 +27,12 @@
 - [x] Libgit2
 - [x] Mailmap
 - [x] Merge
-- [ ] Message
+- [x] Message
 - [x] Note
 - [x] Object (GitObject)
 - [x] Odb
 - [x] Oid
-- [ ] Oidarray
+- [x] Oidarray
 - [ ] Packbuilder
 - [x] Patch
 - [ ] Pathspec

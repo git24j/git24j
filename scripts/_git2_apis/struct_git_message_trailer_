@@ -1,0 +1,4 @@
+typedef struct {
+  const char *key;
+  const char *value;
+} git_message_trailer;
