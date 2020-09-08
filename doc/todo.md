@@ -89,13 +89,9 @@
 - [ ] Consider simplify `Oid` to just bytes, find out all return (const oid *) cases and have it return jbyteArray instead.
 - [x] jni::GetObjectClass segfaults if object is null, so make sure every call is protected.
 - [ ] Replace `assert` with better alternatives (many build system disables assert by default).
-- [x] Rename `consumer` in callbacks to `callback`
 - [ ] Buf is a stupid idea, replace it with plain String or a POJO
-- [x] Unify all enums
-- [x] Formalize CAutoReleaseable vs CAutoClosable
-- [x] Unify behavior of git objects, aka {@code Commit}, {@code Tag}, {@code Tree} or {@code Blob} 
-- [x] Make sure git objects are free-ed with `git_object_free`, make sure they all 
 - [ ] *All callbacks should immediately return if consumer is null*
+- [ ] All callback should handle null payload case
 - [ ] Check all `data_structure **out pattern`, code gen may broken in this case, especially pattern like `jniAbcNew`
 - [ ] Make sure `equals` and `hashcode` makes sense. Equality of simple structures should compare by fields instead of raw pointer
 - [ ] Change all `AtomicReference<String>` to use jniConstants
