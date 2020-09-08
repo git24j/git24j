@@ -1,0 +1,3 @@
+int git_message_prettify(git_buf *out, const char *message, int strip_comments, char comment_char);
+int git_message_trailers(git_message_trailer_array *arr, const char *message);
+void git_message_trailer_array_free(git_message_trailer_array *arr);

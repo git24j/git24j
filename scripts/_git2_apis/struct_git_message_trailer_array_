@@ -1,0 +1,5 @@
+typedef struct {
+  git_message_trailer *trailers;
+  size_t count;
+  char * _trailer_block;
+} git_message_trailer_array;
