@@ -46,6 +46,11 @@ class Internals {
     }
 
     @FunctionalInterface
+    interface IIICallback {
+        int accept(int i0, int i1, int i2);
+    }
+
+    @FunctionalInterface
     interface SJCallback {
         int accept(String s, long ptr);
     }

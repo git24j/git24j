@@ -1,9 +1,9 @@
 package com.github.git24j.core;
 
-import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
+import javax.annotation.Nonnull;
 
 public class Message {
     /**
@@ -47,6 +47,7 @@ public class Message {
             trailers.add(new Trailer(key, val));
         }
         String trailerBlock = jniTrailerArrayGetTrailerBlock(trailerArrPtr);
+        jniTrailerArrayFree(trailerArrPtr);
         return new TrailerArray(trailers, trailerBlock);
     }
 
