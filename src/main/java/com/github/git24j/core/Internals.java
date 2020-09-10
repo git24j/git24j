@@ -21,6 +21,11 @@ class Internals {
     }
 
     @FunctionalInterface
+    interface ICallback {
+        int accept(int ptr);
+    }
+
+    @FunctionalInterface
     interface JJJCallback {
         int accept(long ptr1, long ptr2, long ptr3);
     }
@@ -83,6 +88,11 @@ class Internals {
     @FunctionalInterface
     interface SSCallback {
         int accept(String s1, String s2);
+    }
+
+    @FunctionalInterface
+    interface ISBarrCalback {
+        int accept(int i1, String s, byte[] bytes);
     }
 
     /** Class to hold */

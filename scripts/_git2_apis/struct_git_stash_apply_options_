@@ -1,0 +1,7 @@
+typedef struct git_stash_apply_options {
+	unsigned int version;
+	uint32_t flags;
+	git_checkout_options checkout_options;
+	git_stash_apply_progress_cb progress_cb;
+	void *progress_payload;
+} git_stash_apply_options;
