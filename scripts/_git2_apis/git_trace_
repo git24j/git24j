@@ -1,0 +1,1 @@
+int git_trace_set(git_trace_level_t level, git_trace_cb cb);

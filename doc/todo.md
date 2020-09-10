@@ -46,11 +46,11 @@
 - [x] Remote
 - [x] Repository
 - [x] Reset
-- [ ] Revert
+- [x] Revert
 - [x] Revparse
 - [x] Revwalk
 - [x] Signature
-- [ ] Stash
+- [x] Stash
 - [x] Status
 - [x] Strarray
 - [x] Submodule

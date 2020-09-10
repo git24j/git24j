@@ -1,0 +1,6 @@
+int git_stash_save(git_oid *out, git_repository *repo, const git_signature *stasher, const char *message, uint32_t flags);
+int git_stash_apply_options_init(git_stash_apply_options *opts, unsigned int version);
+int git_stash_apply(git_repository *repo, size_t index, const git_stash_apply_options *options);
+int git_stash_foreach(git_repository *repo, void * callback, void *payload);
+int git_stash_drop(git_repository *repo, size_t index);
+int git_stash_pop(git_repository *repo, size_t index, const git_stash_apply_options *options);
