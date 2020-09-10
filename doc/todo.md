@@ -33,10 +33,10 @@
 - [x] Odb
 - [x] Oid
 - [x] Oidarray
-- [ ] Packbuilder
+- [x] Packbuilder
 - [x] Patch
-- [ ] Pathspec
-- [ ] Proxy
+- [x] Pathspec
+- [x] Proxy
 - [x] Push
 - [x] Rebase
 - [x] Refdb
@@ -45,7 +45,7 @@
 - [x] Refspec
 - [x] Remote
 - [x] Repository
-- [ ] Reset
+- [x] Reset
 - [ ] Revert
 - [x] Revparse
 - [x] Revwalk

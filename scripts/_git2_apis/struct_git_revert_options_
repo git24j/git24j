@@ -1,0 +1,6 @@
+typedef struct {
+	unsigned int version;
+	unsigned int mainline;
+	git_merge_options merge_opts;
+	git_checkout_options checkout_opts;
+} git_revert_options;
