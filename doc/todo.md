@@ -55,10 +55,10 @@
 - [x] Strarray
 - [x] Submodule
 - [x] Tag
-- [ ] Trace
+- [ ] Trace (api incomplete)
 - [x] Transaction
 - [x] Tree
-- [ ] Treebuilder
+- [x] Treebuilder (Tree.Builder)
 - [x] Worktree
 
 
