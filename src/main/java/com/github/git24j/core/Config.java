@@ -3,8 +3,6 @@ package com.github.git24j.core;
 import static com.github.git24j.core.GitException.ErrorCode.ENOTFOUND;
 import static com.github.git24j.core.GitException.ErrorCode.ITEROVER;
 
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -191,7 +189,7 @@ public class Config extends CAutoReleasable {
      * @return path where global configuration is stored.
      */
     @Nullable
-    public static Path findGlobal() {
+    public static String findGlobal() {
         Buf buf = new Buf();
         int e = jniFindGlobal(buf);
         if (e == ENOTFOUND.getCode()) {
@@ -201,7 +199,7 @@ public class Config extends CAutoReleasable {
         if (buf.getSize() == 0 || buf.getPtr() == null) {
             return null;
         }
-        return Paths.get(buf.toString());
+        return buf.getString().orElse(null);
     }
 
     /**
@@ -219,7 +217,7 @@ public class Config extends CAutoReleasable {
      * @throws GitException git errors
      */
     @Nullable
-    public static Path findXdg() {
+    public static String findXdg() {
         Buf buf = new Buf();
         int e = jniFindXdg(buf);
         if (e == ENOTFOUND.getCode()) {
@@ -229,7 +227,7 @@ public class Config extends CAutoReleasable {
         if (buf.getSize() == 0 || buf.getPtr() == null) {
             return null;
         }
-        return Paths.get(buf.toString());
+        return buf.getString().orElse(null);
     }
 
     /**
@@ -241,7 +239,7 @@ public class Config extends CAutoReleasable {
      * @throws GitException git errors
      */
     @Nullable
-    public static Path findSystem() {
+    public static String findSystem() {
         Buf buf = new Buf();
         int e = jniFindSystem(buf);
         if (e == ENOTFOUND.getCode()) {
@@ -251,7 +249,7 @@ public class Config extends CAutoReleasable {
         if (buf.getSize() == 0 || buf.getPtr() == null) {
             return null;
         }
-        return Paths.get(buf.toString());
+        return buf.getString().orElse(null);
     }
 
     /**
@@ -262,8 +260,8 @@ public class Config extends CAutoReleasable {
      * @return the path to the configuration file in ProgramData
      * @throws GitException git errors
      */
-    @Nullable
-    public static Path findProgramdata() {
+    @CheckForNull
+    public static String findProgramdata() {
         Buf buf = new Buf();
         int e = jniFindProgramdata(buf);
         if (e == ENOTFOUND.getCode()) {
@@ -273,7 +271,7 @@ public class Config extends CAutoReleasable {
         if (buf.getSize() == 0 || buf.getPtr() == null) {
             return null;
         }
-        return Paths.get(buf.toString());
+        return buf.getString().orElse(null);
     }
 
     public static Config openDefault() {
@@ -298,9 +296,10 @@ public class Config extends CAutoReleasable {
      * @return the configuration instance opened
      * @throws GitException git errors
      */
-    public static Config openOndisk(Path path) {
+    @Nonnull
+    public static Config openOndisk(@Nonnull String path) {
         Config cfg = new Config(false, 0);
-        Error.throwIfNeeded(jniOpenOndisk(cfg._rawPtr, path.toString()));
+        Error.throwIfNeeded(jniOpenOndisk(cfg._rawPtr, path));
         return cfg;
     }
 
@@ -400,16 +399,15 @@ public class Config extends CAutoReleasable {
      * @param value the path to evaluate
      * @throws GitException parsing error
      */
-    public static Path parsePath(@Nonnull String value) {
+    public static String parsePath(@Nonnull String value) {
         Buf out = new Buf();
         Error.throwIfNeeded(jniParsePath(out, value));
-        return Paths.get(
-                out.getString()
-                        .orElseThrow(
-                                () ->
-                                        new GitException(
-                                                GitException.ErrorClass.CONFIG,
-                                                "could not parse: " + value)));
+        return out.getString()
+                .orElseThrow(
+                        () ->
+                                new GitException(
+                                        GitException.ErrorClass.CONFIG,
+                                        "could not parse: " + value));
     }
 
     @Override
@@ -444,11 +442,11 @@ public class Config extends CAutoReleasable {
      *     priority level (and force_replace set to 0), GIT_ENOTFOUND when the file doesn't exist or
      *     error code
      */
-    public void addFileOndisk(Path path, ConfigLevel level, Repository repo, boolean force) {
+    public void addFileOndisk(String path, ConfigLevel level, Repository repo, boolean force) {
         Error.throwIfNeeded(
                 jniAddFileOndisk(
                         getRawPointer(),
-                        path.toString(),
+                        path,
                         level._code,
                         repo == null ? 0 : repo.getRawPointer(),
                         force ? 1 : 0));
@@ -539,14 +537,14 @@ public class Config extends CAutoReleasable {
      * @throws GitException git errors
      */
     @Nonnull
-    public Optional<Path> getPath(@Nonnull String name) {
+    public Optional<String> getPath(@Nonnull String name) {
         Buf out = new Buf();
         int e = jniGetPath(out, getRawPointer(), name);
         if (e == ENOTFOUND.getCode()) {
             return Optional.empty();
         }
         Error.throwIfNeeded(e);
-        return out.getString().map(Paths::get);
+        return out.getString();
     }
 
     /**

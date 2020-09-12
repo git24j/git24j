@@ -1,12 +1,9 @@
 package com.github.git24j.core;
 
-import org.junit.Assert;
-import org.junit.Test;
-
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
+import org.junit.Assert;
+import org.junit.Test;
 
 public class DiffTest extends TestBase {
     // git rev-parse HEAD^{tree}
@@ -34,7 +31,7 @@ public class DiffTest extends TestBase {
         try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {
             Blob blob1 = Blob.lookup(testRepo, Oid.of(README_BLOB1));
             Blob blob2 = Blob.lookup(testRepo, Oid.of(README_BLOB2));
-            Path p = Paths.get("README.md");
+            String p = "README.md";
             Map<Long, String> trace = new HashMap<>();
             Diff.blobs(
                     blob1,

@@ -122,6 +122,11 @@ public class Repository extends CAutoCloseable {
         return new Repository(outRepo.get());
     }
 
+    @Nonnull
+    public static Repository open(@Nonnull String path) {
+        return open(Paths.get(path));
+    }
+
     /**
      * Creates a new Git repository in the given folder.
      *
@@ -133,9 +138,9 @@ public class Repository extends CAutoCloseable {
      * @throws GitException git error.
      */
     @Nonnull
-    public static Repository init(@Nonnull Path path, boolean isBare) {
+    public static Repository init(@Nonnull String path, boolean isBare) {
         Repository repo = new Repository(0);
-        Error.throwIfNeeded(jniInit(repo._rawPtr, path.toString(), isBare ? 1 : 0));
+        Error.throwIfNeeded(jniInit(repo._rawPtr, path, isBare ? 1 : 0));
         return repo;
     }
 
@@ -174,9 +179,9 @@ public class Repository extends CAutoCloseable {
      */
     @Nullable
     public static String discover(
-            @Nonnull Path startPath, boolean acrossFs, @Nullable String ceilingDirs) {
+            @Nonnull String startPath, boolean acrossFs, @Nullable String ceilingDirs) {
         Buf outBuf = new Buf();
-        jniDiscover(outBuf, startPath.toString(), acrossFs ? 1 : 0, ceilingDirs);
+        jniDiscover(outBuf, startPath, acrossFs ? 1 : 0, ceilingDirs);
         return outBuf.getString().orElse(null);
     }
 
@@ -195,9 +200,9 @@ public class Repository extends CAutoCloseable {
      */
     @Nonnull
     public static Repository openExt(
-            @Nonnull Path path, @Nullable EnumSet<OpenFlag> flags, @Nullable String ceilingDirs) {
+            @Nonnull String path, @Nullable EnumSet<OpenFlag> flags, @Nullable String ceilingDirs) {
         AtomicLong out = new AtomicLong();
-        int error = jniOpenExt(out, path.toString(), IBitEnum.bitOrAll(flags), ceilingDirs);
+        int error = jniOpenExt(out, path, IBitEnum.bitOrAll(flags), ceilingDirs);
         Error.throwIfNeeded(error);
         return new Repository(out.get());
     }
@@ -210,7 +215,7 @@ public class Repository extends CAutoCloseable {
      * @throws GitException git error.
      */
     @Nonnull
-    public static Repository openBare(@Nonnull Path path) {
+    public static Repository openBare(@Nonnull String path) {
         AtomicLong out = new AtomicLong();
         Error.throwIfNeeded(jniOpenBare(out, path.toString()));
         return new Repository(out.get());
@@ -250,8 +255,8 @@ public class Repository extends CAutoCloseable {
      *     workdir is not the parent of the .git directory)
      * @throws GitException git error
      */
-    public void setWorkdir(Path path, boolean updateGitLink) {
-        Error.throwIfNeeded(jniSetWorkdir(getRawPointer(), path.toString(), updateGitLink ? 1 : 0));
+    public void setWorkdir(String path, boolean updateGitLink) {
+        Error.throwIfNeeded(jniSetWorkdir(getRawPointer(), path, updateGitLink ? 1 : 0));
     }
 
     /**
@@ -396,10 +401,9 @@ public class Repository extends CAutoCloseable {
      * @return Output value of calculated SHA
      * @throws GitException git errors
      */
-    public Oid hashfile(Path path, GitObject.Type type, String asPath) {
+    public Oid hashfile(String path, GitObject.Type type, String asPath) {
         Oid oid = new Oid();
-        Error.throwIfNeeded(
-                jniHashfile(oid, getRawPointer(), path.toString(), type.getBit(), asPath));
+        Error.throwIfNeeded(jniHashfile(oid, getRawPointer(), path, type.getBit(), asPath));
         return oid;
     }
 
@@ -592,11 +596,12 @@ public class Repository extends CAutoCloseable {
      * @return Buffer to store the path at
      * @throws GitException git error.
      */
-    public Buf itemPath(Item item) {
+    @CheckForNull
+    public String itemPath(Item item) {
         Buf buf = new Buf();
         int error = jniItemPath(buf, _rawPtr.get(), item.ordinal());
         Error.throwIfNeeded(error);
-        return buf;
+        return buf.getString().orElse(null);
     }
 
     /**

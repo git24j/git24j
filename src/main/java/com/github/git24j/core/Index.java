@@ -2,8 +2,6 @@ package com.github.git24j.core;
 
 import static com.github.git24j.core.GitException.ErrorCode.ITEROVER;
 
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.Instant;
 import java.util.EnumSet;
 import java.util.List;
@@ -326,8 +324,8 @@ public class Index extends CAutoReleasable {
         Error.throwIfNeeded(jniWrite(getRawPointer()));
     }
 
-    public Path path() {
-        return Paths.get(jniPath(getRawPointer()));
+    public String path() {
+        return jniPath(getRawPointer());
     }
 
     /**

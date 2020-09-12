@@ -1,10 +1,9 @@
 package com.github.git24j.core;
 
-import org.apache.commons.io.FileUtils;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
@@ -20,11 +19,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import org.apache.commons.io.FileUtils;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Ignore;
+import org.junit.Test;
 
 public class ConfigTest extends TestBase {
     private static final String MASTER_HASH = "476f0c95825ef4479cab580b71f8b85f9dea4ee4";
@@ -49,8 +48,8 @@ public class ConfigTest extends TestBase {
 
     private File _testCfgFile;
 
-    private void verifyConfigPath(Path p) {
-        assertTrue(Files.exists(p));
+    private void verifyConfigPath(String p) {
+        assertTrue(Files.exists(Paths.get(p)));
     }
 
     @Before
@@ -102,19 +101,19 @@ public class ConfigTest extends TestBase {
     @Test
     public void addFileOnDisk() {
         Config cfg = Config.newConfig();
-        cfg.addFileOndisk(_testCfgFile.toPath(), Config.ConfigLevel.LOCAL, null, false);
+        cfg.addFileOndisk(_testCfgFile.toString(), Config.ConfigLevel.LOCAL, null, false);
         assertFalse(cfg.getBool("http.sslVerify").orElse(true));
     }
 
     @Test
     public void openOnDisk() {
-        Config cfg = Config.openOndisk(_testCfgFile.toPath());
+        Config cfg = Config.openOndisk(_testCfgFile.toString());
         assertFalse(cfg.getBool("http.sslVerify").orElse(true));
     }
 
     @Test
     public void openLocal() {
-        Config parent = Config.openOndisk(_testCfgFile.toPath());
+        Config parent = Config.openOndisk(_testCfgFile.toString());
         Config cfg = Config.openLevel(Config.ConfigLevel.LOCAL, parent);
         assertNotNull(cfg);
         assertEquals(TEST_CFG_COOKIE_FILE, cfg.getStringBuf("http.cookieFile").orElse(null));
@@ -123,20 +122,20 @@ public class ConfigTest extends TestBase {
     @Ignore
     @Test
     public void openGlobal() {
-        Config parent = Config.openOndisk(_testCfgFile.toPath());
+        Config parent = Config.openOndisk(_testCfgFile.toString());
         Config.openGlobal(parent);
     }
 
     @Test
     public void snapshot() {
-        Config cfg = Config.openOndisk(_testCfgFile.toPath());
+        Config cfg = Config.openOndisk(_testCfgFile.toString());
         Config snapshot = cfg.snapshot();
         assertEquals(TEST_CFG_COOKIE_FILE, snapshot.getString("http.cookieFile").get());
     }
 
     @Test
     public void getEntry() {
-        Config cfg = Config.openOndisk(_testCfgFile.toPath());
+        Config cfg = Config.openOndisk(_testCfgFile.toString());
         Config.Entry entry = cfg.getEntry("http.cookieFile").orElse(null);
         assertNotNull(entry);
         assertEquals(TEST_CFG_COOKIE_FILE, entry.getValue());
@@ -149,7 +148,7 @@ public class ConfigTest extends TestBase {
 
     @Test
     public void gettersAndSetters() {
-        Config cfg = Config.openOndisk(_testCfgFile.toPath());
+        Config cfg = Config.openOndisk(_testCfgFile.toString());
         assertEquals(587, cfg.getInt("sendemail.smtpserverport").orElse(0).intValue());
         // boolean
         cfg.setBool("foo.bar.bool", true);
@@ -164,12 +163,13 @@ public class ConfigTest extends TestBase {
         cfg.setString("foo.bar.string", "example-string");
         assertEquals("example-string", cfg.getStringBuf("foo.bar.string").get());
         // path
-        assertEquals(Paths.get(TEST_CFG_COOKIE_FILE), cfg.getPath("http.cookieFile").get());
+        assertEquals(
+                Paths.get(TEST_CFG_COOKIE_FILE).toString(), cfg.getPath("http.cookieFile").get());
     }
 
     @Test
     public void getMultivarForeach() {
-        Config cfg = Config.openOndisk(_testCfgFile.toPath());
+        Config cfg = Config.openOndisk(_testCfgFile.toString());
         String key = "core.gitproxy";
         Set<String> values = new HashSet<>();
         cfg.getMultivarForeach(
@@ -185,7 +185,7 @@ public class ConfigTest extends TestBase {
 
     @Test
     public void multivarIterator() {
-        Config cfg = Config.openOndisk(_testCfgFile.toPath());
+        Config cfg = Config.openOndisk(_testCfgFile.toString());
         String key = "core.gitproxy";
         Config.Iterator iterator = cfg.multivarIteratorNew(key, null);
         Set<String> values = new HashSet<>();
@@ -198,7 +198,7 @@ public class ConfigTest extends TestBase {
 
     @Test
     public void multivar() {
-        Config cfg = Config.openOndisk(_testCfgFile.toPath());
+        Config cfg = Config.openOndisk(_testCfgFile.toString());
         String key = "core.gitproxy";
         cfg.setMultivar(key, "for kernel.org$", "ssh");
         List<String> values = cfg.getMultivar(key, "h$");
@@ -210,7 +210,7 @@ public class ConfigTest extends TestBase {
 
     @Test
     public void iterator() {
-        Config cfg = Config.openOndisk(_testCfgFile.toPath());
+        Config cfg = Config.openOndisk(_testCfgFile.toString());
         Config.Iterator iter1 = cfg.iteratorNew();
         Map<String, List<String>> allValues = new HashMap<>();
         for (Config.Entry entry = iter1.next(); entry != null; entry = iter1.next()) {
@@ -223,7 +223,7 @@ public class ConfigTest extends TestBase {
 
     @Test
     public void foreach() {
-        Config cfg = Config.openOndisk(_testCfgFile.toPath());
+        Config cfg = Config.openOndisk(_testCfgFile.toString());
         Map<String, List<String>> allValues = new HashMap<>();
         cfg.foreach(
                 entry -> {
@@ -241,12 +241,12 @@ public class ConfigTest extends TestBase {
         assertEquals(2048, Config.parseInt("2k"));
         assertEquals(1073741824L, Config.parseLong("1g"));
         Path p = Paths.get(System.getProperty("user.home"));
-        assertEquals(p.resolve("tmp"), Config.parsePath("~/tmp"));
+        assertEquals(p.resolve("tmp").toString(), Config.parsePath("~/tmp"));
     }
 
     @Test
     public void lock() {
-        Config cfg = Config.openOndisk(_testCfgFile.toPath());
+        Config cfg = Config.openOndisk(_testCfgFile.toString());
         Transaction tx = cfg.lock();
         assertTrue(tx.getRawPointer() > 0);
     }

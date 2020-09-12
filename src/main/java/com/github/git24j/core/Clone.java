@@ -1,10 +1,9 @@
 package com.github.git24j.core;
 
+import java.util.concurrent.atomic.AtomicLong;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.nio.file.Path;
-import java.util.concurrent.atomic.AtomicLong;
 
 public class Clone {
     static native int jniClone(AtomicLong out, String url, String localPath, long options);
@@ -62,13 +61,9 @@ public class Clone {
      */
     @Nonnull
     public static Repository cloneRepo(
-            @Nonnull String url, @Nonnull Path localPath, @Nullable Options options) {
+            @Nonnull String url, @Nonnull String localPath, @Nullable Options options) {
         Repository outRepo = new Repository(0);
-        jniClone(
-                outRepo._rawPtr,
-                url,
-                localPath.toString(),
-                options == null ? 0 : options.getRawPointer());
+        jniClone(outRepo._rawPtr, url, localPath, options == null ? 0 : options.getRawPointer());
         return outRepo;
     }
 

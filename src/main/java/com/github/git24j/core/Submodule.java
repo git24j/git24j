@@ -3,8 +3,6 @@ package com.github.git24j.core;
 import static com.github.git24j.core.GitException.ErrorCode.ENOTFOUND;
 
 import java.net.URI;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.EnumSet;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -211,14 +209,14 @@ public class Submodule extends CAutoReleasable {
      */
     @Nonnull
     public static Submodule addSetup(
-            @Nonnull Repository repo, @Nonnull URI url, @Nonnull Path path, boolean useGitlink) {
+            @Nonnull Repository repo, @Nonnull URI url, @Nonnull String path, boolean useGitlink) {
         Submodule out = new Submodule(false, 0);
         Error.throwIfNeeded(
                 jniAddSetup(
                         out._rawPtr,
                         repo.getRawPointer(),
                         url.toString(),
-                        path.toString(),
+                        path,
                         useGitlink ? 1 : 0));
         return out;
     }
@@ -589,8 +587,8 @@ public class Submodule extends CAutoReleasable {
      * @return submodule path
      */
     @Nonnull
-    public Path path() {
-        return Paths.get(jniPath(getRawPointer()));
+    public String path() {
+        return jniPath(getRawPointer());
     }
 
     /**

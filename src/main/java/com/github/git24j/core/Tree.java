@@ -1,6 +1,5 @@
 package com.github.git24j.core;
 
-import java.nio.file.Path;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 import javax.annotation.CheckForNull;
@@ -231,9 +230,9 @@ public class Tree extends GitObject {
      * @throws GitException 0 on success; GIT_ENOTFOUND if the path does not exist
      */
     @Nullable
-    public Entry entryByPath(@Nonnull Path path) {
+    public Entry entryByPath(@Nonnull String path) {
         Entry out = new Entry(false, 0);
-        int e = jniEntryBypath(out._rawPtr, getRawPointer(), path.toString());
+        int e = jniEntryBypath(out._rawPtr, getRawPointer(), path);
         if (e == GitException.ErrorCode.ENOTFOUND.getCode()) {
             return null;
         }
@@ -405,9 +404,8 @@ public class Tree extends GitObject {
                 @Nonnull UpdateT updateType,
                 @Nullable Oid oid,
                 @Nonnull FileMode fileModeType,
-                @Nonnull Path path) {
-            long ptr =
-                    jniUpdateNew(updateType.ordinal(), oid, fileModeType.getBit(), path.toString());
+                @Nonnull String path) {
+            long ptr = jniUpdateNew(updateType.ordinal(), oid, fileModeType.getBit(), path);
             return new Update(false, ptr);
         }
 

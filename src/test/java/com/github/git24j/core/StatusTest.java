@@ -1,16 +1,14 @@
 package com.github.git24j.core;
 
+import static org.junit.Assert.assertEquals;
+
+import java.util.Arrays;
+import java.util.EnumSet;
+import java.util.List;
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
-
-import java.nio.file.Paths;
-import java.util.Arrays;
-import java.util.EnumSet;
-import java.util.List;
-
-import static org.junit.Assert.assertEquals;
 
 public class StatusTest extends TestBase {
     @Rule public TemporaryFolder folder = new TemporaryFolder();
@@ -40,7 +38,7 @@ public class StatusTest extends TestBase {
     @Test
     public void file() {
         try (Repository testRepo = TestRepo.MERGE1.tempRepo(folder)) {
-            EnumSet<Status.StatusT> statuses = Status.file(testRepo, Paths.get("a"));
+            EnumSet<Status.StatusT> statuses = Status.file(testRepo, "a");
             assertEquals(statuses, EnumSet.of(Status.StatusT.CURRENT));
         }
     }
@@ -48,7 +46,7 @@ public class StatusTest extends TestBase {
     @Test
     public void shouldIgnore() {
         try (Repository testRepo = TestRepo.MERGE1.tempRepo(folder)) {
-            Assert.assertFalse(Status.shouldIgnore(testRepo, Paths.get("a")));
+            Assert.assertFalse(Status.shouldIgnore(testRepo, "a"));
         }
     }
 }

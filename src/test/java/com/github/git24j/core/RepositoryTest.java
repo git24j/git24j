@@ -1,8 +1,5 @@
 package com.github.git24j.core;
 
-import org.junit.Assert;
-import org.junit.Test;
-
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -11,6 +8,8 @@ import java.util.EnumSet;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
+import org.junit.Assert;
+import org.junit.Test;
 
 public class RepositoryTest extends TestBase {
     @Test
@@ -26,13 +25,14 @@ public class RepositoryTest extends TestBase {
         Path repoPath = TestRepo.SIMPLE1.tempCopy(folder);
         // open repository without looking at parent directories
         try (Repository repo1 =
-                Repository.openExt(repoPath, EnumSet.of(Repository.OpenFlag.NO_SEARCH), null)) {
+                Repository.openExt(
+                        repoPath.toString(), EnumSet.of(Repository.OpenFlag.NO_SEARCH), null)) {
             Assert.assertTrue(sameFile(repo1.workdir(), repoPath));
         }
         Path sub = repoPath.resolve("sub");
         Files.createDirectories(sub);
         // walk up parent directories looking for the repository
-        try (Repository repo2 = Repository.openExt(sub, null, "/tmp:/home:/usr")) {
+        try (Repository repo2 = Repository.openExt(sub.toString(), null, "/tmp:/home:/usr")) {
             Assert.assertTrue(sameFile(repo2.workdir(), repoPath));
         }
     }
@@ -40,7 +40,7 @@ public class RepositoryTest extends TestBase {
     @Test
     public void openBare() {
         Path repoPath = TestRepo.SIMPLE1_BARE.tempCopy(folder);
-        try (Repository repo = Repository.openBare(repoPath)) {
+        try (Repository repo = Repository.openBare(repoPath.toString())) {
             Assert.assertTrue(sameFile(repoPath, Paths.get(repo.getPath())));
         }
     }
@@ -54,7 +54,7 @@ public class RepositoryTest extends TestBase {
     @Test
     public void init() {
         Path repoPath = folder.getRoot().toPath();
-        try (Repository repo = Repository.init(repoPath, false)) {
+        try (Repository repo = Repository.init(repoPath.toString(), false)) {
             Assert.assertTrue(repo.isEmpty());
             Assert.assertTrue(repo.headUnborn());
         }
@@ -70,7 +70,7 @@ public class RepositoryTest extends TestBase {
             Assert.assertTrue(repo.isEmpty());
             Assert.assertTrue(repo.headUnborn());
         }
-        try (Repository repo = Repository.openExt(repoPath, null, null)) {
+        try (Repository repo = Repository.openExt(repoPath.toString(), null, null)) {
             Assert.assertNotNull(repo);
             Assert.assertTrue(repo.isEmpty());
             Assert.assertTrue(repo.headUnborn());
@@ -82,13 +82,13 @@ public class RepositoryTest extends TestBase {
         Path repoPath = TestRepo.SIMPLE1.tempCopy(folder);
         Path sub = repoPath.resolve("sub");
         Files.createDirectories(sub);
-        String path1 = Repository.discover(sub, true, "/tmp:/home");
+        String path1 = Repository.discover(sub.toString(), true, "/tmp:/home");
         Assert.assertTrue(
                 sameFile(
                         repoPath.resolve(".git/"),
                         Optional.ofNullable(path1).map(Paths::get).orElse(null)));
         String path2 =
-                Repository.discover(folder.newFolder("not-a-repo").toPath(), false, "/tmp:/home");
+                Repository.discover(folder.newFolder("not-a-repo").toString(), false, "/tmp:/home");
         Assert.assertNull(path2);
     }
 
@@ -124,8 +124,8 @@ public class RepositoryTest extends TestBase {
     public void itemPath() {
         Path path = TestRepo.SIMPLE1.tempCopy(folder);
         try (Repository repository = Repository.open(path)) {
-            Buf buf = repository.itemPath(Repository.Item.COMMONDIR);
-            Assert.assertEquals(buf.getPtr(), repository.getCommondir());
+            String buf = repository.itemPath(Repository.Item.COMMONDIR);
+            Assert.assertEquals(buf, repository.getCommondir());
         }
     }
 
@@ -138,7 +138,7 @@ public class RepositoryTest extends TestBase {
             Path wd = repository.workdir();
             Assert.assertTrue(sameFile(path, wd));
             Assert.assertNotNull(wd);
-            repository.setWorkdir(w2, true);
+            repository.setWorkdir(w2.toString(), true);
             wd = repository.workdir();
             Assert.assertTrue(sameFile(w2, wd));
         }
@@ -149,7 +149,7 @@ public class RepositoryTest extends TestBase {
         Path path = TestRepo.SIMPLE1_BARE.tempCopy(folder);
         try (Repository repository = Repository.open(path)) {
             Assert.assertTrue(repository.isBare());
-            repository.setWorkdir(path, true);
+            repository.setWorkdir(path.toString(), true);
             Assert.assertFalse(repository.isBare());
         }
     }
@@ -264,7 +264,7 @@ public class RepositoryTest extends TestBase {
     public void hashFile() {
         Path path = TestRepo.SIMPLE1.tempCopy(folder);
         try (Repository repository = Repository.open(path)) {
-            Oid oid = repository.hashfile(path.resolve("a"), GitObject.Type.BLOB, "");
+            Oid oid = repository.hashfile(path.resolve("a").toString(), GitObject.Type.BLOB, "");
             // same value as `git rev-parse HEAD:a`
             Assert.assertEquals("78981922613b2afb6025042ff6bd878ac1994e85", oid.toString());
         }

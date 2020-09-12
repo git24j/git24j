@@ -4,7 +4,6 @@ import static com.github.git24j.core.Internals.JFCallback;
 import static com.github.git24j.core.Internals.JJCallback;
 import static com.github.git24j.core.Internals.JJJCallback;
 
-import java.nio.file.Path;
 import java.util.EnumSet;
 import java.util.concurrent.atomic.AtomicLong;
 import javax.annotation.CheckForNull;
@@ -568,18 +567,18 @@ public class Diff extends CAutoReleasable {
      */
     public static int blobs(
             @Nullable Blob oldBlob,
-            @Nullable Path oldAsPath,
+            @Nullable String oldAsPath,
             @Nullable Blob newBlob,
-            @Nullable Path newAsPath,
+            @Nullable String newAsPath,
             @Nullable Options options,
             @Nullable FileCb fileCb,
             @Nullable BinaryCb binaryCb,
             @Nullable HunkCb hunkCb,
             @Nullable LineCb lineCb) {
         long jniOldBlob = oldBlob == null ? 0 : oldBlob.getRawPointer();
-        String jniOldAsPath = oldAsPath == null ? null : oldAsPath.toString();
+        String jniOldAsPath = oldAsPath == null ? null : oldAsPath;
         long jniNewBlob = newBlob == null ? 0 : newBlob.getRawPointer();
-        String jniNewAsPath = newAsPath == null ? null : newAsPath.toString();
+        String jniNewAsPath = newAsPath == null ? null : newAsPath;
         long jniOptions =
                 options == null
                         ? Options.create(Options.CURRENT_VERSION).getRawPointer()
@@ -637,7 +636,7 @@ public class Diff extends CAutoReleasable {
      */
     public static int blobToBuff(
             @Nullable Blob oldBlob,
-            @Nullable Path oldAsPath,
+            @Nullable String oldAsPath,
             @Nullable String buffer,
             @Nullable String bufferAsPath,
             @Nullable Options options,
@@ -646,7 +645,7 @@ public class Diff extends CAutoReleasable {
             @Nullable HunkCb hunkCb,
             @Nullable LineCb lineCb) {
         long oldBlobPtr = oldBlob == null ? 0 : oldBlob.getRawPointer();
-        String oldAsPathStr = oldAsPath == null ? null : oldAsPath.toString();
+        String oldAsPathStr = oldAsPath == null ? null : oldAsPath;
         long optsPtr = options == null ? 0 : options.getRawPointer();
         JFCallback jniFileCb =
                 fileCb == null ? null : (pd, progress) -> fileCb.accept(new Delta(pd), progress);
