@@ -1,6 +1,5 @@
 package com.github.git24j.core;
 
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
@@ -92,9 +91,9 @@ public class Status {
      * @throws GitException error if ignore rules could not be processed for the file (regardless of
      *     whether it exists or not)
      */
-    public static boolean shouldIgnore(@Nonnull Repository repo, @Nonnull Path path) {
+    public static boolean shouldIgnore(@Nonnull Repository repo, @Nonnull String path) {
         AtomicInteger out = new AtomicInteger();
-        Error.throwIfNeeded(jniShouldIgnore(out, repo.getRawPointer(), path.toString()));
+        Error.throwIfNeeded(jniShouldIgnore(out, repo.getRawPointer(), path));
         return out.get() == 1;
     }
 
@@ -121,9 +120,9 @@ public class Status {
      *     tree, GIT_EAMBIGUOUS if `path` matches multiple files or if it refers to a folder, or
      *     other errors.
      */
-    public static EnumSet<StatusT> file(@Nonnull Repository repo, @Nonnull Path path) {
+    public static EnumSet<StatusT> file(@Nonnull Repository repo, @Nonnull String path) {
         AtomicInteger out = new AtomicInteger();
-        Error.throwIfNeeded(jniFile(out, repo.getRawPointer(), path.toString()));
+        Error.throwIfNeeded(jniFile(out, repo.getRawPointer(), path));
         return IBitEnum.parse(out.get(), StatusT.class);
     }
 

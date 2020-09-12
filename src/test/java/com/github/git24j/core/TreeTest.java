@@ -1,13 +1,10 @@
 package com.github.git24j.core;
 
-import org.junit.Assert;
-import org.junit.Test;
-
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
+import org.junit.Assert;
+import org.junit.Test;
 
 public class TreeTest extends TestBase {
     private static final String MASTER_TREE_SHA = "8c5f4d727b339fe7d9ee4d1806aa9ca3a5cc5b3e";
@@ -81,7 +78,7 @@ public class TreeTest extends TestBase {
         try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {
             Tree t1 = Tree.lookup(testRepo, Oid.of(MASTER_TREE_SHA));
             Tree.Entry e1 = t1.entryById(Oid.of(README_SHA_IN_MASTER));
-            Tree.Entry e2 = t1.entryByPath(Paths.get("README.md"));
+            Tree.Entry e2 = t1.entryByPath("README.md");
             Tree.Entry e3 = t1.entryByName("a");
             Assert.assertNotNull(e1);
             Assert.assertNotNull(e2);
@@ -102,7 +99,7 @@ public class TreeTest extends TestBase {
     @Test
     public void update() {
         try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {
-            Path readme = Paths.get("README.md");
+            String readme = "README.md";
             Tree t1 = Tree.lookup(testRepo, Oid.of(MASTER_TREE_SHA));
             Tree.Update update =
                     Tree.Update.create(

@@ -2,8 +2,6 @@ package com.github.git24j.core;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.EnumSet;
@@ -14,14 +12,13 @@ import org.junit.Assert;
 import org.junit.Test;
 
 public class StashTest extends TestBase {
-    private Signature signature = Signature.create("tester", "tester@example.com");
+    private final Signature signature = Signature.create("tester", "tester@example.com");
 
     private Repository prepareRepo() {
         Repository testRepo = creteTestRepo(TestRepo.SIMPLE1);
-        Path workdir = testRepo.workdir();
         try {
             FileUtils.writeStringToFile(
-                    workdir.resolve("new_file.txt").toFile(),
+                    testRepo.workdir().resolve("new_file.txt").toFile(),
                     "some content",
                     StandardCharsets.UTF_8);
             return testRepo;
@@ -71,7 +68,7 @@ public class StashTest extends TestBase {
         try (Repository testRepo = prepareRepo()) {
             Stash.save(testRepo, signature, "stash", EnumSet.of(Stash.Flags.INCLUDE_UNTRACKED));
             Stash.pop(testRepo, 0, null);
-            EnumSet<Status.StatusT> status = Status.file(testRepo, Paths.get("new_file.txt"));
+            EnumSet<Status.StatusT> status = Status.file(testRepo, "new_file.txt");
             Assert.assertEquals(EnumSet.of(Status.StatusT.WT_NEW), status);
         }
     }
@@ -81,7 +78,7 @@ public class StashTest extends TestBase {
         try (Repository testRepo = prepareRepo()) {
             Stash.save(testRepo, signature, "stash", EnumSet.of(Stash.Flags.INCLUDE_UNTRACKED));
             Stash.apply(testRepo, 0, null);
-            EnumSet<Status.StatusT> status = Status.file(testRepo, Paths.get("new_file.txt"));
+            EnumSet<Status.StatusT> status = Status.file(testRepo, "new_file.txt");
             Assert.assertEquals(EnumSet.of(Status.StatusT.WT_NEW), status);
             List<Map.Entry<String, String>> stashList = new ArrayList<>();
             Stash.foreach(

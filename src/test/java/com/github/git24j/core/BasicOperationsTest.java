@@ -1,24 +1,22 @@
 package com.github.git24j.core;
 
-import org.junit.Assert;
-import org.junit.Test;
+import static com.github.git24j.core.Repository.InitFlagT.MKPATH;
 
 import java.io.IOException;
 import java.net.URI;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
-
-import static com.github.git24j.core.Repository.InitFlagT.MKPATH;
+import org.junit.Assert;
+import org.junit.Test;
 
 public class BasicOperationsTest extends TestBase {
 
     @Test
     public void initSimple() throws Exception {
         Path path = folder.newFolder("simpleRepo").toPath();
-        try (Repository repo = Repository.init(path, false)) {
+        try (Repository repo = Repository.init(path.toString(), false)) {
             Assert.assertTrue(repo.headUnborn());
         }
     }
@@ -40,7 +38,7 @@ public class BasicOperationsTest extends TestBase {
         Path localPath = folder.newFolder("newClone2").toPath();
         try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {
             try (Repository cloned =
-                    Clone.cloneRepo(testRepo.workdir().toString(), localPath, null)) {
+                    Clone.cloneRepo(testRepo.workdir().toString(), localPath.toString(), null)) {
 
                 Assert.assertTrue(sameFile(localPath, cloned.workdir()));
             }
@@ -63,7 +61,7 @@ public class BasicOperationsTest extends TestBase {
         Path localPath = folder.newFolder("newClone2").toPath();
         try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {
             try (Repository cloned =
-                    Clone.cloneRepo(testRepo.workdir().toString(), localPath, opts)) {}
+                    Clone.cloneRepo(testRepo.workdir().toString(), localPath.toString(), opts)) {}
             Assert.assertTrue(progressTrack.size() > 0);
         }
     }
@@ -72,11 +70,11 @@ public class BasicOperationsTest extends TestBase {
     public void cloneWithRepositoryAndRemoteCallback() throws Exception {
         Clone.Options opts = Clone.Options.defaultOpts();
         opts.setRemoteCreateCb(((repo, name, url) -> Remote.create(repo, name, URI.create(url))));
-        opts.setRepositoryCreateCb((path, bare) -> Repository.init(Paths.get(path), true));
+        opts.setRepositoryCreateCb((path, bare) -> Repository.init(path, true));
         Path localPath = folder.newFolder("newClone2").toPath();
         try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {
             try (Repository cloned =
-                    Clone.cloneRepo(testRepo.workdir().toString(), localPath, opts)) {
+                    Clone.cloneRepo(testRepo.workdir().toString(), localPath.toString(), opts)) {
                 Assert.assertTrue(cloned.isBare());
             }
         }

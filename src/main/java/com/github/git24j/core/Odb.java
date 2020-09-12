@@ -2,7 +2,6 @@ package com.github.git24j.core;
 
 import static com.github.git24j.core.GitException.ErrorCode.ENOTFOUND;
 
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -185,9 +184,9 @@ public class Odb extends CAutoReleasable {
      * @throws GitException fail to open odb error
      */
     @Nonnull
-    public static Odb create(@Nonnull Path objectsDir) {
+    public static Odb create(@Nonnull String objectsDir) {
         Odb out = new Odb(false, 0);
-        Error.throwIfNeeded(jniOpen(out._rawPtr, objectsDir.toString()));
+        Error.throwIfNeeded(jniOpen(out._rawPtr, objectsDir));
         if (out.isNull()) {
             throw new GitException(GitException.ErrorClass.ODB, "Failed to create object database");
         }
@@ -223,9 +222,9 @@ public class Odb extends CAutoReleasable {
      * @param type the type of the object that will be hashed
      * @throws GitException git errors
      */
-    public static Oid hashfile(@Nonnull Path path, @Nonnull GitObject.Type type) {
+    public static Oid hashfile(@Nonnull String path, @Nonnull GitObject.Type type) {
         Oid out = new Oid();
-        Error.throwIfNeeded(jniHashfile(out, path.toString(), type.getBit()));
+        Error.throwIfNeeded(jniHashfile(out, path, type.getBit()));
         return out;
     }
 
@@ -242,7 +241,7 @@ public class Odb extends CAutoReleasable {
      */
     @Nonnull
     public static OdbBackend backendLoose(
-            @Nonnull Path objectsDir,
+            @Nonnull String objectsDir,
             int compressionLevel,
             boolean doFsync,
             int dirMode,
@@ -269,9 +268,9 @@ public class Odb extends CAutoReleasable {
      * @throws GitException git errors
      */
     @Nonnull
-    public static OdbBackend backendOnePack(@Nonnull Path indexFile) {
+    public static OdbBackend backendOnePack(@Nonnull String indexFile) {
         OdbBackend out = new OdbBackend(false, 0);
-        Error.throwIfNeeded(jniBackendOnePack(out._rawPtr, indexFile.toString()));
+        Error.throwIfNeeded(jniBackendOnePack(out._rawPtr, indexFile));
         return out;
     }
 
@@ -289,8 +288,8 @@ public class Odb extends CAutoReleasable {
      * @param path path to the objects folder for the alternate
      * @throws GitException git errors
      */
-    public void addDiskAlternate(@Nonnull Path path) {
-        Error.throwIfNeeded(jniAddDiskAlternate(getRawPointer(), path.toString()));
+    public void addDiskAlternate(@Nonnull String path) {
+        Error.throwIfNeeded(jniAddDiskAlternate(getRawPointer(), path));
     }
 
     /**
