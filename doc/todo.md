@@ -64,11 +64,8 @@
 
 
 ## API polishing
-- [ ] Make sure APIs have consistent behavior, for example, return null object vs. throwing `ENOTFOUND` error.
-- [ ] Annotate nullabilities
-- [x] Return Optionals instead of nullable entities
-- [x] Remove usage of `Optional`, upstream api may change from returning nullable to non-null
-- [ ] Many APIs can also be part of `Repository`, for example `Commit.lookup(Repository repo)` can be `repo.lookupCommit(...)`
+- [x] Make sure APIs have consistent behavior, for example, return null object vs. throwing `ENOTFOUND` error.
+- [x] Annotate nullabilities
 - [ ] Formalize class and enum naming, move some java inner classes to separate class files. Names of classes and enums should follow `git_classname_methodname` convention. 
 
 ## Administrative

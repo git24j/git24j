@@ -33,22 +33,13 @@ int j_git_note_foreach_cb(const git_oid *blob_id, const git_oid *annotated_objec
 
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Note_jniForeach)(JNIEnv *env, jclass obj, jlong repoPtr, jstring notesRef, jobject foreachCb)
 {
+    assert(foreachCb && "foreach with null callback does not make any sense");
+
     char *notes_ref = j_copy_of_jstring(env, notesRef, true);
-    int r;
-    if (foreachCb)
-    {
-        jclass clz = (*env)->GetObjectClass(env, foreachCb);
-        assert(clz && "could not find foreach callback class");
-        jmethodID mid = (*env)->GetMethodID(env, clz, "accept", "([B[B)I");
-        assert(mid && "could not find foreach callback method");
-        j_cb_payload payload = {foreachCb, mid};
-        r = git_note_foreach((git_repository *)repoPtr, notes_ref, j_git_note_foreach_cb, &payload);
-        (*env)->DeleteLocalRef(env, clz);
-    }
-    else
-    {
-        r = git_note_foreach((git_repository *)repoPtr, notes_ref, NULL, NULL);
-    }
+    j_cb_payload payload = {0};
+    j_cb_payload_init(env, &payload, foreachCb, "([B[B)I");
+    int r = git_note_foreach((git_repository *)repoPtr, notes_ref, j_git_note_foreach_cb, &payload);
+    j_cb_payload_release(env, &payload);
     free(notes_ref);
     return r;
 }

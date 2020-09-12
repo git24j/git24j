@@ -255,23 +255,13 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Config_jniGetStringBuf)(JNIEnv *env, jclass
 /** int git_config_get_multivar_foreach(const git_config *cfg, const char *name, const char *regexp, git_config_foreach_cb callback, void *payload); */
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Config_jniGetMultivarForeach)(JNIEnv *env, jclass obj, jlong cfgPtr, jstring name, jstring regexp, jobject callback)
 {
+    assert(callback && "multivar_foreach with null callback does not make any sense");
     char *c_name = j_copy_of_jstring(env, name, true);
     char *c_regexp = j_copy_of_jstring(env, regexp, true);
-    int r;
-    if (callback)
-    {
-        jclass clz = (*env)->GetObjectClass(env, callback);
-        assert(clz && "could not find multivar foreach callback class");
-        jmethodID mid = (*env)->GetMethodID(env, clz, "accept", "(J)I");
-        assert(mid && "could not find multivar foreach callback method");
-        j_cb_payload payload = {callback, mid};
-        r = git_config_get_multivar_foreach((git_config *)cfgPtr, c_name, c_regexp, j_git_config_foreach_cb, &payload);
-        (*env)->DeleteLocalRef(env, callback);
-    }
-    else
-    {
-        r = git_config_get_multivar_foreach((git_config *)cfgPtr, c_name, c_regexp, NULL, NULL);
-    }
+    j_cb_payload payload = {0};
+    j_cb_payload_init(env, &payload, callback, "(J)I");
+    int r = git_config_get_multivar_foreach((git_config *)cfgPtr, c_name, c_regexp, j_git_config_foreach_cb, &payload);
+    j_cb_payload_release(env, &payload);
     free(c_name);
     free(c_regexp);
     return r;
@@ -380,13 +370,10 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Config_jniDeleteMultivar)(JNIEnv *env, jcla
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Config_jniForeach)(JNIEnv *env, jclass obj, jlong cfgPtr, jobject callback)
 {
     assert(callback && "foreach callback must not be NULL");
-    jclass clz = (*env)->GetObjectClass(env, callback);
-    assert(clz && "could not find foreach callback class");
-    jmethodID mid = (*env)->GetMethodID(env, clz, "accept", "(J)I");
-    assert(mid && "could not find foreach callback method");
-    j_cb_payload payload = {callback, mid};
+    j_cb_payload payload = {0};
+    j_cb_payload_init(env, &payload, callback, "(J)I");
     int r = git_config_foreach((git_config *)cfgPtr, j_git_config_foreach_cb, &payload);
-    (*env)->DeleteLocalRef(env, clz);
+    j_cb_payload_release(env, &payload);
     return r;
 }
 
@@ -415,14 +402,11 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Config_jniForeachMatch)(JNIEnv *env, jclass
 {
     assert(callback && "foreach match callback must not be NULL");
     char *c_regexp = j_copy_of_jstring(env, regexp, true);
-    jclass clz = (*env)->GetObjectClass(env, callback);
-    assert(clz && "could not find foreach match callback class");
-    jmethodID mid = (*env)->GetMethodID(env, clz, "accept", "(J)I");
-    assert(mid && "could not find foreach match callback method");
-    j_cb_payload payload = {callback, mid};
+    j_cb_payload payload = {0};
+    j_cb_payload_init(env, &payload, callback, "(J)I");
     int r = git_config_foreach_match((git_config *)cfgPtr, c_regexp, j_git_config_foreach_cb, &payload);
+    j_cb_payload_release(env, &payload);
     free(c_regexp);
-    (*env)->DeleteLocalRef(env, clz);
     return r;
 }
 
@@ -476,14 +460,11 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Config_jniBackendForeachMatch)(JNIEnv *env,
 {
     assert(callback && "foreach match backend callback must not be NULL");
     char *c_regexp = j_copy_of_jstring(env, regexp, true);
-    jclass clz = (*env)->GetObjectClass(env, callback);
-    assert(clz && "foreach match backend callback class not found");
-    jmethodID mid = (*env)->GetMethodID(env, clz, "accept", "(J)I");
-    assert(mid && "foreach match backend callback method not found");
-    j_cb_payload payload = {callback, mid};
+    j_cb_payload payload = {0};
+    j_cb_payload_init(env, &payload, callback, "(J)I");
     int r = git_config_backend_foreach_match((git_config_backend *)backendPtr, c_regexp, j_git_config_foreach_cb, &payload);
+    j_cb_payload_release(env, &payload);
     free(c_regexp);
-    (*env)->DeleteLocalRef(env, clz);
     return r;
 }
 
