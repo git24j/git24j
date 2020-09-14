@@ -15,7 +15,8 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Clone_jniClone)(JNIEnv *env, jclass obj, jo
     git_repository *c_out = 0;
     char *c_url = j_copy_of_jstring(env, url, true);
     char *c_local_path = j_copy_of_jstring(env, local_path, true);
-    int r = git_clone(&c_out, c_url, c_local_path, (git_clone_options *)optionsPtr);
+    git_clone_options *opts = (git_clone_options *)optionsPtr;
+    int r = git_clone(&c_out, c_url, c_local_path, opts);
     (*env)->CallVoidMethod(env, out, jniConstants->midAtomicLongSet, (long)c_out);
     free(c_url);
     free(c_local_path);

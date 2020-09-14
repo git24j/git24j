@@ -36,16 +36,21 @@ int j_proxy_git_transport_certificate_check_cb(struct git_cert *cert, int valid,
     return r;
 }
 
-
+void j_git_proxy_options_init_payload(git_proxy_options *opts)
+{
+    j_cb_payload *payloads = (j_cb_payload *)malloc(sizeof(j_cb_payload) * 2);
+    payloads[0].callback = NULL;
+    payloads[1].callback = NULL;
+    opts->payload = payloads;
+}
+/** -------- proxy_options ---------- */
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Proxy_jniOptionsNew)(JNIEnv *env, jclass obj, jobject outPtr, jint version)
 {
     git_proxy_options *opts = (git_proxy_options *)malloc(sizeof(git_proxy_options));
     int r = git_proxy_init_options(opts, version);
     opts->url = NULL;
-    j_cb_payload * payloads = (j_cb_payload *)malloc(sizeof(j_cb_payload) * 2);
-    payloads[0].callback = NULL;
-    payloads[1].callback = NULL;
-    opts->payload = payloads;
+    opts->payload = NULL;
+    j_git_proxy_options_init_payload(opts);
     (*env)->CallVoidMethod(env, outPtr, jniConstants->midAtomicLongSet, (long)opts);
     return r;
 }
@@ -53,9 +58,12 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Proxy_jniOptionsNew)(JNIEnv *env, jclass ob
 JNIEXPORT void JNICALL J_MAKE_METHOD(Proxy_jniOptionsFree)(JNIEnv *env, jclass obj, jlong optsPtr)
 {
     git_proxy_options *opts = (git_proxy_options *)optsPtr;
-    j_cb_payload * payloads = (j_cb_payload *)opts->payload;
-    j_cb_payload_release(env, &(payloads[0]));
-    j_cb_payload_release(env, &(payloads[1]));
+    j_cb_payload *payloads = (j_cb_payload *)opts->payload;
+    if (payloads)
+    {
+        j_cb_payload_release(env, &(payloads[0]));
+        j_cb_payload_release(env, &(payloads[1]));
+    }
     free((char *)opts->url);
     opts->url = NULL;
     opts->credentials = NULL;
@@ -64,8 +72,6 @@ JNIEXPORT void JNICALL J_MAKE_METHOD(Proxy_jniOptionsFree)(JNIEnv *env, jclass o
     opts->payload = NULL;
     free(opts);
 }
-
-/** -------- Wrapper Body ---------- */
 /** int version*/
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Proxy_jniOptionsGetVersion)(JNIEnv *env, jclass obj, jlong optionsPtr)
 {
@@ -108,9 +114,13 @@ JNIEXPORT void JNICALL J_MAKE_METHOD(Proxy_jniOptionsSetUrl)(JNIEnv *env, jclass
 JNIEXPORT void JNICALL J_MAKE_METHOD(Proxy_jniOptionsSetCredentials)(JNIEnv *env, jclass obj, jlong optionsPtr, jobject credentials)
 {
     git_proxy_options *opts = (git_proxy_options *)optionsPtr;
-    assert(opts && opts->payload && "git_proxy_options was not initialized");
+    assert(opts && "git_proxy_options was not initialized");
+    if (opts->payload == NULL)
+    {
+        j_git_proxy_options_init_payload(opts);
+    }
     j_cb_payload *payload = (j_cb_payload *)opts->payload;
-    j_cb_payload_release(env, payload);
+    j_cb_payload_release(env, payload); /**first release old payload */
     j_cb_payload_init(env, payload, credentials, "(Ljava/lang/String;Ljava/lang/String;I)J");
     opts->credentials = j_proxy_git_credential_acquire_cb;
 }
@@ -119,7 +129,11 @@ JNIEXPORT void JNICALL J_MAKE_METHOD(Proxy_jniOptionsSetCredentials)(JNIEnv *env
 JNIEXPORT void JNICALL J_MAKE_METHOD(Proxy_jniOptionsSetCertificateCheck)(JNIEnv *env, jclass obj, jlong optionsPtr, jobject certificateCheck)
 {
     git_proxy_options *opts = (git_proxy_options *)optionsPtr;
-    assert(opts && opts->payload && "git_proxy_options was not initialized");
+    assert(opts && "git_proxy_options was not initialized");
+    if (opts->payload == NULL)
+    {
+        j_git_proxy_options_init_payload(opts);
+    }
     j_cb_payload *payload_arr = (j_cb_payload *)opts->payload;
     j_cb_payload *payload = &(payload_arr[1]);
     j_cb_payload_release(env, payload);
@@ -134,5 +148,4 @@ JNIEXPORT void JNICALL J_MAKE_METHOD(Proxy_jniOptionsTestCallbacks)(JNIEnv *env,
     git_credential *out;
     opts->credentials(&out, "url-test", "username_from_url-test", 1, opts->payload);
     opts->certificate_check(NULL, 1, "host-test", opts->payload);
-    printf("qqqqq obtained credential ptr = %ld \n", (long)(out));
 }

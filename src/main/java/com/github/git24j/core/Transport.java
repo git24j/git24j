@@ -9,6 +9,7 @@ public class Transport extends CAutoReleasable {
     @Override
     protected void freeOnce(long cPtr) {}
 
+    @FunctionalInterface
     public interface CertificateCheckCb {
         int accept(Cert cert, boolean valid, String host);
     }

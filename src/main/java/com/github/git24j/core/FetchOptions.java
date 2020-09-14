@@ -1,10 +1,5 @@
 package com.github.git24j.core;
 
-import javax.annotation.CheckForNull;
-import javax.annotation.Nonnull;
-import java.util.ArrayList;
-import java.util.List;
-
 import static com.github.git24j.core.Remote.jniFetchOptionsFree;
 import static com.github.git24j.core.Remote.jniFetchOptionsGetCallbacks;
 import static com.github.git24j.core.Remote.jniFetchOptionsGetCustomHeaders;
@@ -13,12 +8,15 @@ import static com.github.git24j.core.Remote.jniFetchOptionsGetProxyOpts;
 import static com.github.git24j.core.Remote.jniFetchOptionsGetPrune;
 import static com.github.git24j.core.Remote.jniFetchOptionsGetUpdateFetchhead;
 import static com.github.git24j.core.Remote.jniFetchOptionsGetVersion;
-import static com.github.git24j.core.Remote.jniFetchOptionsSetCallbacks;
 import static com.github.git24j.core.Remote.jniFetchOptionsSetCustomHeaders;
 import static com.github.git24j.core.Remote.jniFetchOptionsSetDownloadTags;
 import static com.github.git24j.core.Remote.jniFetchOptionsSetPrune;
 import static com.github.git24j.core.Remote.jniFetchOptionsSetUpdateFetchhead;
 import static com.github.git24j.core.Remote.jniFetchOptionsSetVersion;
+
+import java.util.ArrayList;
+import java.util.List;
+import javax.annotation.Nonnull;
 
 public class FetchOptions extends CAutoReleasable {
     public static final int VERSION = 1;
@@ -52,13 +50,8 @@ public class FetchOptions extends CAutoReleasable {
     }
 
     /** git_remote_callbacks callbacks */
-    @CheckForNull
     public Remote.Callbacks getCallbacks() {
-        long ptr = jniFetchOptionsGetCallbacks(getRawPointer());
-        if (ptr == 0) {
-            return null;
-        }
-        return new Remote.Callbacks(true, ptr);
+        return new Remote.Callbacks(true, jniFetchOptionsGetCallbacks(getRawPointer()));
     }
 
     @Nonnull
@@ -105,10 +98,10 @@ public class FetchOptions extends CAutoReleasable {
         jniFetchOptionsSetDownloadTags(getRawPointer(), downloadTags.getBit());
     }
 
-    @CheckForNull
+    @Nonnull
     public Proxy.Options getProxyOpts() {
         long ptr = jniFetchOptionsGetProxyOpts(getRawPointer());
-        return ptr == 0 ? null : new Proxy.Options(true, ptr);
+        return new Proxy.Options(true, ptr);
     }
 
     /** git_strarray custom_headers */
@@ -121,10 +114,6 @@ public class FetchOptions extends CAutoReleasable {
 
     public void setCustomHeaders(@Nonnull String[] customHeaders) {
         jniFetchOptionsSetCustomHeaders(getRawPointer(), customHeaders);
-    }
-
-    public void setCallback(Remote.Callbacks callbacks) {
-        jniFetchOptionsSetCallbacks(callbacks.getRawPointer(), callbacks);
     }
 
     public enum PruneT {

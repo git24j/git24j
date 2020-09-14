@@ -14,7 +14,7 @@ Three steps to get started with `git24j` in a java application:
 <dependency>
     <groupId>com.github.git24j</groupId>
     <artifactId>git24j</artifactId>
-    <version>1.0.0.20200805</version>
+    <version>1.0.0.20200914</version>
 </dependency>
 ```
 #### Step 2, build shared libraries:

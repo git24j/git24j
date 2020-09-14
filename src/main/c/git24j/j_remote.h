@@ -7,7 +7,7 @@
 #ifdef __cplusplus
 extern "C"
 {
-    #endif
+#endif
 
     JNIEXPORT jint JNICALL J_MAKE_METHOD(Remote_jniInitCallbackConstant)(JNIEnv *env, jclass obj, jobject callback);
 
@@ -84,8 +84,24 @@ extern "C"
     JNIEXPORT jint JNICALL J_MAKE_METHOD(Remote_jniCallbacksNew)(JNIEnv *env, jclass obj, jobject outCb, jint version);
     JNIEXPORT void JNICALL J_MAKE_METHOD(Remote_jniCallbacksFree)(JNIEnv *env, jclass obj, jlong cbsPtr);
     JNIEXPORT void JNICALL J_MAKE_METHOD(Remote_jniCallbacksTest)(JNIEnv *env, jclass obj, jlong cbsPtr, jobject cbsObject);
+    typedef enum
+    {
+        J_REMOTE_CALLBACK_CRED = 0,
+        J_REMOTE_CALLBACK_TRANSPORT_MSG,
+        J_REMOTE_CALLBACK_COMPLETION,
+        J_REMOTE_CALLBACK_CERTIFICATE_CHECK,
+        J_REMOTE_CALLBACK_TRANSFER_PROGRESS,
+        J_REMOTE_CALLBACK_UPDATE_TIP,
+        J_REMOTE_CALLBACK_PACK_PROGRESS,
+        J_REMOTE_CALLBACK_PUSH_TRANSFER_PROGRESS,
+        J_REMOTE_CALLBACK_PUSH_UPDATE_REFERENCE,
+        J_REMOTE_CALLBACK_PUSH_NEGOTIATION,
+        J_REMOTE_CALLBACK_TRANSPORT,
+        J_REMOTE_CALLBACK_URL_RESOLVE,
+    } j_callback_type_t;
+
     /** set transport_message_cb */
-    JNIEXPORT void JNICALL J_MAKE_METHOD(Remote_jniCallbacksSetCallbackObject)(JNIEnv *env, jclass obj, jlong cbsPtr, jobject cbsObject);
+    JNIEXPORT void JNICALL J_MAKE_METHOD(Remote_jniCallbacksSetCallbackObject)(JNIEnv *env, jclass obj, jlong cbsPtr, jobject cbsObject, j_callback_type_t cbt);
 
     /** int git_remote_is_valid_name(const char *remote_name); */
     JNIEXPORT jint JNICALL J_MAKE_METHOD(Remote_jniIsValidName)(JNIEnv *env, jclass obj, jstring remote_name);
@@ -185,8 +201,6 @@ extern "C"
     JNIEXPORT void JNICALL J_MAKE_METHOD(Remote_jniFetchOptionsGetCustomHeaders)(JNIEnv *env, jclass obj, jlong fetchOptionsPtr, jobject outHeadersList);
     /** int version*/
     JNIEXPORT void JNICALL J_MAKE_METHOD(Remote_jniFetchOptionsSetVersion)(JNIEnv *env, jclass obj, jlong fetchOptionsPtr, jint version);
-    /** git_remote_callbacks callbacks*/
-    JNIEXPORT void JNICALL J_MAKE_METHOD(Remote_jniFetchOptionsSetCallbacks)(JNIEnv *env, jclass obj, jlong fetchOptionsPtr, jobject cbObj);
     /** git_fetch_prune_t prune*/
     JNIEXPORT void JNICALL J_MAKE_METHOD(Remote_jniFetchOptionsSetPrune)(JNIEnv *env, jclass obj, jlong fetchOptionsPtr, jint prune);
     /** int update_fetchhead*/
@@ -238,8 +252,7 @@ extern "C"
     /** git_oid dst*/
     JNIEXPORT void JNICALL J_MAKE_METHOD(Remote_jniPushUpdateSetDst)(JNIEnv *env, jclass obj, jlong pushUpdatePtr, jobject dst);
 
-
-    #ifdef __cplusplus
+#ifdef __cplusplus
 }
 #endif
 #endif
