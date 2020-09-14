@@ -63,7 +63,8 @@ public class Clone {
     public static Repository cloneRepo(
             @Nonnull String url, @Nonnull String localPath, @Nullable Options options) {
         Repository outRepo = new Repository(0);
-        jniClone(outRepo._rawPtr, url, localPath, options == null ? 0 : options.getRawPointer());
+        int e = jniClone(outRepo._rawPtr, url, localPath, options == null ? 0 : options.getRawPointer());
+        Error.throwIfNeeded(e);
         return outRepo;
     }
 

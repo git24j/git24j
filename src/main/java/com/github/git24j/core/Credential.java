@@ -75,7 +75,7 @@ public class Credential extends CAutoReleasable {
     @Nonnull
     public static Credential userpassPlaintextNew(
             @Nonnull String username, @Nonnull String password) {
-        Credential out = new Credential(false, 0);
+        Credential out = new Credential(true, 0);
         Error.throwIfNeeded(jniUserpassPlaintextNew(out._rawPtr, username, password));
         return out;
     }
@@ -89,7 +89,7 @@ public class Credential extends CAutoReleasable {
      */
     @Nonnull
     public static Credential defaultNew() {
-        Credential out = new Credential(false, 0);
+        Credential out = new Credential(true, 0);
         Error.throwIfNeeded(jniDefaultNew(out._rawPtr));
         return out;
     }
@@ -106,7 +106,7 @@ public class Credential extends CAutoReleasable {
      */
     @Nonnull
     public static Credential usernameNew(@Nonnull String username) {
-        Credential out = new Credential(false, 0);
+        Credential out = new Credential(true, 0);
         Error.throwIfNeeded(jniUsernameNew(out._rawPtr, username));
         return out;
     }
@@ -117,7 +117,7 @@ public class Credential extends CAutoReleasable {
             @Nullable String publickey,
             @Nonnull String privateKey,
             @Nullable String passphrase) {
-        Credential out = new Credential(false, 0);
+        Credential out = new Credential(true, 0);
         Error.throwIfNeeded(jniSshKeyNew(out._rawPtr, username, publickey, privateKey, passphrase));
         return out;
     }
@@ -128,7 +128,7 @@ public class Credential extends CAutoReleasable {
             @Nullable String publickey,
             @Nonnull String privateKey,
             @Nullable String passphrase) {
-        Credential out = new Credential(false, 0);
+        Credential out = new Credential(true, 0);
         Error.throwIfNeeded(
                 jniSshKeyMemoryNew(out._rawPtr, username, publickey, privateKey, passphrase));
         return out;
@@ -136,7 +136,7 @@ public class Credential extends CAutoReleasable {
 
     @Nonnull
     public static Credential fromAgent(@Nonnull String username) {
-        Credential out = new Credential(false, 0);
+        Credential out = new Credential(true, 0);
         Error.throwIfNeeded(jniSshKeyFromAgent(out._rawPtr, username));
         return out;
     }

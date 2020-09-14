@@ -18,5 +18,6 @@ public class PushOptionsTest extends TestBase {
         opts.setVersion(234);
         assertEquals(234, opts.getVersion());
         opts.getCallbacks().setTransportCb(owner -> null);
+        opts.getCallbacks().setCompletionCb(completionT -> 0);
     }
 }

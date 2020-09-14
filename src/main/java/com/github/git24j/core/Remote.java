@@ -29,7 +29,8 @@ public class Remote extends CAutoReleasable {
 
     static native int jniCallbacksNew(AtomicLong outCb, int version);
 
-    static native void jniCallbacksSetCallbackObject(long cbsPtr, Callbacks cbsObject);
+    static native void jniCallbacksSetCallbackObject(
+            long cbsPtr, Callbacks cbsObject, int callbackType);
 
     static native void jniCallbacksTest(long cbsPtr, Callbacks callbacks);
 
@@ -736,7 +737,7 @@ public class Remote extends CAutoReleasable {
         Error.throwIfNeeded(
                 jniFetch(
                         getRawPointer(),
-                        refspecs == null ? new String[0] : refspecs,
+                        refspecs,
                         opts == null ? 0 : opts.getRawPointer(),
                         reflogMessage));
     }
@@ -1019,7 +1020,7 @@ public class Remote extends CAutoReleasable {
          * @return Credential or empty
          */
         @Nullable
-        Cred acquire(String url, String usernameFromUrl, int allowedTypes);
+        Credential acquire(String url, String usernameFromUrl, int allowedTypes);
     }
 
     @FunctionalInterface
@@ -1296,12 +1297,13 @@ public class Remote extends CAutoReleasable {
         }
 
         public void setCredAcquireCb(CredAcquireCb credAcquireCb) {
-            jniCallbacksSetCallbackObject(getRawPointer(), this);
+            jniCallbacksSetCallbackObject(getRawPointer(), this, CallbackType.CRED.ordinal());
             _credAcquireCb = credAcquireCb;
         }
 
         public void setTransportMsg(TransportMessageCb transportMsg) {
-            jniCallbacksSetCallbackObject(getRawPointer(), this);
+            jniCallbacksSetCallbackObject(
+                    getRawPointer(), this, CallbackType.TRANSPORT_MSG.ordinal());
             _transportMsg = transportMsg;
         }
 
@@ -1311,52 +1313,60 @@ public class Remote extends CAutoReleasable {
         }
 
         public void setCompletionCb(CompletionCb completion) {
-            jniCallbacksSetCallbackObject(getRawPointer(), this);
+            jniCallbacksSetCallbackObject(getRawPointer(), this, CallbackType.COMPLETION.ordinal());
             _completionCb = completion;
         }
 
         public void setCertificateCheckCb(TransportCertificateCheckCb certificateCheckCb) {
-            jniCallbacksSetCallbackObject(getRawPointer(), this);
+            jniCallbacksSetCallbackObject(
+                    getRawPointer(), this, CallbackType.CERTIFICATE_CHECK.ordinal());
             _certificateCheckCb = certificateCheckCb;
         }
 
         public void setTransferProgressCb(TransferProgressCb transferProgressCb) {
-            jniCallbacksSetCallbackObject(getRawPointer(), this);
+            jniCallbacksSetCallbackObject(
+                    getRawPointer(), this, CallbackType.TRANSFER_PROGRESS.ordinal());
             _transferProgressCb = transferProgressCb;
         }
 
         public void setUpdateTipsCb(UpdateTipsCb updateTipsCb) {
-            jniCallbacksSetCallbackObject(getRawPointer(), this);
+            jniCallbacksSetCallbackObject(getRawPointer(), this, CallbackType.UPDATE_TIP.ordinal());
             _updateTipsCb = updateTipsCb;
         }
 
         public void setPackProgressCb(PackProgressCb packProgressCb) {
-            jniCallbacksSetCallbackObject(getRawPointer(), this);
+            jniCallbacksSetCallbackObject(
+                    getRawPointer(), this, CallbackType.PACK_PROGRESS.ordinal());
             _packProgressCb = packProgressCb;
         }
 
         public void setPushTransferProgressCb(PushTransferProgressCb pushTransferProgressCb) {
-            jniCallbacksSetCallbackObject(getRawPointer(), this);
+            jniCallbacksSetCallbackObject(
+                    getRawPointer(), this, CallbackType.PUSH_TRANSFER_PROGRESS.ordinal());
             _pushTransferProgressCb = pushTransferProgressCb;
         }
 
         public void setPushUpdateReferenceCb(PushUpdateReferenceCb pushUpdateReferenceCb) {
-            jniCallbacksSetCallbackObject(getRawPointer(), this);
+            jniCallbacksSetCallbackObject(
+                    getRawPointer(), this, CallbackType.PUSH_UPDATE_REFERENCE.ordinal());
             _pushUpdateReferenceCb = pushUpdateReferenceCb;
         }
 
         public void setPushNegotiationCb(PushNegotiationCb pushNegotiationCb) {
-            jniCallbacksSetCallbackObject(getRawPointer(), this);
+            jniCallbacksSetCallbackObject(
+                    getRawPointer(), this, CallbackType.PUSH_NEGOTIATION.ordinal());
             _pushNegotiationCb = pushNegotiationCb;
         }
 
         public void setTransportCb(TransportCb transportCb) {
-            jniCallbacksSetCallbackObject(getRawPointer(), this);
+            jniCallbacksSetCallbackObject(
+                    getRawPointer(), this, CallbackType.TRANSPORT.ordinal());
             _transportCb = transportCb;
         }
 
         public void setUrlResolveCbCb(UrlResolveCb urlResolveCbCb) {
-            jniCallbacksSetCallbackObject(getRawPointer(), this);
+            jniCallbacksSetCallbackObject(
+                    getRawPointer(), this, CallbackType.URL_RESOLVE.ordinal());
             _urlResolveCb = urlResolveCbCb;
         }
 
@@ -1489,6 +1499,21 @@ public class Remote extends CAutoReleasable {
                         .orElse(0L);
             }
             return 0L;
+        }
+
+        private enum CallbackType {
+            CRED,
+            TRANSPORT_MSG,
+            COMPLETION,
+            CERTIFICATE_CHECK,
+            TRANSFER_PROGRESS,
+            UPDATE_TIP,
+            PACK_PROGRESS,
+            PUSH_TRANSFER_PROGRESS,
+            PUSH_UPDATE_REFERENCE,
+            PUSH_NEGOTIATION,
+            TRANSPORT,
+            URL_RESOLVE;
         }
     }
 }

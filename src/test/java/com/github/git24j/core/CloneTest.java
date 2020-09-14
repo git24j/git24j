@@ -1,10 +1,5 @@
 package com.github.git24j.core;
 
-import org.junit.Test;
-
-import java.util.Arrays;
-import java.util.EnumSet;
-
 import static com.github.git24j.core.Checkout.NotifyT.CONFLICT;
 import static com.github.git24j.core.Checkout.NotifyT.UNTRACKED;
 import static com.github.git24j.core.Checkout.StrategyT.ALLOW_CONFLICTS;
@@ -12,6 +7,12 @@ import static com.github.git24j.core.Checkout.StrategyT.FORCE;
 import static com.github.git24j.core.Clone.LocalT.LOCAL_NO_LINKS;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+
+import java.io.File;
+import java.util.Arrays;
+import java.util.EnumSet;
+import org.junit.Ignore;
+import org.junit.Test;
 
 public class CloneTest extends TestBase {
 
@@ -55,5 +56,24 @@ public class CloneTest extends TestBase {
         assertEquals("their-label", opts.getCheckoutOpts().getTheirLabel());
         // opts.getCheckoutOpts().;
         // assertEquals(, opts.getCheckoutOpts().);
+    }
+
+    @Ignore
+    @Test
+    public void cloneWithCredential() throws Exception {
+        Clone.Options opts = Clone.Options.defaultOpts();
+        opts.getFetchOpts()
+                .getCallbacks()
+                .setCredAcquireCb(
+                        (url, usernameFromUrl, allowedTypes) ->
+                                Credential.userpassPlaintextNew("fake-user", "fake-passwd"));
+        String aUrlThatNeedsAuth = "https://github.com/shijinglu/algomisc.git";
+        File localDir = new File("/tmp/localPath");
+        if (localDir.exists()) {
+            Repository repo = Repository.open(localDir.getPath());
+            Remote.lookup(repo, "origin").fetch(null, opts.getFetchOpts(), null);
+        } else {
+            Clone.cloneRepo(aUrlThatNeedsAuth, localDir.getPath(), opts);
+        }
     }
 }

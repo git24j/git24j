@@ -17,7 +17,8 @@ extern "C"
     /**
      * Copy values from java String[] to git_strarray.
      * 
-     * Note: returned {@code jstrarray} needs to be free-ed by git_strarray_free separately.
+     * Note 1: this will not free existing data in git_strarray
+     * Note 2: returned {@code jstrarray} needs to be free-ed by git_strarray_free separately.
      */
     void git_strarray_of_jobject_array(JNIEnv *env, jobjectArray jstrarr, git_strarray *out);
 

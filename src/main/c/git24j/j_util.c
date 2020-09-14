@@ -26,12 +26,14 @@ void j_save_c_pointer(JNIEnv *env, void *ptr, jobject object, const char *setter
 
 void git_strarray_of_jobject_array(JNIEnv *env, jobjectArray jstrarr, git_strarray *out)
 {
+    if (jstrarr == NULL)
+    {
+        return;
+    }
     assert(out && "accepting git_strarray pointer must not be null");
-
     jsize len = (*env)->GetArrayLength(env, jstrarr);
     out->count = len;
     out->strings = (char **)calloc(out->count, sizeof(char *));
-
     assert(out->strings != NULL);
     for (jsize i = 0; i < len; i++)
     {
