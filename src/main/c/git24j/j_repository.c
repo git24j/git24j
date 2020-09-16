@@ -250,7 +250,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Repository_jniHead)(JNIEnv *env, jclass obj
     git_repository *c_repo = (git_repository *)repo;
     git_reference *c_ref;
     int error = git_repository_head(&c_ref, c_repo);
-    (*env)->CallVoidMethod(env, outRef, jniConstants->midAtomicLongSet, (long)c_repo);
+    (*env)->CallVoidMethod(env, outRef, jniConstants->midAtomicLongSet, c_ref);
     return error;
 }
 
