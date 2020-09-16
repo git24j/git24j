@@ -280,6 +280,15 @@ public class RepositoryTest extends TestBase {
     }
 
     @Test
+    public void head() {
+        try (Repository repository = creteTestRepo(TestRepo.SIMPLE1)) {
+            Oid id1 = repository.head().id();
+            Oid id2 = Revparse.single(repository, "HEAD").id();
+            Assert.assertEquals(id1, id2);
+        }
+    }
+
+    @Test
     public void setHeadDetached() {
         Path path = TestRepo.SIMPLE1.tempCopy(folder);
         try (Repository repository = Repository.open(path)) {

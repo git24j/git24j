@@ -62,7 +62,6 @@ public class RemoteTest extends TestBase {
             r4.fetch(null, null, null);
 
             Remote.CreateOptions opts = Remote.CreateOptions.createDefault();
-            // TODO: add getter setters for CreateOptions
             Remote r5 = Remote.createWithOpts(testRepo.workdir().toUri(), opts);
             Assert.assertNotNull(r5);
             // r5.fetch(null, null, null);
@@ -106,7 +105,12 @@ public class RemoteTest extends TestBase {
     public void dup() {}
 
     @Test
-    public void fetch() {}
+    public void fetch() {
+        try (Repository remote = creteTestRepo(TestRepo.SIMPLE1_BARE); Repository local = creteTestRepo(TestRepo.SIMPLE1)){
+            Remote upstream = Remote.create(local, "upstream", URI.create(remote.getPath()));
+            upstream.fetch(null, null, "reflog");
+        }
+    }
 
     @Test
     public void isValidName() {}

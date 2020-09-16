@@ -46,6 +46,29 @@ More in-detailed examples:
 1. [git24j-maven-example](https://github.com/git24j/git24j-maven-example)
 2. [git24j-gradle-example](https://github.com/git24j/git24j-gradle-example)
 
+### Demo of usage in Groovy
+
+```
+$ git clone https://github.com/git24j/git24j.git
+$ cd git24j
+$ git submodule sync --recursive
+$ git submodule update --init --recursive
+$ make && mvn package
+$ groovysh
+groovy:000> import java.nio.file.Paths
+groovy:000> clone = Paths.get(".")
+groovy:000> libgit2 = clone.resolve("target/git2/libgit2.so")
+groovy:000> libgit24j = clone.resolve("target/git24j/libgit24j.so")
+groovy:000> jarGit24j = clone.resolve("target/git24j-1.0.0.20200914.jar")
+groovy:000> this.class.classLoader.rootLoader.addURL(jarGit24j.toUri().toURL())
+groovy:000> import com.github.git24j.core.*
+groovy:000> Init.loadLibraries(libgit2, libgit24j)
+groovy:000> Libgit2.init()
+groovy:000> repo = Repository.open(clone)
+```
+
+[![asciicast](https://asciinema.org/a/tE0KZN3v5epJyQBLHfmJgy87K.svg)](https://asciinema.org/a/tE0KZN3v5epJyQBLHfmJgy87K)
+
 ## Usages
 - Checkout [samples.md](doc/samples.md) for some basic git24j usages
 - Checkout [API Doc](https://git24j.github.io/) for git24j apis
