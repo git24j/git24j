@@ -55,6 +55,10 @@ jobs:
       ##########################################
       #        Publish to Github Packages      #
       ##########################################
+      - name: Override version in pom_gh_pkgs.xml
+        run: |
+          mvn versions:set "-DnewVersion=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)" -f pom_gh_pkgs.xml
+
       - name: Set up Java for publishing to GitHub Packages
         uses: actions/setup-java@v2
         with:
