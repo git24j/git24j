@@ -7,6 +7,8 @@
 
 extern j_constants_t *jniConstants;
 
+JavaVM *globalJvm;
+
 jclass j_find_and_hold_clz(JNIEnv *env, const char *descriptor)
 {
     jclass clz = (*env)->FindClass(env, descriptor);

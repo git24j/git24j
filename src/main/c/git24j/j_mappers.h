@@ -65,7 +65,7 @@ extern "C"
     } j_constants_t;
 
     /** commonly used constants. */
-    j_constants_t *jniConstants;
+    extern j_constants_t *jniConstants;
 
     /** Retrieve env attached to the current thread. */
     JNIEnv *getEnv(void);
