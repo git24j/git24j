@@ -35,7 +35,6 @@ jobs:
         run: |
           git submodule update --init --recursive
           rm -rf target/
-          make
 
       # Runs a single command using the runners shell
       - name: Make test
