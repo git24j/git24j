@@ -27,11 +27,9 @@ jobs:
           git submodule update --init --recursive
           make
 
-      # - name: Publish to GitHub Packages Apache Maven
-      #   run: mvn deploy
-      #   env:
-      #     GITHUB_TOKEN: ${{ github.token }} # GITHUB_TOKEN is the default env for the password
-
+      ##########################################
+      #        Publish to Maven central        #
+      ##########################################
       - name: Set up Apache Maven Central
         uses: actions/setup-java@v2
         with: # running setup-java again overwrites the settings.xml
@@ -53,3 +51,17 @@ jobs:
           OSSRH_USERNAME: ${{ secrets.OSSRH_USERNAME }}
           MAVEN_GPG_PRIVATE_KEY: ${{ secrets.MAVEN_GPG_PRIVATE_KEY }}
           MAVEN_GPG_PASSPHRASE: ${{ secrets.MAVEN_GPG_PASSPHRASE }}
+
+      ##########################################
+      #        Publish to Github Packages      #
+      ##########################################
+      - name: Set up Java for publishing to GitHub Packages
+        uses: actions/setup-java@v2
+        with:
+          java-version: '11'
+          distribution: 'adopt'
+
+      - name: Publish to GitHub Packages
+        run: mvn --batch-mode -Dmaven.test.skip=true clean deploy -f pom_gh_pkgs.xml
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
