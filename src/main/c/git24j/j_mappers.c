@@ -8,6 +8,8 @@
 
 extern JavaVM *globalJvm;
 
+j_constants_t *jniConstants;
+
 /** Retrieve env attached to the current thread. */
 JNIEnv *getEnv(void)
 {
