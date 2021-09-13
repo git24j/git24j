@@ -25,7 +25,7 @@ jobs:
       - name: Pre-build with make
         run: |
           git submodule update --init --recursive
-          make
+          make test
 
       ##########################################
       #        Publish to Maven central        #
@@ -45,7 +45,7 @@ jobs:
       #   run: mvn versions:set "-DnewVersion=${{ github.event.inputs.releaseversion }}"
 
       - name: Publish to Apache Maven Central
-        run: mvn --batch-mode -Dmaven.test.skip=true clean deploy
+        run: mvn --batch-mode -Dmaven.test.skip=true deploy
         env:
           OSSRH_TOKEN: ${{ secrets.OSSRH_TOKEN }}
           OSSRH_USERNAME: ${{ secrets.OSSRH_USERNAME }}
@@ -66,6 +66,6 @@ jobs:
           distribution: 'adopt'
 
       - name: Publish to GitHub Packages
-        run: mvn --batch-mode -Dmaven.test.skip=true clean deploy -f pom_gh.xml
+        run: mvn --batch-mode -Dmaven.test.skip=true deploy -f pom_gh.xml
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
