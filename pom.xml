@@ -10,7 +10,7 @@
     </properties>
     <groupId>com.github.git24j</groupId>
     <artifactId>git24j</artifactId>
-    <version>1.0.0.20210904</version>
+    <version>1.0.0.20210905</version>
     <packaging>jar</packaging>
     <name>git24j</name>
     <description>A java bindings of the libgit2 project.</description>
@@ -56,17 +56,6 @@
                 <configuration>
                     <source>8</source>
                     <target>8</target>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.sonatype.plugins</groupId>
-                <artifactId>nexus-staging-maven-plugin</artifactId>
-                <version>1.6.8</version>
-                <extensions>true</extensions>
-                <configuration>
-                    <serverId>ossrh</serverId>
-                    <nexusUrl>https://oss.sonatype.org/</nexusUrl>
-                    <autoReleaseAfterClose>true</autoReleaseAfterClose>
                 </configuration>
             </plugin>
             <plugin>
