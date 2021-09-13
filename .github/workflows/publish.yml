@@ -55,9 +55,9 @@ jobs:
       ##########################################
       #        Publish to Github Packages      #
       ##########################################
-      - name: Override version in pom_gh_pkgs.xml
+      - name: Create pom.xml
         run: |
-          mvn versions:set "-DnewVersion=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)" -f pom_gh_pkgs.xml
+          patch pom.xml -i pom.patch -o pom_gh.xml
 
       - name: Set up Java for publishing to GitHub Packages
         uses: actions/setup-java@v2
@@ -66,6 +66,6 @@ jobs:
           distribution: 'adopt'
 
       - name: Publish to GitHub Packages
-        run: mvn --batch-mode -Dmaven.test.skip=true clean deploy -f pom_gh_pkgs.xml
+        run: mvn --batch-mode -Dmaven.test.skip=true clean deploy -f pom_gh.xml
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

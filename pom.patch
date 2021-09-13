@@ -1,0 +1,28 @@
+--- pom.xml	2021-09-12 22:15:37.420398009 -0400
++++ pom_gh_pkgs.xml	2021-09-12 22:14:40.644446323 -0400
+@@ -154,6 +154,7 @@
+         </plugins>
+     </build>
+ 
++<!--
+     <distributionManagement>
+         <snapshotRepository>
+             <id>ossrh</id>
+@@ -164,8 +165,8 @@
+             <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+         </repository>
+     </distributionManagement>
++-->
+ 
+-<!--
+     <distributionManagement>
+         <repository>
+             <id>github</id>
+@@ -173,7 +174,6 @@
+             <url>https://maven.pkg.github.com/git24j/git24j</url>
+         </repository>
+     </distributionManagement>
+--->
+ 
+     <dependencies>
+         <dependency>
