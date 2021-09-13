@@ -14,9 +14,12 @@ Three steps to get started with `git24j` in a java application:
 <dependency>
     <groupId>com.github.git24j</groupId>
     <artifactId>git24j</artifactId>
-    <version>1.0.0.20200914</version>
+    <version>${version}</version>
 </dependency>
 ```
+
+The latest `version` can be found from [git2@maven central](https://search.maven.org/artifact/com.github.git24j/git24j/1.0.0.20200914/jar)
+
 #### Step 2, build shared libraries:
 ```
 $ git clone https://github.com/git24j/git24j.git dist/git24j
