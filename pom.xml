@@ -37,15 +37,15 @@
         <url>http://github.com/git24j/git24j/tree/master</url>
     </scm>
 
-    <reporting>
-        <plugins>
-            <plugin>
-                <groupId>com.github.spotbugs</groupId>
-                <artifactId>spotbugs-maven-plugin</artifactId>
-                <version>3.1.12</version>
-            </plugin>
-        </plugins>
-    </reporting>
+<!--    <reporting>-->
+<!--        <plugins>-->
+<!--            <plugin>-->
+<!--                <groupId>com.github.spotbugs</groupId>-->
+<!--                <artifactId>spotbugs-maven-plugin</artifactId>-->
+<!--                <version>3.1.12</version>-->
+<!--            </plugin>-->
+<!--        </plugins>-->
+<!--    </reporting>-->
 
     <build>
         <plugins>

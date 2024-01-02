@@ -69,7 +69,7 @@ void j_git_buf_to_java(JNIEnv *env, git_buf *c_buf, jobject buf)
     assert(jclz && "Could not find Buf class from given buf object");
     j_call_setter_string_c(env, jclz, buf, "setPtr", c_buf->ptr);
     j_call_setter_int(env, jclz, buf, "setSize", c_buf->size);
-    j_call_setter_int(env, jclz, buf, "setAsize", c_buf->asize);
+    j_call_setter_int(env, jclz, buf, "setReserved", c_buf->reserved);
     (*env)->DeleteLocalRef(env, jclz);
 }
 
@@ -141,7 +141,7 @@ void j_git_buf_of_jstring(JNIEnv *env, git_buf *out_buf, jstring jstr)
     int size = (*env)->GetStringLength(env, jstr);
     const char *c_str = (*env)->GetStringUTFChars(env, jstr, NULL);
     strncpy(out_buf->ptr, c_str, size);
-    out_buf->asize = size + 1;
+    out_buf->reserved = size + 1;
     out_buf->size = size;
 }
 
