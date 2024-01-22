@@ -1053,7 +1053,7 @@ public class Remote extends CAutoReleasable {
          *     that the callback refused to act and that the existing validity determination should
          *     be honored
          */
-        int accept(Cert cert, boolean valid, String host);
+        int accept(Cert cert, boolean valid, String host); // where is the payload ptr?
     }
 
     @FunctionalInterface

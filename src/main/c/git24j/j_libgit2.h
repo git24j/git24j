@@ -24,6 +24,8 @@ extern "C"
     JNIEXPORT void JNICALL J_MAKE_METHOD(Libgit2_jniShadowFree)(JNIEnv *env, jclass obj, long ptr);
 
     /**TODO: git_libgit2_opts. */
+    // TODO update 方法签名
+    JNIEXPORT void JNICALL J_MAKE_METHOD(Libgit2_opts)(JNIEnv *env, jclass obj, jlong key,jobjectArray params);
 
 #ifdef __cplusplus
 }
