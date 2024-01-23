@@ -12,11 +12,13 @@ public class Libgit2 {
     public static native Version version();
 
     public static native int features();
-    // TODO: git_libgit2_opts
-    public static native int opts();
 
     /** Wapper of features that returns an enum set. */
     public static EnumSet<GitFeature> featuresSet() {
         return GitFeature.valuesOf(features());
     }
+
+    // git_libgit2_opts() start
+    static native void optsGitOptSetMwindowSize(long mWindowSize);
+    // git_libgit2_opts() end
 }

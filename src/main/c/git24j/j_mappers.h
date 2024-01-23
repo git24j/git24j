@@ -62,7 +62,29 @@ extern "C"
         jmethodID midListGetI;
         j_remote_constants remote;
         j_oid_constants oid;
+        j_git_buf_constants_t buf;
+        j_git_cache_memory_saver_constants_t gitCacheMemorySaver;
     } j_constants_t;
+
+    typedef struct
+    {
+        jclass clzBuf;
+
+        jmethodID emptyConstructor;
+
+    } j_git_buf_constants_t;
+
+    typedef struct
+    {
+        jclass clzGitCacheMemorySaver;
+
+        jmethodID emptyConstructor;
+
+        jmethodID midGetCurrentStorageValue;
+        jmethodID midSetCurrentStorageValue;
+        jmethodID midGetMaxStorage;
+        jmethodID midSetMaxStorage;
+    } j_git_cache_memory_saver_constants_t;
 
     /** commonly used constants. */
     extern j_constants_t *jniConstants;
@@ -88,7 +110,7 @@ extern "C"
     char *j_copy_of_jstring(JNIEnv *env, jstring jstr, bool nullable);
 
     /**
-     * Copy content of `jstr` to `out_buf`. Result out_buf must be disposed by 
+     * Copy content of `jstr` to `out_buf`. Result out_buf must be disposed by
      * `git_buf_dispose`.
      */
     void j_git_buf_of_jstring(JNIEnv *env, git_buf *out_buf, jstring jstr);
