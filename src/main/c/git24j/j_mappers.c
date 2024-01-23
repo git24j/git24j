@@ -434,6 +434,22 @@ void j_strarray_from_java(JNIEnv *env, git_strarray *out, jobjectArray strArr)
     out->count = len;
 }
 
+/** Copy values from `git_strarray *src` to `String[] out` */
+void j_strarray_to_java_array(JNIEnv *env, git_strarray *src, jobjectArray out)
+{
+    if (src==NULL || out == NULL)
+    {
+        return;
+    }
+
+    size_t len = src->count;
+
+    for (size_t i = 0; i < len; i++)
+    {
+        (*env)->SetObjectArrayElement(env, out, i, (*env)->NewStringUTF(env, src->strings[i]));
+    }
+}
+
 /** Copy values from git_signature to git24j.Signature. */
 void deprecated_signature_to_java(JNIEnv *env, const git_signature *c_sig, jobject sig)
 {

@@ -209,6 +209,9 @@ extern "C"
     /**Copy values from String[] to git_strarray*/
     void j_strarray_from_java(JNIEnv *env, git_strarray *out, jobjectArray strArr);
 
+    /** Copy values from `git_strarray *src` to `String[] out` */
+    void j_strarray_to_java_array(JNIEnv *env, git_strarray *src, jobjectArray out);
+
     /** Copy values from git_signature to git24j.Signature. */
     void deprecated_signature_to_java(JNIEnv *env, const git_signature *c_sig, jobject sig);
 
