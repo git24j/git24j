@@ -435,9 +435,9 @@ void j_strarray_from_java(JNIEnv *env, git_strarray *out, jobjectArray strArr)
 }
 
 /** Copy values from `git_strarray *src` to `String[] out` */
-void j_strarray_to_java_array(JNIEnv *env, git_strarray *src, jobjectArray out)
+void j_strarray_to_java_array(JNIEnv *env, jobjectArray out, git_strarray *src)
 {
-    if (src==NULL || out == NULL)
+    if (out == NULL || src==NULL)
     {
         return;
     }

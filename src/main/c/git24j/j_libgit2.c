@@ -478,7 +478,7 @@ JNIEXPORT jobjectArray JNICALL J_MAKE_METHOD(Libgit2_optsGitOptGetExtensions)(JN
     jclass clzStr = (*env)->FindClass(env,"java/lang/String");
     jobjectArray ret = (*env)->NewObjectArray(env, out->count, clzStr, NULL);  // last param is initial value
 
-    j_strarray_to_java_array(env, &out, ret);
+    j_strarray_to_java_array(env, ret, &out);
 
     git_strarray_free(&out);
     (*env)->DeleteLocalRef(env, clzStr);
