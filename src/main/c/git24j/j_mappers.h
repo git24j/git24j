@@ -49,25 +49,6 @@ extern "C"
 
     typedef struct
     {
-        jclass clzAtomicInt;
-        jclass clzAtomicLong;
-        jclass clzAtomicReference;
-        jclass clzList;
-
-        jmethodID midAtomicIntSet;
-        jmethodID midAtomicLongSet;
-        jmethodID midAtomicLongGet;
-        jmethodID midAtomicLongInit;
-        jmethodID midAtomicReferenceSet;
-        jmethodID midListGetI;
-        j_remote_constants remote;
-        j_oid_constants oid;
-        j_git_buf_constants_t buf;
-        j_git_cache_memory_saver_constants_t gitCacheMemorySaver;
-    } j_constants_t;
-
-    typedef struct
-    {
         jclass clzBuf;
 
         jmethodID emptyConstructor;
@@ -85,6 +66,25 @@ extern "C"
         jmethodID midGetMaxStorage;
         jmethodID midSetMaxStorage;
     } j_git_cache_memory_saver_constants_t;
+
+    typedef struct
+    {
+        jclass clzAtomicInt;
+        jclass clzAtomicLong;
+        jclass clzAtomicReference;
+        jclass clzList;
+
+        jmethodID midAtomicIntSet;
+        jmethodID midAtomicLongSet;
+        jmethodID midAtomicLongGet;
+        jmethodID midAtomicLongInit;
+        jmethodID midAtomicReferenceSet;
+        jmethodID midListGetI;
+        j_remote_constants remote;
+        j_oid_constants oid;
+        j_git_buf_constants_t buf;
+        j_git_cache_memory_saver_constants_t gitCacheMemorySaver;
+    } j_constants_t;
 
     /** commonly used constants. */
     extern j_constants_t *jniConstants;

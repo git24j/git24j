@@ -4,6 +4,7 @@
 #include <git2.h>
 #include <jni.h>
 #include <stdio.h>
+#include "j_exception.h"
 
 extern j_constants_t *jniConstants;
 
@@ -77,13 +78,13 @@ void git24j_init(JNIEnv *env)
     clz = j_find_and_hold_clz(env, J_CLZ_PREFIX "Buf");
     assert(clz && "Buf class not found");
     jniConstants->buf.clzBuf = clz;
-    jniConstants->buf.emptyConstructor = (*env)->GetMethodID(clz, "<init>", "()V");
+    jniConstants->buf.emptyConstructor = (*env)->GetMethodID(env, clz, "<init>", "()V");
 
     /* GitCacheMemorySaver class */
     clz = j_find_and_hold_clz(env, J_CLZ_PREFIX "GitCachedMemorySaver");
     assert(clz && "GitCacheMemorySaver class not found");
     jniConstants->gitCacheMemorySaver.clzGitCacheMemorySaver = clz;
-    jniConstants->gitCacheMemorySaver.emptyConstructor = (*env)->GetMethodID(clz, "<init>", "()V");;
+    jniConstants->gitCacheMemorySaver.emptyConstructor = (*env)->GetMethodID(env, clz, "<init>", "()V");;
     jniConstants->gitCacheMemorySaver.midGetCurrentStorageValue = (*env)->GetMethodID(env, clz, "getCurrentStorageValue", "()J");
     jniConstants->gitCacheMemorySaver.midSetCurrentStorageValue =  (*env)->GetMethodID(env, clz, "setCurrentStorageValue", "(J)V");
     jniConstants->gitCacheMemorySaver.midGetMaxStorage = (*env)->GetMethodID(env, clz, "getMaxStorage", "()J");
@@ -330,7 +331,7 @@ JNIEXPORT jobject JNICALL J_MAKE_METHOD(Libgit2_optsGitOptGetCachedMemory)(JNIEn
     }
 
     // get GitCacheMemorySaver class and set field, then return the object
-    jobject ret = (*env)->NewObject(jniConstants->gitCacheMemorySaver.clzGitCacheMemorySaver, jniConstants->gitCacheMemorySaver.emptyConstructor);
+    jobject ret = (*env)->NewObject(env, jniConstants->gitCacheMemorySaver.clzGitCacheMemorySaver, jniConstants->gitCacheMemorySaver.emptyConstructor);
 
     (*env)->CallVoidMethod(env, ret, jniConstants->gitCacheMemorySaver.midSetCurrentStorageValue, git_cache_current_storage_val);
     (*env)->CallVoidMethod(env, ret, jniConstants->gitCacheMemorySaver.midSetMaxStorage, git_cache_max_storage);
@@ -454,7 +455,7 @@ JNIEXPORT void JNICALL J_MAKE_METHOD(Libgit2_optsGitOptSetExtensions)(JNIEnv *en
     git_strarray out = {0};
     j_strarray_from_java(env, &out, extensionsArray);
 
-    int error = git_libgit2_opts(GIT_OPT_SET_EXTENSIONS, out->strings, out->count);
+    int error = git_libgit2_opts(GIT_OPT_SET_EXTENSIONS, out.strings, out.count);
 
     git_strarray_free(&out);
 
@@ -476,7 +477,7 @@ JNIEXPORT jobjectArray JNICALL J_MAKE_METHOD(Libgit2_optsGitOptGetExtensions)(JN
     }
 
     jclass clzStr = (*env)->FindClass(env,"java/lang/String");
-    jobjectArray ret = (*env)->NewObjectArray(env, out->count, clzStr, NULL);  // last param is initial value
+    jobjectArray ret = (*env)->NewObjectArray(env, out.count, clzStr, NULL);  // last param is initial value
 
     j_strarray_to_java_array(env, ret, &out);
 
