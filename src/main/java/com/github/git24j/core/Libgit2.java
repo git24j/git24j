@@ -19,6 +19,12 @@ public class Libgit2 {
     }
 
     // git_libgit2_opts() start
+    /* note:
+        all these methods may throws GitException,
+        but I saw in this project other methods, almost no one wrote throws part
+        on method signature, so I don't wrote throws on method signature too.
+        better use try catch when calling below methods.
+    * */
     public static native void optsGitOptSetMwindowSize(long mWindowSize);
     public static native long optsGitOptGetMwindowSize();
     public static native void optsGitOptSetMWindowMappedLimit(long mWindowMappedLimit);

@@ -10,7 +10,7 @@
     </properties>
     <groupId>com.github.git24j</groupId>
     <artifactId>git24j</artifactId>
-    <version>1.0.0.20210907</version>
+    <version>1.0.1.20240124</version>
     <packaging>jar</packaging>
     <name>git24j</name>
     <description>A java bindings of the libgit2 project.</description>
