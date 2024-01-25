@@ -31,9 +31,14 @@ public class Libgit2 {
     public static native long optsGitOptGetMWindowMappedLimit();
     public static native void optsGitOptSetMWindowFileLimit(long mWindowFileLimit);
     public static native long optsGitOptGetMWindowFileLimit();
+
+    //param `configLevel` should use one of class `Libgit2.OptsCons.ConfigLevel`'s fields
     public static native String optsGitOptGetSearchPath(int configLevel);
     public static native void optsGitOptSetSearchPath(int configLevel, String path);
+
+    //param `type` should use one of class `Libgit2.OptsCons.ObjectType`'s fields
     public static native void optsGitOptSetCacheObjectLimit(int type, long size);
+
     public static native void optsGitOptSetCacheMaxSize(long size);
     public static native void optsGitOptEnableCaching(boolean enable);
     public static native GitCachedMemorySaver optsGitOptGetCachedMemory();
