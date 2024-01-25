@@ -19,7 +19,7 @@ public class OptsTest extends TestBase {
         assert(1234L==Libgit2.optsGitOptGetMWindowFileLimit());
 
         Libgit2.optsGitOptSetSearchPath(Libgit2.OptsCons.ConfigLevel.system,"/abc");
-        assert(Libgit2.optsGitOptGetSearchPath(2).equals("/abc"));
+        assert(Libgit2.optsGitOptGetSearchPath(Libgit2.OptsCons.ConfigLevel.system).equals("/abc"));
 
         Libgit2.optsGitOptSetCacheObjectLimit(Libgit2.OptsCons.ObjectType.commit,1010);
 
