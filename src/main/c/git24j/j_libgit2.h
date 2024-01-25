@@ -40,12 +40,12 @@ extern "C"
     JNIEXPORT jlong JNICALL J_MAKE_METHOD(Libgit2_optsGitOptGetMWindowFileLimit)(JNIEnv *env, jclass obj);
 
     //GIT_OPT_GET_SEARCH_PATH
-    JNIEXPORT jstring JNICALL J_MAKE_METHOD(Libgit2_optsGitOptGetSearchPath)(JNIEnv *env, jclass obj, jlong sysdir);
+    JNIEXPORT jstring JNICALL J_MAKE_METHOD(Libgit2_optsGitOptGetSearchPath)(JNIEnv *env, jclass obj, jint configLevel);
     //GIT_OPT_SET_SEARCH_PATH
-    JNIEXPORT void JNICALL J_MAKE_METHOD(Libgit2_optsGitOptSetSearchPath)(JNIEnv *env, jclass obj, jlong sysdir, jstring path);
+    JNIEXPORT void JNICALL J_MAKE_METHOD(Libgit2_optsGitOptSetSearchPath)(JNIEnv *env, jclass obj, jint configLevel, jstring path);
 
     //GIT_OPT_SET_CACHE_OBJECT_LIMIT
-    JNIEXPORT void JNICALL J_MAKE_METHOD(Libgit2_optsGitOptSetCacheObjectLimit)(JNIEnv *env, jclass obj, jlong type, jlong size);
+    JNIEXPORT void JNICALL J_MAKE_METHOD(Libgit2_optsGitOptSetCacheObjectLimit)(JNIEnv *env, jclass obj, jint type, jlong size);
 
     //GIT_OPT_SET_CACHE_MAX_SIZE
     JNIEXPORT void JNICALL J_MAKE_METHOD(Libgit2_optsGitOptSetCacheMaxSize)(JNIEnv *env, jclass obj, jlong size);

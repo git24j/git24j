@@ -265,11 +265,11 @@ JNIEXPORT jlong JNICALL J_MAKE_METHOD(Libgit2_optsGitOptGetMWindowFileLimit)(JNI
     return get_opts_jlong(env, GIT_OPT_GET_MWINDOW_FILE_LIMIT);
 }
 
-JNIEXPORT jstring JNICALL J_MAKE_METHOD(Libgit2_optsGitOptGetSearchPath)(JNIEnv *env, jclass obj, jlong sysdir)
+JNIEXPORT jstring JNICALL J_MAKE_METHOD(Libgit2_optsGitOptGetSearchPath)(JNIEnv *env, jclass obj, jint configLevel)
 {
     git_buf out = {0};
 
-    int error = git_libgit2_opts(GIT_OPT_GET_SEARCH_PATH, sysdir, &out);
+    int error = git_libgit2_opts(GIT_OPT_GET_SEARCH_PATH, configLevel, &out);
 
     if(error != 0) {
         git_buf_dispose(&out);
@@ -285,7 +285,8 @@ JNIEXPORT jstring JNICALL J_MAKE_METHOD(Libgit2_optsGitOptGetSearchPath)(JNIEnv 
     return ret;
 }
 
-JNIEXPORT void JNICALL J_MAKE_METHOD(Libgit2_optsGitOptSetSearchPath)(JNIEnv *env, jclass obj, jlong sysdir, jstring path)
+// libgit2 use the param `configLevel` to find sysdir, then set the dir to param `path`
+JNIEXPORT void JNICALL J_MAKE_METHOD(Libgit2_optsGitOptSetSearchPath)(JNIEnv *env, jclass obj, jint configLevel, jstring path)
 {
     // path is null
     if(!path) {
@@ -293,7 +294,7 @@ JNIEXPORT void JNICALL J_MAKE_METHOD(Libgit2_optsGitOptSetSearchPath)(JNIEnv *en
     }
 
     char *c_path = j_copy_of_jstring(env, path, true);
-    int error = git_libgit2_opts(GIT_OPT_SET_SEARCH_PATH, sysdir, c_path);
+    int error = git_libgit2_opts(GIT_OPT_SET_SEARCH_PATH, configLevel, c_path);
 
     free(c_path);
 
@@ -302,7 +303,7 @@ JNIEXPORT void JNICALL J_MAKE_METHOD(Libgit2_optsGitOptSetSearchPath)(JNIEnv *en
     }
 }
 
-JNIEXPORT void JNICALL J_MAKE_METHOD(Libgit2_optsGitOptSetCacheObjectLimit)(JNIEnv *env, jclass obj, jlong type, jlong size)
+JNIEXPORT void JNICALL J_MAKE_METHOD(Libgit2_optsGitOptSetCacheObjectLimit)(JNIEnv *env, jclass obj, jint type, jlong size)
 {
     int error = git_libgit2_opts(GIT_OPT_SET_CACHE_OBJECT_LIMIT, type, size);
     if(error != 0) {

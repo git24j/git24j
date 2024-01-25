@@ -31,9 +31,9 @@ public class Libgit2 {
     public static native long optsGitOptGetMWindowMappedLimit();
     public static native void optsGitOptSetMWindowFileLimit(long mWindowFileLimit);
     public static native long optsGitOptGetMWindowFileLimit();
-    public static native String optsGitOptGetSearchPath(long sysdir);
-    public static native void optsGitOptSetSearchPath(long sysdir, String path);
-    public static native void optsGitOptSetCacheObjectLimit(long type, long size);
+    public static native String optsGitOptGetSearchPath(int configLevel);
+    public static native void optsGitOptSetSearchPath(int configLevel, String path);
+    public static native void optsGitOptSetCacheObjectLimit(int type, long size);
     public static native void optsGitOptSetCacheMaxSize(long size);
     public static native void optsGitOptEnableCaching(boolean enable);
     public static native GitCachedMemorySaver optsGitOptGetCachedMemory();
@@ -67,5 +67,71 @@ public class Libgit2 {
     public static native void optsGitOptSetServerConnectTimeout(long timeout);
     public static native long optsGitOptGetServerTimeout();
     public static native void optsGitOptSetServerTimeout(long timeout);
+
+    public static class OptsCons {
+        /*
+
+    typedef enum {
+            //System-wide on Windows, for compatibility with portable git
+            GIT_CONFIG_LEVEL_PROGRAMDATA = 1,
+
+            // System-wide configuration file; /etc/gitconfig on Linux systems
+            GIT_CONFIG_LEVEL_SYSTEM = 2,
+
+            //XDG compatible configuration file; typically ~/.config/git/config
+            GIT_CONFIG_LEVEL_XDG = 3,
+
+            // User-specific configuration file (also called Global configuration
+            // file); typically ~/.gitconfig
+            GIT_CONFIG_LEVEL_GLOBAL = 4,
+
+            // Repository specific configuration file; $WORK_DIR/.git/config on
+            // non-bare repos
+            GIT_CONFIG_LEVEL_LOCAL = 5,
+
+            // Application specific configuration file; freely defined by applications
+            GIT_CONFIG_LEVEL_APP = 6,
+
+            // Represents the highest level available config file (i.e. the most
+            // specific config file available that actually is loaded)
+            GIT_CONFIG_HIGHEST_LEVEL = -1
+        } git_config_level_t;
+
+         */
+        public static class ConfigLevel {
+            public static final int programData = 1;
+            public static final int system = 2;
+            public static final int xdg = 3;
+            public static final int global = 4;
+            // Below config levels doesn't support set by optsGitOptSetSearchPath() method
+//            public static final int local = 5;
+//            public static final int app = 6;
+//            public static final int highest = -1;
+        }
+        /*
+        // Basic type (loose or packed) of any Git object.
+        typedef enum {
+            GIT_OBJECT_ANY =      -2, // Object can be any of the following
+            GIT_OBJECT_INVALID =  -1, // Object is invalid.
+            GIT_OBJECT_COMMIT =    1, // A commit object.
+            GIT_OBJECT_TREE =      2, // A tree (directory listing) object.
+            GIT_OBJECT_BLOB =      3, // A file revision object.
+            GIT_OBJECT_TAG =       4, // An annotated tag object.
+            GIT_OBJECT_OFS_DELTA = 6, // A delta, base is given by an offset.
+            GIT_OBJECT_REF_DELTA = 7  // A delta, base is given by object id.
+        } git_object_t;
+
+         */
+        public static class ObjectType {
+            public static final int any = -2;
+            public static final int invalid = -1;
+            public static final int commit = 1;
+            public static final int tree = 2;
+            public static final int blob = 3;
+            public static final int tag = 4;
+            public static final int ofsDelta = 6;
+            public static final int refDelta = 7;
+        }
+    }
     // git_libgit2_opts() end
 }
