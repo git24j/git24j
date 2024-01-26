@@ -749,6 +749,10 @@ public class Config extends CAutoReleasable {
         ConfigLevel(int code) {
             _code = code;
         }
+
+        public int getValue(){
+            return _code;
+        }
     }
 
     @FunctionalInterface

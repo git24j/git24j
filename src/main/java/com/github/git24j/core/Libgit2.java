@@ -34,18 +34,16 @@ public class Libgit2 {
 
     private static native String optsGitOptGetSearchPath(int configLevel);
     private static native void optsGitOptSetSearchPath(int configLevel, String path);
-    //param `configLevel` should use one of class `ConfigLevel`'s constant fields
-    public static String optsGitOptGetSearchPath(ConfigLevel configLevel) {
+    public static String optsGitOptGetSearchPath(Config.ConfigLevel configLevel) {
         return optsGitOptGetSearchPath(configLevel.getValue());
     }
-    public static void optsGitOptSetSearchPath(ConfigLevel configLevel, String path){
+    public static void optsGitOptSetSearchPath(Config.ConfigLevel configLevel, String path){
         optsGitOptSetSearchPath(configLevel.getValue(), path);
     }
 
     private static native void optsGitOptSetCacheObjectLimit(int type, long size);
-    //param `type` should use one of class `ObjectType`'s constant fields
-    public static void optsGitOptSetCacheObjectLimit(ObjectType type, long size){
-        optsGitOptSetCacheObjectLimit(type.getValue(),size);
+    public static void optsGitOptSetCacheObjectLimit(GitObject.Type type, long size){
+        optsGitOptSetCacheObjectLimit(type.getBit(),size);
     }
 
     public static native void optsGitOptSetCacheMaxSize(long size);

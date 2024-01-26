@@ -18,10 +18,15 @@ public class OptsTest extends TestBase {
         Libgit2.optsGitOptSetMWindowFileLimit(1234L);
         assert(1234L==Libgit2.optsGitOptGetMWindowFileLimit());
 
-        Libgit2.optsGitOptSetSearchPath(ConfigLevel.system,"/abc");
-        assert(Libgit2.optsGitOptGetSearchPath(ConfigLevel.system).equals("/abc"));
+        assert(Config.ConfigLevel.SYSTEM.getValue()==2);
+        assert(Config.ConfigLevel.APP.getValue()==6);
+        Libgit2.optsGitOptSetSearchPath(Config.ConfigLevel.SYSTEM,"/abc");
+        assert(Libgit2.optsGitOptGetSearchPath(Config.ConfigLevel.SYSTEM).equals("/abc"));
 
-        Libgit2.optsGitOptSetCacheObjectLimit(ObjectType.commit,1010);
+        assert(GitObject.Type.TREE.getBit()==2);
+        assert(GitObject.Type.ANY.getBit()==-2);
+        assert(GitObject.Type.COMMIT.getBit()==1);
+        Libgit2.optsGitOptSetCacheObjectLimit(GitObject.Type.COMMIT,1010);
 
         Libgit2.optsGitOptSetCacheMaxSize(11);
 
