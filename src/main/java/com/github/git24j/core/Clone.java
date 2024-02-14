@@ -15,6 +15,7 @@ public class Clone {
 
     /** const char* checkout_branch */
     static native String jniOptionsGetCheckoutBranch(long optionsPtr);
+    static native void jniOptionsSetCheckoutBranch(long optionsPtr, String branch);
 
     /** git_checkout_options checkout_opts */
     static native long jniOptionsGetCheckoutOpts(long optionsPtr);
@@ -194,6 +195,10 @@ public class Clone {
         @CheckForNull
         public String getCheckoutBranch() {
             return jniOptionsGetCheckoutBranch(getRawPointer());
+        }
+
+        public void setCheckoutBranch(String branch) {
+            jniOptionsSetCheckoutBranch(getRawPointer(), branch);
         }
 
         /**
