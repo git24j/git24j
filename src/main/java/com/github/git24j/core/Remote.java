@@ -159,6 +159,10 @@ public class Remote extends CAutoReleasable {
     /** int version */
     static native int jniFetchOptionsGetVersion(long fetch_optionsPtr);
 
+    /** depth **/
+    static native void jniFetchOptionsSetDepth(long fetch_optionsPtr, int depth);
+    static native int jniFetchOptionsGetDepth(long fetch_optionsPtr);
+
     /** -------- Fetch Options---------- */
     static native int jniFetchOptionsNew(AtomicLong outPtr, int version);
 

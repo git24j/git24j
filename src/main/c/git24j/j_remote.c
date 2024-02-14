@@ -843,6 +843,17 @@ JNIEXPORT void JNICALL J_MAKE_METHOD(Remote_jniFetchOptionsSetVersion)(JNIEnv *e
     ((git_fetch_options *)fetchOptionsPtr)->version = (int)version;
 }
 
+/** depth (shallow clone) **/
+JNIEXPORT void JNICALL J_MAKE_METHOD(Remote_jniFetchOptionsSetDepth)(JNIEnv *env, jclass obj, jlong fetchOptionsPtr, jint depth)
+{
+    ((git_fetch_options *)fetchOptionsPtr)->depth = (int)depth;
+}
+
+JNIEXPORT jint JNICALL J_MAKE_METHOD(Remote_jniFetchOptionsGetDepth)(JNIEnv *env, jclass obj, jlong fetchOptionsPtr)
+{
+    return (jint)(((git_fetch_options *)fetchOptionsPtr)->depth);
+}
+
 /** git_fetch_prune_t prune*/
 JNIEXPORT void JNICALL J_MAKE_METHOD(Remote_jniFetchOptionsSetPrune)(JNIEnv *env, jclass obj, jlong fetchOptionsPtr, jint prune)
 {
