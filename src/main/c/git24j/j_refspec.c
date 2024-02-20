@@ -55,7 +55,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Refspec_jniForce)(JNIEnv *env, jclass obj, 
 }
 
 /** git_direction git_refspec_direction(const git_refspec *spec); */
-JNIEXPORT JNICALL jint J_MAKE_METHOD(Refspec_jniDirection)(JNIEnv *env, jclass obj, jlong specPtr)
+JNIEXPORT jint JNICALL J_MAKE_METHOD(Refspec_jniDirection)(JNIEnv *env, jclass obj, jlong specPtr)
 {
     git_direction r = git_refspec_direction((git_refspec *)specPtr);
     return r;
