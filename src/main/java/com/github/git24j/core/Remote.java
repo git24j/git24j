@@ -1057,7 +1057,7 @@ public class Remote extends CAutoReleasable {
          *     that the callback refused to act and that the existing validity determination should
          *     be honored
          */
-        int accept(Cert cert, boolean valid, String host); // where is the payload ptr?
+        int accept(Cert cert, boolean valid, String host); // btw: the payload ptr in libgit2 is trans by user, in java bind, use the payload ptr point to this callback for make decision of connection, os here is no correspond payload ptr param, the payload ptr set in c code and used for point to this method
     }
 
     @FunctionalInterface
