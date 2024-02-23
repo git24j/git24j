@@ -94,7 +94,7 @@ public class Clone {
     }
 
     @FunctionalInterface
-    interface RepositoryCreateCb {
+    public interface RepositoryCreateCb {
         /**
          * The signature of a function matchin git_repository_init, with an aditional void * as
          * callback payload.
@@ -111,6 +111,7 @@ public class Clone {
         Repository accept(@Nonnull String path, boolean bare) throws GitException;
     }
 
+    @FunctionalInterface
     public interface RemoteCreateCb {
         /**
          * The signature of a function matching git_remote_create, with an additional void* as a
