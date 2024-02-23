@@ -111,7 +111,7 @@ public class Clone {
         Repository accept(@Nonnull String path, boolean bare) throws GitException;
     }
 
-    interface RemoteCreateCb {
+    public interface RemoteCreateCb {
         /**
          * The signature of a function matching git_remote_create, with an additional void* as a
          * callback payload.
