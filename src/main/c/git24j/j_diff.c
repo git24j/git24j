@@ -32,7 +32,7 @@ int j_git_diff_file_cb(const git_diff_delta *delta, float progress, void *payloa
     /** int accept(long diffDeltaPtr, float progress) */
     jmethodID accept = (*env)->GetMethodID(env, jclz, "accept", "(JF)I");
     assert(accept && "jni error: could not resolve method consumer method");
-    int r = (*env)->CallIntMethod(env, consumer, accept, (long)delta, progress);
+    int r = (*env)->CallIntMethod(env, consumer, accept, (jlong)delta, progress);
     (*env)->DeleteLocalRef(env, jclz);
     return r;
 }
@@ -62,7 +62,7 @@ int j_git_diff_binary_cb(const git_diff_delta *delta, const git_diff_binary *bin
     /** int accept(long diffDeltaPtr, long binaryPtr) */
     jmethodID accept = (*env)->GetMethodID(env, jclz, "accept", "(JJ)I");
     assert(accept && "jni error: could not resolve method consumer method");
-    int r = (*env)->CallIntMethod(env, consumer, accept, (long)delta, (long)binary);
+    int r = (*env)->CallIntMethod(env, consumer, accept, (jlong)delta, (jlong)binary);
     (*env)->DeleteLocalRef(env, jclz);
     return r;
 }
@@ -91,7 +91,7 @@ int j_git_diff_hunk_cb(const git_diff_delta *delta, const git_diff_hunk *hunk, v
     /** int accept(long diffDeltaPtr, long binaryPtr) */
     jmethodID accept = (*env)->GetMethodID(env, jclz, "accept", "(JJ)I");
     assert(accept && "jni error: could not resolve method consumer method");
-    int r = (*env)->CallIntMethod(env, consumer, accept, (long)delta, (long)hunk);
+    int r = (*env)->CallIntMethod(env, consumer, accept, (jlong)delta, (jlong)hunk);
     (*env)->DeleteLocalRef(env, jclz);
     return r;
 }
@@ -111,7 +111,7 @@ int j_git_diff_line_cb(const git_diff_delta *delta, const git_diff_hunk *hunk, c
     /** int accept(long diffDeltaPtr, long binaryPtr) */
     jmethodID accept = (*env)->GetMethodID(env, jclz, "accept", "(JJJ)I");
     assert(accept && "jni error: could not resolve method consumer method");
-    int r = (*env)->CallIntMethod(env, consumer, accept, (long)delta, (long)hunk, (long)line);
+    int r = (*env)->CallIntMethod(env, consumer, accept, (jlong)delta, (jlong)hunk, (jlong)line);
     (*env)->DeleteLocalRef(env, jclz);
     return r;
 }

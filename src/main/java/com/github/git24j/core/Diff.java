@@ -1296,22 +1296,22 @@ public class Diff extends CAutoReleasable {
     }
 
     @FunctionalInterface
-    interface FileCb {
+    public interface FileCb {
         int accept(Delta delta, float progress);
     }
 
     @FunctionalInterface
-    interface BinaryCb {
+    public interface BinaryCb {
         int accept(Delta delta, Binary binary);
     }
 
     @FunctionalInterface
-    interface HunkCb {
+    public interface HunkCb {
         int accept(Delta delta, Hunk hunk);
     }
 
     @FunctionalInterface
-    interface LineCb {
+    public interface LineCb {
         int accept(Delta delta, Hunk hunk, Line line);
     }
 
