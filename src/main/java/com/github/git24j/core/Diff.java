@@ -416,8 +416,8 @@ public class Diff extends CAutoReleasable {
                 jniIndexToWorkdir(
                         diff._rawPtr,
                         repo.getRawPointer(),
-                        index.getRawPointer(),
-                        opts.getRawPointer()));
+                        index==null ? repo.index().getRawPointer() : index.getRawPointer(),
+                        opts==null ? Options.create().getRawPointer() : opts.getRawPointer()));
         return diff;
     }
 
