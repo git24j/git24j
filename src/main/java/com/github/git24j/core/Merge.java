@@ -926,7 +926,12 @@ public class Merge {
         }
 
         @Nonnull
-        public Options create(int version) {
+        public static Options create() {
+            return create(CURRENT_VERSION);
+        }
+
+        @Nonnull
+        public static Options create(int version) {
             Options out = new Options(false, 0);
             Error.throwIfNeeded(jniOptionsNew(out._rawPtr, version));
             return out;
