@@ -146,7 +146,23 @@ public class MergeTest extends TestBase {
     }
 
     @Test
-    public void stateCleanup() {
+    public void clearIndex() {
+        Repository repo = Repository.open(repoPath);
+        Index index = repo.index();
+
+        // this operation will clear all items in index,
+        // after clear, `git status` will show "deleted" for items which were in last commit,
+        // and show "untracked" for which weren't in last commit.
+        // if you do commit after clear index, all files will become "untracked"
+        index.clear();
+
+//        index.write();  // make change to disk
+
+        repo.close();
+    }
+
+    @Test
+    public void repoStateCleanup() {
         Repository repo = Repository.open(repoPath);
         repo.stateCleanup();
         repo.close();
