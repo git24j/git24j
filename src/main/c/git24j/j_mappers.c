@@ -219,17 +219,23 @@ jlongArray j_long_array_from_pointers(JNIEnv *env, const void **ptrs, size_t n)
 }
 
 /** get array of pointers from long[] */
-void **j_long_array_to_pointers(JNIEnv *env, jlongArray pointers, size_t *out_len)
+void **j_long_array_to_pointers(JNIEnv *env, jlongArray pointers, size_t *out_len, int freeJavaArr)
 {
     jsize np = (*env)->GetArrayLength(env, pointers);
-    void **c_parents = (void **)malloc(sizeof(void *) * np);
+    void **c_pointer = (void **)malloc(sizeof(void *) * np);
+
+    jlong *elements = (*env)->GetLongArrayElements(env, pointers, 0);
     for (jsize i = 0; i < np; i++)
     {
-        jlong *x = (*env)->GetLongArrayElements(env, pointers, 0);
-        c_parents[i] = (void *)(*x);
+        c_pointer[i] = (void *)elements[i];
     }
     *out_len = np;
-    return c_parents;
+
+    if(freeJavaArr != 0) {
+       (*env)->ReleaseLongArrayElements(env, pointers, (jlong*)elements, 0);
+    }
+
+    return c_pointer;
 }
 
 /** create c unsigned char array from jni jbyteArray. Caller must FREE the return pointer. */

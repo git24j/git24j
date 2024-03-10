@@ -188,12 +188,11 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Tree_jniDup)(JNIEnv *env, jclass obj, jobje
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Tree_jniCreateUpdated)(JNIEnv *env, jclass obj, jobject out, jlong repoPtr, jlong baselinePtr, jlongArray updates)
 {
     jsize nupdates = (*env)->GetArrayLength(env, updates);
+    jlong *x = (*env)->GetLongArrayElements(env, updates, 0);
     git_tree_update *c_updates = (git_tree_update *)malloc(sizeof(git_tree_update) * nupdates);
     for (jsize i = 0; i < nupdates; i++)
     {
-        long *pi = (*env)->GetLongArrayElements(env, updates, 0);
-        git_tree_update *x = (git_tree_update *)(*pi);
-        c_updates[i] = (*x);
+        c_updates[i] = *((git_tree_update *)x[i]);
         /* c_updates[i].action = x->action;
         c_updates[i].filemode = x->filemode;
         git_oid_cpy(&(c_updates[i].id), &(x->id));
@@ -202,7 +201,10 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Tree_jniCreateUpdated)(JNIEnv *env, jclass 
     git_oid c_out;
     int r = git_tree_create_updated(&c_out, (git_repository *)repoPtr, (git_tree *)baselinePtr, nupdates, c_updates);
     j_git_oid_to_java(env, &c_out, out);
+
     free(c_updates);
+    (*env)->ReleaseLongArrayElements(env, updates, x, 0);
+
     return r;
 }
 
