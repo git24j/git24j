@@ -86,8 +86,10 @@ public class MergeTest extends TestBase {
         //write repo's index as a tree
         Tree tree = Tree.lookup(repo, repo.index().writeTree());
 
+        String mergeTargetShorthandName = Reference.dwim(repo, mergeTarget.ref()).shorthand();
         //commit
-        Oid resultCommitOid = Commit.create(repo, branchFullRefName, sign, sign, null, "merge branch",
+        Oid resultCommitOid = Commit.create(repo, branchFullRefName, sign, sign, null,
+                "merge branch: \""+mergeTargetShorthandName+"\"",
                 tree, commitList);  //问题在于这里
         System.out.println("New Commit Oid is:"+resultCommitOid);
 
@@ -97,31 +99,41 @@ public class MergeTest extends TestBase {
     }
 
     @Test
-    public void printRepoConflictItems() {
+    public void printAndAddConflictItems() {
         Repository repo = Repository.open(repoPath);
-        boolean hasConflict = repo.index().hasConflicts();
+        Index index = repo.index();
+        boolean hasConflict = index.hasConflicts();
         System.out.println("repo has conflict:"+hasConflict);
         if(!hasConflict) {
+            System.out.println("No conflict!");
             return;
         }
-        Index.ConflictIterator conflictIterator = repo.index().conflictIteratorNew();
+        Index.ConflictIterator conflictIterator = index.conflictIteratorNew();
         Index.Conflict item = conflictIterator.next();
         while (item!=null) {
             String conflictFilePath = item.our.getPath();
+            index.add(conflictFilePath);
             System.out.println("conflict file(both modified):"+conflictFilePath);
             item = conflictIterator.next();
         }
+        System.out.println("After add, repo has conflict:"+index.hasConflicts());  //should be false
+        Index.ConflictIterator it2 = index.conflictIteratorNew();
+        System.out.println("conflict iterator is empty:"+(it2.next()==null)); //should be true
+        assert(!index.hasConflicts());
+        assert(it2.next()==null);
+
+        //write changes to disk
+        index.write();
+
         repo.close();
     }
-
     @Test
-    public void indexAddAll(){
+    public void getRepoState() {
         Repository repo = Repository.open(repoPath);
-        repo.index().write();  //write to disk
-//        repo.index().writeTree();//get an oid for create commit
+        Repository.StateT state = repo.state();
+        System.out.println(state);
         repo.close();
     }
-
     @Test
     public void doCommitThenCleanRepoState() {
         //merged node should have two parents, HEAD and merge target branch,
@@ -138,7 +150,7 @@ public class MergeTest extends TestBase {
         Tree tree = Tree.lookup(repo, repo.index().writeTree());
 
         //create commit
-        Commit.create(repo, repo.head().name(),sign,sign,null,"merge branch",
+        Commit.create(repo, repo.head().name(),sign,sign,null,"merge branch: \""+mergeTargetName+"\"",
                 tree,parents);
 
         repo.stateCleanup();
