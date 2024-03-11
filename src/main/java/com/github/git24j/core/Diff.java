@@ -1,16 +1,18 @@
 package com.github.git24j.core;
 
-import static com.github.git24j.core.Internals.JFCallback;
-import static com.github.git24j.core.Internals.JJCallback;
-import static com.github.git24j.core.Internals.JJJCallback;
-
-import java.util.EnumSet;
-import java.util.concurrent.atomic.AtomicLong;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.EnumSet;
+import java.util.concurrent.atomic.AtomicLong;
+
+import static com.github.git24j.core.Internals.*;
 
 public class Diff extends CAutoReleasable {
+
+    static native void jniDiffOptionsSetPathSpec(long diffOptionsPtr, String[] pathSpecJArr);
+    static native String[] jniDiffOptionsGetPathSpec(long diffOptionsPtr);
+
     /** const char *data */
     static native String jniBinaryFileGetData(long binary_filePtr);
 
@@ -1348,6 +1350,14 @@ public class Diff extends CAutoReleasable {
         @Override
         protected void freeOnce(long cPtr) {
             jniFreeOptions(cPtr);
+        }
+
+        public String[] getPathSpec() {
+            return jniDiffOptionsGetPathSpec(_rawPtr.get());
+        }
+
+        public void setPathSpec(String[] pathSpec) {
+            jniDiffOptionsSetPathSpec(_rawPtr.get(), pathSpec);
         }
     }
 

@@ -423,14 +423,26 @@ void j_strarray_to_java_list(JNIEnv *env, git_strarray *src, jobject strList)
 /**Copy values from `String[] strArr` to `git_strarray *out`*/
 void j_strarray_from_java(JNIEnv *env, git_strarray *out, jobjectArray strArr)
 {
-    if (strArr == NULL)
+    if (strArr == NULL || out == NULL)
     {
         return;
     }
 
-    assert(out && "receiving git_strarray must not be null");
+//    assert(out && "receiving git_strarray must not be null");
     jsize len = (*env)->GetArrayLength(env, strArr);
-    git_strarray_free(out);
+
+    // free `out` memory and set fields value to NULL and 0
+    //btw: `git_strarray_free(out)` free more than 1time may cause program crash, so better don't use it
+    j_clear_git_strarray(out);
+
+    // now `out->strings` and `out->count` value is NULL and 0
+
+    //len<1 , src is an empty array, and before already make `out` array to empty, so needn't do further copy
+    if(len < 1) {
+        return;
+    }
+
+    //do copy
     out->strings = (char **)malloc(sizeof(char *) * len);
     for (jsize i = 0; i < len; i++)
     {
@@ -533,4 +545,18 @@ void __debug_inspect2(JNIEnv *env, jobject obj, const char *message, const char 
     (*env)->DeleteLocalRef(env, clzClz);
     (*env)->DeleteLocalRef(env, clsObj);
     (*env)->DeleteLocalRef(env, clz);
+}
+
+void j_clear_git_strarray(git_strarray* sarr){
+    int cnt = sarr->count;
+    if(cnt > 0) {
+        char ** s = sarr->strings;
+        for(size_t i=0; i<cnt; i++){
+            free(s[i]);
+        }
+        free(s);
+
+        sarr->strings=NULL;
+        sarr->count=0;
+    }
 }

@@ -744,3 +744,23 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Diff_jniBinaryFileGetInflatedlen)(JNIEnv *e
 {
     return ((git_diff_binary_file *)binaryFilePtr)->inflatedlen;
 }
+
+JNIEXPORT void JNICALL J_MAKE_METHOD(Diff_jniDiffOptionsSetPathSpec)(JNIEnv *env, jclass obj, jlong diffOptionsPtr, jobjectArray pathSpecJArr)
+{
+    git_strarray* cpa = &(((git_diff_options *)diffOptionsPtr)->pathspec);
+    j_strarray_from_java(env, cpa, pathSpecJArr);
+}
+
+JNIEXPORT jobjectArray JNICALL J_MAKE_METHOD(Diff_jniDiffOptionsGetPathSpec)(JNIEnv *env, jclass obj, jlong diffOptionsPtr)
+{
+    git_strarray* cpa = &(((git_diff_options *)diffOptionsPtr)->pathspec);
+    //create java array
+    jclass clzStr = (*env)->FindClass(env,"java/lang/String");
+    jobjectArray ret = (*env)->NewObjectArray(env, cpa->count, clzStr, NULL);  // last param is initial value
+    j_strarray_to_java_array(env, ret, cpa);
+
+    //free memory
+    (*env)->DeleteLocalRef(env, clzStr);
+
+    return ret;
+}

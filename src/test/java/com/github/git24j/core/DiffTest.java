@@ -2,6 +2,8 @@ package com.github.git24j.core;
 
 import org.junit.Assert;
 import org.junit.Test;
+
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -13,14 +15,16 @@ public class DiffTest extends TestBase {
 
     private static final String README_BLOB1 = "08f8e5eba8074e2d3d5e17a8902eaea07633d0af";
     private static final String README_BLOB2 = "d628ad3b584b5ab3fa93dbdbcc66a15e4413d9b2";
+    private static final String repoPath = "set to your repo path";
 
     @Test
     public void indexToWorkdirAndHeadToWorkdir() {
-        String path = "set to your repo path";
-        Repository repo=Repository.open(path);
-        Map<Long, String> trace = new HashMap<>();
+        Diff.Options options = Diff.Options.create();
+        options.setPathSpec(new String[]{"f1","f2"});
 
-        Diff diff = Diff.indexToWorkdir(repo, null, Diff.Options.create());
+        Repository repo=Repository.open(repoPath);
+        Map<Long, String> trace = new HashMap<>();
+        Diff diff = Diff.indexToWorkdir(repo, null, options);
 
         diff.foreach((Diff.FileCb)
             (delta, progress) -> {
@@ -28,7 +32,7 @@ public class DiffTest extends TestBase {
                 if(f==null) {
                     f=delta.getNewFile();
                 }
-                System.out.println(f.getPath());
+                System.out.println("Diff.FileCb found file:"+f.getPath());
                 return 0;
             },
         null,
@@ -86,6 +90,35 @@ public class DiffTest extends TestBase {
             return "Del";
         }
         return "Same";  //maybe same newLineNo and oldLineNo, such as context content
+    }
+
+    @Test
+    public void diffOptsSetSpecTest() {
+        Diff.Options options = Diff.Options.create();
+        options.setPathSpec(new String[]{"f1","f2"});
+        assert(options.getPathSpec().length==2);
+
+        // empty or {"*"} for match all
+        options.setPathSpec(new String[]{});
+        options.setPathSpec(new String[]{"*"});
+
+        options.setPathSpec(new String[]{"ff"});
+        options.setPathSpec(new String[]{});
+        options.setPathSpec(new String[]{"f1"});
+        assert(options.getPathSpec().length==1);
+
+        options.setPathSpec(new String[]{"f1"});
+        options.setPathSpec(new String[]{"f8"});
+        assert(options.getPathSpec()[0].equals("f8"));
+        System.out.println("after set pathspec:"+Arrays.toString(options.getPathSpec()));
+        options.setPathSpec(new String[]{"f1","*"});
+        assert(options.getPathSpec()[0].equals("f1"));
+        assert(options.getPathSpec()[1].equals("*"));
+
+        options.setPathSpec(new String[]{});
+        assert(options.getPathSpec().length==0);
+        System.out.println("after set pathspec:"+Arrays.toString(options.getPathSpec()));
+
     }
 
     @Test
