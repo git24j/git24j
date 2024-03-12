@@ -192,6 +192,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Tree_jniCreateUpdated)(JNIEnv *env, jclass 
     git_tree_update *c_updates = (git_tree_update *)malloc(sizeof(git_tree_update) * nupdates);
     for (jsize i = 0; i < nupdates; i++)
     {
+        //I am not sure this is a good copy or isn't
         c_updates[i] = *((git_tree_update *)x[i]);
         /* c_updates[i].action = x->action;
         c_updates[i].filemode = x->filemode;

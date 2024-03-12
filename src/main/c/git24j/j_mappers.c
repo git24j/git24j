@@ -448,6 +448,7 @@ void j_strarray_from_java(JNIEnv *env, git_strarray *out, jobjectArray strArr)
     {
         jobject si = (*env)->GetObjectArrayElement(env, strArr, i);
         out->strings[i] = j_copy_of_jstring(env, (jstring)si, true);
+        (*env)->DeleteLocalRef(env, si);
     }
     out->count = len;
 }

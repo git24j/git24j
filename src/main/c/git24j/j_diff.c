@@ -749,6 +749,8 @@ JNIEXPORT void JNICALL J_MAKE_METHOD(Diff_jniDiffOptionsSetPathSpec)(JNIEnv *env
 {
     git_strarray* cpa = &(((git_diff_options *)diffOptionsPtr)->pathspec);
     j_strarray_from_java(env, cpa, pathSpecJArr);
+
+    (*env)->DeleteLocalRef(env, pathSpecJArr);
 }
 
 JNIEXPORT jobjectArray JNICALL J_MAKE_METHOD(Diff_jniDiffOptionsGetPathSpec)(JNIEnv *env, jclass obj, jlong diffOptionsPtr)
