@@ -1671,6 +1671,36 @@ public class Diff extends CAutoReleasable {
      * file.
      */
     public static class Line extends CAutoReleasable {
+
+        /**
+         * Line origin constants.
+         *
+         * These values describe where a line came from and will be passed to
+         * the git_diff_line_cb when iterating over a diff.  There are some
+         * special origin constants at the end that are used for the text
+         * output callbacks to demarcate lines that are actually part of
+         * the file or hunk headers.
+         *
+         * This type is binding for libgit2's: `git_diff_line_t`
+         */
+        public static class OriginType {
+            /* These values will be sent to `git_diff_line_cb` along with the line */
+            static final char CONTEXT   = ' ';
+            static final char ADDITION  = '+';
+            static final char DELETION  = '-';
+
+            static final char CONTEXT_EOFNL = '='; /**< Both files have no LF at end */
+            static final char ADD_EOFNL = '>';     /**< Old has no LF at end, new does */
+            static final char DEL_EOFNL = '<';     /**< Old has LF at end, new does not */
+
+            /* The following values will only be sent to a `git_diff_line_cb` when
+             * the content of a diff is being formatted through `git_diff_print`.
+             */
+            static final char FILE_HDR  = 'F';
+            static final char HUNK_HDR  = 'H';
+            static final char BINARY    = 'B'; /**< For "Binary files x and y differ" */
+        }
+
         protected Line(long rawPtr) {
             super(true, rawPtr);
         }
