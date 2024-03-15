@@ -1685,20 +1685,20 @@ public class Diff extends CAutoReleasable {
          */
         public static class OriginType {
             /* These values will be sent to `git_diff_line_cb` along with the line */
-            static final char CONTEXT   = ' ';
-            static final char ADDITION  = '+';
-            static final char DELETION  = '-';
+            public static final char CONTEXT   = ' ';
+            public static final char ADDITION  = '+';
+            public static final char DELETION  = '-';
 
-            static final char CONTEXT_EOFNL = '='; /**< Both files have no LF at end */
-            static final char ADD_EOFNL = '>';     /**< Old has no LF at end, new does */
-            static final char DEL_EOFNL = '<';     /**< Old has LF at end, new does not */
+            public static final char CONTEXT_EOFNL = '='; /**< Both files have no LF at end */
+            public static final char ADD_EOFNL = '>';     /**< Old has no LF at end, new does */
+            public static final char DEL_EOFNL = '<';     /**< Old has LF at end, new does not */
 
             /* The following values will only be sent to a `git_diff_line_cb` when
              * the content of a diff is being formatted through `git_diff_print`.
              */
-            static final char FILE_HDR  = 'F';
-            static final char HUNK_HDR  = 'H';
-            static final char BINARY    = 'B'; /**< For "Binary files x and y differ" */
+            public static final char FILE_HDR  = 'F';
+            public static final char HUNK_HDR  = 'H';
+            public static final char BINARY    = 'B'; /**< For "Binary files x and y differ" */
         }
 
         protected Line(long rawPtr) {
