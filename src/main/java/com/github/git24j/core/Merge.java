@@ -719,7 +719,7 @@ public class Merge {
          * There is a `merge.ff=false` configuration setting, suggesting that the user does not want
          * to allow a fast-forward merge.
          */
-        FASTFORWARD(1 << 0),
+        NO_FASTFORWARD(1 << 0),
 
         /**
          * There is a `merge.ff=only` configuration setting, suggesting that the user only wants
