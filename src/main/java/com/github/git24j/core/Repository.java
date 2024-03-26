@@ -527,10 +527,10 @@ public class Repository extends CAutoCloseable {
     public Reference head() {
         Reference out = new Reference(true, 0);
         int e = jniHead(out._rawPtr, getRawPointer());
-        Error.throwIfNeeded(e);
         if (ENOTFOUND.getCode() == e || EUNBORNBRANCH.getCode() == e) {
             return null;
         }
+        Error.throwIfNeeded(e);
         return out;
     }
 
