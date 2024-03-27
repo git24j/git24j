@@ -162,6 +162,9 @@ public class Remote extends CAutoReleasable {
     /** depth **/
     static native void jniFetchOptionsSetDepth(long fetch_optionsPtr, int depth);
     static native int jniFetchOptionsGetDepth(long fetch_optionsPtr);
+    /** follow_redirects **/
+    static native void jniFetchOptionsSetFollowRedirects(long fetch_optionsPtr, int redirectT);
+    static native int jniFetchOptionsGetFollowRedirects(long fetch_optionsPtr);
 
     /** -------- Fetch Options---------- */
     static native int jniFetchOptionsNew(AtomicLong outPtr, int version);
@@ -1003,6 +1006,42 @@ public class Remote extends CAutoReleasable {
         private final int _bit;
 
         CreateFlags(int bit) {
+            this._bit = bit;
+        }
+
+        @Override
+        public int getBit() {
+            return _bit;
+        }
+    }
+
+
+    /**
+     typedef enum {
+             //Do not follow any off-site redirects at any stage of
+             //the fetch or push.
+            GIT_REMOTE_REDIRECT_NONE = (1 << 0),
+             //Allow off-site redirects only upon the initial request.
+             //This is the default.
+            GIT_REMOTE_REDIRECT_INITIAL = (1 << 1),
+
+            //Allow redirects at any stage in the fetch or push.
+            GIT_REMOTE_REDIRECT_ALL = (1 << 2)
+        } git_remote_redirect_t;
+     * */
+    public enum RedirectT implements IBitEnum {
+        /** Do not follow any off-site redirects at any stage of the fetch or push. */
+        NONE(1 << 0),  // 1
+
+        /** Allow off-site redirects only upon the initial request. This is the default. */
+        INITIAL(1 << 1),  // 2
+
+        /** Allow redirects at any stage in the fetch or push. */
+        ALL(1 << 2);  //4
+
+        private final int _bit;
+
+        RedirectT(int bit) {
             this._bit = bit;
         }
 

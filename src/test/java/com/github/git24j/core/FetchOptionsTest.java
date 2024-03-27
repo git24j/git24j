@@ -21,5 +21,12 @@ public class FetchOptionsTest extends TestBase {
         assertFalse(opts.getUpdateFetchhead());
         opts.setDownloadTags(Remote.AutotagOptionT.AUTO);
         assertEquals(Remote.AutotagOptionT.AUTO, opts.getDownloadTags());
+        opts.setFollowRedirects(Remote.RedirectT.ALL);
+        assertEquals(opts.getFollowRedirects().getBit(), Remote.RedirectT.ALL.getBit());
+        opts.setFollowRedirects(Remote.RedirectT.NONE);
+        assertEquals(opts.getFollowRedirects().getBit(), Remote.RedirectT.NONE.getBit());
+        opts.setFollowRedirects(Remote.RedirectT.INITIAL);
+        assertEquals(opts.getFollowRedirects().getBit(), Remote.RedirectT.INITIAL.getBit());
+
     }
 }
