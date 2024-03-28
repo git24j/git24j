@@ -45,16 +45,7 @@ public class FetchOptions extends CAutoReleasable {
     }
     public RedirectT getFollowRedirects() {
         int r = jniFetchOptionsGetFollowRedirects(getRawPointer());
-        switch (r) {
-            case 1:
-                return RedirectT.NONE;
-            case 2:
-                return RedirectT.INITIAL;
-            case 4:
-                return RedirectT.ALL;
-            default:
-                throw new RuntimeException("bad return value of jniFetchOptionsGetFollowRedirects, value is:"+r);
-        }
+        return IBitEnum.valueOf(r, RedirectT.class);
     }
 
     public void setFollowRedirects(RedirectT redirectT) {

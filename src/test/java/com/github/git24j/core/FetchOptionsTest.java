@@ -5,8 +5,7 @@ import org.junit.Test;
 import java.util.Arrays;
 
 import static com.github.git24j.core.FetchOptions.PruneT.NO_PRUNE;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.*;
 
 public class FetchOptionsTest extends TestBase {
 
@@ -27,6 +26,7 @@ public class FetchOptionsTest extends TestBase {
         assertEquals(opts.getFollowRedirects().getBit(), Remote.RedirectT.NONE.getBit());
         opts.setFollowRedirects(Remote.RedirectT.INITIAL);
         assertEquals(opts.getFollowRedirects().getBit(), Remote.RedirectT.INITIAL.getBit());
+        assertNotEquals(opts.getFollowRedirects().getBit(), Remote.RedirectT.ALL.getBit());
 
     }
 }
