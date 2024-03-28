@@ -8,7 +8,6 @@ import org.junit.rules.TemporaryFolder;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -22,7 +21,10 @@ public class TestBase {
     @Rule public TemporaryFolder folder = new TemporaryFolder();
 
     public TestBase() {
-        Init.loadLibraries(null, null);
+        //TODO: set `libRoot` to your libgit2 and git24j dll/so/dylib location before run any Test method,
+        //    p.s. the relative path start location is git24j's root path
+        String libRoot= "libs/win64";
+        Init.loadLibraries(Paths.get(libRoot), Paths.get(libRoot));
         Libgit2.init();
     }
 
@@ -57,22 +59,19 @@ public class TestBase {
 
     /** Create a copy of given test repo and return the path. */
     public static Path tempCopyOf(TestRepo repo, Path tempFolder) {
-        Path zip =
-                Optional.ofNullable(
-                                Thread.currentThread()
-                                        .getContextClassLoader()
-                                        .getResource(repo.zipFileName()))
-                        .map(URL::getFile)
-                        .map(f -> Paths.get(f))
-                        .orElseThrow(
-                                () ->
-                                        new RuntimeException(
-                                                "Unable to locate test data for: "
-                                                        + repo.getName()));
         try {
+            Path zip = Optional.ofNullable(
+                            Thread.currentThread()
+                                    .getContextClassLoader()
+                                    .getResource(repo.zipFileName()).toURI())
+                    .map(Paths::get)
+                    .orElseThrow(
+                            () -> new RuntimeException(
+                                    "Unable to locate test data for: "
+                                            + repo.getName()));
             zipTo(zip, tempFolder);
             return tempFolder.resolve(repo.getName());
-        } catch (IOException e) {
+        } catch (Exception e) {
             throw new RuntimeException(
                     "Failed to extract test data to " + tempFolder.toAbsolutePath().toString(), e);
         }

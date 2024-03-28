@@ -1,16 +1,18 @@
 package com.github.git24j.core;
 
-import static com.github.git24j.core.Internals.JFCallback;
-import static com.github.git24j.core.Internals.JJCallback;
-import static com.github.git24j.core.Internals.JJJCallback;
-
-import java.util.EnumSet;
-import java.util.concurrent.atomic.AtomicLong;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.EnumSet;
+import java.util.concurrent.atomic.AtomicLong;
+
+import static com.github.git24j.core.Internals.*;
 
 public class Diff extends CAutoReleasable {
+
+    static native void jniDiffOptionsSetPathSpec(long diffOptionsPtr, String[] pathSpecJArr);
+    static native String[] jniDiffOptionsGetPathSpec(long diffOptionsPtr);
+
     /** const char *data */
     static native String jniBinaryFileGetData(long binary_filePtr);
 
@@ -416,8 +418,8 @@ public class Diff extends CAutoReleasable {
                 jniIndexToWorkdir(
                         diff._rawPtr,
                         repo.getRawPointer(),
-                        index.getRawPointer(),
-                        opts.getRawPointer()));
+                        index==null ? repo.index().getRawPointer() : index.getRawPointer(),
+                        opts==null ? Options.create().getRawPointer() : opts.getRawPointer()));
         return diff;
     }
 
@@ -1296,22 +1298,22 @@ public class Diff extends CAutoReleasable {
     }
 
     @FunctionalInterface
-    interface FileCb {
+    public interface FileCb {
         int accept(Delta delta, float progress);
     }
 
     @FunctionalInterface
-    interface BinaryCb {
+    public interface BinaryCb {
         int accept(Delta delta, Binary binary);
     }
 
     @FunctionalInterface
-    interface HunkCb {
+    public interface HunkCb {
         int accept(Delta delta, Hunk hunk);
     }
 
     @FunctionalInterface
-    interface LineCb {
+    public interface LineCb {
         int accept(Delta delta, Hunk hunk, Line line);
     }
 
@@ -1348,6 +1350,14 @@ public class Diff extends CAutoReleasable {
         @Override
         protected void freeOnce(long cPtr) {
             jniFreeOptions(cPtr);
+        }
+
+        public String[] getPathSpec() {
+            return jniDiffOptionsGetPathSpec(_rawPtr.get());
+        }
+
+        public void setPathSpec(String[] pathSpec) {
+            jniDiffOptionsSetPathSpec(_rawPtr.get(), pathSpec);
         }
     }
 
@@ -1661,6 +1671,36 @@ public class Diff extends CAutoReleasable {
      * file.
      */
     public static class Line extends CAutoReleasable {
+
+        /**
+         * Line origin constants.
+         *
+         * These values describe where a line came from and will be passed to
+         * the git_diff_line_cb when iterating over a diff.  There are some
+         * special origin constants at the end that are used for the text
+         * output callbacks to demarcate lines that are actually part of
+         * the file or hunk headers.
+         *
+         * This type is binding for libgit2's: `git_diff_line_t`
+         */
+        public static class OriginType {
+            /* These values will be sent to `git_diff_line_cb` along with the line */
+            public static final char CONTEXT   = ' ';
+            public static final char ADDITION  = '+';
+            public static final char DELETION  = '-';
+
+            public static final char CONTEXT_EOFNL = '='; /**< Both files have no LF at end */
+            public static final char ADD_EOFNL = '>';     /**< Old has no LF at end, new does */
+            public static final char DEL_EOFNL = '<';     /**< Old has LF at end, new does not */
+
+            /* The following values will only be sent to a `git_diff_line_cb` when
+             * the content of a diff is being formatted through `git_diff_print`.
+             */
+            public static final char FILE_HDR  = 'F';
+            public static final char HUNK_HDR  = 'H';
+            public static final char BINARY    = 'B'; /**< For "Binary files x and y differ" */
+        }
+
         protected Line(long rawPtr) {
             super(true, rawPtr);
         }

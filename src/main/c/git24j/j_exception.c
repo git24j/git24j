@@ -26,7 +26,9 @@ jint j_throw_jni_error(JNIEnv *env, const char *message)
         return j_throw_java_error(env, J_NO_CLASS_ERROR, message);
     }
 
-    return (*env)->ThrowNew(env, clz, message);
+    jint ret = (*env)->ThrowNew(env, clz, message);
+    (*env)->DeleteLocalRef(env, clz);
+    return ret;
 }
 
 jint j_throw_java_error(JNIEnv *env, const char *exceptionName, const char *message)
@@ -38,5 +40,7 @@ jint j_throw_java_error(JNIEnv *env, const char *exceptionName, const char *mess
         clz = (*env)->FindClass(env, J_NO_CLASS_ERROR);
     }
     assert(clz);
-    return (*env)->ThrowNew(env, clz, message);
+    jint ret = (*env)->ThrowNew(env, clz, message);
+    (*env)->DeleteLocalRef(env, clz);
+    return ret;
 }

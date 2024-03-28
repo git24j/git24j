@@ -4,7 +4,7 @@ import java.util.Optional;
 
 public class Buf {
     private String ptr;
-    private int asize;
+    private int reserved;
     private int size;
 
     /** Get internal buffer, generally only the substr up to size is meaningful. */
@@ -16,12 +16,12 @@ public class Buf {
         this.ptr = ptr;
     }
 
-    public int getAsize() {
-        return asize;
+    public int getReserved() {
+        return reserved;
     }
 
-    public void setAsize(int asize) {
-        this.asize = asize;
+    public void setReserved(int reserved) {
+        this.reserved = reserved;
     }
 
     public int getSize() {

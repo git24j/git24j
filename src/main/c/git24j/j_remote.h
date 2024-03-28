@@ -201,6 +201,14 @@ extern "C"
     JNIEXPORT void JNICALL J_MAKE_METHOD(Remote_jniFetchOptionsGetCustomHeaders)(JNIEnv *env, jclass obj, jlong fetchOptionsPtr, jobject outHeadersList);
     /** int version*/
     JNIEXPORT void JNICALL J_MAKE_METHOD(Remote_jniFetchOptionsSetVersion)(JNIEnv *env, jclass obj, jlong fetchOptionsPtr, jint version);
+    /** depth (shallow clone) **/
+    JNIEXPORT void JNICALL J_MAKE_METHOD(Remote_jniFetchOptionsSetDepth)(JNIEnv *env, jclass obj, jlong fetchOptionsPtr, jint depth);
+    JNIEXPORT jint JNICALL J_MAKE_METHOD(Remote_jniFetchOptionsGetDepth)(JNIEnv *env, jclass obj, jlong fetchOptionsPtr);
+
+    /** follow_redirects **/
+    JNIEXPORT void JNICALL J_MAKE_METHOD(Remote_jniFetchOptionsSetFollowRedirects)(JNIEnv *env, jclass obj, jlong fetchOptionsPtr, jint redirectT);
+    JNIEXPORT jint JNICALL J_MAKE_METHOD(Remote_jniFetchOptionsGetFollowRedirects)(JNIEnv *env, jclass obj, jlong fetchOptionsPtr);
+
     /** git_fetch_prune_t prune*/
     JNIEXPORT void JNICALL J_MAKE_METHOD(Remote_jniFetchOptionsSetPrune)(JNIEnv *env, jclass obj, jlong fetchOptionsPtr, jint prune);
     /** int update_fetchhead*/

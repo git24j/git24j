@@ -801,7 +801,11 @@ public class Reference extends CAutoReleasable {
      * @throws GitException GIT_EAMBIGUOUS or an error code
      */
     public GitObject peel(GitObject.Type objType) {
-        throw new UnsupportedOperationException("not implemented yet");
+        GitObject out = new GitObject(false, 0);
+        int e = jniPeel(out._rawPtr, this._rawPtr.get(), objType.getBit());
+        Error.throwIfNeeded(e);
+        return out;
+//        throw new UnsupportedOperationException("not implemented yet");
     }
 
     /**

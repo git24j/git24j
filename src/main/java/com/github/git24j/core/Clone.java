@@ -15,6 +15,7 @@ public class Clone {
 
     /** const char* checkout_branch */
     static native String jniOptionsGetCheckoutBranch(long optionsPtr);
+    static native void jniOptionsSetCheckoutBranch(long optionsPtr, String branch);
 
     /** git_checkout_options checkout_opts */
     static native long jniOptionsGetCheckoutOpts(long optionsPtr);
@@ -93,7 +94,7 @@ public class Clone {
     }
 
     @FunctionalInterface
-    interface RepositoryCreateCb {
+    public interface RepositoryCreateCb {
         /**
          * The signature of a function matchin git_repository_init, with an aditional void * as
          * callback payload.
@@ -110,7 +111,8 @@ public class Clone {
         Repository accept(@Nonnull String path, boolean bare) throws GitException;
     }
 
-    interface RemoteCreateCb {
+    @FunctionalInterface
+    public interface RemoteCreateCb {
         /**
          * The signature of a function matching git_remote_create, with an additional void* as a
          * callback payload.
@@ -194,6 +196,10 @@ public class Clone {
         @CheckForNull
         public String getCheckoutBranch() {
             return jniOptionsGetCheckoutBranch(getRawPointer());
+        }
+
+        public void setCheckoutBranch(String branch) {
+            jniOptionsSetCheckoutBranch(getRawPointer(), branch);
         }
 
         /**

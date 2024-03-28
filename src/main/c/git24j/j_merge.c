@@ -407,18 +407,18 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Merge_jniAnalysis)(JNIEnv *env, jclass obj,
 {
     jsize theirHeadsLen = (*env)->GetArrayLength(env, theirHeads);
     jlong *elements = (*env)->GetLongArrayElements(env, theirHeads, 0);
-    const git_annotated_commit **their_heads = (const git_annotated_commit **)malloc(sizeof(const git_annotated_commit *) * theirHeadsLen);
-    for (jsize i = 0; i < theirHeadsLen; i++)
-    {
-        their_heads[i] = (const git_annotated_commit *)elements[i];
-    }
+//    const git_annotated_commit **their_heads = (const git_annotated_commit **)malloc(sizeof(const git_annotated_commit *) * theirHeadsLen);
+//    for (jsize i = 0; i < theirHeadsLen; i++)
+//    {
+//        their_heads[i] = (const git_annotated_commit *)elements[i];
+//    }
 
     git_merge_analysis_t analysis_out;
     git_merge_preference_t preference_out;
-    int r = git_merge_analysis(&analysis_out, &preference_out, (git_repository *)repoPtr, their_heads, theirHeadsLen);
+    int r = git_merge_analysis(&analysis_out, &preference_out, (git_repository *)repoPtr, (git_annotated_commit **)elements, theirHeadsLen);
     (*env)->CallVoidMethod(env, analysisOut, jniConstants->midAtomicIntSet, analysis_out);
     (*env)->CallVoidMethod(env, preferenceOut, jniConstants->midAtomicIntSet, preference_out);
-    free(their_heads);
+//    free(their_heads);
     (*env)->ReleaseLongArrayElements(env, theirHeads, elements, 0);
     return r;
 }
@@ -427,19 +427,19 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Merge_jniAnalysis)(JNIEnv *env, jclass obj,
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Merge_jniAnalysisForRef)(JNIEnv *env, jclass obj, jobject analysisOut, jobject preferenceOut, jlong repoPtr, jlong ourRefPtr, jlongArray theirHeads)
 {
     jsize theirHeadsLen = (*env)->GetArrayLength(env, theirHeads);
-    jlong *elemens = (*env)->GetLongArrayElements(env, theirHeads, 0);
-    const git_annotated_commit **their_heads = (const git_annotated_commit **)malloc(sizeof(const git_annotated_commit *) * theirHeadsLen);
-    for (jsize i = 0; i < theirHeadsLen; i++)
-    {
-        their_heads[i] = (const git_annotated_commit *)elemens[i];
-    }
+    jlong *elements = (*env)->GetLongArrayElements(env, theirHeads, 0);
+//    const git_annotated_commit **their_heads = (const git_annotated_commit **)malloc(sizeof(const git_annotated_commit *) * theirHeadsLen);
+//    for (jsize i = 0; i < theirHeadsLen; i++)
+//    {
+//        their_heads[i] = (const git_annotated_commit *)elements[i];
+//    }
     git_merge_analysis_t analysis_out;
     git_merge_preference_t preference_out;
-    int r = git_merge_analysis_for_ref(&analysis_out, &preference_out, (git_repository *)repoPtr, (git_reference *)ourRefPtr, their_heads, theirHeadsLen);
+    int r = git_merge_analysis_for_ref(&analysis_out, &preference_out, (git_repository *)repoPtr, (git_reference *)ourRefPtr, (git_annotated_commit **)elements, theirHeadsLen);
     (*env)->CallVoidMethod(env, analysisOut, jniConstants->midAtomicIntSet, analysis_out);
     (*env)->CallVoidMethod(env, preferenceOut, jniConstants->midAtomicIntSet, preference_out);
-    free(their_heads);
-    (*env)->ReleaseLongArrayElements(env, theirHeads, elemens, 0);
+//    free(their_heads);
+    (*env)->ReleaseLongArrayElements(env, theirHeads, elements, 0);
     return r;
 }
 
@@ -513,12 +513,12 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Merge_jniFile)(JNIEnv *env, jclass obj, job
 }
 
 /** int git_merge_file_from_index(
- *      git_merge_file_result *out, 
+ *      git_merge_file_result *out,
  *      git_repository *repo,
- *      const git_index_entry *ancestor, 
+ *      const git_index_entry *ancestor,
  *      const git_index_entry *ours,
  *      const git_index_entry *theirs,
- *      const git_merge_file_options *opts); 
+ *      const git_merge_file_options *opts);
  * */
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Merge_jniFileFromIndex)(JNIEnv *env, jclass obj, jobject out, jlong repoPtr, jlong ancestorPtr, jlong oursPtr, jlong theirsPtr, jlong optsPtr)
 {
@@ -535,7 +535,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Merge_jniFileFromIndex)(JNIEnv *env, jclass
 }
 
 /** -------- git_merge_file_result ---------- */
-/** void git_merge_file_result_free(git_merge_file_result *result); 
+/** void git_merge_file_result_free(git_merge_file_result *result);
  * Note: this also frees the resultPtr itself.
  */
 JNIEXPORT void JNICALL J_MAKE_METHOD(Merge_jniFileResultFree)(JNIEnv *env, jclass obj, jlong resultPtr)
