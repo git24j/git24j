@@ -45,37 +45,33 @@ int j_git_remote_completion_cb(git_remote_completion_t completion_type, void *pa
  */
 int j_git_cred_acquire_cb(git_credential **cred, const char *url, const char *username_from_url, unsigned int allowed_types, void *payload)
 {
-    if (!payload)
-    {
-        return 0;
+    if (!payload) { //no credential :(
+        return 1;  // bigger than 0 to indicate no credential was acquired, no callback = no credential
     }
+
     JNIEnv *env = getEnv();
 
     jstring jniUrl = (*env)->NewStringUTF(env, url);
     jstring usernameFromUrl = (*env)->NewStringUTF(env, username_from_url);
-    long ptr = (*env)->CallLongMethod(env, (jobject)payload, jniConstants->remote.midAcquireCred, jniUrl, usernameFromUrl, allowed_types);
-    int r;
-    if (ptr >= 0)
-    {
-        if (ptr > 0)
-        {
-            *cred = (git_cred *)ptr;
-            return 0;
-        }
-        return 1;
-        /*
-        ptr > 0 => success
-        ptr == 0 => no credential was accquired
-        */
-    }
-    else
-    {
-        r = (int)ptr;
-    }
 
+    //if need ensure ptr is not <0, please use unsigned type
+    jlong ptr = (jlong)((*env)->CallLongMethod(env, (jobject)payload,
+        jniConstants->remote.midAcquireCred, (jstring)jniUrl, (jstring)usernameFromUrl, (jint)allowed_types));
+
+    //delete local ref
     (*env)->DeleteLocalRef(env, jniUrl);
     (*env)->DeleteLocalRef(env, usernameFromUrl);
-    return r;
+
+    if(!ptr) {  // ptr==0 (is NULL)
+        return -1;  // means error
+    }
+
+    //shouldn't check ptr < 0 , because jlong is a signed type, and in some platforms,
+    // is very big chance got a ptr <0 when cast it to signed type
+
+    //success got credential!, btw: `git_cred` is deprecated, use `git_credential` replace it
+    *cred = (git_credential *)ptr;  // was `git_cred *`
+    return 0;  // success set credential for remote
 }
 
 /**

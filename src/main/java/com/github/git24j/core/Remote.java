@@ -1421,8 +1421,7 @@ public class Remote extends CAutoReleasable {
         /**
          * Get the credential and return its c pointer.
          *
-         * @return 0 if no credential was acquired, > 0 if credentials acquired successfully < 0
-         *     indicate an error
+         * @return 0 if no credential was acquired, > 0 if credentials acquired successfully, < 0 will not happened
          */
         long acquireCred(String url, String usernameFromUrl, int allowedTypes) {
             if (_credAcquireCb != null) {
