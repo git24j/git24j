@@ -3,8 +3,7 @@ package com.github.git24j.core;
 import static com.github.git24j.core.GitException.ErrorCode.ENOTFOUND;
 import static com.github.git24j.core.Internals.OidArray;
 
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import javax.annotation.Nonnull;
@@ -395,9 +394,47 @@ public class Merge {
                         outPreference,
                         repo.getRawPointer(),
                         theirHeads.stream().mapToLong(AnnotatedCommit::getRawPointer).toArray()));
-        return new AnalysisPair(
-                IBitEnum.valueOf(outAnalysis.get(), AnalysisT.class),
-                IBitEnum.valueOf(outPreference.get(), PreferenceT.class));
+
+        //outAnalysis and outPreference value is bitmask, if cast to Enum, should be a Set,
+        // imaging outAnalysis maybe is 5(binary:101) , it means AnalysisT.NORMAL and AnalysisT.FASTFORWARD are setted
+
+        return getAnalysisPairFromBitmask(outAnalysis.get(), outPreference.get());
+    }
+
+    //trans bitmask to Set
+    private static AnalysisPair getAnalysisPairFromBitmask(int analyOutValue, int preferenceOutValue) {
+        //save AnalysisT values to Set
+        HashSet<AnalysisT> analysisSet = new HashSet<>();
+        if(analyOutValue == 0) {
+            analysisSet.add(AnalysisT.NONE);  // NONE is 0
+        }
+        if((analyOutValue & AnalysisT.NORMAL.getBit()) >0) {
+            analysisSet.add(AnalysisT.NORMAL);
+        }
+        if((analyOutValue & AnalysisT.UP_TO_DATE.getBit()) >0) {
+            analysisSet.add(AnalysisT.UP_TO_DATE);
+        }
+        if((analyOutValue & AnalysisT.FASTFORWARD.getBit()) >0) {
+            analysisSet.add(AnalysisT.FASTFORWARD);
+        }
+        if((analyOutValue & AnalysisT.UNBORN.getBit()) >0) {
+            analysisSet.add(AnalysisT.UNBORN);
+        }
+
+        //save PreferenceT values to Set
+        HashSet<PreferenceT> preferenceSet = new HashSet<>();
+        if(preferenceOutValue == 0) {
+            preferenceSet.add(PreferenceT.NONE);
+        }
+        if((preferenceOutValue & PreferenceT.NO_FASTFORWARD.getBit()) >0) {
+            preferenceSet.add(PreferenceT.NO_FASTFORWARD);
+        }
+        if((preferenceOutValue & PreferenceT.FASTFORWARD_ONLY.getBit()) >0) {
+            preferenceSet.add(PreferenceT.FASTFORWARD_ONLY);
+        }
+
+
+        return new AnalysisPair(analysisSet, preferenceSet, analyOutValue, preferenceOutValue);
     }
 
     /**
@@ -424,9 +461,8 @@ public class Merge {
                         repo.getRawPointer(),
                         ourRef == null ? 0 : ourRef.getRawPointer(),
                         theirHeads.stream().mapToLong(AnnotatedCommit::getRawPointer).toArray()));
-        return new AnalysisPair(
-                IBitEnum.valueOf(outAnalysis.get(), AnalysisT.class),
-                IBitEnum.valueOf(outPreference.get(), PreferenceT.class));
+
+        return getAnalysisPairFromBitmask(outAnalysis.get(), outPreference.get());
     }
 
     /**
@@ -1012,22 +1048,37 @@ public class Merge {
 
     /**
      * POJO contains analysis result from {@code Merge::analysis} and {@code Merge::analysisForRef}
+     * Can use `Set.contains()` for check a bit mask of Enum is ON or OFF, or get the value do bit operate by your self.
+     * eg: `analysisValue & AnalysisT.NORMAL.getBit()`, if >0, means the `AnalysisT.NORMAL` bit field is ON.
+     * eg2: `analysisSet.contains(AnalysisT.NORMAL)`, if true, means the `AnalysisT.NORMAL` bit field is ON.
      */
     public static class AnalysisPair {
-        private final AnalysisT analysis;
-        private final PreferenceT preference;
+        private final Set<AnalysisT> analysisSet;
+        private final Set<PreferenceT> preferenceSet;
+        private final int analysisValue;  // bitmask value, eg: 5(binary 101), means include AnalysisT.NORMAL and AnalysisT.FASTFORWARD
+        private final int preferenceValue;  // bitmask value
 
-        public AnalysisPair(AnalysisT analysis, PreferenceT preference) {
-            this.analysis = analysis;
-            this.preference = preference;
+        public AnalysisPair(Set<AnalysisT> analysisSet, Set<PreferenceT> preferenceSet, int analysisValue ,int preferenceValue) {
+            this.analysisSet = analysisSet;
+            this.preferenceSet = preferenceSet;
+            this.analysisValue = analysisValue;
+            this.preferenceValue = preferenceValue;
         }
 
-        public AnalysisT getAnalysis() {
-            return analysis;
+        public Set<AnalysisT> getAnalysisSet() {
+            return analysisSet;
         }
 
-        public PreferenceT getPreference() {
-            return preference;
+        public Set<PreferenceT> getPreferenceSet() {
+            return preferenceSet;
+        }
+
+        public int getAnalysisValue() {
+            return analysisValue;
+        }
+
+        public int getPreferenceValue() {
+            return preferenceValue;
         }
     }
 }

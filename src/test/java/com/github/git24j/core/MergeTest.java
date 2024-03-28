@@ -6,8 +6,7 @@ import org.junit.Test;
 import java.nio.file.Path;
 import java.util.*;
 
-import static com.github.git24j.core.Checkout.StrategyT.ALLOW_CONFLICTS;
-import static com.github.git24j.core.Checkout.StrategyT.FORCE;
+import static com.github.git24j.core.Checkout.StrategyT.*;
 
 public class MergeTest extends TestBase {
     // git rev-parse HEAD^{tree}
@@ -27,7 +26,7 @@ public class MergeTest extends TestBase {
      */
     @Test
     public void mergeTargetBranchIntoHead() {
-        String targetBranchShortHandName = "main";
+        String targetBranchShortHandName = "origin/main";
         Repository repo = Repository.open(repoPath);
         Merge.Options mergeOpts = Merge.Options.create();
         Repository.StateT state = repo.state();
@@ -37,19 +36,16 @@ public class MergeTest extends TestBase {
 
         Checkout.Options checkoutOpts = Checkout.Options.defaultOptions();
         checkoutOpts.setStrategy(EnumSet.of(FORCE,ALLOW_CONFLICTS));
-
-        assert(state.getBit()==0); //expect 0 NONE
         Reference targetBranchRef = Reference.dwim(repo, targetBranchShortHandName);
         AnnotatedCommit mergeTarget = AnnotatedCommit.fromRef(repo, targetBranchRef);
-        System.out.println("mergeTarget.ref():"+mergeTarget.ref());
-        System.out.println("mergeTarget.id():"+mergeTarget.id());
-//        System.out.println("mergeInto(current branch):"+mergeInto.id());
+
+        assert(state.getBit()==0); //expect 0 NONE
+
         ArrayList<AnnotatedCommit> acList = new ArrayList<>();
         acList.add(mergeTarget);
         Merge.AnalysisPair analysis = Merge.analysis(repo, acList);
         //expect NORMAL
-        System.out.println("analysis.getAnalysis().name()::"+analysis.getAnalysis().name());
-        if(analysis.getAnalysis().getBit()!= Merge.AnalysisT.NORMAL.getBit()) {
+        if(analysis.getAnalysisSet().contains(Merge.AnalysisT.NORMAL)) { // or (analysis.getAnalysisValue() & Merge.AnalysisT.NORMAL.getBit()) >0
             System.out.println("repo state is not NORMAL! merge canceled!");
             return;
         }
@@ -235,8 +231,9 @@ public class MergeTest extends TestBase {
                     AnnotatedCommit.lookup(
                             testRepo, Oid.of("10d86efdfa78ec906933a3414affa592511fd170"));
             Merge.AnalysisPair res = Merge.analysis(testRepo, Collections.singletonList(ac));
-            Assert.assertEquals(Merge.AnalysisT.NORMAL, res.getAnalysis());
-            Assert.assertEquals(Merge.PreferenceT.NONE, res.getPreference());
+            assert res.getAnalysisSet().contains(Merge.AnalysisT.NORMAL);
+            assert !res.getAnalysisSet().contains(Merge.AnalysisT.UP_TO_DATE);
+            assert res.getPreferenceSet().contains(Merge.PreferenceT.NONE);
         }
     }
 
@@ -247,8 +244,9 @@ public class MergeTest extends TestBase {
             AnnotatedCommit ac = AnnotatedCommit.lookup(testRepo, Oid.of(SHA_C));
             Merge.AnalysisPair res =
                     Merge.analysisForRef(testRepo, refDev, Collections.singletonList(ac));
-            Assert.assertEquals(Merge.AnalysisT.NORMAL, res.getAnalysis());
-            Assert.assertEquals(Merge.PreferenceT.NONE, res.getPreference());
+            assert res.getAnalysisSet().contains(Merge.AnalysisT.NORMAL);
+            assert res.getPreferenceSet().contains(Merge.PreferenceT.NONE);
+            assert !res.getPreferenceSet().contains(Merge.PreferenceT.NO_FASTFORWARD);
         }
     }
 
