@@ -714,7 +714,7 @@ public class Repository extends CAutoCloseable {
         NONE(0),
         MERGE(1),
         REVERT(2),
-        SEQUENCE(3),
+        REVERT_SEQUENCE(3),
         CHERRYPICK(4),
         CHERRYPICK_SEQUENCE(5),
         BISECT(6),
