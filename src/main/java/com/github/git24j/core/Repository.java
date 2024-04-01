@@ -425,6 +425,9 @@ public class Repository extends CAutoCloseable {
     public void setHeadDetached(Oid oid) {
         Error.throwIfNeeded(jniSetHeadDetached(getRawPointer(), oid));
     }
+    public void setHeadDetachedFromAnnotated(AnnotatedCommit annotatedCommit) {
+        Error.throwIfNeeded(jniSetHeadDetachedFromAnnotated(getRawPointer(), annotatedCommit.getRawPointer()));
+    }
 
     /** Detach the HEAD. */
     public void detachHead() {
