@@ -766,3 +766,12 @@ JNIEXPORT jobjectArray JNICALL J_MAKE_METHOD(Diff_jniDiffOptionsGetPathSpec)(JNI
 
     return ret;
 }
+
+JNIEXPORT void JNICALL J_MAKE_METHOD(Diff_jniDiffOptionsSetFlags)(JNIEnv *env, jclass obj, jlong diffOptionsPtr, jint flags)
+{
+    ((git_diff_options *)diffOptionsPtr) -> flags = (uint32_t)flags;
+}
+JNIEXPORT jint JNICALL J_MAKE_METHOD(Diff_jniDiffOptionsGetFlags)(JNIEnv *env, jclass obj, jlong diffOptionsPtr)
+{
+    return (jint)(((git_diff_options *)diffOptionsPtr) -> flags);
+}
