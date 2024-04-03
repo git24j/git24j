@@ -68,20 +68,24 @@ public class Oid {
         return data;
     }
 
-    byte[] getId() {
+    public byte[] getId() {
         return id;
     }
 
-    void setId(byte[] id) {
+    public void setId(byte[] id) {
         this.id = id;
     }
 
-    boolean isEmpty() {
+    public boolean isEmpty() {
         return id == null || id.length == 0;
     }
 
-    boolean isZero() {
+    public boolean isZero() {
         return Arrays.equals(id, ZERO_SHA);
+    }
+
+    public boolean isNullOrEmptyOrZero() {
+        return isEmpty() || isZero();
     }
 
     @Override
