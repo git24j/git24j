@@ -21,7 +21,8 @@ SET(BUILD_SHARED_LIBS ON)
 IF (MSVC)
 	STRING(REPLACE "/Zm1000" " " CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
 
-	SET(CMAKE_C_FLAGS "/nologo /TC /DUNICODE /D_UNICODE /W3 /WX ${CMAKE_C_FLAGS}")
+    # if you want to treat warning as error, add " /WX" after "/W3"
+	SET(CMAKE_C_FLAGS "/nologo /TC /DUNICODE /D_UNICODE /W3 ${CMAKE_C_FLAGS}")
 
 	# SDL requirements:
 	# /GS - buffers security check

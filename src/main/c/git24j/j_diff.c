@@ -32,7 +32,7 @@ int j_git_diff_file_cb(const git_diff_delta *delta, float progress, void *payloa
     /** int accept(long diffDeltaPtr, float progress) */
     jmethodID accept = (*env)->GetMethodID(env, jclz, "accept", "(JF)I");
     assert(accept && "jni error: could not resolve method consumer method");
-    int r = (*env)->CallIntMethod(env, consumer, accept, (long)delta, progress);
+    int r = (*env)->CallIntMethod(env, consumer, accept, (jlong)delta, progress);
     (*env)->DeleteLocalRef(env, jclz);
     return r;
 }
@@ -62,7 +62,7 @@ int j_git_diff_binary_cb(const git_diff_delta *delta, const git_diff_binary *bin
     /** int accept(long diffDeltaPtr, long binaryPtr) */
     jmethodID accept = (*env)->GetMethodID(env, jclz, "accept", "(JJ)I");
     assert(accept && "jni error: could not resolve method consumer method");
-    int r = (*env)->CallIntMethod(env, consumer, accept, (long)delta, (long)binary);
+    int r = (*env)->CallIntMethod(env, consumer, accept, (jlong)delta, (jlong)binary);
     (*env)->DeleteLocalRef(env, jclz);
     return r;
 }
@@ -91,7 +91,7 @@ int j_git_diff_hunk_cb(const git_diff_delta *delta, const git_diff_hunk *hunk, v
     /** int accept(long diffDeltaPtr, long binaryPtr) */
     jmethodID accept = (*env)->GetMethodID(env, jclz, "accept", "(JJ)I");
     assert(accept && "jni error: could not resolve method consumer method");
-    int r = (*env)->CallIntMethod(env, consumer, accept, (long)delta, (long)hunk);
+    int r = (*env)->CallIntMethod(env, consumer, accept, (jlong)delta, (jlong)hunk);
     (*env)->DeleteLocalRef(env, jclz);
     return r;
 }
@@ -111,7 +111,7 @@ int j_git_diff_line_cb(const git_diff_delta *delta, const git_diff_hunk *hunk, c
     /** int accept(long diffDeltaPtr, long binaryPtr) */
     jmethodID accept = (*env)->GetMethodID(env, jclz, "accept", "(JJJ)I");
     assert(accept && "jni error: could not resolve method consumer method");
-    int r = (*env)->CallIntMethod(env, consumer, accept, (long)delta, (long)hunk, (long)line);
+    int r = (*env)->CallIntMethod(env, consumer, accept, (jlong)delta, (jlong)hunk, (jlong)line);
     (*env)->DeleteLocalRef(env, jclz);
     return r;
 }
@@ -743,4 +743,35 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Diff_jniBinaryFileGetDatalen)(JNIEnv *env, 
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Diff_jniBinaryFileGetInflatedlen)(JNIEnv *env, jclass obj, jlong binaryFilePtr)
 {
     return ((git_diff_binary_file *)binaryFilePtr)->inflatedlen;
+}
+
+JNIEXPORT void JNICALL J_MAKE_METHOD(Diff_jniDiffOptionsSetPathSpec)(JNIEnv *env, jclass obj, jlong diffOptionsPtr, jobjectArray pathSpecJArr)
+{
+    git_strarray* cpa = &(((git_diff_options *)diffOptionsPtr)->pathspec);
+    j_strarray_from_java(env, cpa, pathSpecJArr);
+
+    (*env)->DeleteLocalRef(env, pathSpecJArr);
+}
+
+JNIEXPORT jobjectArray JNICALL J_MAKE_METHOD(Diff_jniDiffOptionsGetPathSpec)(JNIEnv *env, jclass obj, jlong diffOptionsPtr)
+{
+    git_strarray* cpa = &(((git_diff_options *)diffOptionsPtr)->pathspec);
+    //create java array
+    jclass clzStr = (*env)->FindClass(env,"java/lang/String");
+    jobjectArray ret = (*env)->NewObjectArray(env, cpa->count, clzStr, NULL);  // last param is initial value
+    j_strarray_to_java_array(env, ret, cpa);
+
+    //free memory
+    (*env)->DeleteLocalRef(env, clzStr);
+
+    return ret;
+}
+
+JNIEXPORT void JNICALL J_MAKE_METHOD(Diff_jniDiffOptionsSetFlags)(JNIEnv *env, jclass obj, jlong diffOptionsPtr, jint flags)
+{
+    ((git_diff_options *)diffOptionsPtr) -> flags = (uint32_t)flags;
+}
+JNIEXPORT jint JNICALL J_MAKE_METHOD(Diff_jniDiffOptionsGetFlags)(JNIEnv *env, jclass obj, jlong diffOptionsPtr)
+{
+    return (jint)(((git_diff_options *)diffOptionsPtr) -> flags);
 }

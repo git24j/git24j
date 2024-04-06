@@ -3,8 +3,7 @@ package com.github.git24j.core;
 import static com.github.git24j.core.GitException.ErrorCode.ENOTFOUND;
 import static com.github.git24j.core.Internals.OidArray;
 
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import javax.annotation.Nonnull;
@@ -395,9 +394,16 @@ public class Merge {
                         outPreference,
                         repo.getRawPointer(),
                         theirHeads.stream().mapToLong(AnnotatedCommit::getRawPointer).toArray()));
+
+        //outAnalysis and outPreference value is bitmask, if cast to Enum, should be a Set,
+        // imaging outAnalysis maybe is 5(binary:101) , it means AnalysisT.NORMAL and AnalysisT.FASTFORWARD are setted
+
         return new AnalysisPair(
-                IBitEnum.valueOf(outAnalysis.get(), AnalysisT.class),
-                IBitEnum.valueOf(outPreference.get(), PreferenceT.class));
+                IBitEnum.parse(outAnalysis.get(), AnalysisT.class),
+                IBitEnum.parse(outPreference.get(), PreferenceT.class),
+                outAnalysis.get(),
+                outPreference.get());
+
     }
 
     /**
@@ -424,9 +430,12 @@ public class Merge {
                         repo.getRawPointer(),
                         ourRef == null ? 0 : ourRef.getRawPointer(),
                         theirHeads.stream().mapToLong(AnnotatedCommit::getRawPointer).toArray()));
+
         return new AnalysisPair(
-                IBitEnum.valueOf(outAnalysis.get(), AnalysisT.class),
-                IBitEnum.valueOf(outPreference.get(), PreferenceT.class));
+                IBitEnum.parse(outAnalysis.get(), AnalysisT.class),
+                IBitEnum.parse(outPreference.get(), PreferenceT.class),
+                outAnalysis.get(),
+                outPreference.get());
     }
 
     /**
@@ -719,7 +728,7 @@ public class Merge {
          * There is a `merge.ff=false` configuration setting, suggesting that the user does not want
          * to allow a fast-forward merge.
          */
-        FASTFORWARD(1 << 0),
+        NO_FASTFORWARD(1 << 0),
 
         /**
          * There is a `merge.ff=only` configuration setting, suggesting that the user only wants
@@ -926,7 +935,12 @@ public class Merge {
         }
 
         @Nonnull
-        public Options create(int version) {
+        public static Options create() {
+            return create(CURRENT_VERSION);
+        }
+
+        @Nonnull
+        public static Options create(int version) {
             Options out = new Options(false, 0);
             Error.throwIfNeeded(jniOptionsNew(out._rawPtr, version));
             return out;
@@ -1007,22 +1021,37 @@ public class Merge {
 
     /**
      * POJO contains analysis result from {@code Merge::analysis} and {@code Merge::analysisForRef}
+     * Can use `Set.contains()` for check a bit mask of Enum is ON or OFF, or get the value do bit operate by your self.
+     * eg: `analysisValue & AnalysisT.NORMAL.getBit()`, if >0, means the `AnalysisT.NORMAL` bit field is ON.
+     * eg2: `analysisSet.contains(AnalysisT.NORMAL)`, if true, means the `AnalysisT.NORMAL` bit field is ON.
      */
     public static class AnalysisPair {
-        private final AnalysisT analysis;
-        private final PreferenceT preference;
+        private final EnumSet<AnalysisT> analysisSet;
+        private final EnumSet<PreferenceT> preferenceSet;
+        private final int analysisValue;  // bitmask value, eg: 5(binary 101), means include AnalysisT.NORMAL and AnalysisT.FASTFORWARD
+        private final int preferenceValue;  // bitmask value
 
-        public AnalysisPair(AnalysisT analysis, PreferenceT preference) {
-            this.analysis = analysis;
-            this.preference = preference;
+        public AnalysisPair(EnumSet<AnalysisT> analysisSet, EnumSet<PreferenceT> preferenceSet, int analysisValue ,int preferenceValue) {
+            this.analysisSet = analysisSet;
+            this.preferenceSet = preferenceSet;
+            this.analysisValue = analysisValue;
+            this.preferenceValue = preferenceValue;
         }
 
-        public AnalysisT getAnalysis() {
-            return analysis;
+        public EnumSet<AnalysisT> getAnalysisSet() {
+            return analysisSet;
         }
 
-        public PreferenceT getPreference() {
-            return preference;
+        public EnumSet<PreferenceT> getPreferenceSet() {
+            return preferenceSet;
+        }
+
+        public int getAnalysisValue() {
+            return analysisValue;
+        }
+
+        public int getPreferenceValue() {
+            return preferenceValue;
         }
     }
 }

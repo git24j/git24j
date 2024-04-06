@@ -160,10 +160,10 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Commit_jniHeaderField)(JNIEnv *env, jclass 
 }
 
 /**
- * int git_commit_create(git_oid *id, 
- *                       git_repository *repo, 
- *                       const char *update_ref, 
- *                       const git_signature *author, 
+ * int git_commit_create(git_oid *id,
+ *                       git_repository *repo,
+ *                       const char *update_ref,
+ *                       const git_signature *author,
  *                       const git_signature *committer,
  *                       const char *message_encoding,
  *                       const char *message,
@@ -186,15 +186,13 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Commit_jniCreate)(JNIEnv *env,
     assert(parents && "parents must not be null");
     int e = 0;
     jsize np = (*env)->GetArrayLength(env, parents);
-    const git_commit **c_parents = (const git_commit **)malloc(sizeof(git_commit *) * np);
-    for (jsize i = 0; i < np; i++)
-    {
-        jlong *x = (*env)->GetLongArrayElements(env, parents, 0);
-        c_parents[i] = (git_commit *)(*x);
-    }
+    jlong *parentCommitsPtr = (*env)->GetLongArrayElements(env, parents, 0);
+//    const git_commit **c_parents = (const git_commit **)malloc(sizeof(git_commit *) * np);
     char *update_ref = j_copy_of_jstring(env, updateRef, true);
     char *message_encoding = j_copy_of_jstring(env, msgEncoding, true);
     char *c_message = j_copy_of_jstring(env, message, true);
+
+    //call libgit2 function
     git_oid c_oid;
     e = git_commit_create(&c_oid,
                           (git_repository *)repoPtr,
@@ -205,23 +203,30 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Commit_jniCreate)(JNIEnv *env,
                           c_message,
                           (git_tree *)treePtr,
                           np,
-                          c_parents);
+                          (git_commit **)parentCommitsPtr);
     j_git_oid_to_java(env, &c_oid, outOid);
-    free(c_parents);
+
+    //free c
+//    free(c_parents);
     free(c_message);
     free(message_encoding);
     free(update_ref);
+
+    //free java
+    (*env)->ReleaseLongArrayElements(env, parents, parentCommitsPtr, 0);
+
+    //return error value
     return e;
 }
 
-/**int git_commit_amend(git_oid *id, 
- *                      const git_commit *commit_to_amend, 
- *                      const char *update_ref, 
- *                      const git_signature *author, 
- *                      const git_signature *committer, 
- *                      const char *message_encoding, 
- *                      const char *message, 
- *                      const git_tree *tree); 
+/**int git_commit_amend(git_oid *id,
+ *                      const git_commit *commit_to_amend,
+ *                      const char *update_ref,
+ *                      const git_signature *author,
+ *                      const git_signature *committer,
+ *                      const char *message_encoding,
+ *                      const char *message,
+ *                      const git_tree *tree);
  * */
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Commit_jniAmend)(JNIEnv *env, jclass obj,
                                                       jobject id,
@@ -269,12 +274,13 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Commit_jniCreateBuffer)(JNIEnv *env, jclass
 
     assert(parents && "parents must not be null");
     jsize np = (*env)->GetArrayLength(env, parents);
-    const git_commit **c_parents = (const git_commit **)malloc(sizeof(git_commit *) * np);
-    for (jsize i = 0; i < np; i++)
-    {
-        jlong *x = (*env)->GetLongArrayElements(env, parents, 0);
-        c_parents[i] = (git_commit *)(*x);
-    }
+    jlong *elements = (*env)->GetLongArrayElements(env, parents, 0);
+//    const git_commit **c_parents = (const git_commit **)malloc(sizeof(git_commit *) * np);
+
+//    for (jsize i = 0; i < np; i++)
+//    {
+//        c_parents[i] = (git_commit *)x[i];
+//    }
 
     int r = git_commit_create_buffer(
         &c_out,
@@ -285,12 +291,15 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Commit_jniCreateBuffer)(JNIEnv *env, jclass
         c_message,
         (git_tree *)treePtr,
         parentCount,
-        c_parents);
+        (git_commit **)elements);
     j_git_buf_to_java(env, &c_out, out);
     git_buf_dispose(&c_out);
-    free(c_parents);
+//    free(c_parents);
     free(c_message_encoding);
     free(c_message);
+
+    (*env)->ReleaseLongArrayElements(env, parents, elements, 0);
+
     return r;
 }
 

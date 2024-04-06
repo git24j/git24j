@@ -126,6 +126,16 @@ JNIEXPORT jstring JNICALL J_MAKE_METHOD(Clone_jniOptionsGetCheckoutBranch)(JNIEn
     return (*env)->NewStringUTF(env, r);
 }
 
+/** const char* checkout_branch*/
+JNIEXPORT void JNICALL J_MAKE_METHOD(Clone_jniOptionsSetCheckoutBranch)(JNIEnv *env, jclass obj, jlong optionsPtr, jstring branch)
+{
+    const char *c_branch = j_copy_of_jstring(env, branch, true);
+
+    ((git_clone_options *)optionsPtr)->checkout_branch = c_branch;
+
+    //need not free c_branch, because checkout_branch point to it
+}
+
 /** unsigned int version*/
 JNIEXPORT void JNICALL J_MAKE_METHOD(Clone_jniOptionsSetVersion)(JNIEnv *env, jclass obj, jlong optionsPtr, jint version)
 {

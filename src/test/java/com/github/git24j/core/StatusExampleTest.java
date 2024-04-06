@@ -56,7 +56,7 @@ public class StatusExampleTest extends TestBase {
                 "#   (use \"git checkout -- <file>...\" to discard changes in working directory)\n");
         notStaged.add("#\n");
         List<String> untracked = new ArrayList<>();
-        untracked.add("# Ignored files:\n");
+        untracked.add("# Untracked files:\n");
         untracked.add("#   (use \"git add -f <file>...\" to include in what will be committed)\n");
         untracked.add("#\n");
         List<String> ignored = new ArrayList<>();
@@ -73,7 +73,10 @@ public class StatusExampleTest extends TestBase {
             Status.Entry entry = statusList.byIndex(i);
             Diff.Delta delta = entry.getHeadToIndex();
             if (delta == null) {
-                continue;
+                delta = entry.getIndexToWorkdir();
+                if(delta == null) {
+                    continue;
+                }
             }
             EnumSet<Status.StatusT> flags = entry.getStatus();
             if (flags.contains(WT_NEW)) {
@@ -201,9 +204,12 @@ public class StatusExampleTest extends TestBase {
     @Test
     public void testStatus() {
         try (Repository testRepo = TestRepo.CONFLICT.tempRepo(_folder)) {
+
+            System.out.println("on branch: "+showBranch(testRepo));
             List<String> prints = status(testRepo);
             Assert.assertTrue(prints.size() > 1);
             prints.forEach(System.out::print);
+            System.out.println();
         }
     }
 

@@ -1,22 +1,10 @@
 package com.github.git24j.core;
 
-import static com.github.git24j.core.Remote.jniFetchOptionsFree;
-import static com.github.git24j.core.Remote.jniFetchOptionsGetCallbacks;
-import static com.github.git24j.core.Remote.jniFetchOptionsGetCustomHeaders;
-import static com.github.git24j.core.Remote.jniFetchOptionsGetDownloadTags;
-import static com.github.git24j.core.Remote.jniFetchOptionsGetProxyOpts;
-import static com.github.git24j.core.Remote.jniFetchOptionsGetPrune;
-import static com.github.git24j.core.Remote.jniFetchOptionsGetUpdateFetchhead;
-import static com.github.git24j.core.Remote.jniFetchOptionsGetVersion;
-import static com.github.git24j.core.Remote.jniFetchOptionsSetCustomHeaders;
-import static com.github.git24j.core.Remote.jniFetchOptionsSetDownloadTags;
-import static com.github.git24j.core.Remote.jniFetchOptionsSetPrune;
-import static com.github.git24j.core.Remote.jniFetchOptionsSetUpdateFetchhead;
-import static com.github.git24j.core.Remote.jniFetchOptionsSetVersion;
-
 import java.util.ArrayList;
 import java.util.List;
 import javax.annotation.Nonnull;
+
+import static com.github.git24j.core.Remote.*;
 
 public class FetchOptions extends CAutoReleasable {
     public static final int VERSION = 1;
@@ -48,6 +36,22 @@ public class FetchOptions extends CAutoReleasable {
     public void setVersion(int version) {
         jniFetchOptionsSetVersion(getRawPointer(), version);
     }
+
+    public int getDepth() {
+        return jniFetchOptionsGetDepth(getRawPointer());
+    }
+    public void setDepth(int depth) {
+        jniFetchOptionsSetDepth(getRawPointer(), depth);
+    }
+    public RedirectT getFollowRedirects() {
+        int r = jniFetchOptionsGetFollowRedirects(getRawPointer());
+        return IBitEnum.valueOf(r, RedirectT.class);
+    }
+
+    public void setFollowRedirects(RedirectT redirectT) {
+        jniFetchOptionsSetFollowRedirects(getRawPointer(), redirectT.getBit());
+    }
+
 
     /** git_remote_callbacks callbacks */
     public Remote.Callbacks getCallbacks() {

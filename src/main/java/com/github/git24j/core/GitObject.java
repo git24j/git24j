@@ -160,14 +160,14 @@ public class GitObject extends CAutoReleasable {
     }
 
     public enum Type implements IBitEnum {
-        ANY(-2),
-        INVALID(-1),
-        COMMIT(1),
-        TREE(2),
-        BLOB(3),
-        TAG(4),
-        OFS_DELTA(6),
-        ERF_DELTA(7),
+        ANY(-2),  /**< Object can be any of the following */
+        INVALID(-1),  /**< Object is invalid. */
+        COMMIT(1),  /**< A commit object. */
+        TREE(2),  /**< A tree (directory listing) object. */
+        BLOB(3),  /**< A file revision object. */
+        TAG(4),  /**< An annotated tag object. */
+        OFS_DELTA(6),  /**< A delta, base is given by an offset. */
+        REF_DELTA(7),  /**< A delta, base is given by object id. */
         ;
         private final int _bit;
 

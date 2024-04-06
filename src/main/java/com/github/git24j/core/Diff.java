@@ -1,16 +1,21 @@
 package com.github.git24j.core;
 
-import static com.github.git24j.core.Internals.JFCallback;
-import static com.github.git24j.core.Internals.JJCallback;
-import static com.github.git24j.core.Internals.JJJCallback;
-
-import java.util.EnumSet;
-import java.util.concurrent.atomic.AtomicLong;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.EnumSet;
+import java.util.concurrent.atomic.AtomicLong;
+
+import static com.github.git24j.core.Internals.*;
 
 public class Diff extends CAutoReleasable {
+
+    static native void jniDiffOptionsSetPathSpec(long diffOptionsPtr, String[] pathSpecJArr);
+    static native String[] jniDiffOptionsGetPathSpec(long diffOptionsPtr);
+
+    static native void jniDiffOptionsSetFlags(long diffOptionsPtr, int flags);
+    static native int jniDiffOptionsGetFlags(long diffOptionsPtr);
+
     /** const char *data */
     static native String jniBinaryFileGetData(long binary_filePtr);
 
@@ -416,8 +421,8 @@ public class Diff extends CAutoReleasable {
                 jniIndexToWorkdir(
                         diff._rawPtr,
                         repo.getRawPointer(),
-                        index.getRawPointer(),
-                        opts.getRawPointer()));
+                        index==null ? repo.index().getRawPointer() : index.getRawPointer(),
+                        opts==null ? Options.create().getRawPointer() : opts.getRawPointer()));
         return diff;
     }
 
@@ -993,6 +998,8 @@ public class Diff extends CAutoReleasable {
         return oid;
     }
 
+    //move to: Diff.Options.FlagT
+    @Deprecated
     public enum OptionFlag implements IBitEnum {
         /** Normal diff, the default */
         NORMAL0(0),
@@ -1296,22 +1303,22 @@ public class Diff extends CAutoReleasable {
     }
 
     @FunctionalInterface
-    interface FileCb {
+    public interface FileCb {
         int accept(Delta delta, float progress);
     }
 
     @FunctionalInterface
-    interface BinaryCb {
+    public interface BinaryCb {
         int accept(Delta delta, Binary binary);
     }
 
     @FunctionalInterface
-    interface HunkCb {
+    public interface HunkCb {
         int accept(Delta delta, Hunk hunk);
     }
 
     @FunctionalInterface
-    interface LineCb {
+    public interface LineCb {
         int accept(Delta delta, Hunk hunk, Line line);
     }
 
@@ -1348,6 +1355,213 @@ public class Diff extends CAutoReleasable {
         @Override
         protected void freeOnce(long cPtr) {
             jniFreeOptions(cPtr);
+        }
+
+        public String[] getPathSpec() {
+            return jniDiffOptionsGetPathSpec(_rawPtr.get());
+        }
+
+        public void setPathSpec(String[] pathSpec) {
+            jniDiffOptionsSetPathSpec(_rawPtr.get(), pathSpec);
+        }
+
+        public EnumSet<Diff.Options.FlagT> getFlags() {
+            int flagValue = jniDiffOptionsGetFlags(_rawPtr.get());
+            return IBitEnum.parse(flagValue, Diff.Options.FlagT.class);
+        }
+
+        public void setFlags(EnumSet<Diff.Options.FlagT> flags) {
+            jniDiffOptionsSetFlags(_rawPtr.get(), IBitEnum.bitOrAll(flags));
+        }
+
+        /**
+         Flags for diff options.  A combination of these flags can be passed
+         in via the `flags` value in the `git_diff_options`.
+         GIT_DIFF_NORMAL = 0, Normal diff, the default
+
+         Options controlling which files will be in the diff
+
+         Reverse the sides of the diff
+         GIT_DIFF_REVERSE = (1u << 0),
+
+         Include ignored files in the diff
+         GIT_DIFF_INCLUDE_IGNORED = (1u << 1),
+
+         Even with GIT_DIFF_INCLUDE_IGNORED, an entire ignored directory
+         will be marked with only a single entry in the diff; this flag
+         adds all files under the directory as IGNORED entries, too.
+         GIT_DIFF_RECURSE_IGNORED_DIRS = (1u << 2),
+
+         Include untracked files in the diff
+         GIT_DIFF_INCLUDE_UNTRACKED = (1u << 3),
+
+         Even with GIT_DIFF_INCLUDE_UNTRACKED, an entire untracked
+         directory will be marked with only a single entry in the diff
+         (a la what core Git does in `git status`); this flag adds all
+         files under untracked directories as UNTRACKED entries, too.
+         GIT_DIFF_RECURSE_UNTRACKED_DIRS = (1u << 4),
+
+         Include unmodified files in the diff
+         GIT_DIFF_INCLUDE_UNMODIFIED = (1u << 5),
+
+         Normally, a type change between files will be converted into a
+         DELETED record for the old and an ADDED record for the new; this
+         options enabled the generation of TYPECHANGE delta records.
+         GIT_DIFF_INCLUDE_TYPECHANGE = (1u << 6),
+
+         Even with GIT_DIFF_INCLUDE_TYPECHANGE, blob->tree changes still
+         generally show as a DELETED blob.  This flag tries to correctly
+         label blob->tree transitions as TYPECHANGE records with new_file's
+         mode set to tree.  Note: the tree SHA will not be available.
+         GIT_DIFF_INCLUDE_TYPECHANGE_TREES = (1u << 7),
+
+         Ignore file mode changes
+         GIT_DIFF_IGNORE_FILEMODE = (1u << 8),
+
+         Treat all submodules as unmodified
+         GIT_DIFF_IGNORE_SUBMODULES = (1u << 9),
+
+         Use case insensitive filename comparisons
+         GIT_DIFF_IGNORE_CASE = (1u << 10),
+
+         May be combined with `GIT_DIFF_IGNORE_CASE` to specify that a file
+         that has changed case will be returned as an add/delete pair.
+         GIT_DIFF_INCLUDE_CASECHANGE = (1u << 11),
+
+         If the pathspec is set in the diff options, this flags indicates
+         that the paths will be treated as literal paths instead of
+         fnmatch patterns.  Each path in the list must either be a full
+         path to a file or a directory.  (A trailing slash indicates that
+         the path will _only_ match a directory).  If a directory is
+         specified, all children will be included.
+         GIT_DIFF_DISABLE_PATHSPEC_MATCH = (1u << 12),
+
+         Disable updating of the `binary` flag in delta records.  This is
+         useful when iterating over a diff if you don't need hunk and data
+         callbacks and want to avoid having to load file completely.
+         GIT_DIFF_SKIP_BINARY_CHECK = (1u << 13),
+
+         When diff finds an untracked directory, to match the behavior of
+         core Git, it scans the contents for IGNORED and UNTRACKED files.
+         If *all* contents are IGNORED, then the directory is IGNORED; if
+         any contents are not IGNORED, then the directory is UNTRACKED.
+         This is extra work that may not matter in many cases.  This flag
+         turns off that scan and immediately labels an untracked directory
+         as UNTRACKED (changing the behavior to not match core Git).
+
+         GIT_DIFF_ENABLE_FAST_UNTRACKED_DIRS = (1u << 14),
+
+         When diff finds a file in the working directory with stat
+         information different from the index, but the OID ends up being the
+         same, write the correct stat information into the index.  Note:
+         without this flag, diff will always leave the index untouched.
+
+         GIT_DIFF_UPDATE_INDEX = (1u << 15),
+
+         Include unreadable files in the diff
+         GIT_DIFF_INCLUDE_UNREADABLE = (1u << 16),
+
+         Include unreadable files in the diff
+         GIT_DIFF_INCLUDE_UNREADABLE_AS_UNTRACKED = (1u << 17),
+
+
+         Options controlling how output will be generated
+
+
+         Use a heuristic that takes indentation and whitespace into account
+         which generally can produce better diffs when dealing with ambiguous
+         diff hunks.
+         GIT_DIFF_INDENT_HEURISTIC = (1u << 18),
+
+         Ignore blank lines
+         GIT_DIFF_IGNORE_BLANK_LINES = (1u << 19),
+
+         Treat all files as text, disabling binary attributes & detection
+         GIT_DIFF_FORCE_TEXT = (1u << 20),
+
+         Treat all files as binary, disabling text diffs
+         GIT_DIFF_FORCE_BINARY = (1u << 21),
+
+         Ignore all whitespace
+         GIT_DIFF_IGNORE_WHITESPACE = (1u << 22),
+
+         Ignore changes in amount of whitespace
+         GIT_DIFF_IGNORE_WHITESPACE_CHANGE = (1u << 23),
+
+         Ignore whitespace at end of line
+         GIT_DIFF_IGNORE_WHITESPACE_EOL = (1u << 24),
+
+         When generating patch text, include the content of untracked
+         files.  This automatically turns on GIT_DIFF_INCLUDE_UNTRACKED but
+         it does not turn on GIT_DIFF_RECURSE_UNTRACKED_DIRS.  Add that
+         flag if you want the content of every single UNTRACKED file.
+         GIT_DIFF_SHOW_UNTRACKED_CONTENT = (1u << 25),
+
+         When generating output, include the names of unmodified files if
+         they are included in the git_diff.  Normally these are skipped in
+         the formats that list files (e.g. name-only, name-status, raw).
+         Even with this, these will not be included in patch format.
+         GIT_DIFF_SHOW_UNMODIFIED = (1u << 26),
+
+         Use the "patience diff" algorithm
+         GIT_DIFF_PATIENCE = (1u << 28),
+
+         Take extra time to find minimal diff
+         GIT_DIFF_MINIMAL = (1u << 29),
+
+         Include the necessary deflate / delta information so that `git-apply`
+         can apply given diff information to binary files.
+         GIT_DIFF_SHOW_BINARY = (1u << 30)
+         } git_diff_option_t;
+         */
+        public enum FlagT implements IBitEnum {
+            NORMAL(0),
+            REVERSE(1<<0),
+            INCLUDE_IGNORED(1<<1),
+            RECURSE_IGNORED_DIRS(1<<2),
+            INCLUDE_UNTRACKED(1<<3),
+            RECURSE_UNTRACKED_DIRS(1<<4),
+            INCLUDE_UNMODIFIED(1<<5),
+            INCLUDE_TYPECHANGE(1<<6),
+            INCLUDE_TYPECHANGE_TREES(1<<7),
+            IGNORE_FILEMODE(1<<8),
+            IGNORE_SUBMODULES(1<<9),
+            IGNORE_CASE(1<<10),
+            INCLUDE_CASECHANGE(1<<11),
+            DISABLE_PATHSPEC_MATCH(1<<12),
+            SKIP_BINARY_CHECK(1<<13),
+            ENABLE_FAST_UNTRACKED_DIRS(1<<14),
+            UPDATE_INDEX(1<<15),
+            INCLUDE_UNREADABLE(1<<16),
+            INCLUDE_UNREADABLE_AS_UNTRACKED(1<<17),
+
+            /*
+             * Options controlling how output will be generated
+             */
+            INDENT_HEURISTIC(1<<18),
+            IGNORE_BLANK_LINES(1<<19),
+            FORCE_TEXT(1<<20),
+            FORCE_BINARY(1<<21),
+            IGNORE_WHITESPACE(1<<22),
+            IGNORE_WHITESPACE_CHANGE(1<<23),
+            IGNORE_WHITESPACE_EOL(1<<24),
+            SHOW_UNTRACKED_CONTENT(1<<25),
+            SHOW_UNMODIFIED(1<<26),
+            PATIENCE(1<<28),
+            MINIMAL(1<<29),
+            SHOW_BINARY(1<<30),
+            ;
+
+            private final int _bit;
+
+            FlagT(int bit) {
+                _bit = bit;
+            }
+
+            @Override
+            public int getBit() {
+                return _bit;
+            }
         }
     }
 
@@ -1661,6 +1875,36 @@ public class Diff extends CAutoReleasable {
      * file.
      */
     public static class Line extends CAutoReleasable {
+
+        /**
+         * Line origin constants.
+         *
+         * These values describe where a line came from and will be passed to
+         * the git_diff_line_cb when iterating over a diff.  There are some
+         * special origin constants at the end that are used for the text
+         * output callbacks to demarcate lines that are actually part of
+         * the file or hunk headers.
+         *
+         * This type is binding for libgit2's: `git_diff_line_t`
+         */
+        public static class OriginType {
+            /* These values will be sent to `git_diff_line_cb` along with the line */
+            public static final char CONTEXT   = ' ';
+            public static final char ADDITION  = '+';
+            public static final char DELETION  = '-';
+
+            public static final char CONTEXT_EOFNL = '='; /**< Both files have no LF at end */
+            public static final char ADD_EOFNL = '>';     /**< Old has no LF at end, new does */
+            public static final char DEL_EOFNL = '<';     /**< Old has LF at end, new does not */
+
+            /* The following values will only be sent to a `git_diff_line_cb` when
+             * the content of a diff is being formatted through `git_diff_print`.
+             */
+            public static final char FILE_HDR  = 'F';
+            public static final char HUNK_HDR  = 'H';
+            public static final char BINARY    = 'B'; /**< For "Binary files x and y differ" */
+        }
+
         protected Line(long rawPtr) {
             super(true, rawPtr);
         }

@@ -1,3 +1,5 @@
+build-*
+build
 # Compiled source #
 ###################
 *.com
@@ -67,6 +69,6 @@ atlassian-ide-plugin.xml
 
 # core dump
 
-# mvn settings 
+# mvn settings
 settings.xml
 

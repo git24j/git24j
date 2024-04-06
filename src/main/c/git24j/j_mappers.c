@@ -69,7 +69,7 @@ void j_git_buf_to_java(JNIEnv *env, git_buf *c_buf, jobject buf)
     assert(jclz && "Could not find Buf class from given buf object");
     j_call_setter_string_c(env, jclz, buf, "setPtr", c_buf->ptr);
     j_call_setter_int(env, jclz, buf, "setSize", c_buf->size);
-    j_call_setter_int(env, jclz, buf, "setAsize", c_buf->asize);
+    j_call_setter_int(env, jclz, buf, "setReserved", c_buf->reserved);
     (*env)->DeleteLocalRef(env, jclz);
 }
 
@@ -141,7 +141,7 @@ void j_git_buf_of_jstring(JNIEnv *env, git_buf *out_buf, jstring jstr)
     int size = (*env)->GetStringLength(env, jstr);
     const char *c_str = (*env)->GetStringUTFChars(env, jstr, NULL);
     strncpy(out_buf->ptr, c_str, size);
-    out_buf->asize = size + 1;
+    out_buf->reserved = size + 1;
     out_buf->size = size;
 }
 
@@ -219,17 +219,23 @@ jlongArray j_long_array_from_pointers(JNIEnv *env, const void **ptrs, size_t n)
 }
 
 /** get array of pointers from long[] */
-void **j_long_array_to_pointers(JNIEnv *env, jlongArray pointers, size_t *out_len)
+void **j_long_array_to_pointers(JNIEnv *env, jlongArray pointers, size_t *out_len, int freeJavaArr)
 {
     jsize np = (*env)->GetArrayLength(env, pointers);
-    void **c_parents = (void **)malloc(sizeof(void *) * np);
+    void **c_pointer = (void **)malloc(sizeof(void *) * np);
+
+    jlong *elements = (*env)->GetLongArrayElements(env, pointers, 0);
     for (jsize i = 0; i < np; i++)
     {
-        jlong *x = (*env)->GetLongArrayElements(env, pointers, 0);
-        c_parents[i] = (void *)(*x);
+        c_pointer[i] = (void *)elements[i];
     }
     *out_len = np;
-    return c_parents;
+
+    if(freeJavaArr != 0) {
+       (*env)->ReleaseLongArrayElements(env, pointers, (jlong*)elements, 0);
+    }
+
+    return c_pointer;
 }
 
 /** create c unsigned char array from jni jbyteArray. Caller must FREE the return pointer. */
@@ -417,21 +423,50 @@ void j_strarray_to_java_list(JNIEnv *env, git_strarray *src, jobject strList)
 /**Copy values from `String[] strArr` to `git_strarray *out`*/
 void j_strarray_from_java(JNIEnv *env, git_strarray *out, jobjectArray strArr)
 {
-    if (strArr == NULL)
+    if (strArr == NULL || out == NULL)
     {
         return;
     }
 
-    assert(out && "receiving git_strarray must not be null");
+//    assert(out && "receiving git_strarray must not be null");
     jsize len = (*env)->GetArrayLength(env, strArr);
-    git_strarray_free(out);
+
+    // free `out` memory and set fields value to NULL and 0
+    //btw: `git_strarray_free(out)` free more than 1time may cause program crash, so better don't use it
+    j_clear_git_strarray(out);
+
+    // now `out->strings` and `out->count` value is NULL and 0
+
+    //len<1 , src is an empty array, and before already make `out` array to empty, so needn't do further copy
+    if(len < 1) {
+        return;
+    }
+
+    //do copy
     out->strings = (char **)malloc(sizeof(char *) * len);
     for (jsize i = 0; i < len; i++)
     {
         jobject si = (*env)->GetObjectArrayElement(env, strArr, i);
         out->strings[i] = j_copy_of_jstring(env, (jstring)si, true);
+        (*env)->DeleteLocalRef(env, si);
     }
     out->count = len;
+}
+
+/** Copy values from `git_strarray *src` to `String[] out` */
+void j_strarray_to_java_array(JNIEnv *env, jobjectArray out, git_strarray *src)
+{
+    if (out == NULL || src==NULL)
+    {
+        return;
+    }
+
+    size_t len = src->count;
+
+    for (size_t i = 0; i < len; i++)
+    {
+        (*env)->SetObjectArrayElement(env, out, i, (*env)->NewStringUTF(env, src->strings[i]));
+    }
 }
 
 /** Copy values from git_signature to git24j.Signature. */
@@ -511,4 +546,18 @@ void __debug_inspect2(JNIEnv *env, jobject obj, const char *message, const char 
     (*env)->DeleteLocalRef(env, clzClz);
     (*env)->DeleteLocalRef(env, clsObj);
     (*env)->DeleteLocalRef(env, clz);
+}
+
+void j_clear_git_strarray(git_strarray* sarr){
+    int cnt = sarr->count;
+    if(cnt > 0) {
+        char ** s = sarr->strings;
+        for(size_t i=0; i<cnt; i++){
+            free(s[i]);
+        }
+        free(s);
+
+        sarr->strings=NULL;
+        sarr->count=0;
+    }
 }

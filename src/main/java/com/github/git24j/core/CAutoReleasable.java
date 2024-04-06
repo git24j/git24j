@@ -33,7 +33,7 @@ public abstract class CAutoReleasable {
         super.finalize();
     }
 
-    long getRawPointer() {
+    public long getRawPointer() {
         long ptr = _rawPtr.get();
         if (_isWeak) {
             return ptr;

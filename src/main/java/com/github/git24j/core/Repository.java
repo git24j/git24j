@@ -425,6 +425,9 @@ public class Repository extends CAutoCloseable {
     public void setHeadDetached(Oid oid) {
         Error.throwIfNeeded(jniSetHeadDetached(getRawPointer(), oid));
     }
+    public void setHeadDetachedFromAnnotated(AnnotatedCommit annotatedCommit) {
+        Error.throwIfNeeded(jniSetHeadDetachedFromAnnotated(getRawPointer(), annotatedCommit.getRawPointer()));
+    }
 
     /** Detach the HEAD. */
     public void detachHead() {
@@ -527,10 +530,10 @@ public class Repository extends CAutoCloseable {
     public Reference head() {
         Reference out = new Reference(true, 0);
         int e = jniHead(out._rawPtr, getRawPointer());
-        Error.throwIfNeeded(e);
         if (ENOTFOUND.getCode() == e || EUNBORNBRANCH.getCode() == e) {
             return null;
         }
+        Error.throwIfNeeded(e);
         return out;
     }
 
@@ -714,7 +717,7 @@ public class Repository extends CAutoCloseable {
         NONE(0),
         MERGE(1),
         REVERT(2),
-        SEQUENCE(3),
+        REVERT_SEQUENCE(3),
         CHERRYPICK(4),
         CHERRYPICK_SEQUENCE(5),
         BISECT(6),

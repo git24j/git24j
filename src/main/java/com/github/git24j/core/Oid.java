@@ -12,7 +12,7 @@ public class Oid {
     public static final int RAWSZ = 20;
     private static final char[] HEX_ARRAY = "0123456789abcdef".toCharArray();
     private static final String ZERO_HEX = "0000000000000000000000000000000000000000";
-    private static final byte[] ZERO_SHA = ZERO_HEX.getBytes();
+    private static final byte[] ZERO_SHA = new byte[]{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};  //len is 20
 
     /** in case of short sha, only up to {@code eSize} bytes are effective */
     private byte[] id = new byte[RAWSZ];
@@ -63,25 +63,29 @@ public class Oid {
             if (front4 < 0 || end4 < 0) {
                 throw new IllegalArgumentException("Invalid hex string: " + s);
             }
-            data[i / 2] = (byte) ((front4 << 4) + end4);
+            data[i / 2] = (byte) ((front4 << 4) | end4);  // maybe faster bit_or than + ?
         }
         return data;
     }
 
-    byte[] getId() {
+    public byte[] getId() {
         return id;
     }
 
-    void setId(byte[] id) {
+    public void setId(byte[] id) {
         this.id = id;
     }
 
-    boolean isEmpty() {
+    public boolean isEmpty() {
         return id == null || id.length == 0;
     }
 
-    boolean isZero() {
+    public boolean isZero() {
         return Arrays.equals(id, ZERO_SHA);
+    }
+
+    public boolean isNullOrEmptyOrZero() {
+        return isEmpty() || isZero();
     }
 
     @Override

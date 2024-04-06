@@ -37,7 +37,7 @@ public class GitObjectTest extends TestBase {
         Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder);
         GitObject obj = Revparse.single(testRepo, "master");
         Buf buf = obj.shortId();
-        Assert.assertTrue(buf.getAsize() > 0);
+        Assert.assertTrue(buf.getReserved() > 0);
     }
 
     @Test
