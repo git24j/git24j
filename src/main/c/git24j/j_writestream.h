@@ -9,9 +9,9 @@ extern "C"
 {
 #endif
 
-    JNIEXPORT jint JNICALL J_MAKE_METHOD(WriteStream_jniWrite)(JNIEnv *env, jclass obj, long wsPtr, jbyteArray content);
-    JNIEXPORT void JNICALL J_MAKE_METHOD(WriteStream_jniFree)(JNIEnv *env, jclass obj, long wsPtr);
-    JNIEXPORT jint JNICALL J_MAKE_METHOD(WriteStream_jniClose)(JNIEnv *env, jclass obj, long wsPtr);
+    JNIEXPORT jint JNICALL J_MAKE_METHOD(WriteStream_jniWrite)(JNIEnv *env, jclass obj, jlong wsPtr, jbyteArray content);
+    JNIEXPORT void JNICALL J_MAKE_METHOD(WriteStream_jniFree)(JNIEnv *env, jclass obj, jlong wsPtr);
+    JNIEXPORT jint JNICALL J_MAKE_METHOD(WriteStream_jniClose)(JNIEnv *env, jclass obj, jlong wsPtr);
 
 #ifdef __cplusplus
 }

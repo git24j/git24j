@@ -48,7 +48,7 @@ public class Reflog extends CAutoReleasable {
      * int git_transaction_set_reflog(git_transaction *tx, const char *refname, const git_reflog
      * *reflog);
      */
-    static native int jniSetReflog(long tx, String refname, long reflog);
+//    static native int jniSetReflog(long tx, String refname, long reflog);
 
     /** int git_reflog_write(git_reflog *reflog); */
     static native int jniWrite(long reflog);
@@ -90,9 +90,9 @@ public class Reflog extends CAutoReleasable {
         return reflog;
     }
 
-    public void transactionSetReflog(@Nonnull Transaction tx, @Nonnull String refname) {
-        Error.throwIfNeeded(jniSetReflog(tx.getRawPointer(), refname, getRawPointer()));
-    }
+//    public void transactionSetReflog(@Nonnull Transaction tx, @Nonnull String refname) {
+//        Error.throwIfNeeded(jniSetReflog(tx.getRawPointer(), refname, getRawPointer()));
+//    }
 
     public void write() {
         Error.throwIfNeeded(jniWrite(getRawPointer()));

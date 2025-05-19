@@ -68,7 +68,7 @@ public class Branch {
                         repo.getRawPointer(),
                         branchName,
                         target.getRawPointer(),
-                        force ? 0 : 1));
+                        force ? 1 : 0));
         return new Reference(false, outRef.get());
     }
 
@@ -130,7 +130,7 @@ public class Branch {
     public static Reference move(Reference branch, String branchName, boolean force) {
         Reference outRef = new Reference(true, 0);
         Error.throwIfNeeded(
-                jniMove(outRef._rawPtr, branch.getRawPointer(), branchName, force ? 0 : 1));
+                jniMove(outRef._rawPtr, branch.getRawPointer(), branchName, force ? 1 : 0));
         return outRef;
     }
 
@@ -234,7 +234,7 @@ public class Branch {
             return null;
         }
         Error.throwIfNeeded(e);
-        return outBuf.getPtr();
+        return outBuf.toString();
     }
 
     /**
@@ -291,7 +291,7 @@ public class Branch {
             return null;
         }
         Error.throwIfNeeded(e);
-        return outBuf.getPtr();
+        return outBuf.toString();
     }
 
     /**
@@ -311,7 +311,7 @@ public class Branch {
         if (e == GitException.ErrorCode.ENOTFOUND.getCode()) {
             return null;
         }
-        return outBuf.getPtr();
+        return outBuf.toString();
     }
 
     public enum BranchType implements IBitEnum {
@@ -326,7 +326,7 @@ public class Branch {
             _bit = bit;
         }
 
-        static BranchType valueOf(int iVal) {
+        public static BranchType valueOf(int iVal) {
             return IBitEnum.valueOf(iVal, BranchType.class, INVALID);
         }
 
@@ -360,7 +360,7 @@ public class Branch {
 
         @Override
         protected void finalize() throws Throwable {
-            if (_ptr.get() > 0) {
+            if (_ptr.get() != 0) {
                 jniIteratorFree(_ptr.get());
             }
             super.finalize();

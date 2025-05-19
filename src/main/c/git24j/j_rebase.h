@@ -94,6 +94,8 @@ extern "C"
     /** git_commit_signing_cb signing_cb*/
     JNIEXPORT void JNICALL J_MAKE_METHOD(Rebase_jniOptionsSetSigningCb)(JNIEnv *env, jclass obj, jlong optionsPtr, jobject signingCb);
 
+    JNIEXPORT void JNICALL J_MAKE_METHOD(Rebase_jniOptionsSetPayload)(JNIEnv *env, jclass obj, jlong optionsPtr, jlong payload);
+
 #ifdef __cplusplus
 }
 #endif

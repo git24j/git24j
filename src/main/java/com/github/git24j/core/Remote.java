@@ -2,7 +2,6 @@ package com.github.git24j.core;
 
 import static com.github.git24j.core.GitException.ErrorCode.ENOTFOUND;
 
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -29,8 +28,7 @@ public class Remote extends CAutoReleasable {
 
     static native int jniCallbacksNew(AtomicLong outCb, int version);
 
-    static native void jniCallbacksSetCallbackObject(
-            long cbsPtr, Callbacks cbsObject, int callbackType);
+    static native void jniCallbacksSetCallbackObject(long cbsPtr, Callbacks cbsObject, int callbackType);
 
     static native void jniCallbacksTest(long cbsPtr, Callbacks callbacks);
 
@@ -64,7 +62,7 @@ public class Remote extends CAutoReleasable {
     /** int git_remote_create_detached(git_remote **out, const char *url); */
     static native int jniCreateDetached(AtomicLong out, String url);
 
-    static native int jniCreateOptionsFree(long optsPtr);
+    static native void jniCreateOptionsFree(long optsPtr);
 
     /** const char *fetchspec */
     static native String jniCreateOptionsGetFetchspec(long create_optionsPtr);
@@ -135,7 +133,7 @@ public class Remote extends CAutoReleasable {
      */
     static native int jniFetch(long remote, String[] refspecs, long opts, String reflogMessage);
 
-    static native int jniFetchOptionsFree(long ptr);
+    static native void jniFetchOptionsFree(long ptr);
 
     /** git_remote_callbacks callbacks */
     static native long jniFetchOptionsGetCallbacks(long fetch_optionsPtr);
@@ -170,7 +168,10 @@ public class Remote extends CAutoReleasable {
     static native int jniFetchOptionsNew(AtomicLong outPtr, int version);
 
     /** git_remote_callbacks callbacks */
-    static native void jniFetchOptionsSetCallbacks(long fetch_optionsPtr, Callbacks callbacks);
+//    static native void jniFetchOptionsSetCallbacks(long fetch_optionsPtr, Callbacks callbacks);
+
+    /** git_remote_init_callbacks */
+    static native int jniInitCallbacks(long remoteCallbacksPtr, int version);
 
     /** git_strarray custom_headers */
     static native void jniFetchOptionsSetCustomHeaders(
@@ -251,13 +252,21 @@ public class Remote extends CAutoReleasable {
     /** git_strarray custom_headers */
     static native void jniPushOptionsSetCustomHeaders(long push_optionsPtr, String[] customHeaders);
 
+    /**
+     * "Push options" to deliver to the remote.
+     *
+     * @since libgit2 1.8
+     */
+    static native void jniPushOptionsSetRemotePushOptions(long push_optionsPtr, String[] remotePushOptions);
+    static native void jniPushOptionsGetRemotePushOptions(long push_optionsPtr, List<String> outRemotePushOptions);
+
     /** unsigned int pb_parallelism */
     static native void jniPushOptionsSetPbParallelism(long push_optionsPtr, int pbParallelism);
 
     /** unsigned int version */
     static native void jniPushOptionsSetVersion(long push_optionsPtr, int version);
 
-    static native char jniPushUpdateFree(long push_updatePtr);
+    static native void jniPushUpdateFree(long push_updatePtr);
 
     /** git_oid dst */
     static native byte[] jniPushUpdateGetDst(long push_updatePtr);
@@ -382,9 +391,9 @@ public class Remote extends CAutoReleasable {
      * @throws GitException GIT_EINVALIDSPEC, GIT_EEXISTS or an error code
      */
     @Nonnull
-    public static Remote create(@Nonnull Repository repo, @Nonnull String name, @Nonnull URI url) {
+    public static Remote create(@Nonnull Repository repo, @Nonnull String name, @Nonnull String url) {
         Remote remote = new Remote(false, 0);
-        Error.throwIfNeeded(jniCreate(remote._rawPtr, repo.getRawPointer(), name, url.toString()));
+        Error.throwIfNeeded(jniCreate(remote._rawPtr, repo.getRawPointer(), name, url));
         return remote;
     }
 
@@ -400,10 +409,10 @@ public class Remote extends CAutoReleasable {
      * @throws GitException git errors
      */
     @Nonnull
-    public static Remote createAnonymous(@Nonnull Repository repo, @Nonnull URI url) {
+    public static Remote createAnonymous(@Nonnull Repository repo, @Nonnull String url) {
         Remote remote = new Remote(false, 0);
         Error.throwIfNeeded(
-                jniCreateAnonymous(remote._rawPtr, repo.getRawPointer(), url.toString()));
+                jniCreateAnonymous(remote._rawPtr, repo.getRawPointer(), url));
         return remote;
     }
 
@@ -421,9 +430,9 @@ public class Remote extends CAutoReleasable {
      * @throws GitException git errors
      */
     @Nonnull
-    public static Remote createDetached(@Nonnull URI url) {
+    public static Remote createDetached(@Nonnull String url) {
         Remote remote = new Remote(false, 0);
-        Error.throwIfNeeded(jniCreateDetached(remote._rawPtr, url.toString()));
+        Error.throwIfNeeded(jniCreateDetached(remote._rawPtr, url));
         return remote;
     }
 
@@ -442,12 +451,12 @@ public class Remote extends CAutoReleasable {
     public static Remote createWithFetchspec(
             @Nonnull Repository repo,
             @Nonnull String name,
-            @Nonnull URI url,
+            @Nonnull String url,
             @Nullable String fetch) {
         Remote remote = new Remote(false, 0);
         Error.throwIfNeeded(
                 jniCreateWithFetchspec(
-                        remote._rawPtr, repo.getRawPointer(), name, url.toString(), fetch));
+                        remote._rawPtr, repo.getRawPointer(), name, url, fetch));
         return remote;
     }
 
@@ -464,11 +473,11 @@ public class Remote extends CAutoReleasable {
      * @throws GitException GIT_EINVALIDSPEC, GIT_EEXISTS or an error code
      */
     @Nonnull
-    public static Remote createWithOpts(@Nonnull URI url, @Nullable CreateOptions opts) {
+    public static Remote createWithOpts(@Nonnull String url, @Nullable CreateOptions opts) {
         Remote remote = new Remote(false, 0);
         Error.throwIfNeeded(
                 jniCreateWithOpts(
-                        remote._rawPtr, url.toString(), opts == null ? 0 : opts.getRawPointer()));
+                        remote._rawPtr, url, opts == null ? 0 : opts.getRawPointer()));
         return remote;
     }
 
@@ -575,9 +584,9 @@ public class Remote extends CAutoReleasable {
      * @throws GitException git errors
      */
     public static void setPushurl(
-            @Nonnull Repository repo, @Nonnull String remote, @Nullable URI url) {
+            @Nonnull Repository repo, @Nonnull String remote, @Nullable String url) {
         Error.throwIfNeeded(
-                jniSetPushurl(repo.getRawPointer(), remote, url == null ? null : url.toString()));
+                jniSetPushurl(repo.getRawPointer(), remote, url));
     }
 
     /**
@@ -591,9 +600,9 @@ public class Remote extends CAutoReleasable {
      * @param url the url to set, null to delete the remote from config
      * @throws GitException git errors
      */
-    public static void setUrl(@Nonnull Repository repo, @Nonnull String remote, @Nullable URI url) {
+    public static void setUrl(@Nonnull Repository repo, @Nonnull String remote, @Nullable String url) {
         Error.throwIfNeeded(
-                jniSetUrl(repo.getRawPointer(), remote, url == null ? null : url.toString()));
+                jniSetUrl(repo.getRawPointer(), remote, url));
     }
 
     @Override
@@ -853,11 +862,12 @@ public class Remote extends CAutoReleasable {
      *
      * <p>If url.*.pushInsteadOf has been configured for this URL, it will return the modified URL.
      *
-     * @return the url or empty if no special url for pushing is set
+     * @return the url or null if no special url for pushing is set
      */
     @Nullable
-    public URI pushurl() {
-        return Optional.ofNullable(jniPushurl(getRawPointer())).map(URI::create).orElse(null);
+    public String pushurl() {
+//        return Optional.ofNullable(jniPushurl(getRawPointer())).map(URI::create).orElse(null);
+        return jniPushurl(getRawPointer());
     }
 
     /**
@@ -942,12 +952,12 @@ public class Remote extends CAutoReleasable {
      *
      * <p>If url.*.insteadOf has been configured for this URL, it will return the modified URL.
      *
-     * @return URI that represents the url
-     * @throws IllegalStateException if remote url is not a valid URI
+     * @return the url string
      */
     @Nonnull
-    public URI url() {
-        return URI.create(jniUrl(getRawPointer()));
+    public String url() {
+        String url = jniUrl(getRawPointer());
+        return url==null ? "" : url;
     }
 
     public enum AutotagOptionT implements IBitEnum {
@@ -1423,7 +1433,8 @@ public class Remote extends CAutoReleasable {
          *
          * @return 0 if no credential was acquired, > 0 if credentials acquired successfully, < 0 will not happened
          */
-        long acquireCred(String url, String usernameFromUrl, int allowedTypes) {
+        //this method only used by jni, so set it to private is ok
+        private long acquireCred(String url, String usernameFromUrl, int allowedTypes) {
             if (_credAcquireCb != null) {
                 return Optional.ofNullable(
                                 _credAcquireCb.acquire(url, usernameFromUrl, allowedTypes))
@@ -1433,14 +1444,14 @@ public class Remote extends CAutoReleasable {
             return 0;
         }
 
-        int transportMessage(String message) {
+        private int transportMessage(String message) {
             if (_transportMsg != null) {
                 return _transportMsg.accept(message);
             }
             return 0;
         }
 
-        int complete(int type) {
+        private int complete(int type) {
             if (_completionCb != null) {
                 CompletionT completionT =
                         type == 0
@@ -1451,7 +1462,7 @@ public class Remote extends CAutoReleasable {
             return 0;
         }
 
-        int transportMessageCheck(long certPtr, int valid, String host) {
+        private int transportMessageCheck(long certPtr, int valid, String host) {
             if (_certificateCheckCb != null) {
                 Cert cert = certPtr == 0 ? null : new Cert(true, certPtr);
                 return _certificateCheckCb.accept(cert, valid != 0, host);
@@ -1459,7 +1470,7 @@ public class Remote extends CAutoReleasable {
             return 0;
         }
 
-        int transferProgress(long progressPtr) {
+        private int transferProgress(long progressPtr) {
             if (_transferProgressCb != null) {
                 TransferProgress progress =
                         progressPtr == 0 ? null : new TransferProgress(true, progressPtr);
@@ -1468,7 +1479,7 @@ public class Remote extends CAutoReleasable {
             return 0;
         }
 
-        int updateTips(String refname, byte[] ida, byte[] idb) {
+        private int updateTips(String refname, byte[] ida, byte[] idb) {
             if (_updateTipsCb != null) {
                 Oid oida = ida == null ? null : Oid.of(ida);
                 Oid oidb = idb == null ? null : Oid.of(idb);
@@ -1477,28 +1488,28 @@ public class Remote extends CAutoReleasable {
             return 0;
         }
 
-        int packProgress(int stage, long current, long total) {
+        private int packProgress(int stage, long current, long total) {
             if (_packProgressCb != null) {
                 return _packProgressCb.accept(stage, current, total);
             }
             return 0;
         }
 
-        int pushTransferProgress(long current, long total, int bytes) {
+        private int pushTransferProgress(long current, long total, int bytes) {
             if (_pushTransferProgressCb != null) {
                 return _pushTransferProgressCb.accept(current, total, bytes);
             }
             return 0;
         }
 
-        int pushUpdateReference(String refname, String status) {
+        private int pushUpdateReference(String refname, String status) {
             if (_pushUpdateReferenceCb != null) {
                 return _pushUpdateReferenceCb.accept(refname, status);
             }
             return 0;
         }
 
-        int pushNegotiation(long[] updates) {
+        private int pushNegotiation(long[] updates) {
             if (_pushNegotiationCb != null) {
                 if (updates == null) {
                     return _pushNegotiationCb.accept(Collections.emptyList());
@@ -1511,7 +1522,7 @@ public class Remote extends CAutoReleasable {
             return 0;
         }
 
-        int resolveUrl(String resolvedUrl, String url, int direction) {
+        private int resolveUrl(String resolvedUrl, String url, int direction) {
             if (_urlResolveCb != null) {
                 return _urlResolveCb.accept(
                         resolvedUrl, url, direction == 0 ? Direction.FETCH : Direction.PUSH);
@@ -1533,7 +1544,7 @@ public class Remote extends CAutoReleasable {
          * @param ownerPtr
          * @return <0 for error,
          */
-        long transport(long ownerPtr) {
+        private long transport(long ownerPtr) {
             if (_transportCb != null) {
                 Remote remote = ownerPtr == 0 ? null : new Remote(true, ownerPtr);
                 return Optional.ofNullable(_transportCb.accept(remote))

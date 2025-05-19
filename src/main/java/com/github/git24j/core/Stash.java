@@ -12,7 +12,7 @@ public final class Stash {
      */
     static native int jniApply(long repoPtr, int index, long options);
 
-    static native int jniApplyOptionsFree(long applyOptionsPtr);
+    static native void jniApplyOptionsFree(long applyOptionsPtr);
 
     /** git_checkout_options checkout_options */
     static native long jniApplyOptionsGetCheckoutOptions(long apply_optionsPtr);

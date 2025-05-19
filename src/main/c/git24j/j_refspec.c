@@ -14,7 +14,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Refspec_jniParse)(JNIEnv *env, jclass obj, 
     git_refspec *c_refspec = 0;
     char *c_input = j_copy_of_jstring(env, input, true);
     int r = git_refspec_parse(&c_refspec, c_input, is_fetch);
-    (*env)->CallVoidMethod(env, refspec, jniConstants->midAtomicLongSet, (long)c_refspec);
+    (*env)->CallVoidMethod(env, refspec, jniConstants->midAtomicLongSet, (jlong)c_refspec);
     /* git_refspec_free(c_refspec); */
     free(c_input);
     return r;

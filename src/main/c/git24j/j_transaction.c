@@ -14,7 +14,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Transaction_jniNew)(JNIEnv *env, jclass obj
 {
     git_transaction *c_out = 0;
     int r = git_transaction_new(&c_out, (git_repository *)repoPtr);
-    (*env)->CallVoidMethod(env, out, jniConstants->midAtomicLongSet, (long)c_out);
+    (*env)->CallVoidMethod(env, out, jniConstants->midAtomicLongSet, (jlong)c_out);
     /* git_transaction_free(c_out); */
     return r;
 }

@@ -30,6 +30,7 @@ public class Cherrypick {
 
     /** unsigned int mainline */
     static native int jniOptionsGetMainline(long optionsPtr);
+    static native void jniOptionsSetMainline(long optionsPtr, int mainline);
     /** git_merge_options merge_opts */
     static native long jniOptionsGetMergeOpts(long optionsPtr);
     /** git_checkout_options checkout_opts */
@@ -69,7 +70,7 @@ public class Cherrypick {
         return out;
     }
 
-    public void cherrypick(
+    public static void cherrypick(
             @Nonnull Repository repo, @Nonnull Commit commit, @Nullable Options options) {
         int e =
                 jniCherrypick(
@@ -105,6 +106,10 @@ public class Cherrypick {
 
         public int getMainline() {
             return jniOptionsGetMainline(getRawPointer());
+        }
+
+        public void setMainline(int mainline) {
+            jniOptionsSetMainline(getRawPointer(), mainline);
         }
 
         public Merge.Options getMergeOpts() {

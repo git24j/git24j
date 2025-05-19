@@ -16,7 +16,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Signature_jniNew)(JNIEnv *env, jclass obj, 
     char *c_name = j_copy_of_jstring(env, name, true);
     char *c_email = j_copy_of_jstring(env, email, true);
     int r = git_signature_new(&c_out, c_name, c_email, time, offset);
-    (*env)->CallVoidMethod(env, out, jniConstants->midAtomicLongSet, (long)c_out);
+    (*env)->CallVoidMethod(env, out, jniConstants->midAtomicLongSet, (jlong)c_out);
     free(c_name);
     free(c_email);
     return r;
@@ -30,7 +30,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Signature_jniNow)(JNIEnv *env, jclass obj, 
     char *c_email = j_copy_of_jstring(env, email, true);
 
     int r = git_signature_now(&c_out, c_name, c_email);
-    (*env)->CallVoidMethod(env, out, jniConstants->midAtomicLongSet, (long)c_out);
+    (*env)->CallVoidMethod(env, out, jniConstants->midAtomicLongSet, (jlong)c_out);
     free(c_name);
     free(c_email);
     return r;
@@ -41,7 +41,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Signature_jniDefault)(JNIEnv *env, jclass o
 {
     git_signature *c_out = 0;
     int r = git_signature_default(&c_out, (git_repository *)repoPtr);
-    (*env)->CallVoidMethod(env, out, jniConstants->midAtomicLongSet, (long)c_out);
+    (*env)->CallVoidMethod(env, out, jniConstants->midAtomicLongSet, (jlong)c_out);
     return r;
 }
 
@@ -51,7 +51,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Signature_jniFromBuffer)(JNIEnv *env, jclas
     git_signature *c_out = 0;
     char *c_buf = j_copy_of_jstring(env, buf, true);
     int r = git_signature_from_buffer(&c_out, c_buf);
-    (*env)->CallVoidMethod(env, out, jniConstants->midAtomicLongSet, (long)c_out);
+    (*env)->CallVoidMethod(env, out, jniConstants->midAtomicLongSet, (jlong)c_out);
     free(c_buf);
     return r;
 }
@@ -61,7 +61,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Signature_jniDup)(JNIEnv *env, jclass obj, 
 {
     git_signature *c_dest = 0;
     int r = git_signature_dup(&c_dest, (git_signature *)sigPtr);
-    (*env)->CallVoidMethod(env, dest, jniConstants->midAtomicLongSet, (long)c_dest);
+    (*env)->CallVoidMethod(env, dest, jniConstants->midAtomicLongSet, (jlong)c_dest);
     return r;
 }
 

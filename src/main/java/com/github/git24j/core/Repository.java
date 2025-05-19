@@ -25,7 +25,7 @@ public class Repository extends CAutoCloseable {
 
     static native int jniFetchheadForeach(long repoPtr, FetchHeadForeachCb cb);
 
-    static native int jniFree(long repoPtr);
+    static native void jniFree(long repoPtr);
 
     static native String jniGetNamespace(long repoPtr);
 
@@ -53,7 +53,7 @@ public class Repository extends CAutoCloseable {
 
     static native int jniIsEmpty(long repoPtr);
 
-    static native int jniIsShadow(long repoPtr);
+    static native int jniIsShallow(long repoPtr);
 
     static native int jniIsWorktree(long repoPtr);
 
@@ -116,15 +116,15 @@ public class Repository extends CAutoCloseable {
      */
     @Nonnull
     public static Repository open(@Nonnull Path path) {
-        AtomicLong outRepo = new AtomicLong();
-        int error = jniOpen(outRepo, path.toString());
-        Error.throwIfNeeded(error);
-        return new Repository(outRepo.get());
+        return open(path.toString());
     }
 
     @Nonnull
     public static Repository open(@Nonnull String path) {
-        return open(Paths.get(path));
+        AtomicLong outRepo = new AtomicLong();
+        int error = jniOpen(outRepo, path);
+        Error.throwIfNeeded(error);
+        return new Repository(outRepo.get());
     }
 
     /**
@@ -241,10 +241,9 @@ public class Repository extends CAutoCloseable {
      *
      * @return the path to the working dir, if it exists
      */
-    @Nonnull
-    public Path workdir() {
-        String wd = jniWorkdir(getRawPointer());
-        return Paths.get(wd);
+    @CheckForNull
+    public String workdir() {
+        return jniWorkdir(getRawPointer());
     }
 
     /**
@@ -470,8 +469,14 @@ public class Repository extends CAutoCloseable {
     }
 
     /** Determine if the repository was a shallow clone. */
+    public boolean isShallow() {
+        return jniIsShallow(getRawPointer()) == 1;
+    }
+
+    /** backward compatible, please use `isShallow()` instead */
+    @Deprecated
     public boolean isShadow() {
-        return jniIsShadow(getRawPointer()) == 1;
+        return isShallow();
     }
 
     //
@@ -517,7 +522,7 @@ public class Repository extends CAutoCloseable {
 
     /** Close the repository, no-op if not opened. */
     public void free() {
-        if (_rawPtr.get() > 0) {
+        if (_rawPtr.get() != 0) {
             jniFree(_rawPtr.getAndSet(0));
         }
     }
@@ -641,6 +646,7 @@ public class Repository extends CAutoCloseable {
         return Objects.hashCode(getPath());
     }
 
+    // https://libgit2.org/docs/reference/main/repository/git_repository_item_t.html
     public enum Item {
         GITDIR,
         WORKDIR,
@@ -656,6 +662,7 @@ public class Repository extends CAutoCloseable {
         LOGS,
         MODULES,
         WORKTREES,
+        WORKTREE_CONFIG,
         LAST
     }
 
@@ -916,7 +923,8 @@ public class Repository extends CAutoCloseable {
     }
 
     public abstract static class FetchHeadForeachCb {
-        int accept(String remoteUrl, byte[] oidRaw, int isMerge) {
+        // this method only used by jni, so set it to private is ok, user should overwrite `call` method
+        private int accept(String remoteUrl, byte[] oidRaw, int isMerge) {
             return call(remoteUrl, Oid.of(oidRaw), isMerge == 1);
         }
 
@@ -932,7 +940,7 @@ public class Repository extends CAutoCloseable {
     }
 
     public abstract static class MergeheadForeachCb {
-        int accept(byte[] oidRaw) {
+        private int accept(byte[] oidRaw) {
             return call(Oid.of(oidRaw));
         }
 

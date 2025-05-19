@@ -5,6 +5,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 public class PackBuilder extends CAutoReleasable {
+
     /** int git_packbuilder_foreach(git_packbuilder *pb, git_packbuilder_foreach_cb * cb); */
     static native int jniForeach(long pb, Internals.BArrCallback cb);
 

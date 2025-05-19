@@ -15,7 +15,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(FilterList_jniLoad)(JNIEnv *env, jclass obj
     git_filter_list *c_filters;
     char *c_path = j_copy_of_jstring(env, path, true);
     int r = git_filter_list_load(&c_filters, (git_repository *)repoPtr, (git_blob *)blobPtr, c_path, mode, flags);
-    (*env)->CallVoidMethod(env, filters, jniConstants->midAtomicLongSet, (long)c_filters);
+    (*env)->CallVoidMethod(env, filters, jniConstants->midAtomicLongSet, (jlong)c_filters);
     /* git_filter_list_free(c_filters); */
     free(c_path);
     return r;

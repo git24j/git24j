@@ -15,7 +15,7 @@ extern "C"
     JNIEXPORT jint JNICALL J_MAKE_METHOD(GitObject_jniType)(JNIEnv *env, jclass obj, jlong objPtr);
 
     /** const git_oid * git_object_id(const git_object *obj); */
-    JNIEXPORT void JNICALL J_MAKE_METHOD(GitObject_jniId)(JNIEnv *env, jclass obj, jobject objPtr, jobject outId);
+    JNIEXPORT void JNICALL J_MAKE_METHOD(GitObject_jniId)(JNIEnv *env, jclass obj, jlong objPtr, jobject outId);
 
     /**int git_object_short_id(git_buf *out, const git_object *obj); */
     JNIEXPORT jint JNICALL J_MAKE_METHOD(GitObject_jniShortId)(JNIEnv *env, jclass obj, jobject outBuf, jlong objPtr);

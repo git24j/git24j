@@ -653,7 +653,7 @@ public class Reference extends CAutoReleasable {
     public Reference resolve() {
         AtomicLong outRef = new AtomicLong();
         Error.throwIfNeeded(jniResolve(outRef, getRawPointer()));
-        return outRef.get() > 0 ? new Reference(false, outRef.get()) : null;
+        return outRef.get() != 0 ? new Reference(false, outRef.get()) : null;
     }
 
     /**
@@ -687,7 +687,7 @@ public class Reference extends CAutoReleasable {
     public Reference symbolicSetTarget(@Nonnull String target, @Nonnull String logMessage) {
         AtomicLong outRef = new AtomicLong();
         Error.throwIfNeeded(jniSymbolicSetTarget(outRef, getRawPointer(), target, logMessage));
-        return outRef.get() > 0 ? new Reference(false, outRef.get()) : null;
+        return outRef.get() != 0 ? new Reference(false, outRef.get()) : null;
     }
 
     /**

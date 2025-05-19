@@ -50,7 +50,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Note_jniIteratorNew)(JNIEnv *env, jclass ob
     git_note_iterator *c_out = 0;
     char *c_notes_ref = j_copy_of_jstring(env, notes_ref, true);
     int r = git_note_iterator_new(&c_out, (git_repository *)repoPtr, c_notes_ref);
-    (*env)->CallVoidMethod(env, out, jniConstants->midAtomicLongSet, (long)c_out);
+    (*env)->CallVoidMethod(env, out, jniConstants->midAtomicLongSet, (jlong)c_out);
     /* git_note_iterator_free(c_out); */
     free(c_notes_ref);
     return r;
@@ -61,7 +61,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Note_jniCommitIteratorNew)(JNIEnv *env, jcl
 {
     git_note_iterator *c_out = 0;
     int r = git_note_commit_iterator_new(&c_out, (git_commit *)notesCommitPtr);
-    (*env)->CallVoidMethod(env, out, jniConstants->midAtomicLongSet, (long)c_out);
+    (*env)->CallVoidMethod(env, out, jniConstants->midAtomicLongSet, (jlong)c_out);
     /* git_note_iterator_free(c_out); */
     return r;
 }
@@ -91,7 +91,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Note_jniRead)(JNIEnv *env, jclass obj, jobj
     git_oid c_oid;
     j_git_oid_from_java(env, oid, &c_oid);
     int r = git_note_read(&c_out, (git_repository *)repoPtr, c_notes_ref, &c_oid);
-    (*env)->CallVoidMethod(env, out, jniConstants->midAtomicLongSet, (long)c_out);
+    (*env)->CallVoidMethod(env, out, jniConstants->midAtomicLongSet, (jlong)c_out);
     /* git_note_free(c_out); */
     free(c_notes_ref);
     return r;
@@ -104,7 +104,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Note_jniCommitRead)(JNIEnv *env, jclass obj
     git_oid c_oid;
     j_git_oid_from_java(env, oid, &c_oid);
     int r = git_note_commit_read(&c_out, (git_repository *)repoPtr, (git_commit *)notesCommitPtr, &c_oid);
-    (*env)->CallVoidMethod(env, out, jniConstants->midAtomicLongSet, (long)c_out);
+    (*env)->CallVoidMethod(env, out, jniConstants->midAtomicLongSet, (jlong)c_out);
     /* git_note_free(c_out); */
     return r;
 }

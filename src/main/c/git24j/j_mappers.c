@@ -67,7 +67,8 @@ void j_git_buf_to_java(JNIEnv *env, git_buf *c_buf, jobject buf)
     assert(buf && "receiving object must not be null");
     jclass jclz = (*env)->GetObjectClass(env, buf);
     assert(jclz && "Could not find Buf class from given buf object");
-    j_call_setter_string_c(env, jclz, buf, "setPtr", c_buf->ptr);
+//    j_call_setter_string_c(env, jclz, buf, "setPtr", c_buf->ptr);
+    j_call_setter_byte_array(env, jclz, buf, "setPtr", j_byte_array_from_c(env, c_buf->ptr, c_buf->size));
     j_call_setter_int(env, jclz, buf, "setSize", c_buf->size);
     j_call_setter_int(env, jclz, buf, "setReserved", c_buf->reserved);
     (*env)->DeleteLocalRef(env, jclz);
@@ -138,11 +139,16 @@ void j_git_buf_of_jstring(JNIEnv *env, git_buf *out_buf, jstring jstr)
     }
     assert(out_buf && "out_buf must not be null");
     git_buf_dispose(out_buf);
-    int size = (*env)->GetStringLength(env, jstr);
+//    int size = (*env)->GetStringLength(env, jstr); // this size is java char length, not byte length
     const char *c_str = (*env)->GetStringUTFChars(env, jstr, NULL);
-    strncpy(out_buf->ptr, c_str, size);
-    out_buf->reserved = size + 1;
-    out_buf->size = size;
+
+    // maybe null when no more memory
+    if(c_str != NULL) {
+        int size = strlen(c_str);  // bytes length of string
+        strncpy(out_buf->ptr, c_str, size);
+        out_buf->reserved = size + 1;
+        out_buf->size = size;
+    }
 }
 
 int j_get_int_field(JNIEnv *env, jclass jclz, jobject obj, const char *fieldName)
@@ -197,7 +203,7 @@ void index_entry_from_java(JNIEnv *env, git_index_entry *c_entry, jobject entry)
 /** create jni jbyteArray from c unsigned char array. */
 jbyteArray j_byte_array_from_c(JNIEnv *env, const unsigned char *buf, int len)
 {
-    if (buf == NULL || len == 0)
+    if (buf == NULL || len < 1)
     {
         return NULL;
     }
@@ -367,8 +373,10 @@ void j_call_setter_string(JNIEnv *env, jclass clz, jobject obj, const char *meth
     (*env)->CallVoidMethod(env, obj, setter, val);
 }
 
+// the param `val` should end with '\0'
 void j_call_setter_string_c(JNIEnv *env, jclass clz, jobject obj, const char *method, const char *val)
 {
+    //NewStringUTF get length of c chars by '\0'
     jstring jVal = (*env)->NewStringUTF(env, val);
     j_call_setter_string(env, clz, obj, method, jVal);
     (*env)->DeleteLocalRef(env, jVal);

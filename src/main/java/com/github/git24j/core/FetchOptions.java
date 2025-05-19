@@ -43,6 +43,7 @@ public class FetchOptions extends CAutoReleasable {
     public void setDepth(int depth) {
         jniFetchOptionsSetDepth(getRawPointer(), depth);
     }
+
     public RedirectT getFollowRedirects() {
         int r = jniFetchOptionsGetFollowRedirects(getRawPointer());
         return IBitEnum.valueOf(r, RedirectT.class);
@@ -127,5 +128,17 @@ public class FetchOptions extends CAutoReleasable {
         PRUNE,
         /** Force pruning off */
         NO_PRUNE,
+    }
+
+
+    /** Constants for fetch depth (shallowness of fetch).
+     *  `git_fetch_depth_t` in libgit2
+     * */
+    public static class DepthT{
+        /** The fetch is "full" (not shallow). This is the default. */
+        public static final int FULL = 0;  // libgit2: `GIT_FETCH_DEPTH_FULL`
+
+        /** The fetch should "unshallow" and fetch missing data. */
+        public static final int UNSHALLOW = 2147483647;  // libgit2: `GIT_FETCH_DEPTH_UNSHALLOW`
     }
 }

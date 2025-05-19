@@ -124,7 +124,7 @@ extern "C"
     JNIEXPORT jint JNICALL J_MAKE_METHOD(Diff_jniFormatEmailInitOptions)(JNIEnv *env, jclass obj, jlong optsPtr, jint version);
 
     /** new and init git_diff_format_email_options */
-    JNIEXPORT jint JNICALL J_MAKE_METHOD(Diff_jniFormatEmailNewOptions)(JNIEnv *env, jclass obj, jlong optsPtr, jobject outPtr, jint version);
+    JNIEXPORT jint JNICALL J_MAKE_METHOD(Diff_jniFormatEmailNewOptions)(JNIEnv *env, jclass obj, jobject outPtr, jint version);
 
     /** free git_diff_format_email_options *opts. */
     JNIEXPORT void JNICALL J_MAKE_METHOD(Diff_jniFormatEmailOptionsFree)(JNIEnv *env, jclass obj, jlong optsPtr);
@@ -179,7 +179,7 @@ extern "C"
     JNIEXPORT jint JNICALL J_MAKE_METHOD(Diff_jniHunkGetHeaderLen)(JNIEnv *env, jclass obj, jlong hunkPtr);
     /** const char*   header*/
     JNIEXPORT jstring JNICALL J_MAKE_METHOD(Diff_jniHunkGetHeader)(JNIEnv *env, jclass obj, jlong hunkPtr);
-
+    JNIEXPORT jbyteArray JNICALL J_MAKE_METHOD(Diff_jniHunkGetHeaderBytes)(JNIEnv *env, jclass obj, jlong hunkPtr);
     /************ diff line *************/
     /** char   origin*/
     JNIEXPORT jchar JNICALL J_MAKE_METHOD(Diff_jniLineGetOrigin)(JNIEnv *env, jclass obj, jlong linePtr);
@@ -195,6 +195,7 @@ extern "C"
     JNIEXPORT jint JNICALL J_MAKE_METHOD(Diff_jniLineGetContentOffset)(JNIEnv *env, jclass obj, jlong linePtr);
     /** const char *content*/
     JNIEXPORT jstring JNICALL J_MAKE_METHOD(Diff_jniLineGetContent)(JNIEnv *env, jclass obj, jlong linePtr);
+    JNIEXPORT jbyteArray JNICALL J_MAKE_METHOD(Diff_jniLineGetContentBytes)(JNIEnv *env, jclass obj, jlong linePtr);
 
     /************ diff binary *************/
     /** unsigned int contains_data*/

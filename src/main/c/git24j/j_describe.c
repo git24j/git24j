@@ -14,7 +14,7 @@ JNIEXPORT int JNICALL J_MAKE_METHOD(Describe_jniOptionsNew)(JNIEnv *env, jclass 
     git_describe_options *opts = (git_describe_options *)malloc(sizeof(git_describe_options));
     opts->pattern = NULL;
     int r = git_describe_options_init(opts, (unsigned int)version);
-    (*env)->CallVoidMethod(env, outOpts, jniConstants->midAtomicLongSet, (long)opts);
+    (*env)->CallVoidMethod(env, outOpts, jniConstants->midAtomicLongSet, (jlong)opts);
     return r;
 }
 
@@ -99,7 +99,7 @@ JNIEXPORT int JNICALL J_MAKE_METHOD(Describe_jniFormatOptionsNew)(JNIEnv *env, j
     git_describe_format_options *opts = (git_describe_format_options *)malloc(sizeof(git_describe_format_options));
     opts->dirty_suffix = NULL;
     int r = git_describe_format_options_init(opts, version);
-    (*env)->CallVoidMethod(env, outOpts, jniConstants->midAtomicLongSet, (long)opts);
+    (*env)->CallVoidMethod(env, outOpts, jniConstants->midAtomicLongSet, (jlong)opts);
     return r;
 }
 
@@ -175,7 +175,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Describe_jniWorkdir)(JNIEnv *env, jclass ob
 {
     git_describe_result *c_out;
     int r = git_describe_workdir(&c_out, (git_repository *)repoPtr, (git_describe_options *)optsPtr);
-    (*env)->CallVoidMethod(env, out, jniConstants->midAtomicLongSet, (long)c_out);
+    (*env)->CallVoidMethod(env, out, jniConstants->midAtomicLongSet, (jlong)c_out);
     /* git_describe_result_free(c_out); */
     return r;
 }

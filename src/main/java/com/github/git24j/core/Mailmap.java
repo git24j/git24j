@@ -70,7 +70,7 @@ public class Mailmap {
 
     @Override
     protected void finalize() throws Throwable {
-        if (_rawPtr.get() > 0) {
+        if (_rawPtr.get() != 0) {
             jniFree(_rawPtr.getAndSet(0));
         }
         super.finalize();

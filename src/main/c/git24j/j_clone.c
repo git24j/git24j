@@ -17,7 +17,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Clone_jniClone)(JNIEnv *env, jclass obj, jo
     char *c_local_path = j_copy_of_jstring(env, local_path, true);
     git_clone_options *opts = (git_clone_options *)optionsPtr;
     int r = git_clone(&c_out, c_url, c_local_path, opts);
-    (*env)->CallVoidMethod(env, out, jniConstants->midAtomicLongSet, (long)c_out);
+    (*env)->CallVoidMethod(env, out, jniConstants->midAtomicLongSet, (jlong)c_out);
     free(c_url);
     free(c_local_path);
     return r;
@@ -33,7 +33,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Clone_jniOptionsNew)(JNIEnv *env, jclass ob
 {
     git_clone_options *opts = (git_clone_options *)malloc(sizeof(git_clone_options));
     int r = git_clone_init_options(opts, (unsigned int)version);
-    (*env)->CallVoidMethod(env, outOpts, jniConstants->midAtomicLongSet, (long)opts);
+    (*env)->CallVoidMethod(env, outOpts, jniConstants->midAtomicLongSet, (jlong)opts);
     return r;
 }
 

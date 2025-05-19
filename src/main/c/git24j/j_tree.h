@@ -82,8 +82,8 @@ extern "C"
     /** int git_treebuilder_new(git_tree_builder **out, git_repository *repo, const git_tree *source); */
     JNIEXPORT jint JNICALL J_MAKE_METHOD(Tree_jniBuilderNew)(JNIEnv *env, jclass obj, jobject out, jlong repoPtr, jlong sourcePtr);
 
-    /** void git_treebuilder_clear(git_tree_builder *bld); */
-    JNIEXPORT void JNICALL J_MAKE_METHOD(Tree_jniBuilderClear)(JNIEnv *env, jclass obj, jlong bldPtr);
+    /** int git_treebuilder_clear(git_tree_builder *bld); */
+    JNIEXPORT jint JNICALL J_MAKE_METHOD(Tree_jniBuilderClear)(JNIEnv *env, jclass obj, jlong bldPtr);
 
     /** size_t git_treebuilder_entrycount(git_tree_builder *bld); */
     JNIEXPORT jint JNICALL J_MAKE_METHOD(Tree_jniBuilderEntrycount)(JNIEnv *env, jclass obj, jlong bldPtr);

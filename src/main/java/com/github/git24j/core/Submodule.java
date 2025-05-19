@@ -2,7 +2,6 @@ package com.github.git24j.core;
 
 import static com.github.git24j.core.GitException.ErrorCode.ENOTFOUND;
 
-import java.net.URI;
 import java.util.EnumSet;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -144,7 +143,10 @@ public class Submodule extends CAutoReleasable {
     static native void jniUpdateOptionsSetAllowFetch(long update_optionsPtr, int allowFetch);
 
     /** git_checkout_options *checkout_opts */
-    static native void jniUpdateOptionsSetCheckoutOpts(long update_optionsPtr, long checkoutOpts);
+//    static native void jniUpdateOptionsSetCheckoutOpts(long update_optionsPtr, long checkoutOpts);
+
+    /** git_submodule_update_init_options */
+    static native int jniUpdateInitOptions(long updateOptionsPtr, int version);
 
     /** git_submodule_update_t git_submodule_update_strategy(git_submodule *submodule); */
     static native int jniUpdateStrategy(long submodule);
@@ -209,13 +211,13 @@ public class Submodule extends CAutoReleasable {
      */
     @Nonnull
     public static Submodule addSetup(
-            @Nonnull Repository repo, @Nonnull URI url, @Nonnull String path, boolean useGitlink) {
+            @Nonnull Repository repo, @Nonnull String url, @Nonnull String path, boolean useGitlink) {
         Submodule out = new Submodule(false, 0);
         Error.throwIfNeeded(
                 jniAddSetup(
                         out._rawPtr,
                         repo.getRawPointer(),
-                        url.toString(),
+                        url,
                         path,
                         useGitlink ? 1 : 0));
         return out;
@@ -267,17 +269,14 @@ public class Submodule extends CAutoReleasable {
      *     resolve string is nto a valid path.
      */
     @Nonnull
-    public static URI resolveUrl(@Nonnull Repository repo, @Nonnull String url) {
+    public static String resolveUrl(@Nonnull Repository repo, @Nonnull String url) {
         Buf out = new Buf();
         Error.throwIfNeeded(jniResolveUrl(out, repo.getRawPointer(), url));
-        return URI.create(
-                out.getString()
-                        .orElseThrow(
-                                () ->
-                                        new IllegalArgumentException(
-                                                String.format(
-                                                        "'%s' cannot be resolved to an absolute URI, check path please",
-                                                        url))));
+        return out.getString().orElseThrow(
+                () -> new IllegalArgumentException(
+                        String.format("'%s' cannot be resolved to an absolute url, check path please", url)
+                )
+        );
     }
 
     /**
@@ -357,8 +356,8 @@ public class Submodule extends CAutoReleasable {
      * @param url URL that should be used for the submodule
      * @throws GitException git errors
      */
-    public static void setUrl(@Nonnull Repository repo, @Nonnull String name, @Nonnull URI url) {
-        Error.throwIfNeeded(jniSetUrl(repo.getRawPointer(), name, url.toString()));
+    public static void setUrl(@Nonnull Repository repo, @Nonnull String name, @Nonnull String url) {
+        Error.throwIfNeeded(jniSetUrl(repo.getRawPointer(), name, url));
     }
 
     /**
@@ -676,8 +675,9 @@ public class Submodule extends CAutoReleasable {
      *
      * @return the submodule url
      */
-    public URI url() {
-        return URI.create(jniUrl(getRawPointer()));
+    @Nullable
+    public String url() {
+        return jniUrl(getRawPointer());
     }
 
     /**

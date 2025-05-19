@@ -15,7 +15,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Reflog_jniRead)(JNIEnv *env, jclass obj, jo
     git_reflog *c_out;
     char *c_name = j_copy_of_jstring(env, name, true);
     int r = git_reflog_read(&c_out, (git_repository *)repoPtr, c_name);
-    (*env)->CallVoidMethod(env, out, jniConstants->midAtomicLongSet, (long)c_out);
+    (*env)->CallVoidMethod(env, out, jniConstants->midAtomicLongSet, (jlong)c_out);
     /* git_reflog_free(c_out); */
     free(c_name);
     return r;

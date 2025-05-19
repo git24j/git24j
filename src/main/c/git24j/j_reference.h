@@ -42,7 +42,7 @@ extern "C"
     /**int git_reference_set_target(git_reference **out, git_reference *ref, const git_oid *id, const char *log_message); */
     JNIEXPORT jint JNICALL J_MAKE_METHOD(Reference_jniSetTarget)(JNIEnv *env, jclass obj, jobject outRef, jlong refPtr, jobject oid, jstring logMessage);
     /**int git_reference_rename(git_reference **new_ref, git_reference *ref, const char *new_name, int force, const char *log_message); */
-    JNIEXPORT jint JNICALL J_MAKE_METHOD(Reference_jniRename)(JNIEnv *env, jclass obj, jobject outRef, jlong refPtr, jstring newName, int force, jstring logMessage);
+    JNIEXPORT jint JNICALL J_MAKE_METHOD(Reference_jniRename)(JNIEnv *env, jclass obj, jobject outRef, jlong refPtr, jstring newName, jint force, jstring logMessage);
     /**int git_reference_delete(git_reference *ref); */
     JNIEXPORT jint JNICALL J_MAKE_METHOD(Reference_jniDelete)(JNIEnv *env, jclass obj, jlong refPtr);
     /**int git_reference_remove(git_repository *repo, const char *name); */

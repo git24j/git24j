@@ -3,6 +3,7 @@ package com.github.git24j.core;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.nio.charset.StandardCharsets;
 import java.util.EnumSet;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -196,6 +197,9 @@ public class Diff extends CAutoReleasable {
     /** const char* header */
     static native String jniHunkGetHeader(long hunkPtr);
 
+    @Nullable
+    static native byte[] jniHunkGetHeaderBytes(long hunkPtr);
+
     /** size_t header_len */
     static native int jniHunkGetHeaderLen(long hunkPtr);
 
@@ -239,6 +243,14 @@ public class Diff extends CAutoReleasable {
     /** size_t content_offset */
     static native int jniLineGetContentOffset(long linePtr);
 
+    /**
+     *
+     * @param linePtr line ptr
+     * @return if content len > 0, return byte arr; else return null
+     */
+    @Nullable
+    static native byte[] jniLineGetContentBytes(long linePtr);
+
     /** int new_lineno */
     static native int jniLineGetNewLineno(long linePtr);
 
@@ -266,7 +278,7 @@ public class Diff extends CAutoReleasable {
     /** int git_diff_patchid_init_options(git_diff_patchid_options *opts, unsigned int version); */
     static native int jniPatchidInitOptions(long opts, int version);
 
-    static native int jniPatchidOptionsFree(long opts);
+    static native void jniPatchidOptionsFree(long opts);
 
     static native int jniPatchidOptionsNew(AtomicLong outOpts, int version);
 
@@ -907,9 +919,9 @@ public class Diff extends CAutoReleasable {
      * @throws GitException git errors
      */
     @Nonnull
-    public Diff fromBuffer(@Nonnull String content) {
+    public static Diff fromBuffer(@Nonnull String content) {
         Diff diff = new Diff(false, 0);
-        Error.throwIfNeeded(jniFromBuffer(diff._rawPtr, content, content.length()));
+        Error.throwIfNeeded(jniFromBuffer(diff._rawPtr, content, content.getBytes(StandardCharsets.UTF_8).length));
         return diff;
     }
 
@@ -1242,7 +1254,11 @@ public class Diff extends CAutoReleasable {
         NAME_ONLY(4),
         /** < like git diff --name-status */
         NAME_STATUS(5),
+        /**< git diff as used by git patch-id */
+        PATCH_ID(6),
+
         ;
+
         private final int _code;
 
         FormatT(int _code) {
@@ -1802,8 +1818,53 @@ public class Diff extends CAutoReleasable {
             return jniHunkGetHeaderLen(getRawPointer());
         }
 
+        /**
+         * get the bytes of header, the bytes is sized by header len
+         * @return if the header length > 0, return a byte arr, else return null
+         */
+        @Nullable
+        public byte[] getHeaderBytes() {
+            return jniHunkGetHeaderBytes(getRawPointer());
+        }
+
+        /**
+         * get header sized by header length
+         * @return the header text sized by header length
+         */
         public String getHeader() {
+            byte[] headerBytes = getHeaderBytes();
+            return headerBytes!=null ? new String(headerBytes, StandardCharsets.UTF_8) : "";
+        }
+
+        /**
+         * get the raw header which not sized by header length,
+         * libgit2 doc said the `hunk->header` ends with '\0',
+         * and this String created by jni c code `NewStringUTF`, it determines the length by '\0' too,
+         * so if everything fine, this should return same content with `getHeader()`,
+         * and the performance, I am not sure, maybe this better
+         *
+         * @return the raw header which not sized by header length
+         */
+        public String getHeaderRaw() {
             return jniHunkGetHeader(getRawPointer());
+        }
+
+        /**
+         * use getHeader() instead
+         * @return
+         */
+        @Deprecated
+        public String getHeader_Depercated() {
+            String rawHeader = jniHunkGetHeader(getRawPointer());
+            int headerLen = getHeaderLen();
+            byte[] src = rawHeader.getBytes(StandardCharsets.UTF_8);
+            // because the libgit2 doc said the header terminated with '\0',
+            // so this check should always false, if everything fine
+            if(src.length > headerLen) {
+                return new String(src, 0, headerLen, StandardCharsets.UTF_8);
+            }
+
+            return rawHeader;
         }
     }
 
@@ -1947,13 +2008,48 @@ public class Diff extends CAutoReleasable {
             return jniLineGetContentOffset(getRawPointer());
         }
 
-        public String getContent() {
+        /**
+         * get the bytes of content, the bytes sized by content length
+         * @return if content len > 0, return byte arr, else return null
+         */
+        @Nullable
+        public byte[] getContentBytes(){
+            return jniLineGetContentBytes(getRawPointer());
+        }
+
+        /**
+         * get the content sized by content length
+         * @return
+         */
+        public String getContent(){
+            byte[] bytes = getContentBytes();
+
+            return (bytes!=null) ? new String(bytes, StandardCharsets.UTF_8) : "";
+        }
+
+
+        /**
+         * This has more data copy than getContent(), not recommended to use
+         * @return
+         */
+        @Deprecated
+        public String getContent_Deprecated() {
             String content = jniLineGetContent(getRawPointer());
             int contentLen = jniLineGetContentLen(getRawPointer());
-            if (content.length() >= contentLen) {
-                return content.substring(0, contentLen);
+            // content.length() is "chars count", not "bytes count"!
+            // so this code is wrong in some cases! sometimes it will give you more lines than you wanted.
+//            if (content.length() >= contentLen) {
+//                return content.substring(0, contentLen);
+//            }
+            byte[] src = content.getBytes(StandardCharsets.UTF_8);
+            // bytes.length < contentLen maybe not happen, because contentLen should be a part of content
+            if(src.length > contentLen) {  //if content length bigger than contentLen, create a new sub array
+                return new String(src, 0, contentLen, StandardCharsets.UTF_8);
             }
+
+            // if content length equals contentLen, just return it, no more operations required
             return content;
+
         }
     }
 

@@ -21,7 +21,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Indexer_jniNew)(JNIEnv *env, jclass obj, jo
     git_indexer *c_out;
     char *c_path = j_copy_of_jstring(env, path, true);
     int r = git_indexer_new(&c_out, c_path, mode, (git_odb *)odbPtr, (git_indexer_options *)optsPtr);
-    (*env)->CallVoidMethod(env, out, jniConstants->midAtomicLongSet, (long)c_out);
+    (*env)->CallVoidMethod(env, out, jniConstants->midAtomicLongSet, (jlong)c_out);
     /* git_indexer_free(c_out); */
     free(c_path);
     return r;
@@ -78,7 +78,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Indexer_jniOptionsNew)(JNIEnv *env, jclass 
     int r = git_indexer_options_init(opts, version);
     opts->progress_cb = j_git_indexer_progress_cb;
     opts->progress_cb_payload = (void *)payload;
-    (*env)->CallVoidMethod(env, outOpts, jniConstants->midAtomicLongSet, (long)opts);
+    (*env)->CallVoidMethod(env, outOpts, jniConstants->midAtomicLongSet, (jlong)opts);
     return r;
 }
 

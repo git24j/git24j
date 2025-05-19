@@ -42,7 +42,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Tag_jniTarget)(JNIEnv *env, jclass obj, job
 {
     git_object *target_out = 0;
     int e = git_tag_target(&target_out, (git_tag *)tagPtr);
-    (*env)->CallVoidMethod(env, outTargetPtr, jniConstants->midAtomicLongSet, (long)target_out);
+    (*env)->CallVoidMethod(env, outTargetPtr, jniConstants->midAtomicLongSet, (jlong)target_out);
     return e;
 }
 /** const git_oid * git_tag_target_id(const git_tag *tag); */
@@ -175,7 +175,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Tag_jniPeel)(JNIEnv *env, jclass obj, jobje
 {
     git_object *tag_target_out = 0;
     int e = git_tag_peel(&tag_target_out, (const git_tag *)tagPtr);
-    (*env)->CallVoidMethod(env, outTarget, jniConstants->midAtomicLongSet, (long)tag_target_out);
+    (*env)->CallVoidMethod(env, outTarget, jniConstants->midAtomicLongSet, (jlong)tag_target_out);
     return e;
 }
 
@@ -184,6 +184,6 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Tag_jniDup)(JNIEnv *env, jclass obj, jobjec
 {
     git_tag *c_out = 0;
     int e = git_tag_dup(&c_out, (git_tag *)sourcePtr);
-    (*env)->CallVoidMethod(env, outTag, jniConstants->midAtomicLongSet, (long)c_out);
+    (*env)->CallVoidMethod(env, outTag, jniConstants->midAtomicLongSet, (jlong)c_out);
     return e;
 }

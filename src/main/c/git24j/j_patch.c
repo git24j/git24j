@@ -13,7 +13,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Patch_jniFromDiff)(JNIEnv *env, jclass obj,
 {
     git_patch *c_out = 0;
     int r = git_patch_from_diff(&c_out, (git_diff *)diffPtr, idx);
-    (*env)->CallVoidMethod(env, out, jniConstants->midAtomicLongSet, (long)c_out);
+    (*env)->CallVoidMethod(env, out, jniConstants->midAtomicLongSet, (jlong)c_out);
     return r;
 }
 
@@ -24,7 +24,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Patch_jniFromBlobs)(JNIEnv *env, jclass obj
     char *c_old_as_path = j_copy_of_jstring(env, old_as_path, true);
     char *c_new_as_path = j_copy_of_jstring(env, new_as_path, true);
     int r = git_patch_from_blobs(&c_out, (git_blob *)oldBlobPtr, c_old_as_path, (git_blob *)newBlobPtr, c_new_as_path, (git_diff_options *)optsPtr);
-    (*env)->CallVoidMethod(env, out, jniConstants->midAtomicLongSet, (long)c_out);
+    (*env)->CallVoidMethod(env, out, jniConstants->midAtomicLongSet, (jlong)c_out);
     free(c_old_as_path);
     free(c_new_as_path);
     return r;
@@ -39,7 +39,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Patch_jniFromBlobAndBuffer)(JNIEnv *env, jc
     unsigned char *c_buffer = j_unsigned_chars_from_java(env, buffer, &buffer_len);
     char *c_buffer_as_path = j_copy_of_jstring(env, buffer_as_path, true);
     int r = git_patch_from_blob_and_buffer(&c_out, (git_blob *)oldBlobPtr, c_old_as_path, (void *)c_buffer, bufferLen, c_buffer_as_path, (git_diff_options *)optsPtr);
-    (*env)->CallVoidMethod(env, out, jniConstants->midAtomicLongSet, (long)c_out);
+    (*env)->CallVoidMethod(env, out, jniConstants->midAtomicLongSet, (jlong)c_out);
     free(c_old_as_path);
     (*env)->ReleaseByteArrayElements(env, buffer, (jbyte *)c_buffer, 0);
     free(c_buffer_as_path);
@@ -57,7 +57,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Patch_jniFromBuffers)(JNIEnv *env, jclass o
     unsigned char *c_new_buffer = j_unsigned_chars_from_java(env, newBuffer, &new_buffer_len);
     char *c_new_as_path = j_copy_of_jstring(env, new_as_path, true);
     int r = git_patch_from_buffers(&c_out, (void *)c_old_buffer, oldLen, c_old_as_path, (void *)c_new_buffer, newLen, c_new_as_path, (git_diff_options *)optsPtr);
-    (*env)->CallVoidMethod(env, out, jniConstants->midAtomicLongSet, (long)c_out);
+    (*env)->CallVoidMethod(env, out, jniConstants->midAtomicLongSet, (jlong)c_out);
     (*env)->ReleaseByteArrayElements(env, oldBuffer, (jbyte *)c_old_buffer, 0);
     free(c_old_as_path);
     (*env)->ReleaseByteArrayElements(env, newBuffer, (jbyte *)c_new_buffer, 0);
@@ -104,7 +104,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Patch_jniGetHunk)(JNIEnv *env, jclass obj, 
     const git_diff_hunk *c_out = 0;
     size_t c_lines_in_hunk;
     int r = git_patch_get_hunk(&c_out, &c_lines_in_hunk, (git_patch *)patchPtr, hunkIdx);
-    (*env)->CallVoidMethod(env, out, jniConstants->midAtomicLongSet, (long)c_out);
+    (*env)->CallVoidMethod(env, out, jniConstants->midAtomicLongSet, (jlong)c_out);
     (*env)->CallVoidMethod(env, linesInHunk, jniConstants->midAtomicIntSet, c_lines_in_hunk);
     return r;
 }
@@ -121,7 +121,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Patch_jniGetLineInHunk)(JNIEnv *env, jclass
 {
     const git_diff_line *c_out = 0;
     int r = git_patch_get_line_in_hunk(&c_out, (git_patch *)patchPtr, hunkIdx, lineOfHunk);
-    (*env)->CallVoidMethod(env, out, jniConstants->midAtomicLongSet, (long)c_out);
+    (*env)->CallVoidMethod(env, out, jniConstants->midAtomicLongSet, (jlong)c_out);
     return r;
 }
 /** size_t git_patch_size(git_patch *patch, int include_context, int include_hunk_headers, int include_file_headers); */

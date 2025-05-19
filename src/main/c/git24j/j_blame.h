@@ -10,8 +10,8 @@ extern "C"
 #endif
 
     /** int git_blame_init_options(git_blame_options *opts, unsigned int version); */
-    JNIEXPORT jint JNICALL J_MAKE_METHOD(Blame_jniInitOptions)(JNIEnv *env, jclass obj, jlong optsPtr, jint version);
-    JNIEXPORT void JNICALL J_MAKE_METHOD(Blame_jniOptionsNew)(JNIEnv *env, jclass obj, jobject outPtr, jint version);
+//    JNIEXPORT jint JNICALL J_MAKE_METHOD(Blame_jniInitOptions)(JNIEnv *env, jclass obj, jlong optsPtr, jint version);
+    JNIEXPORT jint JNICALL J_MAKE_METHOD(Blame_jniOptionsNew)(JNIEnv *env, jclass obj, jobject outPtr, jint version);
 
     /** size_t git_blame_get_hunk_count(git_blame *blame); */
     JNIEXPORT jint JNICALL J_MAKE_METHOD(Blame_jniGetHunkCount)(JNIEnv *env, jclass obj, jlong blamePtr);

@@ -38,7 +38,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Apply_jniToTree)(JNIEnv *env, jclass obj, j
 {
     git_index *c_out;
     int r = git_apply_to_tree(&c_out, (git_repository *)repoPtr, (git_tree *)preimagePtr, (git_diff *)diffPtr, (git_apply_options *)optionsPtr);
-    (*env)->CallVoidMethod(env, out, jniConstants->midAtomicLongSet, (long)c_out);
+    (*env)->CallVoidMethod(env, out, jniConstants->midAtomicLongSet, (jlong)c_out);
     return r;
 }
 
@@ -54,7 +54,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Apply_jniOptionsNew)(JNIEnv *env, jclass ob
 {
     git_apply_options *opts = (git_apply_options *)malloc(sizeof(git_apply_options));
     int e = git_apply_options_init(opts, (unsigned int)version);
-    (*env)->CallVoidMethod(env, out, jniConstants->midAtomicLongSet, (long)opts);
+    (*env)->CallVoidMethod(env, out, jniConstants->midAtomicLongSet, (jlong)opts);
     j_cb_payload *payload = (j_cb_payload *)malloc(sizeof(j_cb_payload) * 2);
 
     j_cb_payload_init(env, &payload[0], deltaCb, "(J)I");

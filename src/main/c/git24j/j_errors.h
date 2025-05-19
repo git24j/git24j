@@ -8,7 +8,7 @@ extern "C"
 {
 #endif
 
-    JNIEXPORT jobject JNICALL J_MAKE_METHOD(Error_jniLast)(JNIEnv *, jclass);
+    JNIEXPORT jthrowable JNICALL J_MAKE_METHOD(Error_jniLast)(JNIEnv *, jclass);
 
     JNIEXPORT void JNICALL J_MAKE_METHOD(Error_jniClear)(JNIEnv *, jclass);
 

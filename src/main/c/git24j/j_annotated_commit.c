@@ -5,16 +5,16 @@
 extern j_constants_t *jniConstants;
 
 /** int git_annotated_commit_from_ref(git_annotated_commit **out, git_repository *repo, const git_reference *ref); */
-JNIEXPORT jint JNICALL J_MAKE_METHOD(AnnotatedCommit_jniFromRef)(JNIEnv *env, jclass obj, jobject outAc, long repoPtr, long refPtr)
+JNIEXPORT jint JNICALL J_MAKE_METHOD(AnnotatedCommit_jniFromRef)(JNIEnv *env, jclass obj, jobject outAc, jlong repoPtr, jlong refPtr)
 {
     git_annotated_commit *c_ac = 0;
     int e = git_annotated_commit_from_ref(&c_ac, (git_repository *)repoPtr, (git_reference *)refPtr);
-    (*env)->CallVoidMethod(env, outAc, jniConstants->midAtomicLongSet, (long)c_ac);
+    (*env)->CallVoidMethod(env, outAc, jniConstants->midAtomicLongSet, (jlong)c_ac);
     return e;
 }
 
 /** int git_annotated_commit_from_fetchhead(git_annotated_commit **out, git_repository *repo, const char *branch_name, const char *remote_url, const git_oid *id); */
-JNIEXPORT jint JNICALL J_MAKE_METHOD(AnnotatedCommit_jniFromFetchHead)(JNIEnv *env, jclass obj, jobject outAc, long repoPtr, jstring branchName, jstring remoteUrl, jobject oid)
+JNIEXPORT jint JNICALL J_MAKE_METHOD(AnnotatedCommit_jniFromFetchHead)(JNIEnv *env, jclass obj, jobject outAc, jlong repoPtr, jstring branchName, jstring remoteUrl, jobject oid)
 {
     assert(repoPtr && branchName && remoteUrl && oid && "bad user input");
     git_annotated_commit *c_ac = 0;
@@ -23,30 +23,30 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(AnnotatedCommit_jniFromFetchHead)(JNIEnv *e
     git_oid c_oid;
     j_git_oid_from_java(env, oid, &c_oid);
     int e = git_annotated_commit_from_fetchhead(&c_ac, (git_repository *)repoPtr, branch_name, remote_url, &c_oid);
-    (*env)->CallVoidMethod(env, outAc, jniConstants->midAtomicLongSet, (long)c_ac);
+    (*env)->CallVoidMethod(env, outAc, jniConstants->midAtomicLongSet, (jlong)c_ac);
     free(branch_name);
     free(remote_url);
     return e;
 }
 
 /** int git_annotated_commit_lookup(git_annotated_commit **out, git_repository *repo, const git_oid *id); */
-JNIEXPORT jint JNICALL J_MAKE_METHOD(AnnotatedCommit_jniLookup)(JNIEnv *env, jclass obj, jobject outAc, long repoPtr, jobject oid)
+JNIEXPORT jint JNICALL J_MAKE_METHOD(AnnotatedCommit_jniLookup)(JNIEnv *env, jclass obj, jobject outAc, jlong repoPtr, jobject oid)
 {
     git_annotated_commit *c_out = 0;
     git_oid c_oid;
     j_git_oid_from_java(env, oid, &c_oid);
     int e = git_annotated_commit_lookup(&c_out, (git_repository *)repoPtr, &c_oid);
-    (*env)->CallVoidMethod(env, outAc, jniConstants->midAtomicLongSet, (long)c_out);
+    (*env)->CallVoidMethod(env, outAc, jniConstants->midAtomicLongSet, (jlong)c_out);
     return e;
 }
 
 /** int git_annotated_commit_from_revspec(git_annotated_commit **out, git_repository *repo, const char *revspec); */
-JNIEXPORT jint JNICALL J_MAKE_METHOD(AnnotatedCommit_jniFromRevspec)(JNIEnv *env, jclass obj, jobject outAc, long repoPtr, jstring revspec)
+JNIEXPORT jint JNICALL J_MAKE_METHOD(AnnotatedCommit_jniFromRevspec)(JNIEnv *env, jclass obj, jobject outAc, jlong repoPtr, jstring revspec)
 {
     git_annotated_commit *c_out = 0;
     char *c_revspec = j_copy_of_jstring(env, revspec, false);
     int e = git_annotated_commit_from_revspec(&c_out, (git_repository *)repoPtr, c_revspec);
-    (*env)->CallVoidMethod(env, outAc, jniConstants->midAtomicLongSet, (long)c_out);
+    (*env)->CallVoidMethod(env, outAc, jniConstants->midAtomicLongSet, (jlong)c_out);
     free(c_revspec);
     return e;
 }

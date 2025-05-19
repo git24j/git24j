@@ -57,10 +57,10 @@ extern "C"
     JNIEXPORT jbyteArray JNICALL J_MAKE_METHOD(Commit_jniTreeId)(JNIEnv *env, jclass obj, jlong commitPtr);
 
     /**unsigned int git_commit_parentcount(const git_commit *commit); */
-    JNIEXPORT jint JNICALL J_MAKE_METHOD(Commit_jniParentCount)(JNIEnv *env, jclass obj, long commitPtr);
+    JNIEXPORT jint JNICALL J_MAKE_METHOD(Commit_jniParentCount)(JNIEnv *env, jclass obj, jlong commitPtr);
 
     /**int git_commit_parent(git_commit **out, const git_commit *commit, unsigned int n); */
-    JNIEXPORT jint JNICALL J_MAKE_METHOD(Commit_jniParent)(JNIEnv *env, jclass obj, jobject outPtr, long commitPtr, jint n);
+    JNIEXPORT jint JNICALL J_MAKE_METHOD(Commit_jniParent)(JNIEnv *env, jclass obj, jobject outPtr, jlong commitPtr, jint n);
 
     /**const git_oid * git_commit_parent_id(const git_commit *commit, unsigned int n); */
     JNIEXPORT jbyteArray JNICALL J_MAKE_METHOD(Commit_jniParentId)(JNIEnv *env, jclass obj, jlong commitPtr, jint n);
@@ -75,10 +75,10 @@ extern "C"
     JNIEXPORT jint JNICALL J_MAKE_METHOD(Commit_jniExtractSignature)(JNIEnv *env, jclass obj, jobject outBuf, jlong repoPtr, jobject commitId, jstring field);
 
     /**
-     * int git_commit_create(git_oid *id, 
-     *                       git_repository *repo, 
-     *                       const char *update_ref, 
-     *                       const git_signature *author, 
+     * int git_commit_create(git_oid *id,
+     *                       git_repository *repo,
+     *                       const char *update_ref,
+     *                       const git_signature *author,
      *                       const git_signature *committer,
      *                       const char *message_encoding,
      *                       const char *message,
@@ -97,23 +97,23 @@ extern "C"
                                                            jstring message,
                                                            jlong treePtr,
                                                            jlongArray parents);
-    /**int git_commit_create_v(git_oid *id, 
-     *                         git_repository *repo, 
-     *                         const char *update_ref, 
-     *                         const git_signature *author, 
-     *                         const git_signature *committer, 
-     *                         const char *message_encoding, 
-     *                         const char *message, 
-     *                         const git_tree *tree, 
+    /**int git_commit_create_v(git_oid *id,
+     *                         git_repository *repo,
+     *                         const char *update_ref,
+     *                         const git_signature *author,
+     *                         const git_signature *committer,
+     *                         const char *message_encoding,
+     *                         const char *message,
+     *                         const git_tree *tree,
      *                         size_t parent_count, ...); */
 
-    /**int git_commit_amend(git_oid *id, 
-     *                      const git_commit *commit_to_amend, 
-     *                      const char *update_ref, 
-     *                      const git_signature *author, 
-     *                      const git_signature *committer, 
-     *                      const char *message_encoding, 
-     *                      const char *message, 
+    /**int git_commit_amend(git_oid *id,
+     *                      const git_commit *commit_to_amend,
+     *                      const char *update_ref,
+     *                      const git_signature *author,
+     *                      const git_signature *committer,
+     *                      const char *message_encoding,
+     *                      const char *message,
      *                      const git_tree *tree); */
 
     JNIEXPORT jint JNICALL J_MAKE_METHOD(Commit_jniAmend)(JNIEnv *env, jclass obj,
@@ -146,7 +146,7 @@ extern "C"
                                                                  jint parentCount,
                                                                  jlongArray parents);
 
-    /**int git_commit_create_with_signature(git_oid *out, 
+    /**int git_commit_create_with_signature(git_oid *out,
      *                                      git_repository *repo,
      *                                      const char *commit_content,
      *                                      const char *signature,

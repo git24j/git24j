@@ -37,7 +37,7 @@ public abstract class CAutoCloseable implements AutoCloseable {
 
     @Override
     public void close() {
-        if (_rawPtr.get() > 0) {
+        if (_rawPtr.get() != 0) {
             releaseOnce(_rawPtr.getAndSet(0));
         }
     }

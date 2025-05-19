@@ -13,7 +13,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Rebase_jniInit)(JNIEnv *env, jclass obj, jo
 {
     git_rebase *c_out = 0;
     int r = git_rebase_init(&c_out, (git_repository *)repoPtr, (git_annotated_commit *)branchPtr, (git_annotated_commit *)upstreamPtr, (git_annotated_commit *)ontoPtr, (git_rebase_options *)optsPtr);
-    (*env)->CallVoidMethod(env, out, jniConstants->midAtomicLongSet, (long)c_out);
+    (*env)->CallVoidMethod(env, out, jniConstants->midAtomicLongSet, (jlong)c_out);
     return r;
 }
 
@@ -22,7 +22,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Rebase_jniOpen)(JNIEnv *env, jclass obj, jo
 {
     git_rebase *c_out = 0;
     int r = git_rebase_open(&c_out, (git_repository *)repoPtr, (git_rebase_options *)optsPtr);
-    (*env)->CallVoidMethod(env, out, jniConstants->midAtomicLongSet, (long)c_out);
+    (*env)->CallVoidMethod(env, out, jniConstants->midAtomicLongSet, (jlong)c_out);
     return r;
 }
 
@@ -52,7 +52,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Rebase_jniNext)(JNIEnv *env, jclass obj, jo
 {
     git_rebase_operation *c_operation = 0;
     int r = git_rebase_next(&c_operation, (git_rebase *)rebasePtr);
-    (*env)->CallVoidMethod(env, operation, jniConstants->midAtomicLongSet, (long)c_operation);
+    (*env)->CallVoidMethod(env, operation, jniConstants->midAtomicLongSet, (jlong)c_operation);
     return r;
 }
 
@@ -61,7 +61,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Rebase_jniInmemoryIndex)(JNIEnv *env, jclas
 {
     git_index *c_index = 0;
     int r = git_rebase_inmemory_index(&c_index, (git_rebase *)rebasePtr);
-    (*env)->CallVoidMethod(env, index, jniConstants->midAtomicLongSet, (long)c_index);
+    (*env)->CallVoidMethod(env, index, jniConstants->midAtomicLongSet, (jlong)c_index);
     return r;
 }
 
@@ -166,7 +166,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Rebase_jniOptionsNew)(JNIEnv *env, jclass o
     git_rebase_options *opts = (git_rebase_options *)malloc(sizeof(git_rebase_options));
     int r = git_rebase_init_options(opts, version);
     opts->rewrite_notes_ref = NULL;
-    (*env)->CallVoidMethod(env, outOpts, jniConstants->midAtomicLongSet, (long)opts);
+    (*env)->CallVoidMethod(env, outOpts, jniConstants->midAtomicLongSet, (jlong)opts);
     return r;
 }
 

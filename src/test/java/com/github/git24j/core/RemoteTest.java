@@ -32,7 +32,7 @@ public class RemoteTest extends TestBase {
     @Test
     public void connect() {
         try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {
-            Remote r = Remote.create(testRepo, "local", testRepo.workdir().toUri());
+            Remote r = Remote.create(testRepo, "local", testRepo.workdir().toString());
             Remote.Callbacks callbacks = Remote.Callbacks.createDefault();
             r.connect(Remote.Direction.FETCH, callbacks, null, null);
             Assert.assertTrue(r.connected());
@@ -45,11 +45,11 @@ public class RemoteTest extends TestBase {
     @Test
     public void create() {
         try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {
-            Remote r = Remote.create(testRepo, "local", testRepo.workdir().toUri());
+            Remote r = Remote.create(testRepo, "local", testRepo.workdir().toString());
             r.fetch(null, null, null);
-            Remote r2 = Remote.createAnonymous(testRepo, testRepo.workdir().toUri());
+            Remote r2 = Remote.createAnonymous(testRepo, testRepo.workdir().toString());
             r2.fetch(null, null, null);
-            Remote r3 = Remote.createDetached(testRepo.workdir().toUri());
+            Remote r3 = Remote.createDetached(testRepo.workdir().toString());
             try {
                 r3.fetch(null, null, null);
                 Assert.fail("should have failed for 'cannot download detached remote'");
@@ -58,11 +58,11 @@ public class RemoteTest extends TestBase {
             }
             Remote r4 =
                     Remote.createWithFetchspec(
-                            testRepo, "local2", testRepo.workdir().toUri(), null);
+                            testRepo, "local2", testRepo.workdir().toString(), null);
             r4.fetch(null, null, null);
 
             Remote.CreateOptions opts = Remote.CreateOptions.createDefault();
-            Remote r5 = Remote.createWithOpts(testRepo.workdir().toUri(), opts);
+            Remote r5 = Remote.createWithOpts(testRepo.workdir().toString(), opts);
             Assert.assertNotNull(r5);
             // r5.fetch(null, null, null);
         }
@@ -83,7 +83,7 @@ public class RemoteTest extends TestBase {
 
     @Test
     public void createWithOpts() {
-        URI url = URI.create("https://github.com/git24j/git24j.git");
+        String url = "https://github.com/git24j/git24j.git";
         Remote r = Remote.createWithOpts(url, null);
         Assert.assertEquals(url, r.url());
         Assert.assertNull(r.defaultBranch());
@@ -107,7 +107,7 @@ public class RemoteTest extends TestBase {
     @Test
     public void fetch() {
         try (Repository remote = creteTestRepo(TestRepo.SIMPLE1_BARE); Repository local = creteTestRepo(TestRepo.SIMPLE1)){
-            Remote upstream = Remote.create(local, "upstream", URI.create(remote.getPath()));
+            Remote upstream = Remote.create(local, "upstream", remote.getPath());
             upstream.fetch(null, null, "reflog");
         }
     }
@@ -154,7 +154,7 @@ public class RemoteTest extends TestBase {
     @Test
     public void setUrl() {
         try (Repository testRepo = TestRepo.SIMPLE1.tempRepo(folder)) {
-            Remote.setUrl(testRepo, "test", URI.create("https://example.com/test.git"));
+            Remote.setUrl(testRepo, "test", "https://example.com/test.git");
             Remote r = Remote.lookup(testRepo, "test");
             Assert.assertEquals(URI.create("https://example.com/test.git"), r.url());
         }

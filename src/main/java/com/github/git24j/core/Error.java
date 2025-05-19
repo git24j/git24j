@@ -2,10 +2,20 @@ package com.github.git24j.core;
 
 /** Delegate git_error_* methods. */
 public class Error {
+    /**
+     * deprecated by libgit2 1.8.x
+     */
+    @Deprecated
     static native void jniClear();
 
     static native GitException jniLast();
 
+    /**
+     * deprecated by libgit2 1.8.x
+     * @param klass
+     * @param message
+     */
+    @Deprecated
     static native void jniSetStr(int klass, String message);
 
     /**

@@ -16,6 +16,8 @@ extern "C"
     JNIEXPORT jint JNICALL J_MAKE_METHOD(Cherrypick_jniOptionsInit)(JNIEnv *env, jclass obj, jlong optsPtr, jint version);
     /** unsigned int mainline*/
     JNIEXPORT jint JNICALL J_MAKE_METHOD(Cherrypick_jniOptionsGetMainline)(JNIEnv *env, jclass obj, jlong optionsPtr);
+    JNIEXPORT void JNICALL J_MAKE_METHOD(Cherrypick_jniOptionsSetMainline)(JNIEnv *env, jclass obj, jlong optionsPtr, jint mainline);
+
     /** git_merge_options merge_opts*/
     JNIEXPORT jlong JNICALL J_MAKE_METHOD(Cherrypick_jniOptionsGetMergeOpts)(JNIEnv *env, jclass obj, jlong optionsPtr);
     /** git_checkout_options checkout_opts*/

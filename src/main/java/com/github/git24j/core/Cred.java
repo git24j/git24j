@@ -8,8 +8,7 @@ public class Cred extends CAutoReleasable {
      * int git_cred_acquire_cb(git_cred **cred, const char *url, const char *username_from_url,
      * unsigned int allowed_types, void *payload);
      */
-    static native int jniAcquireCb(
-            AtomicLong cred, String url, String usernameFromUrl, int allowedTypes);
+//    static native int jniAcquireCb( AtomicLong cred, String url, String usernameFromUrl, int allowedTypes);
 
     /** int git_cred_default_new(git_cred **out); */
     static native int jniDefaultNew(AtomicLong out);
@@ -52,8 +51,7 @@ public class Cred extends CAutoReleasable {
      * int git_cred_userpass(git_cred **cred, const char *url, const char *user_from_url, unsigned
      * int allowed_types, void *payload);
      */
-    static native int jniUserpass(
-            AtomicLong cred, String url, String userFromUrl, int allowedTypes);
+//    static native int jniUserpass( AtomicLong cred, String url, String userFromUrl, int allowedTypes);
 
     /**
      * int git_cred_userpass_plaintext_new(git_cred **out, const char *username, const char

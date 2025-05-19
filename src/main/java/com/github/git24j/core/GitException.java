@@ -98,8 +98,20 @@ public class GitException extends RuntimeException {
         EINDEXDIRTY(-34),
         /** < Patch application failed */
         EAPPLYFAIL(-35),
+        /**< The object is not owned by the current user */
+        EOWNER(-36),
+        /**< The operation timed out */
+        TIMEOUT(-37),
+        /**< There were no changes */
+        EUNCHANGED(-38),
+        /**< An option is not supported */
+        ENOTSUPPORTED(-39),
+        /**< The subject is read-only */
+        EREADONLY(-40),
+
         /** < undefined code in the libgit2, because of a version mismatch? */
         UNKNOWN(-9999);
+
         private final int code;
 
         ErrorCode(int code) {
@@ -121,7 +133,7 @@ public class GitException extends RuntimeException {
         }
     }
 
-    /** Error classes */
+    /** Error classes, src: `git_error_t` in "libgit2/include/git2/errors.h" */
     public enum ErrorClass {
         NONE,
         NOMEMORY,
@@ -156,7 +168,10 @@ public class GitException extends RuntimeException {
         FILESYSTEM,
         PATCH,
         WORKTREE,
-        SHA1;
+        SHA,
+        HTTP,
+        INTERNAL,
+        GRAFTS;
 
         /**
          * Derive ErrorClass from ordinal index.

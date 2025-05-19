@@ -58,7 +58,7 @@ public class Index extends CAutoReleasable {
 
     static native int jniEntryCount(long indexPtr);
 
-    static native int jniEntryFree(long entryPtr);
+    static native void jniEntryFree(long entryPtr);
 
     /** int ctime_nanoseconds */
     static native long jniEntryGetCtimeNanoseconds(long entryPtr);
@@ -161,7 +161,7 @@ public class Index extends CAutoReleasable {
 
     static native int jniHasConflicts(long indexPtr);
 
-    static native int jniIteratorFree(long iterPtr);
+    static native void jniIteratorFree(long iterPtr);
 
     static native int jniIteratorNew(AtomicLong outIterPtr, long indexPtr);
 
@@ -977,7 +977,7 @@ public class Index extends CAutoReleasable {
 
         @Override
         protected void finalize() throws Throwable {
-            if (_ptr.get() > 0) {
+            if (_ptr.get() != 0) {
                 jniConflictIteratorFree(_ptr.get());
             }
             super.finalize();

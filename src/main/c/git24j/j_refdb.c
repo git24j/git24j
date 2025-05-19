@@ -14,7 +14,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Refdb_jniNew)(JNIEnv *env, jclass obj, jobj
 {
     git_refdb *c_out;
     int r = git_refdb_new(&c_out, (git_repository *)repoPtr);
-    (*env)->CallVoidMethod(env, out, jniConstants->midAtomicLongSet, (long)c_out);
+    (*env)->CallVoidMethod(env, out, jniConstants->midAtomicLongSet, (jlong)c_out);
     return r;
 }
 
@@ -23,7 +23,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Refdb_jniOpen)(JNIEnv *env, jclass obj, job
 {
     git_refdb *c_out;
     int r = git_refdb_open(&c_out, (git_repository *)repoPtr);
-    (*env)->CallVoidMethod(env, out, jniConstants->midAtomicLongSet, (long)c_out);
+    (*env)->CallVoidMethod(env, out, jniConstants->midAtomicLongSet, (jlong)c_out);
     return r;
 }
 

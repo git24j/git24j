@@ -27,7 +27,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Message_jniTrailers)(JNIEnv *env, jclass ob
     char *c_message = j_copy_of_jstring(env, message, true);
     git_message_trailer_array *ptr = (git_message_trailer_array *)malloc(sizeof(git_message_trailer_array));
     int r = git_message_trailers(ptr, c_message);
-    (*env)->CallVoidMethod(env, outArrPtr, jniConstants->midAtomicLongSet, (long)ptr);
+    (*env)->CallVoidMethod(env, outArrPtr, jniConstants->midAtomicLongSet, (jlong)ptr);
     free(c_message);
     return r;
 }

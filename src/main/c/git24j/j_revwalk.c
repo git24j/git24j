@@ -41,7 +41,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Revwalk_jniAddHideCb)(JNIEnv *env, jclass o
     j_cb_payload *payload = (j_cb_payload *)malloc(sizeof(j_cb_payload));
     j_cb_payload_init(env, payload, hideCb, "([B)I");
     int e = git_revwalk_add_hide_cb((git_revwalk *)walkPtr, j_git_revwalk_hide_cb, payload);
-    (*env)->CallVoidMethod(env, outPayload, jniConstants->midAtomicLongSet, (long)payload);
+    (*env)->CallVoidMethod(env, outPayload, jniConstants->midAtomicLongSet, (jlong)payload);
     return e;
 }
 
@@ -94,7 +94,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Revwalk_jniNew)(JNIEnv *env, jclass obj, jo
 {
     git_revwalk *c_out = 0;
     int r = git_revwalk_new(&c_out, (git_repository *)repoPtr);
-    (*env)->CallVoidMethod(env, out, jniConstants->midAtomicLongSet, (long)c_out);
+    (*env)->CallVoidMethod(env, out, jniConstants->midAtomicLongSet, (jlong)c_out);
     return r;
 }
 

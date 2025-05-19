@@ -144,7 +144,7 @@ public class Blob extends GitObject {
      * instead.
      *
      * @param repo git repo
-     * @param oid sha of the blob to search.
+     * @param shortId oid sha of the blob to search.
      * @return found blob or null
      * @throws GitException git error
      */

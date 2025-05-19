@@ -287,7 +287,7 @@ public class CommitTest extends TestBase {
                             "some commit message",
                             masterTree,
                             Collections.singletonList(master));
-            String bufStr = buf.getPtr();
+            String bufStr = buf.toString();
             /*
             tree 8c5f4d727b339fe7d9ee4d1806aa9ca3a5cc5b3e
             parent 476f0c95825ef4479cab580b71f8b85f9dea4ee4
@@ -319,7 +319,7 @@ public class CommitTest extends TestBase {
                             "some commit message",
                             masterTree,
                             Collections.singletonList(master));
-            Oid oid = Commit.createWithSignature(testRepo, buf.getPtr(), "test signature", null);
+            Oid oid = Commit.createWithSignature(testRepo, buf.toString(), "test signature", null);
             Assert.assertEquals(MASTER_HASH, Commit.lookup(testRepo, oid).parentId(0).toString());
         }
     }

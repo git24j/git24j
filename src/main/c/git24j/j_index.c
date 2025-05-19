@@ -53,7 +53,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Index_jniOpen)(JNIEnv *env, jclass obj, job
     git_index *c_out = 0;
     char *index_path = j_copy_of_jstring(env, indexPath, false);
     int e = git_index_open(&c_out, index_path);
-    (*env)->CallVoidMethod(env, outIndexPtr, jniConstants->midAtomicLongSet, (long)c_out);
+    (*env)->CallVoidMethod(env, outIndexPtr, jniConstants->midAtomicLongSet, (jlong)c_out);
     free(index_path);
     return e;
 }
@@ -94,7 +94,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Index_jniSetVersion)(JNIEnv *env, jclass ob
 }
 
 /** int git_index_read(git_index *index, int force); */
-JNIEXPORT jint JNICALL J_MAKE_METHOD(Index_jniRead)(JNIEnv *env, jclass obj, jlong indexPtr, int force)
+JNIEXPORT jint JNICALL J_MAKE_METHOD(Index_jniRead)(JNIEnv *env, jclass obj, jlong indexPtr, jint force)
 {
     return git_index_read((git_index *)indexPtr, force);
 }
@@ -208,7 +208,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Index_jniIteratorNew)(JNIEnv *env, jclass o
 {
     git_index_iterator *iterator_out = 0;
     int e = git_index_iterator_new(&iterator_out, (git_index *)indexPtr);
-    (*env)->CallVoidMethod(env, outIterPtr, jniConstants->midAtomicLongSet, (long)iterator_out);
+    (*env)->CallVoidMethod(env, outIterPtr, jniConstants->midAtomicLongSet, (jlong)iterator_out);
     return e;
 }
 
@@ -217,7 +217,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Index_jniIteratorNext)(JNIEnv *env, jclass 
 {
     const git_index_entry *c_out = 0;
     int e = git_index_iterator_next(&c_out, (git_index_iterator *)iterPtr);
-    (*env)->CallVoidMethod(env, outEntryPtr, jniConstants->midAtomicLongSet, (long)c_out);
+    (*env)->CallVoidMethod(env, outEntryPtr, jniConstants->midAtomicLongSet, (jlong)c_out);
     return e;
 }
 
@@ -348,7 +348,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Index_jniConflictIteratorNew)(JNIEnv *env, 
 {
     git_index_conflict_iterator *iterator_out = 0;
     int e = git_index_conflict_iterator_new(&iterator_out, (git_index *)indexPtr);
-    (*env)->CallVoidMethod(env, outIterPtr, jniConstants->midAtomicLongSet, (long)iterator_out);
+    (*env)->CallVoidMethod(env, outIterPtr, jniConstants->midAtomicLongSet, (jlong)iterator_out);
     return e;
 }
 
@@ -359,9 +359,9 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Index_jniConflictNext)(JNIEnv *env, jclass 
     const git_index_entry *our_out = 0;
     const git_index_entry *their_out = 0;
     int e = git_index_conflict_next(&ancestor_out, &our_out, &their_out, (git_index_conflict_iterator *)iterPtr);
-    (*env)->CallVoidMethod(env, ancestorOut, jniConstants->midAtomicLongSet, (long)ancestor_out);
-    (*env)->CallVoidMethod(env, ourOut, jniConstants->midAtomicLongSet, (long)our_out);
-    (*env)->CallVoidMethod(env, theirOut, jniConstants->midAtomicLongSet, (long)their_out);
+    (*env)->CallVoidMethod(env, ancestorOut, jniConstants->midAtomicLongSet, (jlong)ancestor_out);
+    (*env)->CallVoidMethod(env, ourOut, jniConstants->midAtomicLongSet, (jlong)our_out);
+    (*env)->CallVoidMethod(env, theirOut, jniConstants->midAtomicLongSet, (jlong)their_out);
     return e;
 }
 /** void git_index_conflict_iterator_free(git_index_conflict_iterator *iterator); */

@@ -57,10 +57,8 @@ public class Blame extends CAutoReleasable {
     /** size_t orig_start_line_number */
     static native int jniHunkGetOrigStartLineNumber(long hunkPtr);
 
-    /** int git_blame_init_options(git_blame_options *opts, unsigned int version); */
-    static native int jniInitOptions(long opts, int version);
-
-    static native void jniOptionsNew(AtomicLong outPtr, int version);
+    // return is the errcode, not 0 means err
+    static native int jniOptionsNew(AtomicLong outPtr, int version);
 
     protected Blame(boolean isWeak, long rawPtr) {
         super(isWeak, rawPtr);
@@ -169,7 +167,11 @@ public class Blame extends CAutoReleasable {
          * names and email addresses. The mailmap will be read from the working directory, or HEAD
          * in a bare repository.
          */
-        USE_MAILMAP(1 << 5);
+        USE_MAILMAP(1 << 5),
+
+        /** Ignore whitespace differences */
+        IGNORE_WHITESPACE(1 << 6);
+
         private final int _bit;
 
         FlagT(int bit) {
@@ -189,9 +191,9 @@ public class Blame extends CAutoReleasable {
             super(isWeak, rawPtr);
         }
 
-        public static Options init(int version) {
+        public static Options create(int version) {
             Options out = new Options(false, 0);
-            jniOptionsNew(out._rawPtr, version);
+            Error.throwIfNeeded(jniOptionsNew(out._rawPtr, version));
             return out;
         }
 

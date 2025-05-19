@@ -43,7 +43,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Submodule_jniAddSetup)(JNIEnv *env, jclass 
     char *c_url = j_copy_of_jstring(env, url, true);
     char *c_path = j_copy_of_jstring(env, path, true);
     int r = git_submodule_add_setup(&c_out, (git_repository *)repoPtr, c_url, c_path, use_gitlink);
-    (*env)->CallVoidMethod(env, out, jniConstants->midAtomicLongSet, (long)c_out);
+    (*env)->CallVoidMethod(env, out, jniConstants->midAtomicLongSet, (jlong)c_out);
     free(c_url);
     free(c_path);
     return r;
@@ -119,7 +119,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Submodule_jniLookup)(JNIEnv *env, jclass ob
     git_submodule *c_out = 0;
     char *c_name = j_copy_of_jstring(env, name, true);
     int r = git_submodule_lookup(&c_out, (git_repository *)repoPtr, c_name);
-    (*env)->CallVoidMethod(env, out, jniConstants->midAtomicLongSet, (long)c_out);
+    (*env)->CallVoidMethod(env, out, jniConstants->midAtomicLongSet, (jlong)c_out);
     free(c_name);
     return r;
 }
@@ -137,7 +137,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Submodule_jniOpen)(JNIEnv *env, jclass obj,
 {
     git_repository *c_repo = 0;
     int r = git_submodule_open(&c_repo, (git_submodule *)submodulePtr);
-    (*env)->CallVoidMethod(env, repo, jniConstants->midAtomicLongSet, (long)c_repo);
+    (*env)->CallVoidMethod(env, repo, jniConstants->midAtomicLongSet, (jlong)c_repo);
     return r;
 }
 
@@ -167,7 +167,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Submodule_jniRepoInit)(JNIEnv *env, jclass 
 {
     git_repository *c_out = 0;
     int r = git_submodule_repo_init(&c_out, (git_submodule *)smPtr, use_gitlink);
-    (*env)->CallVoidMethod(env, out, jniConstants->midAtomicLongSet, (long)c_out);
+    (*env)->CallVoidMethod(env, out, jniConstants->midAtomicLongSet, (jlong)c_out);
     return r;
 }
 
@@ -258,9 +258,9 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Submodule_jniUpdate)(JNIEnv *env, jclass ob
 }
 
 /** int git_submodule_update_init_options(git_submodule_update_options *opts, unsigned int version); */
-JNIEXPORT jint JNICALL J_MAKE_METHOD(Submodule_jniUpdateInitOptions)(JNIEnv *env, jclass obj, jlong optsPtr, jint version)
+JNIEXPORT jint JNICALL J_MAKE_METHOD(Submodule_jniUpdateInitOptions)(JNIEnv *env, jclass obj, jlong updateOptionsPtr, jint version)
 {
-    int r = git_submodule_update_init_options((git_submodule_update_options *)optsPtr, version);
+    int r = git_submodule_update_init_options((git_submodule_update_options *)updateOptionsPtr, version);
     return r;
 }
 
@@ -268,7 +268,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Submodule_jniUpdateOptionsNew)(JNIEnv *env,
 {
     git_submodule_update_options *opts = (git_submodule_update_options *)malloc(sizeof(git_submodule_update_options));
     int r = git_submodule_update_init_options(opts, version);
-    (*env)->CallVoidMethod(env, outOpt, jniConstants->midAtomicLongSet, (long)opts);
+    (*env)->CallVoidMethod(env, outOpt, jniConstants->midAtomicLongSet, (jlong)opts);
     return r;
 }
 /** unsigned int version*/
@@ -313,7 +313,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Submodule_jniUpdateStrategy)(JNIEnv *env, j
 JNIEXPORT jstring JNICALL J_MAKE_METHOD(Submodule_jniUrl)(JNIEnv *env, jclass obj, jlong submodulePtr)
 {
     const char *r = git_submodule_url((git_submodule *)submodulePtr);
-    return (*env)->NewStringUTF(env, r);
+    return r ? (*env)->NewStringUTF(env, r) : NULL;
 }
 
 /** const git_oid * git_submodule_wd_id(git_submodule *submodule); */
@@ -328,6 +328,6 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Submodule_jniClone)(JNIEnv *env, jclass obj
 {
     git_repository *c_out;
     int r = git_submodule_clone(&c_out, (git_submodule *)submodulePtr, (git_submodule_update_options *)optsPtr);
-    (*env)->CallVoidMethod(env, out, jniConstants->midAtomicLongSet, (long)c_out);
+    (*env)->CallVoidMethod(env, out, jniConstants->midAtomicLongSet, (jlong)c_out);
     return r;
 }

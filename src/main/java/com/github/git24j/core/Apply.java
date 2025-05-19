@@ -60,7 +60,7 @@ public class Apply {
      * @param location the location to apply (workdir, index or both)
      * @param options the options for the apply (or null for defaults)
      */
-    public void apply(
+    public static void apply(
             @Nonnull Repository repo,
             @Nonnull Diff diff,
             @Nonnull LocationT location,
@@ -93,17 +93,21 @@ public class Apply {
     }
 
     public enum LocationT implements IBitEnum {
+        /**
+         * Apply the patch to the workdir, leaving the index untouched.
+         * This is the equivalent of `git apply` with no location argument.
+         */
         WORKDIR(0),
 
         /**
-         * Apply the patch to the index, leaving the working directory untouched. This is the
-         * equivalent of `git apply --cached`.
+         * Apply the patch to the index, leaving the working directory
+         * untouched.  This is the equivalent of `git apply --cached`.
          */
         INDEX(1),
 
         /**
-         * Apply the patch to both the working directory and the index. This is the equivalent of
-         * `git apply --index`.
+         * Apply the patch to both the working directory and the index.
+         * This is the equivalent of `git apply --index`.
          */
         BOTH(2),
         ;

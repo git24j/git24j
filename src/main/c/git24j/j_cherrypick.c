@@ -18,7 +18,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Cherrypick_jniOptionsNew)(JNIEnv *env, jcla
 {
     git_cherrypick_options *opts = (git_cherrypick_options *)malloc(sizeof(git_cherrypick_options));
     int r = git_cherrypick_options_init(opts, version);
-    (*env)->CallVoidMethod(env, outOpts, jniConstants->midAtomicLongSet, (long)opts);
+    (*env)->CallVoidMethod(env, outOpts, jniConstants->midAtomicLongSet, (jlong)opts);
     return r;
 }
 
@@ -26,6 +26,11 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Cherrypick_jniOptionsNew)(JNIEnv *env, jcla
 JNIEXPORT jint JNICALL J_MAKE_METHOD(Cherrypick_jniOptionsGetMainline)(JNIEnv *env, jclass obj, jlong optionsPtr)
 {
     return ((git_cherrypick_options *)optionsPtr)->mainline;
+}
+
+JNIEXPORT void JNICALL J_MAKE_METHOD(Cherrypick_jniOptionsSetMainline)(JNIEnv *env, jclass obj, jlong optionsPtr, jint mainline)
+{
+    ((git_cherrypick_options *)optionsPtr)->mainline = (unsigned int)mainline;
 }
 
 /** git_merge_options merge_opts*/
@@ -52,7 +57,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Cherrypick_jniCommit)(JNIEnv *env, jclass o
 {
     git_index *c_out;
     int r = git_cherrypick_commit(&c_out, (git_repository *)repoPtr, (git_commit *)cherrypickCommitPtr, (git_commit *)ourCommitPtr, mainline, (git_merge_options *)mergeOptionsPtr);
-    (*env)->CallVoidMethod(env, out, jniConstants->midAtomicLongSet, (long)c_out);
+    (*env)->CallVoidMethod(env, out, jniConstants->midAtomicLongSet, (jlong)c_out);
     /* git_index_free(c_out); */
     return r;
 }

@@ -11,7 +11,7 @@ import java.util.concurrent.atomic.AtomicLong;
  * that data is known.
  */
 public class AnnotatedCommit extends CAutoReleasable {
-    static native String jniFree(long acPtr);
+    static native void jniFree(long acPtr);
 
     static native int jniFromFetchHead(
             AtomicLong outAc, long repoPtr, String branchName, String remoteUrl, Oid oid);

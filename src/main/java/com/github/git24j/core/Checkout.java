@@ -216,11 +216,9 @@ public class Checkout {
     }
 
     public enum StrategyT implements IBitEnum {
-        /** default is a dry run, no actual updates */
-        NONE(0),
-
         /** Allow safe updates that cannot overwrite uncommitted data */
-        SAFE(1 << 0),
+        // updated from 1 to 0, since libgit2 1.9.0
+        SAFE(0),
 
         /** Allow all updates to force working directory to look like index */
         FORCE(1 << 1),
@@ -276,10 +274,39 @@ public class Checkout {
 
         /** Normally checkout writes the index upon completion; this prevents that. */
         DONT_WRITE_INDEX(1 << 23),
+
+
+        /**
+         * Perform a "dry run", reporting what _would_ be done but
+         * without actually making changes in the working directory
+         * or the index.
+         */
+        DRY_RUN(1 << 24),
+
+        /** Include common ancestor data in zdiff3 format for conflicts */
+        CONFLICT_STYLE_ZDIFF3(1 << 25),
+
+        /**
+         * Do not do a checkout and do not fire callbacks; this is primarily
+         * useful only for internal functions that will perform the
+         * checkout themselves but need to pass checkout options into
+         * another function, for example, `git_clone`.
+        */
+        NONE(1 << 30),
+
+
+        /*
+         * THE FOLLOWING OPTIONS ARE NOT YET IMPLEMENTED
+         */
+
+
         /** Recursively checkout submodules with same options (NOT IMPLEMENTED) */
         UPDATE_SUBMODULES(1 << 16),
+
         /** Recursively checkout submodules if HEAD moved in super repo (NOT IMPLEMENTED) */
         UPDATE_SUBMODULES_IF_CHANGED(1 << 17);
+
+
         private final int _bit;
 
         StrategyT(int bit) {

@@ -10,10 +10,24 @@ extern j_constants_t *jniConstants;
 
 /** -------- Wrapper Body ---------- */
 /** int git_blame_init_options(git_blame_options *opts, unsigned int version); */
-JNIEXPORT jint JNICALL J_MAKE_METHOD(Blame_jniInitOptions)(JNIEnv *env, jclass obj, jlong optsPtr, jint version)
+//JNIEXPORT jint JNICALL J_MAKE_METHOD(Blame_jniInitOptions)(JNIEnv *env, jclass obj, jlong optsPtr, jint version)
+//{
+//    int r = git_blame_init_options((git_blame_options *)optsPtr, version);
+//    return r;
+//}
+
+JNIEXPORT jint JNICALL J_MAKE_METHOD(Blame_jniOptionsNew)(JNIEnv *env, jclass obj, jobject outPtr, jint version)
 {
-    int r = git_blame_init_options((git_blame_options *)optsPtr, version);
-    return r;
+    git_blame_options *opts = (git_blame_options *)malloc(sizeof(git_blame_options));
+
+    //value of `err`: Zero on success; -1 on failure.
+    // I am not sure it can get this err msg from git_last_err(), if version bad, maybe can get, if mem alloc err, maybe can't
+    int initErr = git_blame_init_options(opts, (unsigned int)version);
+
+    // this set no check the initErr, even initErr, still set the ptr to java pointer, it make java be able free the mallocated memory
+    (*env)->CallVoidMethod(env, outPtr, jniConstants->midAtomicLongSet, (jlong)opts);
+
+    return initErr;
 }
 
 /** size_t git_blame_get_hunk_count(git_blame *blame); */
@@ -43,7 +57,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Blame_jniFile)(JNIEnv *env, jclass obj, job
     git_blame *c_out = NULL;
     char *c_path = j_copy_of_jstring(env, path, true);
     int r = git_blame_file(&c_out, (git_repository *)repoPtr, c_path, (git_blame_options *)optionsPtr);
-    (*env)->CallVoidMethod(env, out, jniConstants->midAtomicLongSet, (long)c_out);
+    (*env)->CallVoidMethod(env, out, jniConstants->midAtomicLongSet, (jlong)c_out);
     /* git_blame_free(c_out); */
     free(c_path);
     return r;
@@ -55,7 +69,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Blame_jniBuffer)(JNIEnv *env, jclass obj, j
     git_blame *c_out = NULL;
     char *c_buffer = j_copy_of_jstring(env, buffer, true);
     int r = git_blame_buffer(&c_out, (git_blame *)referencePtr, c_buffer, bufferLen);
-    (*env)->CallVoidMethod(env, out, jniConstants->midAtomicLongSet, (long)c_out);
+    (*env)->CallVoidMethod(env, out, jniConstants->midAtomicLongSet, (jlong)c_out);
     /* git_blame_free(c_out); */
     free(c_buffer);
     return r;

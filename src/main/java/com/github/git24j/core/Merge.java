@@ -86,7 +86,7 @@ public class Merge {
     /** int git_merge_file_init_options(git_merge_file_options *opts, unsigned int version); */
     static native int jniFileInitOptions(long opts, int version);
 
-    static native int jniFileInputFree(long optsPtr);
+    static native void jniFileInputFree(long optsPtr);
 
     /** int mode */
     static native int jniFileInputGetMode(long file_inputPtr);
@@ -120,7 +120,7 @@ public class Merge {
     /** unsigned int version */
     static native void jniFileInputSetVersion(long file_inputPtr, int version);
 
-    static native int jniFileOptionsFree(long opts);
+    static native void jniFileOptionsFree(long opts);
 
     /** const char *ancestor_label */
     static native String jniFileOptionsGetAncestorLabel(long file_optionsPtr);

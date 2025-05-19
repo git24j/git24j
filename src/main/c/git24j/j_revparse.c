@@ -12,14 +12,14 @@ void j_save_revspec_c_value(JNIEnv *env, git_revspec *rev_spec, jobject revSpec)
     assert(clz && "Could not find Revspec class from given revspec object");
     if (rev_spec->from)
     {
-        j_call_setter_long(env, clz, revSpec, "setFrom", (long)(rev_spec->from));
+        j_call_setter_long(env, clz, revSpec, "setFrom", (jlong)(rev_spec->from));
     }
 
     if (rev_spec->to)
     {
-        j_call_setter_long(env, clz, revSpec, "setTo", (long)(rev_spec->to));
+        j_call_setter_long(env, clz, revSpec, "setTo", (jlong)(rev_spec->to));
     }
-    j_call_setter_int(env, clz, revSpec, "setFlags", (long)(rev_spec->flags));
+    j_call_setter_int(env, clz, revSpec, "setFlags", (jlong)(rev_spec->flags));
     (*env)->DeleteLocalRef(env, clz);
 }
 
@@ -38,7 +38,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Revparse_jniSingle)(JNIEnv *env, jclass obj
     git_object *c_out = 0;
     char *c_spec = j_copy_of_jstring(env, spec, false);
     int error = git_revparse_single(&c_out, (git_repository *)repoPtr, c_spec);
-    (*env)->CallVoidMethod(env, outObj, jniConstants->midAtomicLongSet, (long)c_out);
+    (*env)->CallVoidMethod(env, outObj, jniConstants->midAtomicLongSet, (jlong)c_out);
     free(c_spec);
     return error;
 }
@@ -49,8 +49,8 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Revparse_jniExt)(JNIEnv *env, jclass obj, j
     git_reference *c_out_ref = 0;
     char *c_spec = j_copy_of_jstring(env, spec, false);
     int error = git_revparse_ext(&c_out_obj, &c_out_ref, (git_repository *)repoPtr, c_spec);
-    (*env)->CallVoidMethod(env, outObj, jniConstants->midAtomicLongSet, (long)c_out_obj);
-    (*env)->CallVoidMethod(env, outRef, jniConstants->midAtomicLongSet, (long)c_out_ref);
+    (*env)->CallVoidMethod(env, outObj, jniConstants->midAtomicLongSet, (jlong)c_out_obj);
+    (*env)->CallVoidMethod(env, outRef, jniConstants->midAtomicLongSet, (jlong)c_out_ref);
     free(c_spec);
     return error;
 }

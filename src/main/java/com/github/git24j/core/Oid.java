@@ -4,6 +4,7 @@ import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Arrays;
+import java.util.Locale;
 
 /**
  * An Oid is a 20 bytes array (each byte coded 32bit), or a 40 hex characters string (16 bit coded)
@@ -39,7 +40,8 @@ public class Oid {
     }
 
     public static Oid of(@Nonnull String hexSha) {
-        byte[] bytes = hexStringToByteArray(hexSha.toLowerCase());
+        // kotlin default `String.lowercase()` use `Local.ROOT`, maybe more compatible and less err? idk, just use it
+        byte[] bytes = hexStringToByteArray(hexSha.toLowerCase(Locale.ROOT));
         return new Oid(bytes);
     }
 

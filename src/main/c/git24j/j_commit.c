@@ -80,7 +80,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Commit_jniCommitterWithMailmap)(JNIEnv *env
 {
     git_signature *c_out = 0;
     int r = git_commit_committer_with_mailmap(&c_out, (git_commit *)commitPtr, (git_mailmap *)mailmapPtr);
-    (*env)->CallVoidMethod(env, out, jniConstants->midAtomicLongSet, (long)c_out);
+    (*env)->CallVoidMethod(env, out, jniConstants->midAtomicLongSet, (jlong)c_out);
     return r;
 }
 
@@ -89,7 +89,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Commit_jniAuthorWithMailmap)(JNIEnv *env, j
 {
     git_signature *c_out = 0;
     int r = git_commit_author_with_mailmap(&c_out, (git_commit *)commitPtr, (git_mailmap *)mailmapPtr);
-    (*env)->CallVoidMethod(env, out, jniConstants->midAtomicLongSet, (long)c_out);
+    (*env)->CallVoidMethod(env, out, jniConstants->midAtomicLongSet, (jlong)c_out);
     return r;
 }
 
@@ -105,7 +105,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Commit_jniTree)(JNIEnv *env, jclass obj, jo
 {
     git_tree *tree = 0;
     int e = git_commit_tree(&tree, (git_commit *)commitPtr);
-    (*env)->CallVoidMethod(env, outTreePtr, jniConstants->midAtomicLongSet, (long)tree);
+    (*env)->CallVoidMethod(env, outTreePtr, jniConstants->midAtomicLongSet, (jlong)tree);
     return e;
 }
 
@@ -117,17 +117,17 @@ JNIEXPORT jbyteArray JNICALL J_MAKE_METHOD(Commit_jniTreeId)(JNIEnv *env, jclass
 }
 
 /**unsigned int git_commit_parentcount(const git_commit *commit); */
-JNIEXPORT jint JNICALL J_MAKE_METHOD(Commit_jniParentCount)(JNIEnv *env, jclass obj, long commitPtr)
+JNIEXPORT jint JNICALL J_MAKE_METHOD(Commit_jniParentCount)(JNIEnv *env, jclass obj, jlong commitPtr)
 {
     return (jint)git_commit_parentcount((git_commit *)commitPtr);
 }
 
 /**int git_commit_parent(git_commit **out, const git_commit *commit, unsigned int n); */
-JNIEXPORT jint JNICALL J_MAKE_METHOD(Commit_jniParent)(JNIEnv *env, jclass obj, jobject outPtr, long commitPtr, jint n)
+JNIEXPORT jint JNICALL J_MAKE_METHOD(Commit_jniParent)(JNIEnv *env, jclass obj, jobject outPtr, jlong commitPtr, jint n)
 {
     git_commit *c_out = 0;
     int e = git_commit_parent(&c_out, (git_commit *)commitPtr, (unsigned int)n);
-    (*env)->CallVoidMethod(env, outPtr, jniConstants->midAtomicLongSet, (long)c_out);
+    (*env)->CallVoidMethod(env, outPtr, jniConstants->midAtomicLongSet, (jlong)c_out);
     return e;
 }
 
@@ -143,7 +143,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Commit_jniNthGenAncestor)(JNIEnv *env, jcla
 {
     git_commit *ancestor = 0;
     int e = git_commit_nth_gen_ancestor(&ancestor, (git_commit *)commitPtr, (unsigned int)n);
-    (*env)->CallVoidMethod(env, outPtr, jniConstants->midAtomicLongSet, (long)ancestor);
+    (*env)->CallVoidMethod(env, outPtr, jniConstants->midAtomicLongSet, (jlong)ancestor);
     return e;
 }
 

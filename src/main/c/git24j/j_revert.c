@@ -13,7 +13,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Revert_jniCommit)(JNIEnv *env, jclass obj, 
 {
     git_index *c_out;
     int r = git_revert_commit(&c_out, (git_repository *)repoPtr, (git_commit *)revertCommitPtr, (git_commit *)ourCommitPtr, mainline, (git_merge_options *)mergeOptionsPtr);
-    (*env)->CallVoidMethod(env, out, jniConstants->midAtomicLongSet, (long)c_out);
+    (*env)->CallVoidMethod(env, out, jniConstants->midAtomicLongSet, (jlong)c_out);
     /* git_index_free(c_out); */
     return r;
 }
@@ -29,7 +29,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Revert_jniOptionsNew)(JNIEnv *env, jclass o
 {
     git_revert_options *opts = (git_revert_options *)malloc(sizeof(git_revert_options));
     int r = git_revert_options_init(opts, version);
-    (*env)->CallVoidMethod(env, outPtr, jniConstants->midAtomicLongSet, (long)opts);
+    (*env)->CallVoidMethod(env, outPtr, jniConstants->midAtomicLongSet, (jlong)opts);
     return r;
 }
 

@@ -3,7 +3,7 @@
 #include <assert.h>
 #include <git2.h>
 
-JNIEXPORT jobject JNICALL J_MAKE_METHOD(Error_jniLast)(JNIEnv *env, jclass obj)
+JNIEXPORT jthrowable JNICALL J_MAKE_METHOD(Error_jniLast)(JNIEnv *env, jclass obj)
 {
     const git_error *error = git_error_last();
     if (error == NULL)
@@ -23,17 +23,21 @@ JNIEXPORT jobject JNICALL J_MAKE_METHOD(Error_jniLast)(JNIEnv *env, jclass obj)
 
 JNIEXPORT void JNICALL J_MAKE_METHOD(Error_jniClear)(JNIEnv *env, jclass obj)
 {
-    git_error_clear();
+    // deprecated by libgit2 1.8.x
+//    git_error_clear();
 }
 
 JNIEXPORT void JNICALL J_MAKE_METHOD(Error_jniSetStr)(JNIEnv *env, jclass obj, jint klass, jstring message)
 {
-    const char *c_msg = (*env)->GetStringUTFChars(env, message, NULL);
-    git_error_set_str((int)klass, c_msg);
-    (*env)->ReleaseStringUTFChars(env, message, c_msg);
+    // deprecated by libgit2 1.8.x
+//    const char *c_msg = (*env)->GetStringUTFChars(env, message, NULL);
+//    git_error_set_str((int)klass, c_msg);
+//    (*env)->ReleaseStringUTFChars(env, message, c_msg);
 }
 
 JNIEXPORT void JNICALL J_MAKE_METHOD(Error_jniSetOom)(JNIEnv *env, jclass obj)
 {
-    git_error_set_oom();
+    // deprecated by libgit2 1.8.x
+
+//    git_error_set_oom();
 }

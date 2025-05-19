@@ -133,7 +133,7 @@ extern "C"
     JNIEXPORT jstring JNICALL J_MAKE_METHOD(Repository_jniGetNamespace)(JNIEnv *env, jclass obj, jlong repoPtr);
 
     /** int git_repository_is_shallow(git_repository *repo); */
-    JNIEXPORT jint JNICALL J_MAKE_METHOD(Repository_jniIsShadow)(JNIEnv *env, jclass obj, jlong repoPtr);
+    JNIEXPORT jint JNICALL J_MAKE_METHOD(Repository_jniIsShallow)(JNIEnv *env, jclass obj, jlong repoPtr);
 
     /** int git_repository_ident(const char **name, const char **email, const git_repository *repo); */
     JNIEXPORT jint JNICALL J_MAKE_METHOD(Repository_jniIdent)(JNIEnv *env, jclass obj, jobject identity, jlong repoPtr);

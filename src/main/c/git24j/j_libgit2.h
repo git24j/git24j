@@ -21,7 +21,7 @@ extern "C"
     JNIEXPORT jint JNICALL J_MAKE_METHOD(Libgit2_features)(JNIEnv *, jclass);
 
     /**call free(void* ptr) without recursively freeing fields. */
-    JNIEXPORT void JNICALL J_MAKE_METHOD(Libgit2_jniShadowFree)(JNIEnv *env, jclass obj, long ptr);
+    JNIEXPORT void JNICALL J_MAKE_METHOD(Libgit2_jniShadowFree)(JNIEnv *env, jclass obj, jlong ptr);
 
     // git_libgit2_opts() start
     //GIT_OPT_SET_MWINDOW_SIZE

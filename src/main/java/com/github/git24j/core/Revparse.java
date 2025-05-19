@@ -45,8 +45,8 @@ public class Revparse {
         AtomicLong outRef = new AtomicLong();
         Error.throwIfNeeded(jniExt(outObj, outRef, repository.getRawPointer(), spec));
         return new ExtReturn(
-                outObj.get() > 0 ? new GitObject(false, outObj.get()) : null,
-                outRef.get() > 0 ? new Reference(false, outRef.get()) : null);
+                outObj.get() != 0 ? new GitObject(false, outObj.get()) : null,
+                outRef.get() != 0 ? new Reference(false, outRef.get()) : null);
     }
 
     public enum Mode implements IBitEnum {

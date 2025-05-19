@@ -5,16 +5,7 @@ import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.github.git24j.core.Remote.jniPushOptionsFree;
-import static com.github.git24j.core.Remote.jniPushOptionsGetCallbacks;
-import static com.github.git24j.core.Remote.jniPushOptionsGetCustomHeaders;
-import static com.github.git24j.core.Remote.jniPushOptionsGetPbParallelism;
-import static com.github.git24j.core.Remote.jniPushOptionsGetProxyOpts;
-import static com.github.git24j.core.Remote.jniPushOptionsGetVersion;
-import static com.github.git24j.core.Remote.jniPushOptionsNew;
-import static com.github.git24j.core.Remote.jniPushOptionsSetCustomHeaders;
-import static com.github.git24j.core.Remote.jniPushOptionsSetPbParallelism;
-import static com.github.git24j.core.Remote.jniPushOptionsSetVersion;
+import static com.github.git24j.core.Remote.*;
 
 public class PushOptions extends CAutoReleasable {
     public static final int VERSION = 1;
@@ -78,5 +69,16 @@ public class PushOptions extends CAutoReleasable {
 
     public void setCustomHeaders(String[] customHeaders) {
         jniPushOptionsSetCustomHeaders(getRawPointer(), customHeaders);
+    }
+
+    @Nonnull
+    public List<String> getRemotePushOptions() {
+        List<String> out = new ArrayList<>();
+        jniPushOptionsGetRemotePushOptions(getRawPointer(), out);
+        return out;
+    }
+
+    public void setRemotePushOptions(String[] remotePushOptions) {
+        jniPushOptionsSetRemotePushOptions(getRawPointer(), remotePushOptions);
     }
 }

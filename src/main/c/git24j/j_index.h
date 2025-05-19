@@ -10,14 +10,14 @@ extern "C"
 {
 #endif
 
-    /** standard callback that forwards c-callback to java. 
+    /** standard callback that forwards c-callback to java.
      * c: standard_matched_cb(path, pathspec, ...)
      * java: class IndexMachedCallback extends BiConsumer<String, String> {
      *     @override
      *     public void accept(String path, String pathspec) {
      *     }
      * }
-     * 
+     *
      * jniAddAll(indexPtr.get(), new String[]{"foo/", "bar/"}, 0, (path, pathSpec) -> { ... })
      */
     int standard_matched_cb(const char *path, const char *matched_pathspec, void *payload);
@@ -41,7 +41,7 @@ extern "C"
     JNIEXPORT jint JNICALL J_MAKE_METHOD(Index_jniSetVersion)(JNIEnv *env, jclass obj, jlong idxPtr, jint version);
 
     /** int git_index_read(git_index *index, int force); */
-    JNIEXPORT jint JNICALL J_MAKE_METHOD(Index_jniRead)(JNIEnv *env, jclass obj, jlong indexPtr, int force);
+    JNIEXPORT jint JNICALL J_MAKE_METHOD(Index_jniRead)(JNIEnv *env, jclass obj, jlong indexPtr, jint force);
     /** int git_index_write(git_index *index); */
     JNIEXPORT jint JNICALL J_MAKE_METHOD(Index_jniWrite)(JNIEnv *env, jclass obj, jlong index);
 

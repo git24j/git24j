@@ -21,24 +21,24 @@ int j_packbuilder_git_indexer_progress_cb(const git_indexer_progress *stats, voi
 }
 
 /** int git_packbuilder_new(git_packbuilder **out, git_repository *repo); */
-JNIEXPORT jint JNICALL J_MAKE_METHOD(Packbuilder_jniNew)(JNIEnv *env, jclass obj, jobject out, jlong repoPtr)
+JNIEXPORT jint JNICALL J_MAKE_METHOD(PackBuilder_jniNew)(JNIEnv *env, jclass obj, jobject out, jlong repoPtr)
 {
     git_packbuilder *c_out;
     int r = git_packbuilder_new(&c_out, (git_repository *)repoPtr);
-    (*env)->CallVoidMethod(env, out, jniConstants->midAtomicLongSet, (long)c_out);
+    (*env)->CallVoidMethod(env, out, jniConstants->midAtomicLongSet, (jlong)c_out);
     /* git_packbuilder_free(c_out); */
     return r;
 }
 
 /** unsigned int git_packbuilder_set_threads(git_packbuilder *pb, unsigned int n); */
-JNIEXPORT jint JNICALL J_MAKE_METHOD(Packbuilder_jniSetThreads)(JNIEnv *env, jclass obj, jlong pbPtr, jint n)
+JNIEXPORT jint JNICALL J_MAKE_METHOD(PackBuilder_jniSetThreads)(JNIEnv *env, jclass obj, jlong pbPtr, jint n)
 {
     unsigned int r = git_packbuilder_set_threads((git_packbuilder *)pbPtr, n);
     return r;
 }
 
 /** int git_packbuilder_insert(git_packbuilder *pb, const git_oid *id, const char *name); */
-JNIEXPORT jint JNICALL J_MAKE_METHOD(Packbuilder_jniInsert)(JNIEnv *env, jclass obj, jlong pbPtr, jobject id, jstring name)
+JNIEXPORT jint JNICALL J_MAKE_METHOD(PackBuilder_jniInsert)(JNIEnv *env, jclass obj, jlong pbPtr, jobject id, jstring name)
 {
     git_oid c_id;
     j_git_oid_from_java(env, id, &c_id);
@@ -49,7 +49,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Packbuilder_jniInsert)(JNIEnv *env, jclass 
 }
 
 /** int git_packbuilder_insert_tree(git_packbuilder *pb, const git_oid *id); */
-JNIEXPORT jint JNICALL J_MAKE_METHOD(Packbuilder_jniInsertTree)(JNIEnv *env, jclass obj, jlong pbPtr, jobject id)
+JNIEXPORT jint JNICALL J_MAKE_METHOD(PackBuilder_jniInsertTree)(JNIEnv *env, jclass obj, jlong pbPtr, jobject id)
 {
     git_oid c_id;
     j_git_oid_from_java(env, id, &c_id);
@@ -58,7 +58,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Packbuilder_jniInsertTree)(JNIEnv *env, jcl
 }
 
 /** int git_packbuilder_insert_commit(git_packbuilder *pb, const git_oid *id); */
-JNIEXPORT jint JNICALL J_MAKE_METHOD(Packbuilder_jniInsertCommit)(JNIEnv *env, jclass obj, jlong pbPtr, jobject id)
+JNIEXPORT jint JNICALL J_MAKE_METHOD(PackBuilder_jniInsertCommit)(JNIEnv *env, jclass obj, jlong pbPtr, jobject id)
 {
     git_oid c_id;
     j_git_oid_from_java(env, id, &c_id);
@@ -67,14 +67,14 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Packbuilder_jniInsertCommit)(JNIEnv *env, j
 }
 
 /** int git_packbuilder_insert_walk(git_packbuilder *pb, git_revwalk *walk); */
-JNIEXPORT jint JNICALL J_MAKE_METHOD(Packbuilder_jniInsertWalk)(JNIEnv *env, jclass obj, jlong pbPtr, jlong walkPtr)
+JNIEXPORT jint JNICALL J_MAKE_METHOD(PackBuilder_jniInsertWalk)(JNIEnv *env, jclass obj, jlong pbPtr, jlong walkPtr)
 {
     int r = git_packbuilder_insert_walk((git_packbuilder *)pbPtr, (git_revwalk *)walkPtr);
     return r;
 }
 
 /** int git_packbuilder_insert_recur(git_packbuilder *pb, const git_oid *id, const char *name); */
-JNIEXPORT jint JNICALL J_MAKE_METHOD(Packbuilder_jniInsertRecur)(JNIEnv *env, jclass obj, jlong pbPtr, jobject id, jstring name)
+JNIEXPORT jint JNICALL J_MAKE_METHOD(PackBuilder_jniInsertRecur)(JNIEnv *env, jclass obj, jlong pbPtr, jobject id, jstring name)
 {
     git_oid c_id;
     j_git_oid_from_java(env, id, &c_id);
@@ -85,7 +85,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Packbuilder_jniInsertRecur)(JNIEnv *env, jc
 }
 
 /** int git_packbuilder_write_buf(git_buf *buf, git_packbuilder *pb); */
-JNIEXPORT jint JNICALL J_MAKE_METHOD(Packbuilder_jniWriteBuf)(JNIEnv *env, jclass obj, jobject buf, jlong pbPtr)
+JNIEXPORT jint JNICALL J_MAKE_METHOD(PackBuilder_jniWriteBuf)(JNIEnv *env, jclass obj, jobject buf, jlong pbPtr)
 {
     git_buf c_buf = {0};
     int r = git_packbuilder_write_buf(&c_buf, (git_packbuilder *)pbPtr);
@@ -95,7 +95,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Packbuilder_jniWriteBuf)(JNIEnv *env, jclas
 }
 
 /** int git_packbuilder_write(git_packbuilder *pb, const char *path, unsigned int mode, git_indexer_progress_cb * progress_cb); */
-JNIEXPORT jint JNICALL J_MAKE_METHOD(Packbuilder_jniWrite)(JNIEnv *env, jclass obj, jlong pbPtr, jstring path, jint mode, jobject progressCb)
+JNIEXPORT jint JNICALL J_MAKE_METHOD(PackBuilder_jniWrite)(JNIEnv *env, jclass obj, jlong pbPtr, jstring path, jint mode, jobject progressCb)
 {
     int r;
     char *c_path = j_copy_of_jstring(env, path, true);
@@ -115,7 +115,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Packbuilder_jniWrite)(JNIEnv *env, jclass o
 }
 
 /** const git_oid * git_packbuilder_hash(git_packbuilder *pb); */
-JNIEXPORT jbyteArray JNICALL J_MAKE_METHOD(Packbuilder_jniHash)(JNIEnv *env, jclass obj, jlong pbPtr)
+JNIEXPORT jbyteArray JNICALL J_MAKE_METHOD(PackBuilder_jniHash)(JNIEnv *env, jclass obj, jlong pbPtr)
 {
     const git_oid *r = git_packbuilder_hash((git_packbuilder *)pbPtr);
     return j_git_oid_to_bytearray(env, r);
@@ -136,7 +136,7 @@ int j_git_packbuilder_foreach_cb(void *buf, size_t size, void *payload)
 }
 
 /** int git_packbuilder_foreach(git_packbuilder *pb, git_packbuilder_foreach_cb * cb); */
-JNIEXPORT jint JNICALL J_MAKE_METHOD(Packbuilder_jniForeach)(JNIEnv *env, jclass obj, jlong pbPtr, jobject foreachCb)
+JNIEXPORT jint JNICALL J_MAKE_METHOD(PackBuilder_jniForeach)(JNIEnv *env, jclass obj, jlong pbPtr, jobject foreachCb)
 {
     j_cb_payload payload = {0};
     j_cb_payload_init(env, &payload, foreachCb, "([B)I");
@@ -146,14 +146,14 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Packbuilder_jniForeach)(JNIEnv *env, jclass
 }
 
 /** size_t git_packbuilder_object_count(git_packbuilder *pb); */
-JNIEXPORT jint JNICALL J_MAKE_METHOD(Packbuilder_jniObjectCount)(JNIEnv *env, jclass obj, jlong pbPtr)
+JNIEXPORT jint JNICALL J_MAKE_METHOD(PackBuilder_jniObjectCount)(JNIEnv *env, jclass obj, jlong pbPtr)
 {
     size_t r = git_packbuilder_object_count((git_packbuilder *)pbPtr);
     return r;
 }
 
 /** size_t git_packbuilder_written(git_packbuilder *pb); */
-JNIEXPORT jint JNICALL J_MAKE_METHOD(Packbuilder_jniWritten)(JNIEnv *env, jclass obj, jlong pbPtr)
+JNIEXPORT jint JNICALL J_MAKE_METHOD(PackBuilder_jniWritten)(JNIEnv *env, jclass obj, jlong pbPtr)
 {
     size_t r = git_packbuilder_written((git_packbuilder *)pbPtr);
     return r;
@@ -172,7 +172,7 @@ int j_git_packbuilder_progress(int stage, uint32_t current, uint32_t total, void
 }
 
 /** int git_packbuilder_set_callbacks(git_packbuilder *pb, git_packbuilder_progress * progress_cb); */
-JNIEXPORT jint JNICALL J_MAKE_METHOD(Packbuilder_jniSetCallbacks)(JNIEnv *env, jclass obj, jlong pbPtr, jobject progressCb)
+JNIEXPORT jint JNICALL J_MAKE_METHOD(PackBuilder_jniSetCallbacks)(JNIEnv *env, jclass obj, jlong pbPtr, jobject progressCb)
 {
     j_cb_payload *payload = (j_cb_payload *)malloc(sizeof(j_cb_payload));
     j_cb_payload_init(env, payload, progressCb, "(III)I");
@@ -181,7 +181,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Packbuilder_jniSetCallbacks)(JNIEnv *env, j
 }
 
 /** void git_packbuilder_free(git_packbuilder *pb); */
-JNIEXPORT void JNICALL J_MAKE_METHOD(Packbuilder_jniFree)(JNIEnv *env, jclass obj, jlong pbPtr)
+JNIEXPORT void JNICALL J_MAKE_METHOD(PackBuilder_jniFree)(JNIEnv *env, jclass obj, jlong pbPtr)
 {
     git_packbuilder_free((git_packbuilder *)pbPtr);
 }

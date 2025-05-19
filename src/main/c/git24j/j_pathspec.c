@@ -16,7 +16,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Pathspec_jniNew)(JNIEnv *env, jclass obj, j
     git_strarray c_pathspec;
     git_strarray_of_jobject_array(env, pathspec, &c_pathspec);
     int r = git_pathspec_new(&c_out, &c_pathspec);
-    (*env)->CallVoidMethod(env, out, jniConstants->midAtomicLongSet, (long)c_out);
+    (*env)->CallVoidMethod(env, out, jniConstants->midAtomicLongSet, (jlong)c_out);
     /* git_pathspec_free(c_out); */
     git_strarray_free(&c_pathspec);
     return r;
@@ -42,7 +42,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Pathspec_jniMatchWorkdir)(JNIEnv *env, jcla
 {
     git_pathspec_match_list *c_out;
     int r = git_pathspec_match_workdir(&c_out, (git_repository *)repoPtr, flags, (git_pathspec *)psPtr);
-    (*env)->CallVoidMethod(env, out, jniConstants->midAtomicLongSet, (long)c_out);
+    (*env)->CallVoidMethod(env, out, jniConstants->midAtomicLongSet, (jlong)c_out);
     /* git_pathspec_match_list_free(c_out); */
     return r;
 }
@@ -52,7 +52,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Pathspec_jniMatchIndex)(JNIEnv *env, jclass
 {
     git_pathspec_match_list *c_out;
     int r = git_pathspec_match_index(&c_out, (git_index *)indexPtr, flags, (git_pathspec *)psPtr);
-    (*env)->CallVoidMethod(env, out, jniConstants->midAtomicLongSet, (long)c_out);
+    (*env)->CallVoidMethod(env, out, jniConstants->midAtomicLongSet, (jlong)c_out);
     /* git_pathspec_match_list_free(c_out); */
     return r;
 }
@@ -62,7 +62,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Pathspec_jniMatchTree)(JNIEnv *env, jclass 
 {
     git_pathspec_match_list *c_out;
     int r = git_pathspec_match_tree(&c_out, (git_tree *)treePtr, flags, (git_pathspec *)psPtr);
-    (*env)->CallVoidMethod(env, out, jniConstants->midAtomicLongSet, (long)c_out);
+    (*env)->CallVoidMethod(env, out, jniConstants->midAtomicLongSet, (jlong)c_out);
     /* git_pathspec_match_list_free(c_out); */
     return r;
 }
@@ -72,7 +72,7 @@ JNIEXPORT jint JNICALL J_MAKE_METHOD(Pathspec_jniMatchDiff)(JNIEnv *env, jclass 
 {
     git_pathspec_match_list *c_out;
     int r = git_pathspec_match_diff(&c_out, (git_diff *)diffPtr, flags, (git_pathspec *)psPtr);
-    (*env)->CallVoidMethod(env, out, jniConstants->midAtomicLongSet, (long)c_out);
+    (*env)->CallVoidMethod(env, out, jniConstants->midAtomicLongSet, (jlong)c_out);
     /* git_pathspec_match_list_free(c_out); */
     return r;
 }

@@ -20,7 +20,7 @@ void j_save_c_pointer(JNIEnv *env, void *ptr, jobject object, const char *setter
         j_throw_jni_error(env, "cannot find setter to save native pointer.");
     }
 
-    (*env)->CallVoidMethod(env, object, method, (long)ptr);
+    (*env)->CallVoidMethod(env, object, method, (jlong)ptr);
     (*env)->DeleteLocalRef(env, clz);
 }
 

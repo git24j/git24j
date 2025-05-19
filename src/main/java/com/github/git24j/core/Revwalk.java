@@ -18,7 +18,7 @@ public class Revwalk extends CAutoReleasable {
     /** void git_revwalk_free(git_revwalk *walk); */
     static native void jniFree(long walk);
 
-    static native int jniFreeHideCb(long payloadPtr);
+    static native void jniFreeHideCb(long payloadPtr);
 
     /** int git_revwalk_hide(git_revwalk *walk, const git_oid *commit_id); */
     static native int jniHide(long walk, Oid commitId);
